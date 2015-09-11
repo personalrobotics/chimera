@@ -23,7 +23,11 @@ static cl::OptionCategory ChimeraCategory("Chimera options");
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 
 // A help message for this specific tool can be added afterwards.
-static cl::extrahelp MoreHelp("\nChimera is a conversion tool");
+static cl::extrahelp MoreHelp(
+    "\n"
+    "Chimera is a tool for converting C++ headers into Boost.Python bindings.\n"
+    "\n"
+);
 
 int main(int argc, const char **argv) {
   CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
