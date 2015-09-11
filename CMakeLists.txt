@@ -44,7 +44,10 @@ endif()
 ###########
 ## BUILD ##
 ###########
-set(CMAKE_CXX_FLAGS "--std=c++11 -Wno-unused-parameter ${CMAKE_CXX_FLAGS}")
+include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
+
+message(STATUS ${CMAKE_CXX_FLAGS})
 
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
@@ -54,7 +57,12 @@ llvm_map_components_to_libnames(llvm_libs
   option
 )
 
-add_executable(chimera src/chimera.cpp)
+add_executable(chimera
+  src/chimera.cpp
+  src/chimera_consumer.cpp
+  src/chimera_visitor.cpp
+)
+
 target_link_libraries(chimera
   ${YAMLCPP_LIBRARIES}
   ${CLANG_LIBS}

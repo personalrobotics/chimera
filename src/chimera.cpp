@@ -1,6 +1,7 @@
 /**
  * Chimera - a tool to convert c++ headers into Boost.Python bindings.
  */
+#include "chimera/chimera_consumer.h"
 
 // Declares clang::SyntaxOnlyAction.
 #include "clang/Frontend/FrontendActions.h"
@@ -10,6 +11,10 @@
 // Declares llvm::cl::extrahelp.
 #include "llvm/Support/CommandLine.h"
 
+#include <memory>
+
+using namespace chimera;
+using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
 
@@ -28,6 +33,16 @@ static cl::extrahelp MoreHelp(
     "Chimera is a tool for converting C++ headers into Boost.Python bindings.\n"
     "\n"
 );
+
+/**
+ * Front-end that runs the Chimera AST consumer on the provided source.
+ */
+class ChimeraFrontendAction : public ASTFrontendAction {
+public:
+    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
+        return std::unique_ptr<ChimeraConsumer>(new ChimeraConsumer(&CI));
+    }
+};
 
 int main(int argc, const char **argv) {
   CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
