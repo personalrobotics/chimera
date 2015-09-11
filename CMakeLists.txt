@@ -7,12 +7,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 ###########
 
 ## Find necessary packages.
-find_package(LLVM REQUIRED)
+find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED)
 
 include_directories(${LLVM_INCLUDE_DIRS})
-link_directories(${LLVM_LIBRARY_DIRS})
-add_definitions(${LLVM_CXXFLAGS})
+add_definitions(${LLVM_DEFINITIONS})
 
 include_directories(${CLANG_INCLUDE_DIRS})
 link_directories(${CLANG_LIBRARY_DIRS})
@@ -40,8 +39,17 @@ endif()
 ###########
 ## BUILD ##
 ###########
+set(CMAKE_CXX_FLAGS "--std=c++11 -Wno-unused-parameter ${CMAKE_CXX_FLAGS}")
+
+llvm_map_components_to_libnames(llvm_libs
+  core
+  irreader
+  mcparser
+  option
+)
 
 add_executable(test src/test.cpp)
 target_link_libraries(test
-                      ${LLVM_MODULE_LIBS}
-                      ${CLANG_LIBS})
+  ${llvm_libs}
+  ${CLANG_LIBS}
+)
