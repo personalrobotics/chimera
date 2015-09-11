@@ -8,13 +8,18 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
 ## Find necessary packages.
 find_package(LLVM REQUIRED CONFIG)
-find_package(Clang REQUIRED)
-
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
+find_package(Clang REQUIRED)
 include_directories(${CLANG_INCLUDE_DIRS})
-link_directories(${CLANG_LIBRARY_DIRS})
+add_definitions(${CLANG_DEFINITIONS})
+
+set(YAMLCPP_STATIC_LIBRARY ON CACHE BOOL
+    "If true, try to find static yaml-cpp library first instead of dynamic.")
+find_package(YamlCpp REQUIRED)
+include_directories(${YAMLCPP_INCLUDE_DIRS})
+add_definitions(${YAMLCPP_DEFINITIONS})
 
 ## Set up glorious compiler options.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
@@ -51,6 +56,7 @@ llvm_map_components_to_libnames(llvm_libs
 
 add_executable(chimera src/chimera.cpp)
 target_link_libraries(chimera
+  ${YAMLCPP_LIBRARIES}
   ${CLANG_LIBS}
   ${llvm_libs}
 )
