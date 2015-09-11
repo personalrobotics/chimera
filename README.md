@@ -1,7 +1,7 @@
 # chimera #
 
-> ### chi·me·ra ###
-> #### /kīˈmirə,kəˈmirə/ [![speaker][2]][1] ####
+> ##### chi·me·ra #####
+> ##### /kīˈmirə,kəˈmirə/ [![speaker][2]][1] #####
 > _*informal*, noun_
 >
 > 1. a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
