@@ -31,7 +31,7 @@ YAML::Node chimera::Configuration::GetRoot()
     return rootNode_;
 }
 
-YAML::Node chimera::Configuration::GetSignature(std::string signature)
+YAML::Node chimera::Configuration::GetSignature(clang::Decl declaration)
 {
     // TODO: lookup by function decl.
     YAML::Node emptyNode;

@@ -1,8 +1,7 @@
 #ifndef __CHIMERA_CONFIGURATION_H__
 #define __CHIMERA_CONFIGURATION_H__
 
-#include <clang/AST/ASTConsumer.h>
-#include <clang/Frontend/CompilerInstance.h>
+#include <clang/AST/DeclBase.h>
 #include <yaml-cpp/yaml.h>
 
 namespace chimera
@@ -30,10 +29,10 @@ public:
     YAML::Node GetRoot();
 
     /**
-     * Get the YAML configuration associated with a specific type declaration,
+     * Get the YAML configuration associated with a specific declaration,
      * or return an empty YAML node if no configuration was found.
      */
-    YAML::Node GetSignature(std::string signature);
+    YAML::Node GetSignature(clang::Decl declaration);
 
 private:
     Configuration();
