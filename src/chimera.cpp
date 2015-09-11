@@ -1,10 +1,9 @@
 /**
  * Chimera - a tool to convert c++ headers into Boost.Python bindings.
  */
-#include "chimera/chimera_consumer.h"
+#include "chimera/chimera_frontend_action.h"
 
 // Declares clang::SyntaxOnlyAction.
-#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 
@@ -34,19 +33,9 @@ static cl::extrahelp MoreHelp(
     "\n"
 );
 
-/**
- * Front-end that runs the Chimera AST consumer on the provided source.
- */
-class ChimeraFrontendAction : public ASTFrontendAction {
-public:
-    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
-        return std::unique_ptr<ChimeraConsumer>(new ChimeraConsumer(&CI));
-    }
-};
-
 int main(int argc, const char **argv) {
   CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
   ClangTool Tool(OptionsParser.getCompilations(),
                  OptionsParser.getSourcePathList());
-  return Tool.run(newFrontendActionFactory<clang::SyntaxOnlyAction>().get());
+  return Tool.run(newFrontendActionFactory<ChimeraFrontendAction>().get());
 }
