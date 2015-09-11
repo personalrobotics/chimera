@@ -21,9 +21,13 @@ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev
 ```
 
 ## Usage ##
+Let's try running chimera on itself!
 ```
-$ chimera ${CXX_FLAGS} --output my_python_binding.cpp \
-    my_header.h my_other_header.h
+$ cd [PATH TO CHIMERA]
+$ rm -rf build && mkdir -p build && cd build
+$ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+$ make
+$ chimera -p . --output chimera_py_binding.cpp ../src/chimera.cpp
 ```
 
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
