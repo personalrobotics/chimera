@@ -22,7 +22,7 @@ public:
     virtual bool HandleTopLevelDecl(clang::DeclGroupRef DG);
 
 private:
-    Visitor *visitor;
+    Visitor visitor;
 };
 
 } // namespace chimera
