@@ -1,7 +1,7 @@
 # chimera #
 
 > #### chi·me·ra ####
-> #### kīˈmirə,kəˈmirə/ #### [![speaker][2]][1]
+> #### kīˈmirə,kəˈmirə/#### [![speaker][2]][1]
 > _*informal*, noun_
 >
 > 1. a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
@@ -9,12 +9,15 @@
 
 ## Requirements ##
 
-- libclang3.6-dev
-- libllvm3.6-dev
+- libclang 3.6
+- llvm 3.6 (+ tools)
+- libedit
 
 **On Ubuntu**
 ```
-sudo apt-get install libclang3.6-dev llvm-3.6-dev
+sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
+wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev
 ```
 
 ## Usage ##
