@@ -59,9 +59,10 @@ llvm_map_components_to_libnames(llvm_libs
 
 add_executable(chimera
   src/chimera.cpp
-  src/chimera_consumer.cpp
-  src/chimera_frontend_action.cpp
-  src/chimera_visitor.cpp
+  src/configuration.cpp
+  src/consumer.cpp
+  src/frontend_action.cpp
+  src/visitor.cpp
 )
 
 target_link_libraries(chimera

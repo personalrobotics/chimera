@@ -1,24 +1,24 @@
-#include "chimera/chimera_visitor.h"
+#include "chimera/visitor.h"
 #include <iostream>
 #include <string>
 
 using namespace chimera;
 using namespace clang;
 
-ChimeraVisitor::ChimeraVisitor(CompilerInstance *CI)
+chimera::Visitor::Visitor(CompilerInstance *CI)
 : astContext(&(CI->getASTContext()))
 {
     // Do nothing.
 }
 
-bool ChimeraVisitor::VisitFunctionDecl(FunctionDecl *func)
+bool chimera::Visitor::VisitFunctionDecl(FunctionDecl *func)
 {
     std::string funcName = func->getNameInfo().getName().getAsString();
     std::cout << "** Rewrote function def: " << funcName << std::endl;
     return true;
 }
 
-bool ChimeraVisitor::VisitStmt(Stmt *st)
+bool chimera::Visitor::VisitStmt(Stmt *st)
 {
     if (ReturnStmt *ret = dyn_cast<ReturnStmt>(st))
     {
@@ -32,13 +32,13 @@ bool ChimeraVisitor::VisitStmt(Stmt *st)
     return true;
 }
 
-bool ChimeraVisitor::VisitReturnStmt(ReturnStmt *ret) 
+bool chimera::Visitor::VisitReturnStmt(ReturnStmt *ret) 
 {
     std::cout << "** Rewrote ReturnStmt" << std::endl;
     return true;
 }
 
-bool ChimeraVisitor::VisitCallExpr(CallExpr *call) {
+bool chimera::Visitor::VisitCallExpr(CallExpr *call) {
     std::cout << "** Rewrote function call" << std::endl;
     return true;
 }

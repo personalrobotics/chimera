@@ -1,5 +1,5 @@
-#ifndef __CHIMERA_CHIMERA_VISITOR_H__
-#define __CHIMERA_CHIMERA_VISITOR_H__
+#ifndef __CHIMERA_VISITOR_H__
+#define __CHIMERA_VISITOR_H__
 
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
@@ -8,10 +8,10 @@
 namespace chimera
 {
 
-class ChimeraVisitor : public clang::RecursiveASTVisitor<ChimeraVisitor>
+class Visitor : public clang::RecursiveASTVisitor<Visitor>
 {
 public:
-    explicit ChimeraVisitor(clang::CompilerInstance *CI);
+    explicit Visitor(clang::CompilerInstance *CI);
 
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
     virtual bool VisitStmt(clang::Stmt *st);
@@ -24,4 +24,4 @@ private:
 
 } // namespace chimera
 
-#endif // __CHIMERA_CHIMERA_VISITOR_H__
+#endif // __CHIMERA_VISITOR_H__
