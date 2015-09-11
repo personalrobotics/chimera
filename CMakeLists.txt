@@ -1,4 +1,4 @@
-project(kludge)
+project(chimera)
 cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
@@ -41,6 +41,7 @@ endif()
 ###########
 set(CMAKE_CXX_FLAGS "--std=c++11 -Wno-unused-parameter ${CMAKE_CXX_FLAGS}")
 
+## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
   core
   irreader
@@ -48,8 +49,8 @@ llvm_map_components_to_libnames(llvm_libs
   option
 )
 
-add_executable(test src/test.cpp)
-target_link_libraries(test
+add_executable(chimera src/chimera.cpp)
+target_link_libraries(chimera
   ${llvm_libs}
   ${CLANG_LIBS}
 )
