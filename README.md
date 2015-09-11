@@ -22,8 +22,8 @@ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev
 
 ## Usage ##
 ```
-$ chimera ${CXX_FLAGS} \
-    --input my_binding.h --output my_binding.cpp
+$ chimera ${CXX_FLAGS} --output my_python_binding.cpp \
+    my_header.h my_other_header.h
 ```
 
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
