@@ -51,6 +51,6 @@ llvm_map_components_to_libnames(llvm_libs
 
 add_executable(chimera src/chimera.cpp)
 target_link_libraries(chimera
-  ${llvm_libs}
   ${CLANG_LIBS}
+  ${llvm_libs}
 )
