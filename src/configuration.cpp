@@ -26,14 +26,13 @@ void chimera::Configuration::LoadFile(std::string filename)
     }
 }
 
-YAML::Node chimera::Configuration::GetRoot()
+const YAML::Node& chimera::Configuration::GetRoot() const
 {
     return rootNode_;
 }
 
-YAML::Node chimera::Configuration::GetSignature(clang::Decl declaration)
+const YAML::Node& chimera::Configuration::GetSignature(const clang::Decl& declaration) const
 {
     // TODO: lookup by function decl.
-    YAML::Node emptyNode;
-    return emptyNode;
+    return emptyNode_;
 }

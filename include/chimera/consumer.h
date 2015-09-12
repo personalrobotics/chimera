@@ -18,11 +18,8 @@ public:
     // Override this to call our ChimeraVisitor on the entire source file.
     virtual void HandleTranslationUnit(clang::ASTContext &Context);
 
-    // Override this to call ChimeraVisitor on each top-level Decl.
-    virtual bool HandleTopLevelDecl(clang::DeclGroupRef DG);
-
 private:
-    Visitor visitor;
+    Visitor visitor_;
 };
 
 } // namespace chimera

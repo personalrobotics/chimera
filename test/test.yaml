@@ -1,0 +1,16 @@
+namespaces:
+  - dart::dynamics
+  - dart::math
+properties:
+  ::dart::dynamics::Shape:
+    name: Shape
+    bases: []
+    noncopyable: true
+  'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
+    return_value_policy: ::boost::python::copy_const_reference
+  'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
+    source: 'test.cpp.in'
+  'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
+    content: '/* Definitely not implementing this function! */'  
+  'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
+    # This should be suppressed.

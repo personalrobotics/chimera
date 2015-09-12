@@ -26,19 +26,20 @@ public:
     /**
      * Get the root node of the YAML configuration structure.
      */
-    YAML::Node GetRoot();
+    const YAML::Node& GetRoot() const;
 
     /**
      * Get the YAML configuration associated with a specific declaration,
      * or return an empty YAML node if no configuration was found.
      */
-    YAML::Node GetSignature(clang::Decl declaration);
+    const YAML::Node& GetSignature(const clang::Decl& declaration) const;
 
 private:
     Configuration();
 
 protected:
     YAML::Node rootNode_;
+    YAML::Node emptyNode_;
 };
 
 } // namespace chimera

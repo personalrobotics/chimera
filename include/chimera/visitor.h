@@ -13,6 +13,7 @@ class Visitor : public clang::RecursiveASTVisitor<Visitor>
 public:
     explicit Visitor(clang::CompilerInstance *CI);
 
+    virtual bool TraverseNamespaceDecl(clang::NamespaceDecl *ns);
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
     virtual bool VisitStmt(clang::Stmt *st);
     virtual bool VisitReturnStmt(clang::ReturnStmt *ret);

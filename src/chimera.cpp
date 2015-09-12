@@ -50,9 +50,6 @@ int main(int argc, const char **argv)
 
     // Parse the YAML configuration file if it exists, otherwise initialize it
     // to an empty node.
-    if (ConfigFilename.empty())
-        return 0;
-
     if (!ConfigFilename.empty())
         chimera::Configuration::GetInstance().LoadFile(ConfigFilename);
 
