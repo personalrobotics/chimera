@@ -15,15 +15,15 @@ chimera::Visitor::Visitor(CompilerInstance *CI)
 
 bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
 {
-    const std::string ns_string = ns->getCanonicalDecl()->getQualifiedNameAsString();
-    const chimera::Configuration& config = chimera::Configuration::GetInstance();
+    const auto ns_string = ns->getCanonicalDecl()->getQualifiedNameAsString();
+    const auto config = chimera::Configuration::GetInstance();
     const auto namespaces = config.GetRoot()["namespaces"];
 
-    // Traverse only namespaces contained by the configuration namespaces key.
+    // Traverse only namespaces contained by one of the configuration namespaces.
     for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
     {
         std::string ns_key = it->as<std::string>();
-        if (ns_key == ns_string) 
+        if (ns_string.substr(0, ns_key.size()) == ns_key)
         {
             std::cout << "Traversing namespace: " << ns_string << std::endl;
             return clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
@@ -34,7 +34,7 @@ bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
 
 bool chimera::Visitor::VisitFunctionDecl(FunctionDecl *func)
 {
-    std::string funcName = func->getNameInfo().getName().getAsString();
+    const auto funcName = func->getNameInfo().getName().getAsString();
     //std::cout << "** Rewrote function def: " << funcName << std::endl;
     return true;
 }
