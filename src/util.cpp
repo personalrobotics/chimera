@@ -66,5 +66,5 @@ const NamedDecl*
 chimera::util::resolveNamespace(clang::CompilerInstance *ci,
                                 const llvm::StringRef nsStr)
 {
-    return chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + "{}");
+    return chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + " {}");
 }
