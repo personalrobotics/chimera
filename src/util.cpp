@@ -22,6 +22,9 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
 
     // Set up the preprocessor to only care about incrementally handling type.
     preprocessor.getDiagnostics().setIgnoreAllWarnings(true);
+    preprocessor.getDiagnostics().setSeverityForGroup(diag::Flavor::WarningOrError,
+                                                      "out-of-line-declaration",
+                                                      diag::Severity::Ignored);
     preprocessor.enableIncrementalProcessing();
     const_cast<LangOptions&>(preprocessor.getLangOpts()).SpellChecking = 0;
 
