@@ -37,6 +37,7 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
     while (!parser.ParseTopLevelDecl(ADecl))
     {
         // A DeclGroupRef may have multiple Decls, so we iterate through each one.
+        // TODO: We probably shouldn't actually iterate here.
         if (ADecl)
         {
             std::cout << "PARSED " << declStr.str() << std::endl;
@@ -46,14 +47,7 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
                 Decl *D = (*i)->getCanonicalDecl();
                 D->dumpColor(); // TODO: remove debugging.
 
-                if (isa<NamedDecl>(D))
-                {
-                    return cast<NamedDecl>(D);
-                }
-                else
-                {
-                    std::cerr << "Unnamed decl found??" << std::endl;
-                }
+                return (isa<NamedDecl>(D)) ? cast<NamedDecl>(D) : NULL;
             }
         }
     }
@@ -62,9 +56,10 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
     return NULL;
 }
 
-const NamedDecl*
+const NamespaceDecl*
 chimera::util::resolveNamespace(clang::CompilerInstance *ci,
                                 const llvm::StringRef nsStr)
 {
-    return chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + " {}");
+    auto D = chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + " {}");
+    return (isa<NamespaceDecl>(D)) ? cast<NamespaceDecl>(D) : NULL;
 }

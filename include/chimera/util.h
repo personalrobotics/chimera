@@ -13,9 +13,9 @@ namespace util
 /**
  * Resolve a declaration string within the scope of a compiler instance.
  *
- * This function parses the provided declaration string as a single line
- * of the form `[declStr];` within the AST that is currently loaded by
- * the provided compiler instance.
+ * This function parses the provided declaration string as a single line of
+ * the form `[declStr];` within the AST that is currently loaded by the
+ * provided compiler instance.
  *
  * If it can be resolved to a named declaration, the canonical clang::Decl
  * pointer associated with the declaration will be returned, otherwise NULL.
@@ -26,15 +26,15 @@ const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
 /**
  * Resolve a namespace string within the scope of a compiler instance.
  *
- * This function parses the provided namespace string as a single line
- * of the form `namespace [nsStr] {};` within the AST that is currently
- * loaded by the provided compiler instance.
+ * This function parses the provided namespace string as a single line of the
+ * form `namespace [nsStr] {};` within the AST that is currently loaded by the
+ * provided compiler instance.
  *
- * If it can be resolved to a named declaration, the canonical clang::Decl
+ * If it can be resolved to a namespace declaration, the canonical clang::Decl
  * pointer associated with the namespace will be returned, otherwise NULL.
  */
-const clang::NamedDecl* resolveNamespace(clang::CompilerInstance *ci,
-                                         const llvm::StringRef nsStr);
+const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
+                                             const llvm::StringRef nsStr);
 
 } // namespace util
 } // namespace chimera

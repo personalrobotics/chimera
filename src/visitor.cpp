@@ -7,15 +7,28 @@
 using namespace chimera;
 using namespace clang;
 
-chimera::Visitor::Visitor(CompilerInstance *CI)
-: astContext(&(CI->getASTContext()))
+chimera::Visitor::Visitor(clang::CompilerInstance *ci,
+                          std::unique_ptr<CompiledConfiguration> cc)
+: context_(&(ci->getASTContext()))
+, config_(std::move(cc))
 {
     // Do nothing.
 }
 
 bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
 {
-    return clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
+    // Filter over the namespaces and only traverse ones that are enclosed
+    // by one of the configuration namespaces.
+    auto namespaces = config_->GetNamespaces();
+    for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
+    {
+        if ((*it)->Encloses(ns))
+        {
+            clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
+        }
+    }
+
+    return true;
 }
 
 bool chimera::Visitor::VisitFunctionDecl(FunctionDecl *func)

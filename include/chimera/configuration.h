@@ -4,11 +4,13 @@
 #include <clang/AST/DeclBase.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <map>
+#include <memory>
 #include <set>
 #include <yaml-cpp/yaml.h>
 
 namespace chimera
 {
+class CompiledConfiguration;
 
 class Configuration
 {
@@ -29,17 +31,30 @@ public:
     /**
      * Process the configuration settings against the current AST.
      */
-    void Process(clang::CompilerInstance *ci);
+    std::unique_ptr<CompiledConfiguration> Process(clang::CompilerInstance *ci) const;
 
     /**
      * Get the root node of the YAML configuration structure.
      */
     const YAML::Node& GetRoot() const;
 
+private:
+    Configuration();
+
+protected:
+    YAML::Node rootNode_;
+};
+
+class CompiledConfiguration
+{
+public:
+    CompiledConfiguration(const CompiledConfiguration&) = delete;
+    CompiledConfiguration &operator=(const CompiledConfiguration&) = delete;
+
     /**
      * Return list of namespace declarations that should be included.
      */
-    const std::set<const clang::NamedDecl*>& GetNamespaces() const;
+    const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
 
     /**
      * Get the YAML configuration associated with a specific declaration,
@@ -48,14 +63,14 @@ public:
     const YAML::Node& GetDeclaration(const clang::Decl *decl) const;
 
 private:
-    Configuration();
+    CompiledConfiguration();
 
 protected:
-    YAML::Node rootNode_;
-    const YAML::Node emptyNode_;
-
-    std::set<const clang::NamedDecl*> namespaces_;
+    std::set<const clang::NamespaceDecl*> namespaces_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
+    static const YAML::Node emptyNode_;
+
+    friend class Configuration;
 };
 
 } // namespace chimera

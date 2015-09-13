@@ -29,8 +29,11 @@ void chimera::Configuration::LoadFile(std::string filename)
     }
 }
 
-void chimera::Configuration::Process(CompilerInstance *ci)
+std::unique_ptr<chimera::CompiledConfiguration>
+chimera::Configuration::Process(CompilerInstance *ci) const
 {
+    std::unique_ptr<chimera::CompiledConfiguration> config(new CompiledConfiguration());
+
     // Resolve namespace configuration entries within provided AST.
     const auto namespaces = rootNode_["namespaces"];
     for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
@@ -40,13 +43,12 @@ void chimera::Configuration::Process(CompilerInstance *ci)
         if (ns)
         {
             std::cout << "Namespace: " << ns->getNameAsString() << std::endl;
-            namespaces_.insert(ns);
+            config->namespaces_.insert(ns);
         }
         else
         {
-            std::cerr << "Unable to resolve namespace '"
-                      << ns_str << "'." << std::endl;
-            continue;
+            std::cerr << "Unable to resolve namespace: "
+                      << "'" << ns_str << "'." << std::endl;
         }
     }
 
@@ -59,12 +61,16 @@ void chimera::Configuration::Process(CompilerInstance *ci)
         if (decl)
         {
             std::cout << "Declaration: " << decl->getNameAsString() << std::endl;
+            config->declarations_[decl] = it->second;
         }
         else
         {
-            std::cerr << "UNKNOWN TYPE: " << decl_str << std::endl;
+            std::cerr << "Unable to resolve declaration: "
+                      << "'" << decl_str << "'" << std::endl;
         }
     }
+
+    return config;
 }
 
 const YAML::Node& chimera::Configuration::GetRoot() const
@@ -72,12 +78,19 @@ const YAML::Node& chimera::Configuration::GetRoot() const
     return rootNode_;
 }
 
-const std::set<const clang::NamedDecl*>& chimera::Configuration::GetNamespaces() const
+const YAML::Node chimera::CompiledConfiguration::emptyNode_;
+
+chimera::CompiledConfiguration::CompiledConfiguration()
+{
+    // Do nothing.
+}
+
+const std::set<const clang::NamespaceDecl*>& chimera::CompiledConfiguration::GetNamespaces() const
 {
     return namespaces_;
 }
 
-const YAML::Node& chimera::Configuration::GetDeclaration(const clang::Decl *decl) const
+const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::Decl *decl) const
 {
     const auto d = declarations_.find(decl->getCanonicalDecl());
     return d != declarations_.end() ? d->second : emptyNode_;

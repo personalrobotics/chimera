@@ -1,8 +1,6 @@
 namespaces:
   - dart::dynamics
-  - dart::dynamics
   - dart::math
-  - dart
   - chimera
 declarations:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
@@ -13,7 +11,7 @@ declarations:
     content: '/* Definitely not implementing this function! */'  
   'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
     # This should be suppressed.
-  #::dart::dynamics::Shape:
-  #  name: Shape
-  #  bases: []
-  #  noncopyable: true
+  '::dart::dynamics::Shape':
+    name: Shape
+    bases: []
+    noncopyable: true
