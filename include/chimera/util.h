@@ -10,8 +10,11 @@ namespace chimera
 namespace util
 {
 
-clang::QualType findType(clang::CompilerInstance *ci,
-                         const llvm::StringRef typeName);
+const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
+                                           const llvm::StringRef declStr);
+
+const clang::NamedDecl* resolveNamespace(clang::CompilerInstance *ci,
+                                         const llvm::StringRef nsStr);
 
 } // namespace util
 } // namespace chimera

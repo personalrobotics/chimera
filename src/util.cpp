@@ -7,13 +7,13 @@
 
 using namespace clang;
 
-QualType chimera::util::findType(CompilerInstance *ci, llvm::StringRef typeName)
+const NamedDecl*
+chimera::util::resolveDeclaration(CompilerInstance *ci,
+                                  const llvm::StringRef declStr)
 {
-    QualType qt;
-
     // Immediately return if passed an empty string.
-    if (typeName.empty())
-        return qt;
+    if (declStr.empty())
+        return NULL;
 
     // Create a new parser to handle this type parsing.
     Preprocessor &preprocessor = ci->getPreprocessor();
@@ -27,7 +27,7 @@ QualType chimera::util::findType(CompilerInstance *ci, llvm::StringRef typeName)
 
     // Put the type string into a buffer and run it through the preprocessor.
     FileID fid = sema.getSourceManager().createFileID(
-        llvm::MemoryBuffer::getMemBufferCopy(typeName.str() + ";",
+        llvm::MemoryBuffer::getMemBufferCopy(declStr.str() + ";",
                                              "chimera.util.findtype"));
     preprocessor.EnterSourceFile(fid, /* DirLookup = */ 0, SourceLocation());
     parser.Initialize();
@@ -39,18 +39,32 @@ QualType chimera::util::findType(CompilerInstance *ci, llvm::StringRef typeName)
         // A DeclGroupRef may have multiple Decls, so we iterate through each one.
         if (ADecl)
         {
-            std::cout << "PARSED " << typeName.str() << std::endl;
+            std::cout << "PARSED " << declStr.str() << std::endl;
             DeclGroupRef DG = ADecl.get();
             for (auto i = DG.begin(), e = DG.end(); i != e; ++i)
             {
-                Decl *D = *i;    
-                D->dumpColor();
+                Decl *D = (*i)->getCanonicalDecl();
+                D->dumpColor(); // TODO: remove debugging.
+
+                if (isa<NamedDecl>(D))
+                {
+                    return cast<NamedDecl>(D);
+                }
+                else
+                {
+                    std::cerr << "Unnamed decl found??" << std::endl;
+                }
             }
         }
-        else
-        {
-            std::cout << "FAILED TO PARSE: " << typeName.str() << std::endl;
-        }
     }
-    return qt;
+
+    std::cerr << "FAILED TO PARSE: " << declStr.str() << std::endl;
+    return NULL;
+}
+
+const NamedDecl*
+chimera::util::resolveNamespace(clang::CompilerInstance *ci,
+                                const llvm::StringRef nsStr)
+{
+    return chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + "{}");
 }

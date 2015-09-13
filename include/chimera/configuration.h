@@ -45,17 +45,17 @@ public:
      * Get the YAML configuration associated with a specific declaration,
      * or return an empty YAML node if no configuration was found.
      */
-    const YAML::Node& GetSignature(const clang::Decl& declaration) const;
+    const YAML::Node& GetDeclaration(const clang::Decl *decl) const;
 
 private:
     Configuration();
 
 protected:
     YAML::Node rootNode_;
-    YAML::Node emptyNode_;
+    const YAML::Node emptyNode_;
 
     std::set<const clang::NamedDecl*> namespaces_;
-    std::map<const clang::NamedDecl*, YAML::Node> declarations_;
+    std::map<const clang::Decl*, YAML::Node> declarations_;
 };
 
 } // namespace chimera

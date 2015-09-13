@@ -32,37 +32,38 @@ void chimera::Configuration::LoadFile(std::string filename)
 void chimera::Configuration::Process(CompilerInstance *ci)
 {
     // Resolve namespace configuration entries within provided AST.
-    /*
     const auto namespaces = rootNode_["namespaces"];
     for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
     {
         std::string ns_str = it->as<std::string>();
-
-        clang::IdentifierInfo &ident_info = Context.Idents.get(ns_str);
-        auto decl_name = Context.DeclarationNames.getIdentifier(&ident_info);
-        auto result = Context.getTranslationUnitDecl()->lookup(decl_name);
-
-        if (result.empty())
+        auto ns = chimera::util::resolveNamespace(ci, ns_str);
+        if (ns)
+        {
+            std::cout << "Namespace: " << ns->getNameAsString() << std::endl;
+            namespaces_.insert(ns);
+        }
+        else
         {
             std::cerr << "Unable to resolve namespace '"
                       << ns_str << "'." << std::endl;
             continue;
         }
-
-        for(auto ns_it = result.begin(); ns_it != result.end(); ++ns_it)
-        {
-            namespaces_.insert(*ns_it);
-        }
     }
-    */
 
     // Resolve namespace configuration entries within provided AST.
     const auto declarations = rootNode_["declarations"];
     for(auto it = declarations.begin(); it != declarations.end(); ++it)
     {
         std::string decl_str = it->first.as<std::string>();
-        auto typeDecl = chimera::util::findType(ci, decl_str);
-        std::cout << "Type: " << typeDecl.getAsString() << std::endl;
+        auto decl = chimera::util::resolveDeclaration(ci, decl_str);
+        if (decl)
+        {
+            std::cout << "Declaration: " << decl->getNameAsString() << std::endl;
+        }
+        else
+        {
+            std::cerr << "UNKNOWN TYPE: " << decl_str << std::endl;
+        }
     }
 }
 
@@ -76,8 +77,8 @@ const std::set<const clang::NamedDecl*>& chimera::Configuration::GetNamespaces()
     return namespaces_;
 }
 
-const YAML::Node& chimera::Configuration::GetSignature(const clang::Decl& declaration) const
+const YAML::Node& chimera::Configuration::GetDeclaration(const clang::Decl *decl) const
 {
-    // TODO: lookup by function decl.
-    return emptyNode_;
+    const auto d = declarations_.find(decl->getCanonicalDecl());
+    return d != declarations_.end() ? d->second : emptyNode_;
 }
