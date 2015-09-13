@@ -1,11 +1,10 @@
 namespaces:
   - dart::dynamics
+  - dart::dynamics
   - dart::math
-properties:
-  ::dart::dynamics::Shape:
-    name: Shape
-    bases: []
-    noncopyable: true
+  - dart
+  - chimera
+declarations:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
     return_value_policy: ::boost::python::copy_const_reference
   'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
@@ -14,3 +13,7 @@ properties:
     content: '/* Definitely not implementing this function! */'  
   'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
     # This should be suppressed.
+  #::dart::dynamics::Shape:
+  #  name: Shape
+  #  bases: []
+  #  noncopyable: true

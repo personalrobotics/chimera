@@ -1,6 +1,6 @@
 #include "chimera/visitor.h"
-#include "chimera/configuration.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -15,21 +15,7 @@ chimera::Visitor::Visitor(CompilerInstance *CI)
 
 bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
 {
-    const auto ns_string = ns->getCanonicalDecl()->getQualifiedNameAsString();
-    const auto config = chimera::Configuration::GetInstance();
-    const auto namespaces = config.GetRoot()["namespaces"];
-
-    // Traverse only namespaces contained by one of the configuration namespaces.
-    for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
-    {
-        std::string ns_key = it->as<std::string>();
-        if (ns_string.substr(0, ns_key.size()) == ns_key)
-        {
-            std::cout << "Traversing namespace: " << ns_string << std::endl;
-            return clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
-        }
-    }
-    return true;
+    return clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
 }
 
 bool chimera::Visitor::VisitFunctionDecl(FunctionDecl *func)

@@ -2,6 +2,9 @@
 #define __CHIMERA_CONFIGURATION_H__
 
 #include <clang/AST/DeclBase.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <map>
+#include <set>
 #include <yaml-cpp/yaml.h>
 
 namespace chimera
@@ -24,9 +27,19 @@ public:
     void LoadFile(std::string filename);
     
     /**
+     * Process the configuration settings against the current AST.
+     */
+    void Process(clang::CompilerInstance *ci);
+
+    /**
      * Get the root node of the YAML configuration structure.
      */
     const YAML::Node& GetRoot() const;
+
+    /**
+     * Return list of namespace declarations that should be included.
+     */
+    const std::set<const clang::NamedDecl*>& GetNamespaces() const;
 
     /**
      * Get the YAML configuration associated with a specific declaration,
@@ -40,6 +53,9 @@ private:
 protected:
     YAML::Node rootNode_;
     YAML::Node emptyNode_;
+
+    std::set<const clang::NamedDecl*> namespaces_;
+    std::map<const clang::NamedDecl*, YAML::Node> declarations_;
 };
 
 } // namespace chimera

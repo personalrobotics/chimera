@@ -63,6 +63,7 @@ add_executable(chimera
   src/consumer.cpp
   src/frontend_action.cpp
   src/visitor.cpp
+  src/util.cpp
 )
 
 target_link_libraries(chimera
