@@ -13,7 +13,7 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
 {
     // Immediately return if passed an empty string.
     if (declStr.empty())
-        return NULL;
+        return nullptr;
 
     // Create a new parser to handle this type parsing.
     Preprocessor &preprocessor = ci->getPreprocessor();
@@ -47,19 +47,67 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
                 Decl *D = (*i)->getCanonicalDecl();
                 D->dumpColor(); // TODO: remove debugging.
 
-                return (isa<NamedDecl>(D)) ? cast<NamedDecl>(D) : NULL;
+                return (isa<NamedDecl>(D)) ? cast<NamedDecl>(D) : nullptr;
             }
         }
     }
 
     std::cerr << "FAILED TO PARSE: " << declStr.str() << std::endl;
-    return NULL;
+    return nullptr;
+}
+
+const RecordDecl*
+chimera::util::resolveRecord(clang::CompilerInstance *ci,
+                             const llvm::StringRef recordStr)
+{
+    auto decl = chimera::util::resolveDeclaration(ci, "using " + recordStr.str() + " ;");
+    if (!decl)
+        return nullptr;
+
+    if (!isa<UsingDecl>(decl))
+    {
+        std::cerr << "Expected 'using' declaration, found '"
+                  << decl->getNameAsString() << "'." << std::endl;
+        return nullptr;
+    }
+
+    auto using_decl = cast<UsingDecl>(decl);
+    if (using_decl->shadow_size() != 1)
+    {
+        std::cerr << "Unexpected shadow declarations when resolving '"
+                  << recordStr.str() << "' expected 1, found "
+                  << using_decl->shadow_size() << "." << std::endl;
+        return nullptr;
+    }
+
+    auto shadow_decl = cast<UsingShadowDecl>(*(using_decl->shadow_begin()));
+    if (!isa<RecordDecl>(shadow_decl->getTargetDecl()))
+    {
+        std::cerr << "Expected 'using class' declaration, found '"
+                  << shadow_decl->getTargetDecl()->getNameAsString()
+                  << "'." << std::endl;
+        return nullptr;
+    }
+
+    return cast<RecordDecl>(shadow_decl->getTargetDecl()->getCanonicalDecl());
 }
 
 const NamespaceDecl*
 chimera::util::resolveNamespace(clang::CompilerInstance *ci,
                                 const llvm::StringRef nsStr)
 {
-    auto D = chimera::util::resolveDeclaration(ci, "namespace " + nsStr.str() + " {}");
-    return (isa<NamespaceDecl>(D)) ? cast<NamespaceDecl>(D) : NULL;
+    auto decl = chimera::util::resolveDeclaration(ci, "using namespace " + nsStr.str());
+    if (!decl)
+        return nullptr;
+
+    if (!isa<UsingDirectiveDecl>(decl))
+    {
+        std::cerr << "Expected 'using namespace' declaration, found '"
+                  << decl->getNameAsString() << "'." << std::endl;
+        return nullptr;
+    }
+
+    return cast<NamespaceDecl>(
+        cast<UsingDirectiveDecl>(decl)
+            ->getNominatedNamespace()->getCanonicalDecl());
 }

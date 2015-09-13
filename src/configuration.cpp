@@ -3,6 +3,18 @@
 
 using namespace clang;
 
+/**
+ * Counts the number of whitespace-separated words in a string.
+ *
+ * See: http://stackoverflow.com/a/3672259 
+ */
+size_t countWordsInString(const std::string & str)
+{
+    std::stringstream stream(str);
+    return std::distance(std::istream_iterator<std::string>(stream),
+                         std::istream_iterator<std::string>());
+}
+
 chimera::Configuration::Configuration()
 {
     // Do nothing.
@@ -57,7 +69,12 @@ chimera::Configuration::Process(CompilerInstance *ci) const
     for(auto it = declarations.begin(); it != declarations.end(); ++it)
     {
         std::string decl_str = it->first.as<std::string>();
-        auto decl = chimera::util::resolveDeclaration(ci, decl_str);
+
+        // If there are multiple words, assume a full declaration.
+        // If there is only one word, assume a record declaration.
+        auto decl = (countWordsInString(decl_str) == 1)
+                    ? chimera::util::resolveRecord(ci, decl_str)
+                    : chimera::util::resolveDeclaration(ci, decl_str);
         if (decl)
         {
             std::cout << "Declaration: " << decl->getNameAsString() << std::endl;

@@ -11,7 +11,7 @@ declarations:
     content: '/* Definitely not implementing this function! */'  
   'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
     # This should be suppressed.
-  'using ::dart::dynamics::Shape':
+  '::dart::dynamics::Shape':
     name: Shape
     bases: []
     noncopyable: true

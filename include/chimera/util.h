@@ -24,14 +24,28 @@ const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
 
 /**
+ * Resolve a record string within the scope of a compiler instance.
+ *
+ * This function parses the provided record name string as a single line of
+ * the form `using [recordStr];` within the AST that is currently loaded by
+ * the provided compiler instance.
+ *
+ * If it is resolved to a record declaration, the canonical clang::RecordDecl
+ * pointer associated with the declaration will be returned, otherwise NULL.
+ */
+const clang::RecordDecl* resolveRecord(clang::CompilerInstance *ci,
+                                       const llvm::StringRef recordStr);
+
+/**
  * Resolve a namespace string within the scope of a compiler instance.
  *
  * This function parses the provided namespace string as a single line of the
  * form `namespace [nsStr] {};` within the AST that is currently loaded by the
  * provided compiler instance.
  *
- * If it can be resolved to a namespace declaration, the canonical clang::Decl
- * pointer associated with the namespace will be returned, otherwise NULL.
+ * If it is resolved to a namespace declaration, the canonical 
+ * clang::NamespaceDecl pointer associated with the namespace will be
+ * returned, otherwise NULL.
  */
 const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);
