@@ -21,14 +21,14 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
     Parser parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
 
     // Set up the preprocessor to only care about incrementally handling type.
-    preprocessor.getDiagnostics().setSuppressAllDiagnostics(true);
+    preprocessor.getDiagnostics().setIgnoreAllWarnings(true);
     preprocessor.enableIncrementalProcessing();
     const_cast<LangOptions&>(preprocessor.getLangOpts()).SpellChecking = 0;
 
     // Put the type string into a buffer and run it through the preprocessor.
     FileID fid = sema.getSourceManager().createFileID(
         llvm::MemoryBuffer::getMemBufferCopy(declStr.str() + ";",
-                                             "chimera.util.findtype"));
+                                             "chimera.util.resolveDeclaration"));
     preprocessor.EnterSourceFile(fid, /* DirLookup = */ 0, SourceLocation());
     parser.Initialize();
     
