@@ -147,8 +147,6 @@ void chimera::Visitor::GenerateCXXMethod(
     }
 
     std::cout << ")\n";
-
-    //context_->getPointerType(decl->getType()).dump();
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(
@@ -198,8 +196,18 @@ std::vector<std::pair<std::string, std::string>>
                 param_value = result.Val.getAsString(
                     *context_, param_decl->getType());
             }
+            else if (default_expr->hasNonTrivialCall(*context_))
+            {
+                // TODO: How do we print the decl with argument + return types?
+                std::cerr
+                  << "Warning: Unable to evaluate non-trivial call in default"
+                     "  value for parameter"
+                  << " '" << param_name << "' of method"
+                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
+            }
             else
             {
+                // TODO: How do we print the decl with argument + return types?
                 std::cerr
                   << "Warning: Failed to evaluate default value for parameter"
                   << " '" << param_name << "' of method"
