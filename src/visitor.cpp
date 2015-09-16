@@ -114,7 +114,7 @@ void chimera::Visitor::GenerateCXXMethod(
             return;
         }
 
-        // TODO: CHeck if return_type is non-copyable.
+        // TODO: Check if return_type is non-copyable.
     }
 
     std::cout
@@ -131,6 +131,10 @@ void chimera::Visitor::GenerateCXXMethod(
     const auto params = GetParameterNames(decl);
     if (!params.empty())
     {
+        // TODO: Supress any default parameters that occur after the first
+        // non-default to default transition. This can only occur if evaluating
+        // the default value of one or more parameters failed.
+
         std::vector<std::string> python_args;
         for (const auto &param : params)
         {
