@@ -61,4 +61,3 @@ bool chimera::Visitor::VisitCallExpr(CallExpr *call) {
     //std::cout << "** Rewrote function call" << std::endl;
     return true;
 }
-
