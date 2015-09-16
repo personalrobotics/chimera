@@ -48,10 +48,9 @@ chimera::Configuration::Process(CompilerInstance *ci) const
     std::unique_ptr<chimera::CompiledConfiguration> config(new CompiledConfiguration());
 
     // Resolve namespace configuration entries within provided AST.
-    const auto namespaces = rootNode_["namespaces"];
-    for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
+    for(auto it : rootNode_["namespaces"])
     {
-        std::string ns_str = it->as<std::string>();
+        std::string ns_str = it.as<std::string>();
         auto ns = chimera::util::resolveNamespace(ci, ns_str);
         if (ns)
         {
