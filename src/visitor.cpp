@@ -23,7 +23,7 @@ bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
     {
         if (it->Encloses(ns))
         {
-            clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
+            return clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
         }
     }
 
