@@ -36,7 +36,7 @@ $ cd [PATH TO CHIMERA]
 $ rm -rf build && mkdir -p build && cd build
 $ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 $ make
-$ chimera -p . --output chimera_py_binding.cpp ../src/chimera.cpp
+$ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
 
 ## Troubleshooting ##
@@ -45,7 +45,7 @@ $ chimera -p . --output chimera_py_binding.cpp ../src/chimera.cpp
   https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
 
   ```bash
-  $ chimera -extra-arg "-I/usr/lib/clang/3.6/" -p . --output chimera_py_binding.cpp ../src/chimera.cpp
+  $ chimera -extra-arg "-I/usr/lib/clang/3.6/include" -p . -o chimera_py_binding.cpp ../src/chimera.cpp
   ```
 
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
