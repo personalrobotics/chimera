@@ -1,7 +1,6 @@
 namespaces:
   - dart::dynamics
   - dart::math
-  - chimera
 declarations:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
     return_value_policy: ::boost::python::copy_const_reference

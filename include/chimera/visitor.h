@@ -16,13 +16,15 @@ public:
     Visitor(clang::CompilerInstance *ci,
             std::unique_ptr<CompiledConfiguration> cc);
 
-    virtual bool TraverseNamespaceDecl(clang::NamespaceDecl *ns);
-    virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
-    virtual bool VisitStmt(clang::Stmt *st);
-    virtual bool VisitReturnStmt(clang::ReturnStmt *ret);
-    virtual bool VisitCallExpr(clang::CallExpr *call);
+    virtual bool VisitDecl(clang::Decl *decl);
+
+protected:
+    void GenerateCXXRecord(clang::CXXRecordDecl *decl);
 
 private:
+    bool IsEnclosed(clang::Decl *decl) const;
+    std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;
+
     clang::ASTContext *context_;
     std::unique_ptr<CompiledConfiguration> config_;
 };
