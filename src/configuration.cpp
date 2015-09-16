@@ -65,10 +65,9 @@ chimera::Configuration::Process(CompilerInstance *ci) const
     }
 
     // Resolve namespace configuration entries within provided AST.
-    const auto declarations = rootNode_["declarations"];
-    for(auto it = declarations.begin(); it != declarations.end(); ++it)
+    for(auto it : rootNode_["declarations"])
     {
-        std::string decl_str = it->first.as<std::string>();
+        std::string decl_str = it.first.as<std::string>();
 
         // If there are multiple words, assume a full declaration.
         // If there is only one word, assume a record declaration.
@@ -78,7 +77,7 @@ chimera::Configuration::Process(CompilerInstance *ci) const
         if (decl)
         {
             std::cout << "Declaration: " << decl->getNameAsString() << std::endl;
-            config->declarations_[decl] = it->second;
+            config->declarations_[decl] = it.second;
         }
         else
         {
