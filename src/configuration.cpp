@@ -1,3 +1,4 @@
+#include <iostream>
 #include "chimera/configuration.h"
 #include "chimera/util.h"
 
