@@ -19,10 +19,9 @@ bool chimera::Visitor::TraverseNamespaceDecl(NamespaceDecl *ns)
 {
     // Filter over the namespaces and only traverse ones that are enclosed
     // by one of the configuration namespaces.
-    auto namespaces = config_->GetNamespaces();
-    for(auto it = namespaces.begin(); it != namespaces.end(); ++it)
+    for(const auto &it : config_->GetNamespaces())
     {
-        if ((*it)->Encloses(ns))
+        if (it->Encloses(ns))
         {
             clang::RecursiveASTVisitor<Visitor>::TraverseNamespaceDecl(ns);
         }
