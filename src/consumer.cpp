@@ -22,4 +22,3 @@ void chimera::Consumer::HandleTranslationUnit(ASTContext &context)
     // a single Decl that collectively represents the entire source file.
     visitor.TraverseDecl(context.getTranslationUnitDecl());
 }
-
