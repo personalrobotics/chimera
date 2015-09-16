@@ -135,6 +135,8 @@ void chimera::Visitor::GenerateCXXMethod(
         // non-default to default transition. This can only occur if evaluating
         // the default value of one or more parameters failed.
 
+        // TODO: Assign names to unnamed arguments.
+
         std::vector<std::string> python_args;
         for (const auto &param : params)
         {
