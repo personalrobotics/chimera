@@ -20,10 +20,14 @@ public:
 
 protected:
     void GenerateCXXRecord(clang::CXXRecordDecl *decl);
+    void GenerateCXXMethod(
+        clang::CXXRecordDecl *class_decl, clang::CXXMethodDecl *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
     std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;
+    std::vector<std::pair<std::string, std::string>> GetParameterNames(
+        clang::CXXMethodDecl *decl) const;
 
     clang::ASTContext *context_;
     std::unique_ptr<CompiledConfiguration> config_;
