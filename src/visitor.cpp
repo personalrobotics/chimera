@@ -41,7 +41,14 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         return;
 
     const YAML::Node &node = config_->GetDeclaration(decl);
+
     std::unique_ptr<llvm::raw_fd_ostream> stream = config_->GetOutputFile(decl);
+    if (!stream)
+    {
+        std::cerr << "Failed to create output file for '"
+                  << decl->getQualifiedNameAsString() << "'." << std::endl;
+        return;
+    }
 
     *stream << "::boost::python::class_<"
             << decl->getQualifiedNameAsString();
