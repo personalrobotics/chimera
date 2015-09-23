@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <llvm/Support/raw_ostream.h>
 #include <string>
 #include <boost/algorithm/string/join.hpp>
 
@@ -19,12 +20,15 @@ chimera::Visitor::Visitor(clang::CompilerInstance *ci,
 
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
+    // Only visit canonical declarations.
     if (!decl->isCanonicalDecl())
         return true;
 
+    // Only visit declarations in namespaces we are configured to read.
     if (!IsEnclosed(decl))
         return true;
 
+    // Generate a C++ class/union/struct binding.
     if (isa<CXXRecordDecl>(decl))
         GenerateCXXRecord(cast<CXXRecordDecl>(decl));
 
@@ -37,17 +41,17 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         return;
 
     const YAML::Node &node = config_->GetDeclaration(decl);
+    std::unique_ptr<llvm::raw_fd_ostream> stream = config_->GetOutputFile(decl);
 
-    std::cout
-        << "::boost::python::class_<"
-        << decl->getQualifiedNameAsString();
+    *stream << "::boost::python::class_<"
+            << decl->getQualifiedNameAsString();
 
     const YAML::Node &noncopyable_node = node["noncopyable"];
     if (const bool noncopyable = noncopyable_node && noncopyable_node.as<bool>(false))
-        std::cout << ", ::boost::python::noncopyable";
+        *stream << ", ::boost::python::noncopyable";
 
     if (const YAML::Node &held_type_node = node["held_type"])
-        std::cout << ", " << held_type_node.as<std::string>();
+        *stream << ", " << held_type_node.as<std::string>();
 
     std::vector<std::string> base_names;
 
@@ -58,11 +62,11 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     if (!base_names.empty())
     {
-        std::cout << ", ::boost::python::bases<"
+        *stream << ", ::boost::python::bases<"
                   << join(base_names, ", ") << " >";
     }
 
-    std::cout << " >\n";
+    *stream << " >\n";
 
     for (CXXMethodDecl *method_decl : decl->methods())
     {
@@ -77,11 +81,14 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         else if (method_decl->isStatic())
             ; // TODO: Wrap static functions
         else
-            GenerateCXXMethod(decl, method_decl);
+            GenerateCXXMethod(*stream, decl, method_decl);
     }
+
+    stream->close();
 }
 
 void chimera::Visitor::GenerateCXXMethod(
+    llvm::raw_fd_ostream &stream,
     CXXRecordDecl *class_decl, CXXMethodDecl *decl)
 {
     decl = decl->getCanonicalDecl();
@@ -117,15 +124,14 @@ void chimera::Visitor::GenerateCXXMethod(
         // TODO: Check if return_type is non-copyable.
     }
 
-    std::cout
-        << ".def(\"" << decl->getNameAsString() << "\""
-        << ", static_cast<" << pointer_type.getAsString() << ">(&"
-        << decl->getQualifiedNameAsString() << ")";
+    stream << ".def(\"" << decl->getNameAsString() << "\""
+           << ", static_cast<" << pointer_type.getAsString() << ">(&"
+           << decl->getQualifiedNameAsString() << ")";
 
     if (rvp_node)
     {
-        std::cout << ", boost::python::return_value_policy<"
-                  << rvp_node.as<std::string>() << " >";
+        stream << ", boost::python::return_value_policy<"
+               << rvp_node.as<std::string>() << " >";
     }
 
     const auto params = GetParameterNames(decl);
@@ -149,10 +155,10 @@ void chimera::Visitor::GenerateCXXMethod(
             python_args.push_back(python_arg.str());
         }
 
-        std::cout << ", (" << join(python_args, ", ") << ")";
+        stream << ", (" << join(python_args, ", ") << ")";
     }
 
-    std::cout << ")\n";
+    stream << ")\n";
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(

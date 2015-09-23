@@ -7,6 +7,13 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
 
+// Forward declare LLVM raw_ostream, as per:
+// http://llvm.org/docs/CodingStandards.html#use-raw-ostream
+namespace llvm
+{
+class raw_fd_ostream;
+}
+
 namespace chimera
 {
 
@@ -20,8 +27,9 @@ public:
 
 protected:
     void GenerateCXXRecord(clang::CXXRecordDecl *decl);
-    void GenerateCXXMethod(
-        clang::CXXRecordDecl *class_decl, clang::CXXMethodDecl *decl);
+    void GenerateCXXMethod(llvm::raw_fd_ostream &stream,
+                           clang::CXXRecordDecl *class_decl,
+                           clang::CXXMethodDecl *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;

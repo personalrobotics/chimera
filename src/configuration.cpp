@@ -148,7 +148,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         base_input_stream.str(), // If no OutputPath, a name to derive output path
         ".cpp", // The extension to use for derived name.
         false, // Use a temporary file that should be renamed
-        true // Create missing directories in the output path
+        false // Create missing directories in the output path
     ));
     return nullptr;
 }
