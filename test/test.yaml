@@ -1,6 +1,14 @@
+# Arguments that will be appended in-order before command line arguments.
+arguments:
+  - "-extra-arg"
+  - "-I/usr/lib/clang/3.6/include"
+
+# The C++ namespaces that will be extracted by Chimera
 namespaces:
   - dart::dynamics
   - dart::math
+
+# Selected function and class declarations that need custom parameters.
 declarations:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
     return_value_policy: ::boost::python::copy_const_reference

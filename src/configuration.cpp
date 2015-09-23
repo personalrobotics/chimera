@@ -32,6 +32,7 @@ void chimera::Configuration::LoadFile(std::string filename)
     try
     {
         rootNode_ = YAML::LoadFile(filename);
+        rootFilename_ = filename;
     }
     catch(YAML::Exception& e) 
     {
@@ -45,7 +46,7 @@ void chimera::Configuration::LoadFile(std::string filename)
 std::unique_ptr<chimera::CompiledConfiguration>
 chimera::Configuration::Process(CompilerInstance *ci) const
 {
-    std::unique_ptr<chimera::CompiledConfiguration> config(new CompiledConfiguration());
+    std::unique_ptr<chimera::CompiledConfiguration> config(new CompiledConfiguration(ci));
 
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : rootNode_["namespaces"])
@@ -94,9 +95,16 @@ const YAML::Node& chimera::Configuration::GetRoot() const
     return rootNode_;
 }
 
+const std::string &chimera::Configuration::GetFilename() const
+{
+    return rootFilename_;
+}
+
 const YAML::Node chimera::CompiledConfiguration::emptyNode_;
 
-chimera::CompiledConfiguration::CompiledConfiguration()
+chimera::CompiledConfiguration::CompiledConfiguration(CompilerInstance *ci)
+: ci_(ci)
+, mangler_(ci->getASTContext().createMangleContext())
 {
     // Do nothing.
 }
@@ -110,4 +118,36 @@ const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::De
 {
     const auto d = declarations_.find(decl->getCanonicalDecl());
     return d != declarations_.end() ? d->second : emptyNode_;
+}
+
+std::unique_ptr<llvm::raw_fd_ostream>
+chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
+{
+    // Try to convert to a canonical named declaration.
+    const auto canonical_decl = decl->getCanonicalDecl();
+    if (!isa<clang::NamedDecl>(canonical_decl))
+    {
+        std::cerr << "Cannot serialize unnamed declaration." << std::endl;
+        canonical_decl->dumpColor();
+        return nullptr;
+    }
+    const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
+
+    // Use the C++ mangler to create the mangled base input name.
+    llvm::SmallString<1024> base_input_buffer;
+    llvm::raw_svector_ostream base_input_stream(base_input_buffer);
+    mangler_->mangleName(named_decl, base_input_stream);
+
+    // Create an output file depending on the provided parameters.
+    // TODO: In newer Clang versions, this function returns std::unique<>.
+    return std::unique_ptr<llvm::raw_fd_ostream>(ci_->createOutputFile(
+        ci_->getFrontendOpts().OutputFile, // Output Path
+        false, // Open the file in binary mode
+        false, // Register with llvm::sys::RemoveFileOnSignal
+        base_input_stream.str(), // If no OutputPath, a name to derive output path
+        ".cpp", // The extension to use for derived name.
+        false, // Use a temporary file that should be renamed
+        true // Create missing directories in the output path
+    ));
+    return nullptr;
 }

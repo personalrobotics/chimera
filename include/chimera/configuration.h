@@ -2,7 +2,9 @@
 #define __CHIMERA_CONFIGURATION_H__
 
 #include <clang/AST/DeclBase.h>
+#include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
+#include <llvm/Support/raw_ostream.h>
 #include <map>
 #include <memory>
 #include <set>
@@ -38,11 +40,17 @@ public:
      */
     const YAML::Node& GetRoot() const;
 
+    /**
+     * Get the filename of the loaded YAML configuration file, if it exists.
+     */
+    const std::string& GetFilename() const;
+
 private:
     Configuration();
 
 protected:
     YAML::Node rootNode_;
+    std::string rootFilename_;
 };
 
 class CompiledConfiguration
@@ -62,13 +70,26 @@ public:
      */
     const YAML::Node& GetDeclaration(const clang::Decl *decl) const;
 
+    /**
+     * Get a file pointer used for the output a given decl.
+     *
+     * This output path can be either `stdout`, a reference to a monolithic
+     * `.cpp` file for all bindings, or an individual `.cpp` file created
+     * according to the mangled name of the decl.
+     *
+     * The file pointer should be closed after the output has been written.
+     */
+    std::unique_ptr<llvm::raw_fd_ostream> GetOutputFile(const clang::Decl *decl) const;
+
 private:
-    CompiledConfiguration();
+    CompiledConfiguration(clang::CompilerInstance *ci);
 
 protected:
-    std::set<const clang::NamespaceDecl*> namespaces_;
-    std::map<const clang::Decl*, YAML::Node> declarations_;
     static const YAML::Node emptyNode_;
+    clang::CompilerInstance *ci_;
+    std::map<const clang::Decl*, YAML::Node> declarations_;
+    std::set<const clang::NamespaceDecl*> namespaces_;
+    std::unique_ptr<clang::MangleContext> mangler_;
 
     friend class Configuration;
 };
