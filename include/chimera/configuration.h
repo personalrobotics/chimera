@@ -4,11 +4,17 @@
 #include <clang/AST/DeclBase.h>
 #include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
-#include <llvm/Support/raw_ostream.h>
 #include <map>
 #include <memory>
 #include <set>
 #include <yaml-cpp/yaml.h>
+
+// Forward declare LLVM raw_ostream, as per:
+// http://llvm.org/docs/CodingStandards.html#use-raw-ostream
+namespace llvm
+{
+class raw_fd_ostream;
+}
 
 namespace chimera
 {

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <llvm/Support/raw_ostream.h>
 #include "chimera/configuration.h"
 #include "chimera/util.h"
 
