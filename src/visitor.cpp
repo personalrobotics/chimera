@@ -20,10 +20,6 @@ chimera::Visitor::Visitor(clang::CompilerInstance *ci,
 
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
-    // Only visit canonical declarations.
-    if (!decl->isCanonicalDecl())
-        return true;
-
     // Only visit declarations in namespaces we are configured to read.
     if (!IsEnclosed(decl))
         return true;
@@ -37,7 +33,7 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
 
 void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 {
-    if (!decl->hasDefinition())
+    if (!decl->hasDefinition() || decl->getDefinition() != decl)
         return;
 
     const YAML::Node &node = config_->GetDeclaration(decl);
@@ -75,8 +71,13 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << " >\n";
 
+    std::cout << "Record: " << decl->getQualifiedNameAsString() << std::endl;
+    decl->dump();
+
     for (CXXMethodDecl *method_decl : decl->methods())
     {
+        std::cout << "+Method: " << method_decl->getQualifiedNameAsString() << std::endl;
+
         if (isa<CXXConversionDecl>(method_decl))
             ; // do nothing
         else if (isa<CXXDestructorDecl>(method_decl))
