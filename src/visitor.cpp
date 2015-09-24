@@ -118,8 +118,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         GenerateField(*stream, decl, field_decl);
     }
 
-    //else if (decl->isStaticDataMember())
-    //    return false;
+    for (Decl *const child_decl : decl->decls())
+    {
+        if (isa<VarDecl>(child_decl))
+            GenerateStaticField(*stream, decl, cast<VarDecl>(child_decl));
+    }
 
     *stream << ";\n";
     
@@ -231,6 +234,30 @@ bool chimera::Visitor::GenerateField(
 
     stream << "(\"" << decl->getNameAsString() << "\","
            << " &" << decl->getQualifiedNameAsString() << ");\n";
+    return true;
+}
+
+bool chimera::Visitor::GenerateStaticField(
+    llvm::raw_pwrite_stream &stream,
+    clang::CXXRecordDecl *class_decl,
+    clang::VarDecl *decl)
+{
+    if (decl->getAccess() != AS_public)
+        return false;
+    else if (!decl->isStaticDataMember())
+        return false;
+
+    stream << ".add_static_property(\"" << decl->getNameAsString() << "\", "
+           << "[]() { return " << decl->getQualifiedNameAsString() << "; }";
+
+    if (!decl->getType().isConstQualified())
+    {
+        stream << "[](" << decl->getType().getAsString() << " value) { "
+               << decl->getQualifiedNameAsString() << " = value; }";
+    }
+
+    stream << ")\n";
+
     return true;
 }
 

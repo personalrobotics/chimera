@@ -36,6 +36,9 @@ protected:
     bool GenerateField(llvm::raw_pwrite_stream &stream,
                        clang::CXXRecordDecl *class_decl,
                        clang::FieldDecl *decl);
+    bool GenerateStaticField(llvm::raw_pwrite_stream &stream,
+                             clang::CXXRecordDecl *class_decl,
+                             clang::VarDecl *decl);
 
     bool GenerateEnum(clang::EnumDecl *decl);
     bool GenerateGlobalVar(clang::VarDecl *decl);
