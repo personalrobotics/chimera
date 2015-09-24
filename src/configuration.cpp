@@ -142,7 +142,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     // Create an output file depending on the provided parameters.
     // TODO: In newer Clang versions, this function returns std::unique<>.
-    return ci_->createOutputFile(
+    llvm::raw_pwrite_stream *stream = ci_->createOutputFile(
         ci_->getFrontendOpts().OutputFile, // Output Path
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
@@ -151,4 +151,16 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         false, // Use a temporary file that should be renamed
         false // Create missing directories in the output path
     );
+
+    auto &sm = ci_->getSourceManager();
+    for (auto it = sm.fileinfo_begin(); it != sm.fileinfo_end(); ++it)
+    {
+        *stream << "#include <" << it->first->getName() << ">\n";
+    }
+
+    *stream << "\n"
+               "void " << base_input_stream.str() << "()\n"
+               "{\n";
+
+    return stream;
 }
