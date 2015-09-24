@@ -10,6 +10,11 @@ using namespace chimera;
 using namespace clang;
 using boost::algorithm::join;
 
+// TODO: Support template functions.
+// TODO: Detect missing copy constructors, possibly using:
+//  hasUserDeclaredCopyConstructor()
+//  hasCopyConstructorWithConstParam ()
+
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
 : context_(&(ci->getASTContext()))
@@ -24,7 +29,9 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     if (!IsEnclosed(decl))
         return true;
 
-    if (isa<CXXRecordDecl>(decl))
+    if (isa<ClassTemplateDecl>(decl))
+        GenerateClassTemplate(cast<ClassTemplateDecl>(decl));
+    else if (isa<CXXRecordDecl>(decl))
         GenerateCXXRecord(cast<CXXRecordDecl>(decl));
     else if (isa<EnumDecl>(decl))
         GenerateEnum(cast<EnumDecl>(decl));
@@ -52,7 +59,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     }
 
     *stream << "::boost::python::class_<"
-            << decl->getQualifiedNameAsString();
+            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString();
 
     const YAML::Node &noncopyable_node = node["noncopyable"];
     if (noncopyable_node && noncopyable_node.as<bool>(false))
@@ -74,7 +81,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
                   << join(base_names, ", ") << " >";
     }
 
-    *stream << " >\n";
+    *stream << " >(\"" << decl->getNameAsString()
+            << "\", boost::python::no_init)";
 
     // Methods
     std::set<std::string> overloaded_method_names;
@@ -276,6 +284,23 @@ bool chimera::Visitor::GenerateStaticField(
     return true;
 }
 
+bool chimera::Visitor::GenerateClassTemplate(clang::ClassTemplateDecl *decl)
+{
+    if (decl != decl->getCanonicalDecl())
+        return false;
+
+    for (ClassTemplateSpecializationDecl *spec_decl : decl->specializations())
+    {
+        if (spec_decl->getSpecializationKind() == TSK_Undeclared)
+            continue;
+
+        CXXRecordDecl *decl = spec_decl->getTypeForDecl()->getAsCXXRecordDecl();
+        GenerateCXXRecord(decl);
+    }
+
+    return true;
+}
+
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
     llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
@@ -370,9 +395,13 @@ std::vector<std::pair<std::string, std::string>>
         const Type *param_type = param_decl->getType().getTypePtr();
         std::string param_value;
 
-        if (param_decl->hasDefaultArg())
+        if (param_decl->hasDefaultArg()
+            && !param_decl->hasUninstantiatedDefaultArg()
+            && !param_decl->hasUnparsedDefaultArg())
         {
             Expr *default_expr = param_decl->getDefaultArg();
+            assert(default_expr);
+
             Expr::EvalResult result;
             bool success;
 

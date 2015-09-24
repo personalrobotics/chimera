@@ -40,6 +40,7 @@ protected:
                              clang::CXXRecordDecl *class_decl,
                              clang::VarDecl *decl);
 
+    bool GenerateClassTemplate(clang::ClassTemplateDecl *decl);
     bool GenerateEnum(clang::EnumDecl *decl);
     bool GenerateGlobalVar(clang::VarDecl *decl);
     bool GenerateGlobalFunction(clang::FunctionDecl *decl);
