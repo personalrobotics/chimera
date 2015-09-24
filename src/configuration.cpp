@@ -132,6 +132,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         canonical_decl->dumpColor();
         return nullptr;
     }
+
     const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
 
     // Use the C++ mangler to create the mangled base input name.

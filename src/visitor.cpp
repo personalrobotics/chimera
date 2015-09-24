@@ -30,6 +30,9 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     // Generate enums
     else if (isa<EnumDecl>(decl))
         GenerateEnum(cast<EnumDecl>(decl));
+    // Global variables
+    else if (isa<VarDecl>(decl))
+        GenerateVar(cast<VarDecl>(decl));
 
     return true;
 }
@@ -114,6 +117,9 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
         GenerateField(*stream, decl, field_decl);
     }
+
+    //else if (decl->isStaticDataMember())
+    //    return false;
 
     *stream << ";\n";
     
@@ -250,6 +256,33 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 
     *stream << ";\n";
 
+    return true;
+}
+
+bool chimera::Visitor::GenerateVar(clang::VarDecl *decl)
+{
+    // TODO: Ignore static member variables.
+
+    // TODO: This causes the name mangler to SEGFAULT.
+#if 0
+    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    if (!stream)
+    {
+        std::cerr << "Failed to create output file for '"
+                  << decl->getQualifiedNameAsString() << "'." << std::endl;
+        return false;
+    }
+#else
+    auto stream = &std::cout;
+#endif
+
+    if (!decl->isFileVarDecl())
+        return false;
+    else if (!decl->isThisDeclarationADefinition())
+        return false;
+
+    *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
+            << "\") = " << decl->getQualifiedNameAsString() << ";\n";
     return true;
 }
 
