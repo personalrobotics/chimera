@@ -38,7 +38,7 @@ protected:
                        clang::FieldDecl *decl);
 
     bool GenerateEnum(clang::EnumDecl *decl);
-    bool GenerateVar(clang::VarDecl *decl);
+    bool GenerateGlobalVar(clang::VarDecl *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
