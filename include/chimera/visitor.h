@@ -37,6 +37,8 @@ protected:
                        clang::CXXRecordDecl *class_decl,
                        clang::FieldDecl *decl);
 
+    bool GenerateEnum(clang::EnumDecl *decl);
+
 private:
     bool IsEnclosed(clang::Decl *decl) const;
     std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;

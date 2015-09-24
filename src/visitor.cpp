@@ -27,6 +27,9 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     // Generate a C++ class/union/struct binding.
     if (isa<CXXRecordDecl>(decl))
         GenerateCXXRecord(cast<CXXRecordDecl>(decl));
+    // Generate enums
+    else if (isa<EnumDecl>(decl))
+        GenerateEnum(cast<EnumDecl>(decl));
 
     return true;
 }
@@ -111,6 +114,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
         GenerateField(*stream, decl, field_decl);
     }
+
+    *stream << ";\n";
     
     return true;
 }
@@ -125,7 +130,7 @@ bool chimera::Visitor::GenerateCXXConstructor(
     for (ParmVarDecl *param_decl : decl->params())
         argument_types.push_back(param_decl->getType().getAsString());
 
-    stream << ".def(boost::python::init<"
+    stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
            << ">());\n";
     return true;
@@ -174,7 +179,7 @@ bool chimera::Visitor::GenerateCXXMethod(
 
     if (rvp_node)
     {
-        stream << ", boost::python::return_value_policy<"
+        stream << ", ::boost::python::return_value_policy<"
                << rvp_node.as<std::string>() << " >";
     }
 
@@ -191,7 +196,7 @@ bool chimera::Visitor::GenerateCXXMethod(
         for (const auto &param : params)
         {
             std::stringstream python_arg;
-            python_arg << "boost::python::arg(\"" << param.first << "\")";
+            python_arg << "::boost::python::arg(\"" << param.first << "\")";
 
             if (!param.second.empty())
                 python_arg << " = " << param.second;
@@ -220,6 +225,31 @@ bool chimera::Visitor::GenerateField(
 
     stream << "(\"" << decl->getNameAsString() << "\","
            << " &" << decl->getQualifiedNameAsString() << ");\n";
+    return true;
+}
+
+bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
+{
+    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    if (!stream)
+    {
+        std::cerr << "Failed to create output file for '"
+                  << decl->getQualifiedNameAsString() << "'." << std::endl;
+        return false;
+    }
+
+    *stream << "::boost::python::enum_<"
+            << decl->getQualifiedNameAsString()
+            << ">(\"" << decl->getNameAsString() << "\")\n";
+
+    for (EnumConstantDecl *constant_decl : decl->enumerators())
+    {
+        *stream << ".value(\"" << constant_decl->getNameAsString() << "\", "
+                << constant_decl->getQualifiedNameAsString() << ")\n";
+    }
+
+    *stream << ";\n";
+
     return true;
 }
 
