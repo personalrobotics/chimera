@@ -38,7 +38,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     const YAML::Node &node = config_->GetDeclaration(decl);
 
-    llvm::raw_pwrite_stream *stream = config_->GetOutputFile(decl);
+    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
     if (!stream)
     {
         std::cerr << "Failed to create output file for '"
@@ -71,9 +71,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << " >\n";
 
+    // Methods
     std::set<std::string> overloaded_method_names;
 
-    for (CXXMethodDecl *method_decl : decl->methods())
+    for (CXXMethodDecl *const method_decl : decl->methods())
     {
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
@@ -102,6 +103,15 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     for (const std::string &method_name : overloaded_method_names)
         *stream << ".staticmethod(\"" << method_name << "\")\n";
 
+    // Fields
+    for (FieldDecl *const field_decl : decl->fields())
+    {
+        if (field_decl->getAccess() != AS_public)
+            continue; // skip protected and private fields
+
+        GenerateField(*stream, decl, field_decl);
+    }
+    
     return true;
 }
 
@@ -193,6 +203,23 @@ bool chimera::Visitor::GenerateCXXMethod(
     }
 
     stream << ")\n";
+    return true;
+}
+
+bool chimera::Visitor::GenerateField(
+    llvm::raw_pwrite_stream &stream,
+    clang::CXXRecordDecl *class_decl,
+    clang::FieldDecl *decl)
+{
+    if (decl->getType().isConstQualified())
+        stream << ".def_readonly";
+    else
+        stream << ".def_readwrite";
+
+    // TODO: Check if a copy constructor is defined for this type.
+
+    stream << "(\"" << decl->getNameAsString() << "\","
+           << " &" << decl->getQualifiedNameAsString() << ");\n";
     return true;
 }
 

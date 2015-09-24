@@ -33,6 +33,9 @@ protected:
     bool GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
                            clang::CXXRecordDecl *class_decl,
                            clang::CXXMethodDecl *decl);
+    bool GenerateField(llvm::raw_pwrite_stream &stream,
+                       clang::CXXRecordDecl *class_decl,
+                       clang::FieldDecl *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
