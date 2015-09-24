@@ -75,6 +75,9 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     for (CXXMethodDecl *method_decl : decl->methods())
     {
+        if (method_decl->getAccess() != AS_public)
+            continue; // skip protected and private members
+
         if (isa<CXXConversionDecl>(method_decl))
             ; // do nothing
         else if (isa<CXXDestructorDecl>(method_decl))
