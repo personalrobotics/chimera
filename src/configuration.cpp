@@ -121,7 +121,7 @@ const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::De
     return d != declarations_.end() ? d->second : emptyNode_;
 }
 
-std::unique_ptr<llvm::raw_fd_ostream>
+std::unique_ptr<llvm::raw_pwrite_stream>
 chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 {
     // Try to convert to a canonical named declaration.
@@ -141,7 +141,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     // Create an output file depending on the provided parameters.
     // TODO: In newer Clang versions, this function returns std::unique<>.
-    return std::unique_ptr<llvm::raw_fd_ostream>(ci_->createOutputFile(
+    return std::unique_ptr<llvm::raw_pwrite_stream>(ci_->createOutputFile(
         ci_->getFrontendOpts().OutputFile, // Output Path
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal

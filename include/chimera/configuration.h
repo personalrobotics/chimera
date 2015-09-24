@@ -13,7 +13,7 @@
 // http://llvm.org/docs/CodingStandards.html#use-raw-ostream
 namespace llvm
 {
-class raw_fd_ostream;
+class raw_pwrite_stream;
 }
 
 namespace chimera
@@ -85,7 +85,7 @@ public:
      *
      * The file pointer should be closed after the output has been written.
      */
-    std::unique_ptr<llvm::raw_fd_ostream> GetOutputFile(const clang::Decl *decl) const;
+    std::unique_ptr<llvm::raw_pwrite_stream> GetOutputFile(const clang::Decl *decl) const;
 
 private:
     CompiledConfiguration(clang::CompilerInstance *ci);
