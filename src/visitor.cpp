@@ -71,13 +71,10 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << " >\n";
 
-    std::cout << "Record: " << decl->getQualifiedNameAsString() << std::endl;
-    decl->dump();
+    std::set<std::string> overloaded_method_names;
 
     for (CXXMethodDecl *method_decl : decl->methods())
     {
-        std::cout << "+Method: " << method_decl->getQualifiedNameAsString() << std::endl;
-
         if (isa<CXXConversionDecl>(method_decl))
             ; // do nothing
         else if (isa<CXXDestructorDecl>(method_decl))
@@ -87,13 +84,22 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         else if (method_decl->isOverloadedOperator())
             ; // TODO: Wrap overloaded operators.
         else if (method_decl->isStatic())
-            ; // TODO: Wrap static functions
+        {
+            if (GenerateCXXMethod(*stream, decl, method_decl))
+                overloaded_method_names.insert(method_decl->getNameAsString());
+        }
         else
             GenerateCXXMethod(*stream, decl, method_decl);
     }
+
+    // Static methods MUST be declared after overloads are defined.
+    for (const std::string &method_name : overloaded_method_names)
+    {
+        *stream << ".staticmethod(\"" << method_name << "\")\n";
+    }
 }
 
-void chimera::Visitor::GenerateCXXMethod(
+bool chimera::Visitor::GenerateCXXMethod(
     llvm::raw_pwrite_stream &stream,
     CXXRecordDecl *class_decl, CXXMethodDecl *decl)
 {
@@ -115,7 +121,7 @@ void chimera::Visitor::GenerateCXXMethod(
                 << decl->getQualifiedNameAsString()
                 << "' because it returns a reference and no"
                    "  'return_value_policy' was specified.\n";
-            return;
+            return false;
         }
         else if (return_type->isPointerType())
         {
@@ -124,7 +130,7 @@ void chimera::Visitor::GenerateCXXMethod(
                 << decl->getQualifiedNameAsString()
                 << "' because it returns a pointer and no"
                    "  'return_value_policy' was specified.\n";
-            return;
+            return false;
         }
 
         // TODO: Check if return_type is non-copyable.
@@ -165,6 +171,7 @@ void chimera::Visitor::GenerateCXXMethod(
     }
 
     stream << ")\n";
+    return true;
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(

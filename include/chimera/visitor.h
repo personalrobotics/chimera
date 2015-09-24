@@ -27,7 +27,7 @@ public:
 
 protected:
     void GenerateCXXRecord(clang::CXXRecordDecl *decl);
-    void GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
+    bool GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
                            clang::CXXRecordDecl *class_decl,
                            clang::CXXMethodDecl *decl);
 
