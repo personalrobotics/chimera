@@ -11,7 +11,7 @@
 // http://llvm.org/docs/CodingStandards.html#use-raw-ostream
 namespace llvm
 {
-class raw_fd_ostream;
+class raw_pwrite_stream;
 }
 
 namespace chimera
@@ -27,7 +27,7 @@ public:
 
 protected:
     void GenerateCXXRecord(clang::CXXRecordDecl *decl);
-    void GenerateCXXMethod(llvm::raw_fd_ostream &stream,
+    void GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
                            clang::CXXRecordDecl *class_decl,
                            clang::CXXMethodDecl *decl);
 

@@ -42,7 +42,7 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     const YAML::Node &node = config_->GetDeclaration(decl);
 
-    std::unique_ptr<llvm::raw_fd_ostream> stream = config_->GetOutputFile(decl);
+    std::unique_ptr<llvm::raw_pwrite_stream> stream = config_->GetOutputFile(decl);
     if (!stream)
     {
         std::cerr << "Failed to create output file for '"
@@ -90,12 +90,10 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         else
             GenerateCXXMethod(*stream, decl, method_decl);
     }
-
-    stream->close();
 }
 
 void chimera::Visitor::GenerateCXXMethod(
-    llvm::raw_fd_ostream &stream,
+    llvm::raw_pwrite_stream &stream,
     CXXRecordDecl *class_decl, CXXMethodDecl *decl)
 {
     decl = decl->getCanonicalDecl();
