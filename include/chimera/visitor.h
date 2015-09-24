@@ -26,7 +26,10 @@ public:
     virtual bool VisitDecl(clang::Decl *decl);
 
 protected:
-    void GenerateCXXRecord(clang::CXXRecordDecl *decl);
+    bool GenerateCXXRecord(clang::CXXRecordDecl *decl);
+    bool GenerateCXXConstructor(llvm::raw_pwrite_stream &stream,
+                                clang::CXXRecordDecl *class_decl,
+                                clang::CXXConstructorDecl *decl);
     bool GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
                            clang::CXXRecordDecl *class_decl,
                            clang::CXXMethodDecl *decl);

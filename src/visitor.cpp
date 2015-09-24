@@ -31,10 +31,10 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     return true;
 }
 
-void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
+bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 {
     if (!decl->hasDefinition() || decl->getDefinition() != decl)
-        return;
+        return false;
 
     const YAML::Node &node = config_->GetDeclaration(decl);
 
@@ -43,7 +43,7 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     {
         std::cerr << "Failed to create output file for '"
                   << decl->getQualifiedNameAsString() << "'." << std::endl;
-        return;
+        return false;
     }
 
     *stream << "::boost::python::class_<"
@@ -80,7 +80,10 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         else if (isa<CXXDestructorDecl>(method_decl))
             ; // do nothing
         else if (isa<CXXConstructorDecl>(method_decl))
-            ; // TODO: Wrap constructors.
+        {
+            GenerateCXXConstructor(
+                *stream, decl, cast<CXXConstructorDecl>(method_decl));
+        }
         else if (method_decl->isOverloadedOperator())
             ; // TODO: Wrap overloaded operators.
         else if (method_decl->isStatic())
@@ -94,9 +97,25 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     // Static methods MUST be declared after overloads are defined.
     for (const std::string &method_name : overloaded_method_names)
-    {
         *stream << ".staticmethod(\"" << method_name << "\")\n";
-    }
+
+    return true;
+}
+
+bool chimera::Visitor::GenerateCXXConstructor(
+    llvm::raw_pwrite_stream &stream,
+    CXXRecordDecl *class_decl,
+    CXXConstructorDecl *decl)
+{
+    std::vector<std::string> argument_types;
+
+    for (ParmVarDecl *param_decl : decl->params())
+        argument_types.push_back(param_decl->getType().getAsString());
+
+    stream << ".def(boost::python::init<"
+           << join(argument_types, ", ")
+           << ">());\n";
+    return true;
 }
 
 bool chimera::Visitor::GenerateCXXMethod(
