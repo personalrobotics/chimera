@@ -30,9 +30,9 @@ protected:
     bool GenerateCXXConstructor(llvm::raw_pwrite_stream &stream,
                                 clang::CXXRecordDecl *class_decl,
                                 clang::CXXConstructorDecl *decl);
-    bool GenerateCXXMethod(llvm::raw_pwrite_stream &stream,
+    bool GenerateFunction(llvm::raw_pwrite_stream &stream,
                            clang::CXXRecordDecl *class_decl,
-                           clang::CXXMethodDecl *decl);
+                           clang::FunctionDecl *decl);
     bool GenerateField(llvm::raw_pwrite_stream &stream,
                        clang::CXXRecordDecl *class_decl,
                        clang::FieldDecl *decl);
@@ -42,12 +42,13 @@ protected:
 
     bool GenerateEnum(clang::EnumDecl *decl);
     bool GenerateGlobalVar(clang::VarDecl *decl);
+    bool GenerateGlobalFunction(clang::FunctionDecl *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
     std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;
     std::vector<std::pair<std::string, std::string>> GetParameterNames(
-        clang::CXXMethodDecl *decl) const;
+        clang::FunctionDecl *decl) const;
 
     clang::ASTContext *context_;
     std::unique_ptr<CompiledConfiguration> config_;

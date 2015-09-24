@@ -24,15 +24,14 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     if (!IsEnclosed(decl))
         return true;
 
-    // Generate a C++ class/union/struct binding.
     if (isa<CXXRecordDecl>(decl))
         GenerateCXXRecord(cast<CXXRecordDecl>(decl));
-    // Generate enums
     else if (isa<EnumDecl>(decl))
         GenerateEnum(cast<EnumDecl>(decl));
-    // Global variables
     else if (isa<VarDecl>(decl))
         GenerateGlobalVar(cast<VarDecl>(decl));
+    else if (isa<FunctionDecl>(decl))
+        GenerateGlobalFunction(cast<FunctionDecl>(decl));
 
     return true;
 }
@@ -98,11 +97,15 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
             ; // TODO: Wrap overloaded operators.
         else if (method_decl->isStatic())
         {
-            if (GenerateCXXMethod(*stream, decl, method_decl))
+            // TODO: Missing the dot.
+            if (GenerateFunction(*stream, decl, method_decl))
                 overloaded_method_names.insert(method_decl->getNameAsString());
         }
         else
-            GenerateCXXMethod(*stream, decl, method_decl);
+        {
+            // TODO: Missing the dot.
+            GenerateFunction(*stream, decl, method_decl);
+        }
     }
 
     // Static methods MUST be declared after overloads are defined.
@@ -145,14 +148,23 @@ bool chimera::Visitor::GenerateCXXConstructor(
     return true;
 }
 
-bool chimera::Visitor::GenerateCXXMethod(
+bool chimera::Visitor::GenerateFunction(
     llvm::raw_pwrite_stream &stream,
-    CXXRecordDecl *class_decl, CXXMethodDecl *decl)
+    CXXRecordDecl *class_decl, FunctionDecl *decl)
 {
     decl = decl->getCanonicalDecl();
 
-    const QualType pointer_type = context_->getMemberPointerType(
-        decl->getType(), class_decl->getTypeForDecl());
+    QualType pointer_type;
+    if (class_decl)
+    {
+        pointer_type = context_->getMemberPointerType(
+            decl->getType(), class_decl->getTypeForDecl());
+    }
+    else
+    {
+        pointer_type = context_->getPointerType(decl->getType());
+    }
+
     const Type *return_type = decl->getReturnType().getTypePtr();
 
     const YAML::Node &node = config_->GetDeclaration(decl);
@@ -182,7 +194,10 @@ bool chimera::Visitor::GenerateCXXMethod(
         // TODO: Check if return_type is non-copyable.
     }
 
-    stream << ".def(\"" << decl->getNameAsString() << "\""
+    if (class_decl)
+        stream << ".";
+
+    stream << "def(\"" << decl->getNameAsString() << "\""
            << ", static_cast<" << pointer_type.getAsString() << ">(&"
            << decl->getQualifiedNameAsString() << ")";
 
@@ -306,6 +321,24 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     return true;
 }
 
+bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
+{
+    if (isa<clang::CXXMethodDecl>(decl))
+        return false;
+    else if (decl->isOverloadedOperator())
+        return false; // TODO: Wrap overloaded operators.
+
+    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    if (!stream)
+    {
+        std::cerr << "Failed to create output file for '"
+                  << decl->getQualifiedNameAsString() << "'." << std::endl;
+        return false;
+    }
+
+    return GenerateFunction(*stream, nullptr, decl);
+}
+
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(
     CXXRecordDecl *decl) const
 {
@@ -327,7 +360,7 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
 }
 
 std::vector<std::pair<std::string, std::string>>
-    chimera::Visitor::GetParameterNames(clang::CXXMethodDecl *decl) const
+    chimera::Visitor::GetParameterNames(clang::FunctionDecl *decl) const
 {
     std::vector<std::pair<std::string, std::string>> params;
 
