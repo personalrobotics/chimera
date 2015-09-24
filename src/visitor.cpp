@@ -42,7 +42,7 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     const YAML::Node &node = config_->GetDeclaration(decl);
 
-    std::unique_ptr<llvm::raw_pwrite_stream> stream = config_->GetOutputFile(decl);
+    llvm::raw_pwrite_stream *stream = config_->GetOutputFile(decl);
     if (!stream)
     {
         std::cerr << "Failed to create output file for '"
@@ -54,7 +54,7 @@ void chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
             << decl->getQualifiedNameAsString();
 
     const YAML::Node &noncopyable_node = node["noncopyable"];
-    if (const bool noncopyable = noncopyable_node && noncopyable_node.as<bool>(false))
+    if (noncopyable_node && noncopyable_node.as<bool>(false))
         *stream << ", ::boost::python::noncopyable";
 
     if (const YAML::Node &held_type_node = node["held_type"])

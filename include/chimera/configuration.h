@@ -85,7 +85,7 @@ public:
      *
      * The file pointer should be closed after the output has been written.
      */
-    std::unique_ptr<llvm::raw_pwrite_stream> GetOutputFile(const clang::Decl *decl) const;
+    llvm::raw_pwrite_stream *GetOutputFile(const clang::Decl *decl) const;
 
 private:
     CompiledConfiguration(clang::CompilerInstance *ci);
