@@ -11,13 +11,14 @@ class Consumer : public clang::ASTConsumer
 {
 public:
     // Overrides the constructor in order to receive CompilerInstance.
-    explicit Consumer(clang::CompilerInstance *ci);
+    Consumer(clang::CompilerInstance *ci, clang::StringRef file);
 
     // Overrides method to call our ChimeraVisitor on the entire source file.
-    virtual void HandleTranslationUnit(clang::ASTContext &context);
+    void HandleTranslationUnit(clang::ASTContext &context) override;
 
 private:
     clang::CompilerInstance *ci_;
+    clang::StringRef file_;
 };
 
 } // namespace chimera

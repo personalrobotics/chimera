@@ -1,7 +1,8 @@
-#include <iostream>
-#include <llvm/Support/raw_ostream.h>
 #include "chimera/configuration.h"
 #include "chimera/util.h"
+
+#include <fstream>
+#include <iostream>
 
 using namespace clang;
 
@@ -45,9 +46,10 @@ void chimera::Configuration::LoadFile(std::string filename)
 }
 
 std::unique_ptr<chimera::CompiledConfiguration>
-chimera::Configuration::Process(CompilerInstance *ci) const
+chimera::Configuration::Process(CompilerInstance *ci, StringRef file) const
 {
-    std::unique_ptr<chimera::CompiledConfiguration> config(new CompiledConfiguration(ci));
+    std::unique_ptr<chimera::CompiledConfiguration> config(
+        new CompiledConfiguration(*this, ci, file));
 
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : rootNode_["namespaces"])
@@ -103,8 +105,11 @@ const std::string &chimera::Configuration::GetFilename() const
 
 const YAML::Node chimera::CompiledConfiguration::emptyNode_;
 
-chimera::CompiledConfiguration::CompiledConfiguration(CompilerInstance *ci)
-: ci_(ci)
+chimera::CompiledConfiguration::CompiledConfiguration(
+    const chimera::Configuration &parent, CompilerInstance *ci, StringRef file)
+: parent_(parent)
+, ci_(ci)
+, file_(file)
 , mangler_(ci->getASTContext().createMangleContext())
 {
     // Do nothing.
@@ -121,7 +126,7 @@ const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::De
     return d != declarations_.end() ? d->second : emptyNode_;
 }
 
-llvm::raw_pwrite_stream *
+std::unique_ptr<chimera::Stream>
 chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 {
     // Try to convert to a canonical named declaration.
@@ -142,7 +147,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     // Create an output file depending on the provided parameters.
     // TODO: In newer Clang versions, this function returns std::unique<>.
-    llvm::raw_pwrite_stream *stream = ci_->createOutputFile(
+    auto *stream = ci_->createOutputFile(
         ci_->getFrontendOpts().OutputFile, // Output Path
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
@@ -152,15 +157,69 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         false // Create missing directories in the output path
     );
 
-    auto &sm = ci_->getSourceManager();
-    for (auto it = sm.fileinfo_begin(); it != sm.fileinfo_end(); ++it)
+    // If file creation failed, report the error and return a nullptr.
+    if (!stream)
     {
-        *stream << "#include <" << it->first->getName() << ">\n";
+        std::cerr << "Failed to create output file for '"
+                  << named_decl->getQualifiedNameAsString() << "'."
+                  << std::endl;
+        return nullptr;
     }
 
-    *stream << "\n"
-               "void " << base_input_stream.str() << "()\n"
-               "{\n";
+    // Create a stream wrapper to write header and footer of file.
+    return std::unique_ptr<chimera::Stream>(
+        new chimera::Stream(stream, file_, base_input_stream.str()));
+}
 
-    return stream;
+bool chimera::CompiledConfiguration::DumpOverride(
+    const clang::Decl *decl, chimera::Stream &stream) const
+{
+    const YAML::Node &node = GetDeclaration(decl);
+
+    if (const YAML::Node &content_node = node["content"])
+    {
+        stream << content_node.as<std::string>() << "\n";
+        return true;
+    }
+    else if (const YAML::Node &source_node = node["source"])
+    {
+        // Concatenate YAML filepath with source relative path.
+        // TODO: this is somewhat brittle.
+        std::string source_path = source_node.as<std::string>();
+        const std::string &config_path = parent_.GetFilename();
+
+        if (source_path.front() != '/')
+        {
+            std::size_t found = config_path.rfind("/");
+            if (found != std::string::npos)
+            {
+                source_path = config_path.substr(0, found) + "/" + source_path;
+            }
+            else
+            {
+                source_path = "./" + source_path;
+            }
+        }
+
+        // Try to open configuration file.
+        std::ifstream source(source_path);
+        if (source.fail())
+        {
+            std::cerr << "Warning: Failed to open source '"
+                      << source_path << "': " << strerror(errno) << std::endl;
+            return true;
+        }
+
+        // Copy file content to the output stream.
+        // TODO: There is probably a better way to do this part.
+        std::string line;
+        while (std::getline(source, line))
+            stream << line << "\n";
+        source.close();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
