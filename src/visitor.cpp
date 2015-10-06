@@ -1,10 +1,10 @@
 #include "chimera/visitor.h"
 
 #include <algorithm>
+#include <boost/algorithm/string/join.hpp>
 #include <iostream>
 #include <llvm/Support/raw_ostream.h>
 #include <string>
-#include <boost/algorithm/string/join.hpp>
 
 using namespace chimera;
 using namespace clang;
@@ -45,18 +45,19 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
 
 bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 {
+    // Only traverse CXX records that contain the actual class definition.
     if (!decl->hasDefinition() || decl->getDefinition() != decl)
         return false;
 
-    const YAML::Node &node = config_->GetDeclaration(decl);
-
-    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    // Open a stream object unique to this CXX record's mangled name.
+    auto stream = config_->GetOutputFile(decl);
     if (!stream)
-    {
-        std::cerr << "Failed to create output file for '"
-                  << decl->getQualifiedNameAsString() << "'." << std::endl;
         return false;
-    }
+
+    // Get configuration, and use any overrides if they exist.
+    if (config_->DumpOverride(decl, *stream))
+        return true;
+    const YAML::Node &node = config_->GetDeclaration(decl);
 
     *stream << "::boost::python::class_<"
             << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString();
@@ -141,7 +142,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 }
 
 bool chimera::Visitor::GenerateCXXConstructor(
-    llvm::raw_pwrite_stream &stream,
+    chimera::Stream &stream,
     CXXRecordDecl *class_decl,
     CXXConstructorDecl *decl)
 {
@@ -157,11 +158,17 @@ bool chimera::Visitor::GenerateCXXConstructor(
 }
 
 bool chimera::Visitor::GenerateFunction(
-    llvm::raw_pwrite_stream &stream,
+    chimera::Stream &stream,
     CXXRecordDecl *class_decl, FunctionDecl *decl)
 {
     decl = decl->getCanonicalDecl();
 
+    // Get configuration, and use any overrides if they exist.
+    if (config_->DumpOverride(decl, stream))
+        return true;
+    const YAML::Node &node = config_->GetDeclaration(decl);
+
+    // Extract the pointer type of this function declaration.
     QualType pointer_type;
     if (class_decl)
     {
@@ -173,11 +180,12 @@ bool chimera::Visitor::GenerateFunction(
         pointer_type = context_->getPointerType(decl->getType());
     }
 
+    // Extract the return type of this function declaration.
     const Type *return_type = decl->getReturnType().getTypePtr();
 
-    const YAML::Node &node = config_->GetDeclaration(decl);
+    // Check that a valid return value policy was defined, or that one can be
+    // determined automatically by Boost.Python.
     const YAML::Node &rvp_node = node["return_value_policy"];
-
     if (!rvp_node)
     {
         if (return_type->isReferenceType())
@@ -202,23 +210,30 @@ bool chimera::Visitor::GenerateFunction(
         // TODO: Check if return_type is non-copyable.
     }
 
+    // If we are inside a class declaration, this is being called within a
+    // builder pattern and will start with '.' since it is a member function.
     if (class_decl)
         stream << ".";
 
+    // Create the actual function declaration here using its name and its
+    // full pointer reference.
     stream << "def(\"" << decl->getNameAsString() << "\""
            << ", static_cast<" << pointer_type.getAsString() << ">(&"
            << decl->getQualifiedNameAsString() << ")";
 
+    // If a return value policy was specified, insert it after the function.
     if (rvp_node)
     {
         stream << ", ::boost::python::return_value_policy<"
                << rvp_node.as<std::string>() << " >";
     }
 
+    // Construct a list of the arguments that are provided to this function,
+    // and define named arguments for them based on their c++ names.
     const auto params = GetParameterNames(decl);
     if (!params.empty())
     {
-        // TODO: Supress any default parameters that occur after the first
+        // TODO: Suppress any default parameters that occur after the first
         // non-default to default transition. This can only occur if evaluating
         // the default value of one or more parameters failed.
 
@@ -244,7 +259,7 @@ bool chimera::Visitor::GenerateFunction(
 }
 
 bool chimera::Visitor::GenerateField(
-    llvm::raw_pwrite_stream &stream,
+    chimera::Stream &stream,
     clang::CXXRecordDecl *class_decl,
     clang::FieldDecl *decl)
 {
@@ -261,7 +276,7 @@ bool chimera::Visitor::GenerateField(
 }
 
 bool chimera::Visitor::GenerateStaticField(
-    llvm::raw_pwrite_stream &stream,
+    chimera::Stream &stream,
     clang::CXXRecordDecl *class_decl,
     clang::VarDecl *decl)
 {
@@ -303,13 +318,9 @@ bool chimera::Visitor::GenerateClassTemplate(clang::ClassTemplateDecl *decl)
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
-    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    auto stream = config_->GetOutputFile(decl);
     if (!stream)
-    {
-        std::cerr << "Failed to create output file for '"
-                  << decl->getQualifiedNameAsString() << "'." << std::endl;
         return false;
-    }
 
     *stream << "::boost::python::enum_<"
             << decl->getQualifiedNameAsString()
@@ -333,13 +344,9 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     else if (!decl->isThisDeclarationADefinition())
         return false;
 
-    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    auto stream = config_->GetOutputFile(decl);
     if (!stream)
-    {
-        std::cerr << "Failed to create output file for '"
-                  << decl->getQualifiedNameAsString() << "'." << std::endl;
         return false;
-    }
 
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
             << "\") = " << decl->getQualifiedNameAsString() << ";\n";
@@ -353,13 +360,9 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     else if (decl->isOverloadedOperator())
         return false; // TODO: Wrap overloaded operators.
 
-    llvm::raw_pwrite_stream *const stream = config_->GetOutputFile(decl);
+    auto stream = config_->GetOutputFile(decl);
     if (!stream)
-    {
-        std::cerr << "Failed to create output file for '"
-                  << decl->getQualifiedNameAsString() << "'." << std::endl;
         return false;
-    }
 
     return GenerateFunction(*stream, nullptr, decl);
 }

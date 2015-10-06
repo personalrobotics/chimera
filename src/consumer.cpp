@@ -6,8 +6,8 @@
 
 using namespace clang;
 
-chimera::Consumer::Consumer(CompilerInstance *ci)
-: ci_(ci)
+chimera::Consumer::Consumer(CompilerInstance *ci, StringRef file)
+: ci_(ci), file_(file)
 { 
     // Do nothing.
 }
@@ -16,7 +16,7 @@ void chimera::Consumer::HandleTranslationUnit(ASTContext &context)
 {
     // Use the current translation unit to resolve the YAML configuration.
     chimera::Configuration &config = chimera::Configuration::GetInstance();
-    chimera::Visitor visitor(ci_, config.Process(ci_));
+    chimera::Visitor visitor(ci_, config.Process(ci_, file_));
 
     // TODO: Remove this debug print.
     std::cout << "\n\n---\n\n";

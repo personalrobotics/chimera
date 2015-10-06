@@ -9,5 +9,5 @@ std::unique_ptr<clang::ASTConsumer>
 chimera::FrontendAction::CreateASTConsumer(CompilerInstance &CI, StringRef file) 
 {
     CI.getPreprocessor().getDiagnostics().setIgnoreAllWarnings(true);
-    return std::unique_ptr<chimera::Consumer>(new chimera::Consumer(&CI));
+    return std::unique_ptr<chimera::Consumer>(new chimera::Consumer(&CI, file));
 }

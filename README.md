@@ -16,7 +16,7 @@
 
 **On Ubuntu**
 
-```
+```bash
 sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
 wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
@@ -32,12 +32,47 @@ PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DLLVM_DIR=
 ## Usage ##
 Let's try running chimera on itself!
 
-```
+```bash
 $ cd [PATH TO CHIMERA]
 $ rm -rf build && mkdir -p build && cd build
 $ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 $ make
 $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
+```
+
+## Configuration ##
+```yaml
+# Arguments that will be appended in-order before command line arguments.
+# (Not implemented yet.)
+arguments:
+  - "-extra-arg"
+  - "-I/usr/lib/clang/3.6/include"
+
+# The C++ namespaces that will be extracted by Chimera
+namespaces:
+  - dart::dynamics
+  - dart::math
+
+# Selected types that should have special handling.
+# (Not implemented yet.)
+types:
+  'class BodyNode':
+    convert_to: 'class BodyNodePtr'
+
+# Selected function and class declarations that need custom parameters.
+declarations:
+  'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
+    return_value_policy: ::boost::python::copy_const_reference
+  'bool ::dart::dynamics::Skeleton::isImpulseApplied() const':
+    source: 'test.cpp.in'
+  'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
+    content: '/* Instead of implementing this function, insert this comment! */'
+  'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
+    # This declaration will be suppressed.
+  '::dart::dynamics::Shape':
+    name: Shape
+    bases: []
+    noncopyable: true
 ```
 
 ## Troubleshooting ##

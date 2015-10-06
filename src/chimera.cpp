@@ -4,9 +4,9 @@
 #include "chimera/configuration.h"
 #include "chimera/frontend_action.h"
 
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Support/CommandLine.h"
+#include <clang/Tooling/CommonOptionsParser.h>
+#include <clang/Tooling/Tooling.h>
+#include <llvm/Support/CommandLine.h>
 
 #include <memory>
 #include <string>

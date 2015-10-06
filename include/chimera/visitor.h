@@ -7,13 +7,6 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-// Forward declare LLVM raw_ostream, as per:
-// http://llvm.org/docs/CodingStandards.html#use-raw-ostream
-namespace llvm
-{
-class raw_pwrite_stream;
-}
-
 namespace chimera
 {
 
@@ -27,16 +20,16 @@ public:
 
 protected:
     bool GenerateCXXRecord(clang::CXXRecordDecl *decl);
-    bool GenerateCXXConstructor(llvm::raw_pwrite_stream &stream,
+    bool GenerateCXXConstructor(chimera::Stream &stream,
                                 clang::CXXRecordDecl *class_decl,
                                 clang::CXXConstructorDecl *decl);
-    bool GenerateFunction(llvm::raw_pwrite_stream &stream,
+    bool GenerateFunction(chimera::Stream &stream,
                            clang::CXXRecordDecl *class_decl,
                            clang::FunctionDecl *decl);
-    bool GenerateField(llvm::raw_pwrite_stream &stream,
+    bool GenerateField(chimera::Stream &stream,
                        clang::CXXRecordDecl *class_decl,
                        clang::FieldDecl *decl);
-    bool GenerateStaticField(llvm::raw_pwrite_stream &stream,
+    bool GenerateStaticField(chimera::Stream &stream,
                              clang::CXXRecordDecl *class_decl,
                              clang::VarDecl *decl);
 

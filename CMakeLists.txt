@@ -62,6 +62,7 @@ add_executable(chimera
   src/configuration.cpp
   src/consumer.cpp
   src/frontend_action.cpp
+  src/stream.cpp
   src/visitor.cpp
   src/util.cpp
 )
