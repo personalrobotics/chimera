@@ -7,7 +7,8 @@ chimera::Stream::Stream(StreamType *stream,
                         const std::string &mangledName)
 : stream_(stream)
 {
-    *stream_ << "#include <" << includeName << ">\n"
+    *stream_ << "#include <boost/python.hpp>\n"
+                "#include <" << includeName << ">\n"
                 "\n"
                 "void " << mangledName << "()\n"
                 "{\n";
