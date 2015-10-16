@@ -14,6 +14,7 @@ using boost::algorithm::join;
 // TODO: Detect missing copy constructors, possibly using:
 //  hasUserDeclaredCopyConstructor()
 //  hasCopyConstructorWithConstParam ()
+// TODO: Mark abstract classes as noncopyable?
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
@@ -391,30 +392,10 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
 
         CXXRecordDecl *const base_record_decl
           = base_decl.getType()->getAsCXXRecordDecl();
+        const QualType base_record_type
+          = base_record_decl->getTypeForDecl()->getCanonicalTypeInternal();
 
-        std::stringstream base_name;
-        base_name << base_record_decl->getQualifiedNameAsString();
-
-        if (isa<ClassTemplateSpecializationDecl>(base_record_decl))
-        {
-            auto spec_decl = cast<ClassTemplateSpecializationDecl>(base_record_decl);
-            const TemplateArgumentList &template_args = spec_decl->getTemplateArgs();
-
-            base_name << "<";
-
-            for (size_t i = 0; i < template_args.size(); ++i)
-            {
-                const QualType arg_type = template_args[i].getAsType();
-                base_name << arg_type.getAsString(printing_policy_);
-
-                if (i != template_args.size() - 1)
-                    base_name << ", ";
-            }
-
-            base_name << " >";
-        }
-
-        base_names.push_back(base_name.str());
+        base_names.push_back(base_record_type.getAsString(printing_policy_));
     }
 
     return base_names;
