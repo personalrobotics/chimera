@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/tmp/chimera",
+  "command": "/usr/bin/c++ -x c++ -DBOOST_TEST_DYN_LINK -Wall -msse2 -fPIC -std=c++11 -O3 -DNDEBUG -I/home/mkoval/storage/dart-ws/src/dart -isystem /usr/include/eigen3 -isystem /opt/ros/indigo/include -isystem /usr/include/coin -I/homes/mkoval/dart-ws/build/dart -o /home/mkoval/storage/dart-ws/devel/include/dart/dart.h -c /home/mkoval/storage/dart-ws/devel/include/dart/dart.h",
+  "file": "/home/mkoval/storage/dart-ws/devel/include/dart/dart.h"
+}
+]
