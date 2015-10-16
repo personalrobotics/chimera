@@ -169,6 +169,9 @@ bool chimera::Visitor::GenerateFunction(
 {
     decl = decl->getCanonicalDecl();
 
+    if (decl->isDeleted())
+        return false;
+
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, stream))
         return true;
