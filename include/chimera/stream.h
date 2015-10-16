@@ -26,7 +26,10 @@ class Stream
 public:
     Stream(StreamType *stream,
            const std::string &includeName,
-           const std::string &mangledName);
+           const std::string &mangledName,
+           const std::string &headerSnippet,
+           const std::string &postincludeSnippet,
+           const std::string &footerSnippet);
     virtual ~Stream();
 
     Stream(const Stream&) = delete;
@@ -36,6 +39,7 @@ public:
 
 private:
     StreamType *stream_; // Pointer to actual stream type.
+    std::string footer_snippet_;
 };
 
 

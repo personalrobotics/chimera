@@ -6,6 +6,9 @@
 
 using namespace clang;
 
+namespace
+{
+
 /**
  * Counts the number of whitespace-separated words in a string.
  *
@@ -17,6 +20,56 @@ size_t countWordsInString(const std::string & str)
     return std::distance(std::istream_iterator<std::string>(stream),
                          std::istream_iterator<std::string>());
 }
+
+bool getSnippet(const YAML::Node &node, const std::string &config_path,
+                std::string &snippet)
+{
+    if (const YAML::Node &content_node = node["content"])
+    {
+        snippet = content_node.as<std::string>();
+        return true;
+    }
+    else if (const YAML::Node &source_node = node["source"])
+    {
+        // Concatenate YAML filepath with source relative path.
+        // TODO: this is somewhat brittle.
+        std::string source_path = source_node.as<std::string>();
+
+        if (source_path.front() != '/')
+        {
+            std::size_t found = config_path.rfind("/");
+            if (found != std::string::npos)
+            {
+                source_path = config_path.substr(0, found) + "/" + source_path;
+            }
+            else
+            {
+                source_path = "./" + source_path;
+            }
+        }
+
+        // Try to open configuration file.
+        std::ifstream source(source_path);
+        if (source.fail())
+        {
+            std::cerr << "Warning: Failed to open source '"
+                      << source_path << "': " << strerror(errno) << std::endl;
+            return true;
+        }
+
+        // Copy file content to the output stream.
+        snippet.assign(std::istreambuf_iterator<char>(source),
+                       std::istreambuf_iterator<char>());
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+} // namespace
 
 chimera::Configuration::Configuration()
 {
@@ -166,60 +219,29 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         return nullptr;
     }
 
+    const YAML::Node &template_config = parent_.GetRoot()["template"];
+
+    std::string header_snippet, postinclude_snippet, footer_snippet;
+    getSnippet(template_config["header"], parent_.GetFilename(), header_snippet);
+    getSnippet(template_config["postinclude"], parent_.GetFilename(), postinclude_snippet);
+    getSnippet(template_config["footer"], parent_.GetFilename(), footer_snippet);
+
     // Create a stream wrapper to write header and footer of file.
     return std::unique_ptr<chimera::Stream>(
-        new chimera::Stream(stream, file_, base_input_stream.str()));
+        new chimera::Stream(stream, file_, base_input_stream.str(),
+                            header_snippet, postinclude_snippet, footer_snippet));
 }
 
 bool chimera::CompiledConfiguration::DumpOverride(
     const clang::Decl *decl, chimera::Stream &stream) const
 {
     const YAML::Node &node = GetDeclaration(decl);
+    std::string snippet;
 
-    if (const YAML::Node &content_node = node["content"])
+    if (getSnippet(node, parent_.GetFilename(), snippet))
     {
-        stream << content_node.as<std::string>() << "\n";
+        stream << snippet << '\n';
         return true;
     }
-    else if (const YAML::Node &source_node = node["source"])
-    {
-        // Concatenate YAML filepath with source relative path.
-        // TODO: this is somewhat brittle.
-        std::string source_path = source_node.as<std::string>();
-        const std::string &config_path = parent_.GetFilename();
-
-        if (source_path.front() != '/')
-        {
-            std::size_t found = config_path.rfind("/");
-            if (found != std::string::npos)
-            {
-                source_path = config_path.substr(0, found) + "/" + source_path;
-            }
-            else
-            {
-                source_path = "./" + source_path;
-            }
-        }
-
-        // Try to open configuration file.
-        std::ifstream source(source_path);
-        if (source.fail())
-        {
-            std::cerr << "Warning: Failed to open source '"
-                      << source_path << "': " << strerror(errno) << std::endl;
-            return true;
-        }
-
-        // Copy file content to the output stream.
-        // TODO: There is probably a better way to do this part.
-        std::string line;
-        while (std::getline(source, line))
-            stream << line << "\n";
-        source.close();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return false;
 }
