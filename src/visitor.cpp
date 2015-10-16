@@ -147,6 +147,11 @@ bool chimera::Visitor::GenerateCXXConstructor(
     CXXRecordDecl *class_decl,
     CXXConstructorDecl *decl)
 {
+    decl = decl->getCanonicalDecl();
+
+    if (decl->isDeleted())
+        return false;
+
     std::vector<std::string> argument_types;
 
     for (ParmVarDecl *param_decl : decl->params())
