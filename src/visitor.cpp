@@ -18,6 +18,7 @@ using boost::algorithm::join;
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
 : context_(&(ci->getASTContext()))
+, printing_policy_(ci->getLangOpts())
 , config_(std::move(cc))
 {
     // Do nothing.
@@ -60,11 +61,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     const YAML::Node &node = config_->GetDeclaration(decl);
 
     *stream << "::boost::python::class_<"
-            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString();
+            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
 
     const YAML::Node &noncopyable_node = node["noncopyable"];
     if (noncopyable_node && noncopyable_node.as<bool>(false))
-        *stream << ", ::boost::python::noncopyable";
+        *stream << ", ::boost::noncopyable";
 
     if (const YAML::Node &held_type_node = node["held_type"])
         *stream << ", " << held_type_node.as<std::string>();
@@ -83,7 +84,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     }
 
     *stream << " >(\"" << decl->getNameAsString()
-            << "\", boost::python::no_init)";
+            << "\", boost::python::no_init)\n";
 
     // Methods
     std::set<std::string> overloaded_method_names;
@@ -149,11 +150,11 @@ bool chimera::Visitor::GenerateCXXConstructor(
     std::vector<std::string> argument_types;
 
     for (ParmVarDecl *param_decl : decl->params())
-        argument_types.push_back(param_decl->getType().getAsString());
+        argument_types.push_back(param_decl->getType().getAsString(printing_policy_));
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
-           << ">());\n";
+           << ">())\n";
     return true;
 }
 
@@ -179,6 +180,7 @@ bool chimera::Visitor::GenerateFunction(
     {
         pointer_type = context_->getPointerType(decl->getType());
     }
+    pointer_type = pointer_type.getCanonicalType();
 
     // Extract the return type of this function declaration.
     const Type *return_type = decl->getReturnType().getTypePtr();
@@ -218,7 +220,7 @@ bool chimera::Visitor::GenerateFunction(
     // Create the actual function declaration here using its name and its
     // full pointer reference.
     stream << "def(\"" << decl->getNameAsString() << "\""
-           << ", static_cast<" << pointer_type.getAsString() << ">(&"
+           << ", static_cast<" << pointer_type.getAsString(printing_policy_) << ">(&"
            << decl->getQualifiedNameAsString() << ")";
 
     // If a return value policy was specified, insert it after the function.
@@ -271,7 +273,7 @@ bool chimera::Visitor::GenerateField(
     // TODO: Check if a copy constructor is defined for this type.
 
     stream << "(\"" << decl->getNameAsString() << "\","
-           << " &" << decl->getQualifiedNameAsString() << ");\n";
+           << " &" << decl->getQualifiedNameAsString() << ")\n";
     return true;
 }
 
@@ -290,7 +292,7 @@ bool chimera::Visitor::GenerateStaticField(
 
     if (!decl->getType().isConstQualified())
     {
-        stream << "[](" << decl->getType().getAsString() << " value) { "
+        stream << "[](" << decl->getType().getAsString(printing_policy_) << " value) { "
                << decl->getQualifiedNameAsString() << " = value; }";
     }
 

@@ -45,6 +45,7 @@ private:
         clang::FunctionDecl *decl) const;
 
     clang::ASTContext *context_;
+    clang::PrintingPolicy printing_policy_;
     std::unique_ptr<CompiledConfiguration> config_;
 };
 
