@@ -179,7 +179,7 @@ bool chimera::Visitor::GenerateFunction(
 
     // Extract the pointer type of this function declaration.
     QualType pointer_type;
-    if (class_decl)
+    if (class_decl && !cast<CXXMethodDecl>(decl)->isStatic())
     {
         pointer_type = context_->getMemberPointerType(
             decl->getType(), class_decl->getTypeForDecl());
