@@ -3,6 +3,14 @@ arguments:
   - "-extra-arg"
   - "-I/usr/lib/clang/3.6/include"
 
+template:
+  header:
+    content: '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
+  postinclude:
+    content: '/* postinclude */'
+  footer:
+    content: '/* footer */'
+
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
   - dart::dynamics
@@ -10,6 +18,9 @@ namespaces:
 
 # Selected function and class declarations that need custom parameters.
 declarations:
+  '::dart::dynamics::Skeleton':
+    held_type: '::dart::dynamics::Skeleton *'
+    noncopyable: true
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
     return_value_policy: ::boost::python::copy_const_reference
   'bool ::dart::dynamics::Skeleton::isImpulseApplied() const':
