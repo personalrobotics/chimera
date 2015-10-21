@@ -52,6 +52,30 @@ types:
     return_value_policy: boost::python::copy_const_reference
   'const dart::dynamics::Joint::Properties &':
     return_value_policy: boost::python::copy_const_reference
+  'const std::shared_ptr<dart::dynamics::InverseKinematics> &':
+    return_value_policy: boost::python::copy_const_reference
+  'const std::shared_ptr<dart::optimizer::Function> &':
+    return_value_policy: boost::python::copy_const_reference
+  'const std::shared_ptr<dart::optimizer::Problem> &':
+    return_value_policy: boost::python::copy_const_reference
+  'const std::shared_ptr<dart::optimizer::Solver> &':
+    return_value_policy: boost::python::copy_const_reference
+  'const std::shared_ptr<dart::dynamics::WholeBodyIK> &':
+    return_value_policy: boost::python::copy_const_reference
+  # smart pointers
+  'dart::dynamics::BodyNode *':
+    return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::BodyNodePtr>
+  'dart::dynamics::SoftBodyNode *':
+    return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::SoftBodyNodePtr>
+  'dart::dynamics::DegreeOfFreedom *':
+    return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::DegreeOfFreedomPtr>
+  'dart::dynamics::Joint *':
+    return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::JointPtr>
+  'dart::dynamics::EndEffector *':
+    return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::EndEffectorPtr>
+  # deprecated; allow unsafe access.
+  'dart::dynamics::Marker *':
+    return_value_policy: boost::python::reference_existing_object
 
 # Selected function and class declarations that need custom parameters.
 declarations:
@@ -134,4 +158,5 @@ declarations:
   'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<2>::getDof(size_t) const': null
   'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<3>::getDof(size_t) const': null
   'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<6>::getDof(size_t) const': null
+  'dart::dynamics::AssimpInputResourceRetrieverAdaptor': null
   #'const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint::getDof(size_t) const': null
