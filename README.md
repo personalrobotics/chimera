@@ -41,7 +41,7 @@ brew install yaml-cpp --with-static-lib
 PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
 ```
 
-## Usage ##
+## Example ##
 Let's try running chimera on itself!
 
 ```bash
@@ -53,6 +53,7 @@ $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
 
 ## Configuration ##
+
 ```yaml
 # Arguments that will be appended in-order before command line arguments.
 # (Not implemented yet.)
