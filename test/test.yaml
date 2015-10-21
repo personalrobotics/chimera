@@ -69,7 +69,6 @@ declarations:
   'const dart::dynamics::Frame* dart::dynamics::Entity::getParentFrame() const': null
   'const dart::dynamics::DegreeOfFreedom* dart::dynamics::JacobianNode::getDependentDof(size_t) const': null
   'const std::vector<const DegreeOfFreedom *>& dart::dynamics::JacobianNode::getDependentDofs() const': null
-  'const std::shared_ptr<dart::optimizer::Function>& dart::dynamics::InverseKinematics::getNullSpaceObjective() const': null
   'const dart::dynamics::InverseKinematics::ErrorMethod& dart::dynamics::InverseKinematics::getErrorMethod() const': null
   'const dart::dynamics::InverseKinematics::GradientMethod &dart::dynamics::InverseKinematics::getGradientMethod() const': null
   'const dart::dynamics::JacobianNode *dart::dynamics::InverseKinematics::getNode() const': null
@@ -99,13 +98,12 @@ declarations:
   'const dart::dynamics::PointMass *dart::dynamics::SoftBodyNode::getPointMass(size_t) const': null
   'const dart::dynamics::PointMassNotifier *dart::dynamics::SoftBodyNode::getNotifier() const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::SingleDofJoint::getDof(size_t) const': null
-  'const dart::dynamics::SoftBodyNode *(dart::dynamics::PointMass::getParentSoftBodyNode) const': null
+  'const dart::dynamics::SoftBodyNode *dart::dynamics::PointMass::getParentSoftBodyNode() const': null
   'const dart::dynamics::PointMass *dart::dynamics::PointMass::getConnectedPointMass(size_t) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::ReferentialSkeleton::getDof(size_t) const': null
   'const dart::dynamics::Joint *dart::dynamics::ReferentialSkeleton::getJoint(size_t) const': null
   'const std::vector<const BodyNode *> &dart::dynamics::ReferentialSkeleton::getBodyNodes() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::ReferentialSkeleton::getBodyNode(size_t) const': null
-  'const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint::getDof(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::DegreeOfFreedom::getParentBodyNode() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::DegreeOfFreedom::getParentBodyNode() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::DegreeOfFreedom::getChildBodyNode() const': null
@@ -123,8 +121,8 @@ declarations:
   'const dart::dynamics::BodyNode *dart::dynamics::BodyNode::getParentBodyNode() const': null
   'const dart::dynamics::Joint *dart::dynamics::BodyNode::getParentJoint() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::Marker::getBodyNode() const': null
-  'const dart::dynamics::SoftBodyNode *dart::dynamics::PointMass::getParentSoftBodyNode() const'
+  'const dart::dynamics::SoftBodyNode *dart::dynamics::PointMass::getParentSoftBodyNode() const': null
+  'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<2>::getDof(size_t) const': null
+  'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<3>::getDof(size_t) const': null
+  'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<6>::getDof(size_t) const': null
   #'const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint::getDof(size_t) const': null
-  #'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<2>::getDof(size_t) const': nul
-  #'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<3>::getDof(size_t) const': nul
-  #'template<> const dart::dynamics::DegreeOfFreedom *dart::dynamics::MultiDofJoint<6>::getDof(size_t) const': nul
