@@ -59,7 +59,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, *stream))
         return true;
+
     const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false; // Explicitly suppressed.
 
     *stream << "::boost::python::class_<"
             << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
@@ -176,7 +179,10 @@ bool chimera::Visitor::GenerateFunction(
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, stream))
         return true;
+
     const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false; // Explicitly suppressed.
 
     // Extract the pointer type of this function declaration.
     QualType pointer_type;
@@ -216,8 +222,10 @@ bool chimera::Visitor::GenerateFunction(
             std::cerr
                 << "Warning: Skipped method '"
                 << decl->getQualifiedNameAsString()
+                << "' with signature '"
+                << decl->getType().getAsString(printing_policy_)
                 << "' because it returns a reference and no"
-                   "  'return_value_policy' was specified.\n";
+                   " 'return_value_policy' was specified.\n";
             return false;
         }
         else if (return_type->isPointerType())
@@ -225,8 +233,10 @@ bool chimera::Visitor::GenerateFunction(
             std::cerr
                 << "Warning: Skipped method '"
                 << decl->getQualifiedNameAsString()
+                << "' with signature '"
+                << decl->getType().getAsString(printing_policy_)
                 << "' because it returns a pointer and no"
-                   "  'return_value_policy' was specified.\n";
+                   " 'return_value_policy' was specified.\n";
             return false;
         }
         // TODO: Check if return_type is non-copyable.
@@ -448,7 +458,7 @@ std::vector<std::pair<std::string, std::string>>
                 // TODO: How do we print the decl with argument + return types?
                 std::cerr
                   << "Warning: Unable to evaluate non-trivial call in default"
-                     "  value for parameter"
+                     " value for parameter"
                   << " '" << param_name << "' of method"
                   << " '" << decl->getQualifiedNameAsString() << "'.\n";
             }

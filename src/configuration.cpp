@@ -71,6 +71,10 @@ bool getSnippet(const YAML::Node &node, const std::string &config_path,
 
 } // namespace
 
+
+const YAML::Node chimera::CompiledConfiguration::emptyNode_(
+    YAML::NodeType::Undefined);
+
 chimera::Configuration::Configuration()
 : outputPath_(".")
 {
@@ -191,8 +195,6 @@ const std::string &chimera::Configuration::GetOutputPath() const
     return outputPath_;
 }
 
-const YAML::Node chimera::CompiledConfiguration::emptyNode_;
-
 chimera::CompiledConfiguration::CompiledConfiguration(
     const chimera::Configuration &parent, CompilerInstance *ci)
 : parent_(parent)
@@ -282,8 +284,8 @@ bool chimera::CompiledConfiguration::DumpOverride(
     const clang::Decl *decl, chimera::Stream &stream) const
 {
     const YAML::Node &node = GetDeclaration(decl);
-    std::string snippet;
 
+    std::string snippet;
     if (getSnippet(node, parent_.GetFilename(), snippet))
     {
         stream << snippet << '\n';
