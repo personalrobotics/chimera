@@ -16,6 +16,12 @@ namespaces:
   - dart::dynamics
   - dart::math
 
+# Selected types that need special handling.
+types:
+  'const Eigen::Vector4d &': ~
+  'const Eigen::Vector4d': ~
+  'Eigen::Vector4d': ~
+
 # Selected function and class declarations that need custom parameters.
 declarations:
   '::dart::dynamics::Skeleton':

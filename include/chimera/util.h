@@ -27,14 +27,28 @@ const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
  * Resolve a record string within the scope of a compiler instance.
  *
  * This function parses the provided record name string as a single line of
- * the form `using [recordStr];` within the AST that is currently loaded by
- * the provided compiler instance.
+ * the form `typedef [recordStr] <uid>;` within the AST that is currently
+ * loaded by the provided compiler instance.
  *
  * If it is resolved to a record declaration, the canonical clang::RecordDecl
  * pointer associated with the declaration will be returned, otherwise NULL.
  */
 const clang::RecordDecl* resolveRecord(clang::CompilerInstance *ci,
                                        const llvm::StringRef recordStr);
+
+/**
+ * Resolve a type string within the scope of a compiler instance.
+ *
+ * This function parses the provided record name string as a single line of
+ * the form `typedef [recordStr] <uid>;` within the AST that is currently
+ * loaded by the provided compiler instance.
+ *
+ * If it is resolved to a qualified type declaration, the canonical
+ * clang::QualType associated with the declaration will be returned, otherwise
+ * an empty clang::QualType is returned (use getTypeOrNull() to check this).
+ */
+const clang::QualType resolveType(clang::CompilerInstance *ci,
+                                  const llvm::StringRef typeStr);
 
 /**
  * Resolve a namespace string within the scope of a compiler instance.

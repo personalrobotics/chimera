@@ -74,6 +74,12 @@ public:
     const YAML::Node& GetDeclaration(const clang::Decl *decl) const;
 
     /**
+     * Get the YAML configuration associated with a specific qualified type,
+     * or return an empty YAML node if no configuration was found.
+     */
+    const YAML::Node& GetType(const clang::QualType type) const;
+
+    /**
      * Get a file pointer used for the output a given decl.
      *
      * This output path can be either `stdout`, a reference to a monolithic
@@ -103,6 +109,7 @@ protected:
     const Configuration &parent_;
     clang::CompilerInstance *ci_;
     const clang::StringRef file_;
+    std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
     std::unique_ptr<clang::MangleContext> mangler_;

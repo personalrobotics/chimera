@@ -4,8 +4,34 @@
 #include <clang/Parse/Parser.h>
 #include <clang/Sema/Sema.h>
 #include <iostream>
+#include <sstream>
 
 using namespace clang;
+
+namespace
+{
+/**
+ * Empty QualType used when returning a type-resolution failure.
+ */
+static const clang::QualType emptyType_;
+
+/**
+ * Generates incremental typedef names to avoid namespace conflicts.
+ *
+ * This is used by functions that need to compile a temporary typedef to
+ * resolve a type within the AST.
+ */
+std::string generateUniqueTypedefName()
+{
+    // Use a static variable to generate non-duplicate names.
+    static size_t counter = 0;
+
+    std::stringstream ss;
+    ss << "chimera_typedef_" << (counter++);
+    return ss.str();
+}
+
+}
 
 const NamedDecl*
 chimera::util::resolveDeclaration(CompilerInstance *ci,
@@ -59,40 +85,35 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
     return nullptr;
 }
 
+const QualType
+chimera::util::resolveType(clang::CompilerInstance *ci,
+                           const llvm::StringRef typeStr)
+{
+    auto decl = chimera::util::resolveDeclaration(
+        ci, "typedef " + typeStr.str() + " " + generateUniqueTypedefName());
+    if (!decl)
+        return emptyType_;
+
+    if (!isa<TypedefDecl>(decl))
+    {
+        std::cerr << "Expected 'typedef' declaration, found '"
+                  << decl->getNameAsString() << "'." << std::endl;
+        return emptyType_;
+    }
+
+    auto typedef_decl = cast<TypedefDecl>(decl);
+    return typedef_decl->getUnderlyingType().getCanonicalType();
+}
+
 const RecordDecl*
 chimera::util::resolveRecord(clang::CompilerInstance *ci,
                              const llvm::StringRef recordStr)
 {
-    auto decl = chimera::util::resolveDeclaration(ci, "using " + recordStr.str() + " ;");
-    if (!decl)
+    auto type = chimera::util::resolveType(ci, recordStr).getTypePtrOrNull();
+    if (!type)
         return nullptr;
 
-    if (!isa<UsingDecl>(decl))
-    {
-        std::cerr << "Expected 'using' declaration, found '"
-                  << decl->getNameAsString() << "'." << std::endl;
-        return nullptr;
-    }
-
-    auto using_decl = cast<UsingDecl>(decl);
-    if (using_decl->shadow_size() != 1)
-    {
-        std::cerr << "Unexpected shadow declarations when resolving '"
-                  << recordStr.str() << "' expected 1, found "
-                  << using_decl->shadow_size() << "." << std::endl;
-        return nullptr;
-    }
-
-    auto shadow_decl = cast<UsingShadowDecl>(*(using_decl->shadow_begin()));
-    if (!isa<RecordDecl>(shadow_decl->getTargetDecl()))
-    {
-        std::cerr << "Expected 'using class' declaration, found '"
-                  << shadow_decl->getTargetDecl()->getNameAsString()
-                  << "'." << std::endl;
-        return nullptr;
-    }
-
-    return cast<RecordDecl>(shadow_decl->getTargetDecl()->getCanonicalDecl());
+    return cast<RecordDecl>(type->getAsCXXRecordDecl()->getCanonicalDecl());
 }
 
 const NamespaceDecl*

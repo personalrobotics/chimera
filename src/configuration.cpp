@@ -129,8 +129,8 @@ chimera::Configuration::Process(CompilerInstance *ci, StringRef file) const
         // If there are multiple words, assume a full declaration.
         // If there is only one word, assume a record declaration.
         auto decl = (countWordsInString(decl_str) == 1)
-                    ? chimera::util::resolveRecord(ci, decl_str)
-                    : chimera::util::resolveDeclaration(ci, decl_str);
+                     ? chimera::util::resolveRecord(ci, decl_str)
+                     : chimera::util::resolveDeclaration(ci, decl_str);
         if (decl)
         {
             std::cout << "Declaration: " << decl->getNameAsString() << std::endl;
@@ -140,6 +140,23 @@ chimera::Configuration::Process(CompilerInstance *ci, StringRef file) const
         {
             std::cerr << "Unable to resolve declaration: "
                       << "'" << decl_str << "'" << std::endl;
+        }
+    }
+
+    // Resolve type configuration entries within provided AST.
+    for(const auto &it : rootNode_["types"])
+    {
+        std::string type_str = it.first.as<std::string>();
+        auto type = chimera::util::resolveType(ci, type_str);
+        if (type.getTypePtrOrNull())
+        {
+            std::cout << "Type: " << type.getAsString() << std::endl;
+            config->types_.push_back(std::make_pair(type, it.second));
+        }
+        else
+        {
+            std::cerr << "Unable to resolve type: "
+                      << "'" << type_str << "'" << std::endl;
         }
     }
 
@@ -177,6 +194,17 @@ const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::De
 {
     const auto d = declarations_.find(decl->getCanonicalDecl());
     return d != declarations_.end() ? d->second : emptyNode_;
+}
+
+const YAML::Node& chimera::CompiledConfiguration::GetType(const clang::QualType type) const
+{
+    const auto canonical_type = type.getCanonicalType();
+    for (const auto &entry : types_)
+    {
+        if (entry.first == canonical_type)
+            return entry.second;
+    }
+    return emptyNode_;
 }
 
 std::unique_ptr<chimera::Stream>
