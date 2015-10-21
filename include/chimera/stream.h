@@ -2,6 +2,7 @@
 #define __CHIMERA_STREAM_H__
 
 #include <string>
+#include <vector>
 
 // Forward declare LLVM raw_ostream, as per:
 // http://llvm.org/docs/CodingStandards.html#use-raw-ostream
@@ -25,11 +26,11 @@ class Stream
 {
 public:
     Stream(StreamType *stream,
-           const std::string &includeName,
            const std::string &mangledName,
-           const std::string &headerSnippet,
-           const std::string &postincludeSnippet,
-           const std::string &footerSnippet);
+           const std::vector<std::string> &includeNames,
+           const std::string &headerSnippet = "",
+           const std::string &postincludeSnippet = "",
+           const std::string &footerSnippet = "");
     virtual ~Stream();
 
     Stream(const Stream&) = delete;

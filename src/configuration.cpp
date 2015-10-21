@@ -108,10 +108,14 @@ void chimera::Configuration::SetOutputPath(const std::string &path)
 }
 
 std::unique_ptr<chimera::CompiledConfiguration>
-chimera::Configuration::Process(CompilerInstance *ci, StringRef file) const
+chimera::Configuration::Process(CompilerInstance *ci) const
 {
     std::unique_ptr<chimera::CompiledConfiguration> config(
-        new CompiledConfiguration(*this, ci, file));
+        new CompiledConfiguration(*this, ci));
+
+    // Compile the list of input files into the list of includes.
+    for (const auto &input_file : ci->getInvocation().getFrontendOpts().Inputs)
+        config->includes_.push_back(input_file.getFile());
 
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : rootNode_["namespaces"])
@@ -190,10 +194,9 @@ const std::string &chimera::Configuration::GetOutputPath() const
 const YAML::Node chimera::CompiledConfiguration::emptyNode_;
 
 chimera::CompiledConfiguration::CompiledConfiguration(
-    const chimera::Configuration &parent, CompilerInstance *ci, StringRef file)
+    const chimera::Configuration &parent, CompilerInstance *ci)
 : parent_(parent)
 , ci_(ci)
-, file_(file)
 , mangler_(ci->getASTContext().createMangleContext())
 {
     // Do nothing.
@@ -235,19 +238,16 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
 
-    // Create an LLVM string stream to store a binding filename.
+    // Use the C++ mangler to create the mangled binding filename.
     llvm::SmallString<1024> base_input_buffer;
     llvm::raw_svector_ostream base_input_stream(base_input_buffer);
-
-    // Use the C++ mangler to create the mangled binding filename.
-    base_input_stream << parent_.GetOutputPath() << "/";
     mangler_->mangleName(named_decl, base_input_stream);
-    base_input_stream << ".cpp";
+    std::string mangled_name = base_input_stream.str();
 
     // Create an output file depending on the provided parameters.
     // TODO: In newer Clang versions, this function returns std::unique<>.
     auto *stream = ci_->createOutputFile(
-        base_input_stream.str(), // The output file path for this declaration
+        parent_.GetOutputPath() + "/" + mangled_name + ".cpp",
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
         "", // The derived basename (shouldn't be used)
@@ -274,7 +274,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     // Create a stream wrapper to write header and footer of file.
     return std::unique_ptr<chimera::Stream>(
-        new chimera::Stream(stream, file_, base_input_stream.str(),
+        new chimera::Stream(stream, mangled_name, includes_,
                             header_snippet, postinclude_snippet, footer_snippet));
 }
 

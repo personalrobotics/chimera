@@ -42,7 +42,7 @@ public:
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration>
-    Process(clang::CompilerInstance *ci, clang::StringRef file) const;
+    Process(clang::CompilerInstance *ci) const;
 
     /**
      * Get the root node of the YAML configuration structure.
@@ -113,14 +113,13 @@ public:
 
 private:
     CompiledConfiguration(const Configuration &parent,
-                          clang::CompilerInstance *ci,
-                          clang::StringRef file);
+                          clang::CompilerInstance *ci);
 
 protected:
     static const YAML::Node emptyNode_;
     const Configuration &parent_;
     clang::CompilerInstance *ci_;
-    const clang::StringRef file_;
+    std::vector<std::string> includes_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
