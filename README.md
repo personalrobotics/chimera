@@ -7,7 +7,19 @@
 > 1. a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
 > 2. a utility to generate Boost.Python bindings for C++ code.
 
-## Requirements ##
+Chimera is a tool for generating Boost.Python bindings from C/C++ header files.
+It uses the Clang/LLVM toolchain, making it capable of automatically handling
+fairly complex source files.
+
+## Usage ##
+
+```bash
+$ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_header2.h -- [compiler args]
+```
+
+## Installation ##
+
+** Requirements **
 
 - libclang 3.6
 - llvm 3.6 (+ tools)
@@ -29,7 +41,7 @@ brew install yaml-cpp --with-static-lib
 PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
 ```
 
-## Usage ##
+## Example ##
 Let's try running chimera on itself!
 
 ```bash
@@ -41,13 +53,8 @@ $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
 
 ## Configuration ##
-```yaml
-# Arguments that will be appended in-order before command line arguments.
-# (Not implemented yet.)
-arguments:
-  - "-extra-arg"
-  - "-I/usr/lib/clang/3.6/include"
 
+```yaml
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
   - dart::dynamics
