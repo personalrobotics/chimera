@@ -203,14 +203,14 @@ bool chimera::Visitor::GenerateFunction(
 
     // First, check if a return_value_policy was specified for this function.
     std::string return_value_policy
-      = node["return_value_policy"].as<std::string>("");
+        = node["return_value_policy"].as<std::string>("");
 
     // Next, check if a return_value_policy is defined on the return type.
     if (return_value_policy.empty())
     {
         const YAML::Node &type_node = config_->GetType(return_qual_type);
         return_value_policy
-          = type_node["return_value_policy"].as<std::string>("");
+            = type_node["return_value_policy"].as<std::string>("");
     }
 
     // Finally, try the default return_value_policy. This is only acceptable if
@@ -221,9 +221,7 @@ bool chimera::Visitor::GenerateFunction(
         {
             std::cerr
                 << "Warning: Skipped method '"
-                << decl->getQualifiedNameAsString()
-                << "' with signature '"
-                << decl->getType().getAsString(printing_policy_)
+                << pointer_type.getAsString(printing_policy_)
                 << "' because it returns a reference and no"
                    " 'return_value_policy' was specified.\n";
             return false;
@@ -232,9 +230,7 @@ bool chimera::Visitor::GenerateFunction(
         {
             std::cerr
                 << "Warning: Skipped method '"
-                << decl->getQualifiedNameAsString()
-                << "' with signature '"
-                << decl->getType().getAsString(printing_policy_)
+                << pointer_type.getAsString(printing_policy_)
                 << "' because it returns a pointer and no"
                    " 'return_value_policy' was specified.\n";
             return false;
