@@ -57,6 +57,10 @@ types:
 declarations:
   'dart::dynamics::MultiDofJoint<2>':
     name: MultiDofJoint2
+  'dart::dynamics::MultiDofJoint<3>':
+    name: MultiDofJoint3
+  'dart::dynamics::MultiDofJoint<6>':
+    name: MultiDofJoint6
   'dart::dynamics::Skeleton':
     held_type: '::dart::dynamics::Skeleton *'
     noncopyable: true
