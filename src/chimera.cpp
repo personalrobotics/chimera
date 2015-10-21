@@ -31,11 +31,6 @@ static cl::opt<std::string> ConfigFilename(
     cl::desc("Specify YAML configuration filename"),
     cl::value_desc("filename"));
 
-// CommonOptionsParser declares HelpMessage with a description of the common
-// command-line options related to the compilation database and input files.
-// It's nice to have this help message in all tools.
-static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
-
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
     "\n"
