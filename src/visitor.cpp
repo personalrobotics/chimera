@@ -192,12 +192,24 @@ bool chimera::Visitor::GenerateFunction(
     pointer_type = pointer_type.getCanonicalType();
 
     // Extract the return type of this function declaration.
-    const Type *return_type = decl->getReturnType().getTypePtr();
+    const QualType return_qual_type = decl->getReturnType();
+    const Type *return_type = return_qual_type.getTypePtr();
 
-    // Check that a valid return value policy was defined, or that one can be
-    // determined automatically by Boost.Python.
-    const YAML::Node &rvp_node = node["return_value_policy"];
-    if (!rvp_node)
+    // First, check if a return_value_policy was specified for this function.
+    std::string return_value_policy
+      = node["return_value_policy"].as<std::string>("");
+
+    // Next, check if a return_value_policy is defined on the return type.
+    if (return_value_policy.empty())
+    {
+        const YAML::Node &type_node = config_->GetType(return_qual_type);
+        return_value_policy
+          = type_node["return_value_policy"].as<std::string>("");
+    }
+
+    // Finally, try the default return_value_policy. This is only acceptable if
+    // the output is copy constructable.
+    if (return_value_policy.empty())
     {
         if (return_type->isReferenceType())
         {
@@ -217,7 +229,6 @@ bool chimera::Visitor::GenerateFunction(
                    "  'return_value_policy' was specified.\n";
             return false;
         }
-
         // TODO: Check if return_type is non-copyable.
     }
 
@@ -233,10 +244,10 @@ bool chimera::Visitor::GenerateFunction(
            << decl->getQualifiedNameAsString() << ")";
 
     // If a return value policy was specified, insert it after the function.
-    if (rvp_node)
+    if (!return_value_policy.empty())
     {
         stream << ", ::boost::python::return_value_policy<"
-               << rvp_node.as<std::string>() << " >";
+               << return_value_policy << " >";
     }
 
     // Construct a list of the arguments that are provided to this function,
