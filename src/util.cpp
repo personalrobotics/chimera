@@ -69,19 +69,16 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
         // TODO: We probably shouldn't actually iterate here.
         if (ADecl)
         {
-            std::cout << "PARSED " << declStr.str() << std::endl;
             DeclGroupRef DG = ADecl.get();
             for (auto i = DG.begin(), e = DG.end(); i != e; ++i)
             {
                 Decl *D = (*i)->getCanonicalDecl();
-                D->dumpColor(); // TODO: remove debugging.
-
                 return (isa<NamedDecl>(D)) ? cast<NamedDecl>(D) : nullptr;
             }
         }
     }
 
-    std::cerr << "FAILED TO PARSE: " << declStr.str() << std::endl;
+    std::cerr << "Failed to parse '" << declStr.str() << "'." << std::endl;
     return nullptr;
 }
 
