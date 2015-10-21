@@ -255,7 +255,7 @@ bool chimera::Visitor::GenerateFunction(
     if (!return_value_policy.empty())
     {
         stream << ", ::boost::python::return_value_policy<"
-               << return_value_policy << " >";
+               << return_value_policy << " >()";
     }
 
     // Construct a list of the arguments that are provided to this function,
