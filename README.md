@@ -55,12 +55,6 @@ $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ## Configuration ##
 
 ```yaml
-# Arguments that will be appended in-order before command line arguments.
-# (Not implemented yet.)
-arguments:
-  - "-extra-arg"
-  - "-I/usr/lib/clang/3.6/include"
-
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
   - dart::dynamics
