@@ -55,13 +55,12 @@ types:
 
 # Selected function and class declarations that need custom parameters.
 declarations:
-  '::dart::dynamics::Skeleton':
+  'dart::dynamics::MultiDofJoint<2>':
+    name: MultiDofJoint2
+  'dart::dynamics::Skeleton':
     held_type: '::dart::dynamics::Skeleton *'
     noncopyable: true
-  # This should be suppressed.
-  '::dart::dynamics::Shape':
-    name: Shape
-    bases: []
+  'dart::dynamics::Shape':
     noncopyable: true
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
