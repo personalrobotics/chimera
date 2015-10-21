@@ -30,7 +30,13 @@ public:
     /**
      * Load the specified file to use as the YAML configuration.
      */
-    void LoadFile(std::string filename);
+    void LoadFile(const std::string &filename);
+
+    /**
+     * Set the desired output path to be prepended to every binding.
+     * If unspecified, the default is the current working directory.
+     */
+    void SetOutputPath(const std::string &path);
     
     /**
      * Process the configuration settings against the current AST.
@@ -48,12 +54,18 @@ public:
      */
     const std::string& GetFilename() const;
 
+    /**
+     * Get the desired output path for C++ bindings.
+     */
+    const std::string &GetOutputPath() const;
+
 private:
     Configuration();
 
 protected:
     YAML::Node rootNode_;
     std::string rootFilename_;
+    std::string outputPath_;
 };
 
 class CompiledConfiguration

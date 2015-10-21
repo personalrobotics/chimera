@@ -72,6 +72,7 @@ bool getSnippet(const YAML::Node &node, const std::string &config_path,
 } // namespace
 
 chimera::Configuration::Configuration()
+: outputPath_(".")
 {
     // Do nothing.
 }
@@ -82,7 +83,7 @@ chimera::Configuration& chimera::Configuration::GetInstance()
     return config;
 }
 
-void chimera::Configuration::LoadFile(std::string filename)
+void chimera::Configuration::LoadFile(const std::string &filename)
 {
     try
     {
@@ -96,6 +97,14 @@ void chimera::Configuration::LoadFile(std::string filename)
                   << std::endl << e.what() << std::endl;
         exit(-1);
     }
+}
+
+void chimera::Configuration::SetOutputPath(const std::string &path)
+{
+    // Setting the path to the empty string makes no sense and will break the
+    // binding path concatenation, so if an empty string is passed, assume the
+    // caller wanted to reset back to the CWD.
+    outputPath_ = path.empty() ? "." : path;
 }
 
 std::unique_ptr<chimera::CompiledConfiguration>
@@ -173,6 +182,11 @@ const std::string &chimera::Configuration::GetFilename() const
     return rootFilename_;
 }
 
+const std::string &chimera::Configuration::GetOutputPath() const
+{
+    return outputPath_;
+}
+
 const YAML::Node chimera::CompiledConfiguration::emptyNode_;
 
 chimera::CompiledConfiguration::CompiledConfiguration(
@@ -221,19 +235,23 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 
     const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
 
-    // Use the C++ mangler to create the mangled base input name.
+    // Create an LLVM string stream to store a binding filename.
     llvm::SmallString<1024> base_input_buffer;
     llvm::raw_svector_ostream base_input_stream(base_input_buffer);
+
+    // Use the C++ mangler to create the mangled binding filename.
+    base_input_stream << parent_.GetOutputPath() << "/";
     mangler_->mangleName(named_decl, base_input_stream);
+    base_input_stream << ".cpp";
 
     // Create an output file depending on the provided parameters.
     // TODO: In newer Clang versions, this function returns std::unique<>.
     auto *stream = ci_->createOutputFile(
-        ci_->getFrontendOpts().OutputFile, // Output Path
+        base_input_stream.str(), // The output file path for this declaration
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
-        base_input_stream.str(), // If no OutputPath, a name to derive output path
-        ".cpp", // The extension to use for derived name.
+        "", // The derived basename (shouldn't be used)
+        "", // The extension to use for derived name (shouldn't be used)
         false, // Use a temporary file that should be renamed
         false // Create missing directories in the output path
     );

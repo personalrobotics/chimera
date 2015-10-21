@@ -20,10 +20,10 @@ using namespace llvm;
 static cl::OptionCategory ChimeraCategory("Chimera options");
 
 // Option for specifying output binding filename.
-static cl::opt<std::string> OutputFilename(
+static cl::opt<std::string> OutputPath(
     "o", cl::cat(ChimeraCategory),
-    cl::desc("Specify output binding cpp filename"),
-    cl::value_desc("filename"));
+    cl::desc("Specify output C++ binding directory"),
+    cl::value_desc("directory"));
 
 // Option for specifying YAML configuration filename.
 static cl::opt<std::string> ConfigFilename(
@@ -52,6 +52,10 @@ int main(int argc, const char **argv)
     // to an empty node.
     if (!ConfigFilename.empty())
         chimera::Configuration::GetInstance().LoadFile(ConfigFilename);
+
+    // If an output path was specified, initialize configuration to use it.
+    if (!OutputPath.empty())
+        chimera::Configuration::GetInstance().SetOutputPath(OutputPath);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
