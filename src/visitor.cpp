@@ -34,7 +34,14 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     if (isa<ClassTemplateDecl>(decl))
         GenerateClassTemplate(cast<ClassTemplateDecl>(decl));
     else if (isa<CXXRecordDecl>(decl))
-        GenerateCXXRecord(cast<CXXRecordDecl>(decl));
+    {
+        // Every class template is represented by a CXXRecordDecl and a
+        // ClassTemplateDecl. We handle code generation of template classes in
+        // the above case, so we don't process them here.
+        CXXRecordDecl *class_decl = cast<CXXRecordDecl>(decl);
+        if (!class_decl->getDescribedClassTemplate())
+            GenerateCXXRecord(class_decl);
+    }
     else if (isa<EnumDecl>(decl))
         GenerateEnum(cast<EnumDecl>(decl));
     else if (isa<VarDecl>(decl))
@@ -74,20 +81,15 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (const YAML::Node &held_type_node = node["held_type"])
         *stream << ", " << held_type_node.as<std::string>();
 
-    std::vector<std::string> base_names;
-
-    if (const YAML::Node &bases_node = node["bases"])
-        base_names = bases_node.as<std::vector<std::string> >();
-    else
-        base_names = GetBaseClassNames(decl);
-
+    std::vector<std::string> base_names
+        = node["bases"].as<std::vector<std::string> >(GetBaseClassNames(decl));
     if (!base_names.empty())
     {
         *stream << ", ::boost::python::bases<"
                   << join(base_names, ", ") << " >";
     }
 
-    *stream << " >(\"" << decl->getNameAsString()
+    *stream << " >(\"" << node["name"].as<std::string>(decl->getNameAsString())
             << "\", boost::python::no_init)\n";
 
     // Methods
