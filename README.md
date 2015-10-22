@@ -82,14 +82,5 @@ declarations:
     noncopyable: true
 ```
 
-## Troubleshooting ##
-
-- **Cannot find "stdarg.h" when running `chimera`.**
-  https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
-
-  ```bash
-  $ chimera -extra-arg "-I/usr/lib/clang/3.6/include" -p . -o chimera_py_binding.cpp ../src/chimera.cpp
-  ```
-
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg

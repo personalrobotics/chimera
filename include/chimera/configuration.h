@@ -39,6 +39,12 @@ public:
     void SetOutputPath(const std::string &path);
     
     /**
+     * Set the desired output filename for the top-level binding function.
+     * If unspecified, the default is "chimera_bindings.cpp".
+     */
+    void SetOutputFilename(const std::string &filename);
+
+    /**
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration>
@@ -52,20 +58,26 @@ public:
     /**
      * Get the filename of the loaded YAML configuration file, if it exists.
      */
-    const std::string& GetFilename() const;
+    const std::string& GetConfigFilename() const;
 
     /**
-     * Get the desired output path for C++ bindings.
+     * Get the desired output path for bindings.
      */
     const std::string &GetOutputPath() const;
+
+    /**
+     * Get the desired output filename for top-level binding.
+     */
+    const std::string& GetOutputFilename() const;
 
 private:
     Configuration();
 
 protected:
-    YAML::Node rootNode_;
-    std::string rootFilename_;
+    YAML::Node configNode_;
+    std::string configFilename_;
     std::string outputPath_;
+    std::string outputFilename_;
 };
 
 class CompiledConfiguration
@@ -94,9 +106,8 @@ public:
     /**
      * Get a file pointer used for the output a given decl.
      *
-     * This output path can be either `stdout`, a reference to a monolithic
-     * `.cpp` file for all bindings, or an individual `.cpp` file created
-     * according to the mangled name of the decl.
+     * This output path is an individual `.cpp` file created according to the
+     * mangled name of the decl.
      *
      * The file pointer should be closed after the output has been written.
      */

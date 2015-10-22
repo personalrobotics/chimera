@@ -77,6 +77,7 @@ const YAML::Node chimera::CompiledConfiguration::emptyNode_(
 
 chimera::Configuration::Configuration()
 : outputPath_(".")
+, outputFilename_("chimera_bindings.cpp")
 {
     // Do nothing.
 }
@@ -91,8 +92,8 @@ void chimera::Configuration::LoadFile(const std::string &filename)
 {
     try
     {
-        rootNode_ = YAML::LoadFile(filename);
-        rootFilename_ = filename;
+        configNode_ = YAML::LoadFile(filename);
+        configFilename_ = filename;
     }
     catch(YAML::Exception& e) 
     {
@@ -107,8 +108,16 @@ void chimera::Configuration::SetOutputPath(const std::string &path)
 {
     // Setting the path to the empty string makes no sense and will break the
     // binding path concatenation, so if an empty string is passed, assume the
-    // caller wanted to reset back to the CWD.
+    // caller wanted to reset back to the default.
     outputPath_ = path.empty() ? "." : path;
+}
+
+void chimera::Configuration::SetOutputFilename(const std::string &filename)
+{
+    // Setting the filename to the empty string makes no sense and will break the
+    // binding path concatenation, so if an empty string is passed, assume the
+    // caller wanted to reset back to the default.
+    outputFilename_ = filename.empty() ? "chimera_bindings.cpp" : filename;
 }
 
 std::unique_ptr<chimera::CompiledConfiguration>
@@ -122,7 +131,7 @@ chimera::Configuration::Process(CompilerInstance *ci) const
         config->includes_.push_back(input_file.getFile());
 
     // Resolve namespace configuration entries within provided AST.
-    for(const auto &it : rootNode_["namespaces"])
+    for(const auto &it : configNode_["namespaces"])
     {
         std::string ns_str = it.as<std::string>();
         auto ns = chimera::util::resolveNamespace(ci, ns_str);
@@ -139,7 +148,7 @@ chimera::Configuration::Process(CompilerInstance *ci) const
     }
 
     // Resolve namespace configuration entries within provided AST.
-    for(const auto &it : rootNode_["declarations"])
+    for(const auto &it : configNode_["declarations"])
     {
         std::string decl_str = it.first.as<std::string>();
 
@@ -161,7 +170,7 @@ chimera::Configuration::Process(CompilerInstance *ci) const
     }
 
     // Resolve type configuration entries within provided AST.
-    for(const auto &it : rootNode_["types"])
+    for(const auto &it : configNode_["types"])
     {
         std::string type_str = it.first.as<std::string>();
         auto type = chimera::util::resolveType(ci, type_str);
@@ -182,12 +191,12 @@ chimera::Configuration::Process(CompilerInstance *ci) const
 
 const YAML::Node& chimera::Configuration::GetRoot() const
 {
-    return rootNode_;
+    return configNode_;
 }
 
-const std::string &chimera::Configuration::GetFilename() const
+const std::string &chimera::Configuration::GetConfigFilename() const
 {
-    return rootFilename_;
+    return configFilename_;
 }
 
 const std::string &chimera::Configuration::GetOutputPath() const
@@ -270,14 +279,17 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     const YAML::Node &template_config = parent_.GetRoot()["template"];
 
     std::string header_snippet, postinclude_snippet, footer_snippet;
-    getSnippet(template_config["header"], parent_.GetFilename(), header_snippet);
-    getSnippet(template_config["postinclude"], parent_.GetFilename(), postinclude_snippet);
-    getSnippet(template_config["footer"], parent_.GetFilename(), footer_snippet);
+    getSnippet(template_config["header"],
+               parent_.GetConfigFilename(), header_snippet);
+    getSnippet(template_config["postinclude"],
+               parent_.GetConfigFilename(), postinclude_snippet);
+    getSnippet(template_config["footer"],
+               parent_.GetConfigFilename(), footer_snippet);
 
     // Create a stream wrapper to write header and footer of file.
-    return std::unique_ptr<chimera::Stream>(
-        new chimera::Stream(stream, mangled_name, includes_,
-                            header_snippet, postinclude_snippet, footer_snippet));
+    return std::unique_ptr<chimera::Stream>(new chimera::Stream(
+        stream, mangled_name, includes_, 
+        header_snippet, postinclude_snippet, footer_snippet));
 }
 
 bool chimera::CompiledConfiguration::DumpOverride(
@@ -286,7 +298,7 @@ bool chimera::CompiledConfiguration::DumpOverride(
     const YAML::Node &node = GetDeclaration(decl);
 
     std::string snippet;
-    if (getSnippet(node, parent_.GetFilename(), snippet))
+    if (getSnippet(node, parent_.GetConfigFilename(), snippet))
     {
         stream << snippet << '\n';
         return true;

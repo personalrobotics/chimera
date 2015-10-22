@@ -6,6 +6,7 @@
 
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
+#include <clang/Tooling/ArgumentsAdjusters.h>
 #include <llvm/Support/CommandLine.h>
 
 #include <memory>
@@ -22,14 +23,25 @@ static cl::OptionCategory ChimeraCategory("Chimera options");
 // Option for specifying output binding filename.
 static cl::opt<std::string> OutputPath(
     "o", cl::cat(ChimeraCategory),
-    cl::desc("Specify output C++ binding directory"),
+    cl::desc("Specify output bindings directory"),
     cl::value_desc("directory"));
+
+// Option for specifying output binding filename.
+static cl::opt<std::string> OutputFilename(
+    "f", cl::cat(ChimeraCategory),
+    cl::desc("Specify output top-level binding filename"),
+    cl::value_desc("filename"));
 
 // Option for specifying YAML configuration filename.
 static cl::opt<std::string> ConfigFilename(
     "c", cl::cat(ChimeraCategory),
     cl::desc("Specify YAML configuration filename"),
     cl::value_desc("filename"));
+
+// Option for switching from C++ to C source.
+static cl::opt<bool> UseCMode(
+    "use-c", cl::cat(ChimeraCategory),
+    cl::desc("Parse input files as C instead of C++"));
 
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
@@ -48,13 +60,27 @@ int main(int argc, const char **argv)
     if (!ConfigFilename.empty())
         chimera::Configuration::GetInstance().LoadFile(ConfigFilename);
 
-    // If an output path was specified, initialize configuration to use it.
+    // If an output path was specified, set configuration to use it.
     if (!OutputPath.empty())
         chimera::Configuration::GetInstance().SetOutputPath(OutputPath);
+
+    // If a top-level binding file was specified, set configuration to use it.
+    if (!OutputFilename.empty())
+        chimera::Configuration::GetInstance().SetOutputFilename(OutputFilename);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
+
+    // Add the appropriate C/C++ language flag.
+    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
+        UseCMode ? "-xc" : "-xc++", ArgumentInsertPosition::BEGIN));
+
+    // Add a workaround for the bug in clang shipped default with Ubuntu 14.04.
+    // https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
+    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
+        "-I/usr/lib/llvm-3.6/lib/clang/3.6.2/include", ArgumentInsertPosition::END));
+    
 
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());
