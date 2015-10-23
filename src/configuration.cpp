@@ -123,70 +123,8 @@ void chimera::Configuration::SetOutputFilename(const std::string &filename)
 std::unique_ptr<chimera::CompiledConfiguration>
 chimera::Configuration::Process(CompilerInstance *ci) const
 {
-    std::unique_ptr<chimera::CompiledConfiguration> config(
+    return std::unique_ptr<chimera::CompiledConfiguration>(
         new CompiledConfiguration(*this, ci));
-
-    // Compile the list of input files into the list of includes.
-    for (const auto &input_file : ci->getInvocation().getFrontendOpts().Inputs)
-        config->includes_.push_back(input_file.getFile());
-
-    // Resolve namespace configuration entries within provided AST.
-    for(const auto &it : configNode_["namespaces"])
-    {
-        std::string ns_str = it.as<std::string>();
-        auto ns = chimera::util::resolveNamespace(ci, ns_str);
-        if (ns)
-        {
-            std::cout << "Namespace: " << ns->getNameAsString() << std::endl;
-            config->namespaces_.insert(ns);
-        }
-        else
-        {
-            std::cerr << "Unable to resolve namespace: "
-                      << "'" << ns_str << "'." << std::endl;
-        }
-    }
-
-    // Resolve namespace configuration entries within provided AST.
-    for(const auto &it : configNode_["declarations"])
-    {
-        std::string decl_str = it.first.as<std::string>();
-
-        // If there are multiple words, assume a full declaration.
-        // If there is only one word, assume a record declaration.
-        auto decl = (countWordsInString(decl_str) == 1)
-                     ? chimera::util::resolveRecord(ci, decl_str)
-                     : chimera::util::resolveDeclaration(ci, decl_str);
-        if (decl)
-        {
-            std::cout << "Declaration: " << decl->getNameAsString() << std::endl;
-            config->declarations_[decl] = it.second;
-        }
-        else
-        {
-            std::cerr << "Unable to resolve declaration: "
-                      << "'" << decl_str << "'" << std::endl;
-        }
-    }
-
-    // Resolve type configuration entries within provided AST.
-    for(const auto &it : configNode_["types"])
-    {
-        std::string type_str = it.first.as<std::string>();
-        auto type = chimera::util::resolveType(ci, type_str);
-        if (type.getTypePtrOrNull())
-        {
-            std::cout << "Type: " << type.getAsString() << std::endl;
-            config->types_.push_back(std::make_pair(type, it.second));
-        }
-        else
-        {
-            std::cerr << "Unable to resolve type: "
-                      << "'" << type_str << "'" << std::endl;
-        }
-    }
-
-    return config;
 }
 
 const YAML::Node& chimera::Configuration::GetRoot() const
@@ -204,27 +142,111 @@ const std::string &chimera::Configuration::GetOutputPath() const
     return outputPath_;
 }
 
+const std::string &chimera::Configuration::GetOutputFilename() const
+{
+    return outputFilename_;
+}
+
 chimera::CompiledConfiguration::CompiledConfiguration(
     const chimera::Configuration &parent, CompilerInstance *ci)
 : parent_(parent)
 , ci_(ci)
 , mangler_(ci->getASTContext().createMangleContext())
-{
-    // Do nothing.
+{   
+    // Get a reference to the configuration YAML structure.
+    const YAML::Node &configNode = parent.GetRoot();
+
+    // Compile the list of input files into the list of includes.
+    for (const auto &input_file : ci->getInvocation().getFrontendOpts().Inputs)
+        includes_.push_back(input_file.getFile());
+
+    // Resolve namespace configuration entries within provided AST.
+    for(const auto &it : configNode["namespaces"])
+    {
+        std::string ns_str = it.as<std::string>();
+        auto ns = chimera::util::resolveNamespace(ci, ns_str);
+        if (ns)
+        {
+            namespaces_.insert(ns);
+        }
+        else
+        {
+            std::cerr << "Unable to resolve namespace: "
+                      << "'" << ns_str << "'." << std::endl;
+        }
+    }
+
+    // Resolve namespace configuration entries within provided AST.
+    for(const auto &it : configNode["declarations"])
+    {
+        std::string decl_str = it.first.as<std::string>();
+
+        // If there are multiple words, assume a full declaration.
+        // If there is only one word, assume a record declaration.
+        auto decl = (countWordsInString(decl_str) == 1)
+                     ? chimera::util::resolveRecord(ci, decl_str)
+                     : chimera::util::resolveDeclaration(ci, decl_str);
+        if (decl)
+        {
+            declarations_[decl] = it.second;
+        }
+        else
+        {
+            std::cerr << "Unable to resolve declaration: "
+                      << "'" << decl_str << "'" << std::endl;
+        }
+    }
+
+    // Resolve type configuration entries within provided AST.
+    for(const auto &it : configNode["types"])
+    {
+        std::string type_str = it.first.as<std::string>();
+        auto type = chimera::util::resolveType(ci, type_str);
+        if (type.getTypePtrOrNull())
+        {
+            types_.push_back(std::make_pair(type, it.second));
+        }
+        else
+        {
+            std::cerr << "Unable to resolve type: "
+                      << "'" << type_str << "'" << std::endl;
+        }
+    }
+
+    // Create the top-level binding source file.
+    std::string binding_filename =
+        parent_.GetOutputPath() + "/" + parent_.GetOutputFilename();
+    // TODO: In newer Clang versions, this function returns std::unique<>.
+    auto *stream = ci_->createOutputFile(
+        binding_filename,
+        false, // Open the file in binary mode
+        false, // Register with llvm::sys::RemoveFileOnSignal
+        "", // The derived basename (shouldn't be used)
+        "", // The extension to use for derived name (shouldn't be used)
+        false, // Use a temporary file that should be renamed
+        false // Create missing directories in the output path
+    );
+
+    // Create a reference to the binding file.
+    std::cout << binding_filename << std::endl;
+    binding_.reset(new chimera::Stream(stream, "chimera_bindings", includes_));
 }
 
-const std::set<const clang::NamespaceDecl*>& chimera::CompiledConfiguration::GetNamespaces() const
+const std::set<const clang::NamespaceDecl*>&
+chimera::CompiledConfiguration::GetNamespaces() const
 {
     return namespaces_;
 }
 
-const YAML::Node& chimera::CompiledConfiguration::GetDeclaration(const clang::Decl *decl) const
+const YAML::Node&
+chimera::CompiledConfiguration::GetDeclaration(const clang::Decl *decl) const
 {
     const auto d = declarations_.find(decl->getCanonicalDecl());
     return d != declarations_.end() ? d->second : emptyNode_;
 }
 
-const YAML::Node& chimera::CompiledConfiguration::GetType(const clang::QualType type) const
+const YAML::Node&
+chimera::CompiledConfiguration::GetType(const clang::QualType type) const
 {
     const auto canonical_type = type.getCanonicalType();
     for (const auto &entry : types_)
@@ -256,9 +278,11 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     std::string mangled_name = base_input_stream.str();
 
     // Create an output file depending on the provided parameters.
+    std::string binding_filename =
+        parent_.GetOutputPath() + "/" + mangled_name + ".cpp";
     // TODO: In newer Clang versions, this function returns std::unique<>.
     auto *stream = ci_->createOutputFile(
-        parent_.GetOutputPath() + "/" + mangled_name + ".cpp",
+        binding_filename,
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
         "", // The derived basename (shouldn't be used)
@@ -270,8 +294,10 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     // If file creation failed, report the error and return a nullptr.
     if (!stream)
     {
-        std::cerr << "Failed to create output file for '"
-                  << named_decl->getQualifiedNameAsString() << "'."
+        std::cerr << "Failed to create output file "
+                  << "'" << binding_filename << "'"
+                  << " for "
+                  << "'" << named_decl->getQualifiedNameAsString() << "'."
                   << std::endl;
         return nullptr;
     }
@@ -286,7 +312,11 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     getSnippet(template_config["footer"],
                parent_.GetConfigFilename(), footer_snippet);
 
+    // Add this function to the top-level binding source file.
+    *binding_ << "  " << mangled_name << "();\n";
+
     // Create a stream wrapper to write header and footer of file.
+    std::cout << binding_filename << std::endl;
     return std::unique_ptr<chimera::Stream>(new chimera::Stream(
         stream, mangled_name, includes_, 
         header_snippet, postinclude_snippet, footer_snippet));

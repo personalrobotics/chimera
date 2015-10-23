@@ -161,7 +161,9 @@ bool chimera::Visitor::GenerateCXXConstructor(
     std::vector<std::string> argument_types;
 
     for (ParmVarDecl *param_decl : decl->params())
-        argument_types.push_back(param_decl->getType().getAsString(printing_policy_));
+        argument_types.push_back(param_decl->getType()
+                                            .getCanonicalType()
+                                            .getAsString(printing_policy_));
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
