@@ -31,10 +31,10 @@ static cl::opt<std::string> OutputPath(
     cl::value_desc("directory"));
 
 // Option for specifying output binding filename.
-static cl::opt<std::string> OutputFilename(
-    "f", cl::cat(ChimeraCategory),
-    cl::desc("Specify output top-level binding filename"),
-    cl::value_desc("filename"));
+static cl::opt<std::string> OutputModuleName(
+    "m", cl::cat(ChimeraCategory),
+    cl::desc("Specify output top-level module name"),
+    cl::value_desc("modulename"));
 
 // Option for specifying YAML configuration filename.
 static cl::opt<std::string> ConfigFilename(
@@ -69,8 +69,8 @@ int main(int argc, const char **argv)
         chimera::Configuration::GetInstance().SetOutputPath(OutputPath);
 
     // If a top-level binding file was specified, set configuration to use it.
-    if (!OutputFilename.empty())
-        chimera::Configuration::GetInstance().SetOutputFilename(OutputFilename);
+    if (!OutputModuleName.empty())
+        chimera::Configuration::GetInstance().SetOutputModuleName(OutputModuleName);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),

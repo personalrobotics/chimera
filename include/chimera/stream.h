@@ -20,13 +20,14 @@ namespace chimera
 {
 
 /**
- * Opaque stream type that forwards to internal file stream.
+ * Opaque stream type that forwards to internal file stream that forms the
+ * body of the specified function prototype.
  */
 class Stream
 {
 public:
     Stream(StreamType *stream,
-           const std::string &mangledName,
+           const std::string &functionPrototype,
            const std::vector<std::string> &includeNames,
            const std::string &headerSnippet = "",
            const std::string &postincludeSnippet = "",

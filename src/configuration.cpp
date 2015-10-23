@@ -77,7 +77,7 @@ const YAML::Node chimera::CompiledConfiguration::emptyNode_(
 
 chimera::Configuration::Configuration()
 : outputPath_(".")
-, outputFilename_("chimera_bindings.cpp")
+, outputModuleName_("chimera_binding")
 {
     // Do nothing.
 }
@@ -112,12 +112,12 @@ void chimera::Configuration::SetOutputPath(const std::string &path)
     outputPath_ = path.empty() ? "." : path;
 }
 
-void chimera::Configuration::SetOutputFilename(const std::string &filename)
+void chimera::Configuration::SetOutputModuleName(const std::string &moduleName)
 {
-    // Setting the filename to the empty string makes no sense and will break the
-    // binding path concatenation, so if an empty string is passed, assume the
-    // caller wanted to reset back to the default.
-    outputFilename_ = filename.empty() ? "chimera_bindings.cpp" : filename;
+    // Setting the module name to the empty string makes no sense and will
+    // break the binding, so if an empty string is passed, assume the caller
+    // wanted to reset back to the default.
+    outputModuleName_ = moduleName.empty() ? "chimera_binding" : moduleName;
 }
 
 std::unique_ptr<chimera::CompiledConfiguration>
@@ -142,9 +142,9 @@ const std::string &chimera::Configuration::GetOutputPath() const
     return outputPath_;
 }
 
-const std::string &chimera::Configuration::GetOutputFilename() const
+const std::string &chimera::Configuration::GetOutputModuleName() const
 {
-    return outputFilename_;
+    return outputModuleName_;
 }
 
 chimera::CompiledConfiguration::CompiledConfiguration(
@@ -215,7 +215,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 
     // Create the top-level binding source file.
     std::string binding_filename =
-        parent_.GetOutputPath() + "/" + parent_.GetOutputFilename();
+        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp";
+    std::string binding_prototype =
+        "BOOST_PYTHON_MODULE(" + parent_.GetOutputModuleName() + ")";
     // TODO: In newer Clang versions, this function returns std::unique<>.
     auto *stream = ci_->createOutputFile(
         binding_filename,
@@ -229,7 +231,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 
     // Create a reference to the binding file.
     std::cout << binding_filename << std::endl;
-    binding_.reset(new chimera::Stream(stream, "chimera_bindings", includes_));
+    binding_.reset(new chimera::Stream(stream, binding_prototype, includes_));
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -280,6 +282,8 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     // Create an output file depending on the provided parameters.
     std::string binding_filename =
         parent_.GetOutputPath() + "/" + mangled_name + ".cpp";
+    std::string binding_prototype =
+        "void " + mangled_name + "()";
     // TODO: In newer Clang versions, this function returns std::unique<>.
     auto *stream = ci_->createOutputFile(
         binding_filename,
@@ -313,13 +317,13 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
                parent_.GetConfigFilename(), footer_snippet);
 
     // Add this function to the top-level binding source file.
-    *binding_ << "  void " << mangled_name << "();\n";
-    *binding_ << "  " << mangled_name << "();\n";
+    *binding_ << "  " << binding_prototype << ";\n";
+    *binding_ << "  " << mangled_name << "();\n\n";
 
     // Create a stream wrapper to write header and footer of file.
     std::cout << binding_filename << std::endl;
     return std::unique_ptr<chimera::Stream>(new chimera::Stream(
-        stream, mangled_name, includes_, 
+        stream, binding_prototype, includes_,
         header_snippet, postinclude_snippet, footer_snippet));
 }
 
