@@ -20,10 +20,10 @@ bool IsCopyable(CXXRecordDecl *decl)
         return false;
 
     for (CXXConstructorDecl *ctor_decl : decl->ctors())
-        if (ctor_decl->isCopyConstructor() && ctor_decl->isDeleted())
-            return false;
+        if (ctor_decl->isCopyConstructor() && !ctor_decl->isDeleted())
+            return true;
 
-    return true;
+    return false;
 }
 
 bool IsQualTypeCopyable(ASTContext &context, QualType qual_type)
