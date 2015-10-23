@@ -228,6 +228,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     );
 
     // Create a reference to the binding file.
+    std::cout << binding_filename << std::endl;
     binding_.reset(new chimera::Stream(stream, "chimera_bindings", includes_));
 }
 
@@ -315,6 +316,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     *binding_ << "  " << mangled_name << "();\n";
 
     // Create a stream wrapper to write header and footer of file.
+    std::cout << binding_filename << std::endl;
     return std::unique_ptr<chimera::Stream>(new chimera::Stream(
         stream, mangled_name, includes_, 
         header_snippet, postinclude_snippet, footer_snippet));
