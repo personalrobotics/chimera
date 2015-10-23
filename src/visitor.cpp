@@ -161,6 +161,8 @@ bool chimera::Visitor::GenerateCXXConstructor(
 
     if (decl->isDeleted())
         return false;
+    else if (decl->isCopyOrMoveConstructor())
+        return false;
 
     std::vector<std::string> argument_types;
 
