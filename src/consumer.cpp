@@ -18,9 +18,6 @@ void chimera::Consumer::HandleTranslationUnit(ASTContext &context)
     chimera::Configuration &config = chimera::Configuration::GetInstance();
     chimera::Visitor visitor(ci_, config.Process(ci_));
 
-    // TODO: Remove this debug print.
-    std::cout << "\n\n---\n\n";
-
     // We can use ASTContext to get the TranslationUnitDecl, which is
     // a single Decl that collectively represents the entire source file.
     visitor.TraverseDecl(context.getTranslationUnitDecl());

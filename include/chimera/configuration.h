@@ -135,6 +135,7 @@ protected:
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
     std::unique_ptr<clang::MangleContext> mangler_;
+    std::unique_ptr<chimera::Stream> binding_;
 
     friend class Configuration;
 };
