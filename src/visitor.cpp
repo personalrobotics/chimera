@@ -26,13 +26,26 @@ bool IsCopyable(CXXRecordDecl *decl)
     return true;
 }
 
-} // namespace
+bool IsInsideTemplateClass(DeclContext *decl_context)
+{
+    if (!decl_context->isRecord())
+        return false;
 
-// TODO: Support template functions.
-// TODO: Detect missing copy constructors, possibly using:
-//  hasUserDeclaredCopyConstructor()
-//  hasCopyConstructorWithConstParam ()
-// TODO: Mark abstract classes as noncopyable?
+    if (isa<CXXRecordDecl>(decl_context))
+    {
+        CXXRecordDecl *record_decl = cast<CXXRecordDecl>(decl_context);
+        if (record_decl->getDescribedClassTemplate())
+            return true;
+    }
+
+    DeclContext *parent_context = decl_context->getParent();
+    if (parent_context)
+        return IsInsideTemplateClass(parent_context);
+    else
+        return false;
+}
+
+} // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
@@ -43,25 +56,41 @@ chimera::Visitor::Visitor(clang::CompilerInstance *ci,
     // Do nothing.
 }
 
+bool chimera::Visitor::shouldVisitTemplateInstantiations() const
+{
+    return true;
+}
+
+bool chimera::Visitor::shouldVisitImplicitCode() const
+{
+    return true;
+}
+
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
     // Only visit declarations in namespaces we are configured to read.
     if (!IsEnclosed(decl))
         return true;
 
-    if (isa<ClassTemplateDecl>(decl))
-        GenerateClassTemplate(cast<ClassTemplateDecl>(decl));
-    else if (isa<CXXRecordDecl>(decl))
+    if (isa<CXXRecordDecl>(decl))
     {
         // Every class template is represented by a CXXRecordDecl and a
         // ClassTemplateDecl. We handle code generation of template classes in
         // the above case, so we don't process them here.
-        CXXRecordDecl *class_decl = cast<CXXRecordDecl>(decl);
-        if (!class_decl->getDescribedClassTemplate())
+        //
+        // This also suppresses inner class that are contained inside a
+        // template class.
+        auto *class_decl = cast<CXXRecordDecl>(decl);
+
+        if (!IsInsideTemplateClass(class_decl))
             GenerateCXXRecord(class_decl);
     }
     else if (isa<EnumDecl>(decl))
-        GenerateEnum(cast<EnumDecl>(decl));
+    {
+        auto *enum_decl = cast<EnumDecl>(decl);
+        if (!IsInsideTemplateClass(enum_decl))
+            GenerateEnum(cast<EnumDecl>(decl));
+    }
     else if (isa<VarDecl>(decl))
         GenerateGlobalVar(cast<VarDecl>(decl));
     else if (isa<FunctionDecl>(decl))
@@ -77,7 +106,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         return false;
 
     // Skip protected and private classes.
-    if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
     // Open a stream object unique to this CXX record's mangled name.
@@ -95,16 +124,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << "::boost::python::class_<"
             << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
-
-    std::cout << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_)
-              << " hasCopyConstructorWithConstParam "
-                << decl->hasCopyConstructorWithConstParam()
-              << " hasTrivialDefaultConstructor "
-                << decl->hasTrivialCopyConstructor()
-              << " hasNonTrivialDefaultConstructor "
-                << decl->hasNonTrivialCopyConstructor()
-                << std::endl;
-
 
     const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
@@ -372,23 +391,6 @@ bool chimera::Visitor::GenerateStaticField(
     }
 
     stream << ")\n";
-
-    return true;
-}
-
-bool chimera::Visitor::GenerateClassTemplate(clang::ClassTemplateDecl *decl)
-{
-    if (decl != decl->getCanonicalDecl())
-        return false;
-
-    for (ClassTemplateSpecializationDecl *spec_decl : decl->specializations())
-    {
-        if (spec_decl->getSpecializationKind() == TSK_Undeclared)
-            continue;
-
-        CXXRecordDecl *decl = spec_decl->getTypeForDecl()->getAsCXXRecordDecl();
-        GenerateCXXRecord(decl);
-    }
 
     return true;
 }
