@@ -79,23 +79,65 @@ types:
 
 # Selected function and class declarations that need custom parameters.
 declarations:
+  'dart::dynamics::ZeroDofJoint':
+    name: ZeroDofJoint
+    held_type: 'dart::dynamics::MultiDofJoint<2> *'
+    noncopyable: true
   'dart::dynamics::MultiDofJoint<2>':
-    name: MultiDofJoint2
-    held_type: '::dart::dynamics::MultiDofJoint<2> *'
+    name: TwoDofJoint
+    held_type: 'dart::dynamics::MultiDofJoint<2> *'
     noncopyable: true
   'dart::dynamics::MultiDofJoint<3>':
-    name: MultiDofJoint3
-    held_type: '::dart::dynamics::MultiDofJoint<3> *'
+    name: ThreeDofJoint
+    held_type: 'dart::dynamics::MultiDofJoint<3> *'
     noncopyable: true
   'dart::dynamics::MultiDofJoint<6>':
-    name: MultiDofJoint6
-    held_type: '::dart::dynamics::MultiDofJoint<6> *'
+    name: SixDofJoint
+    held_type: 'dart::dynamics::MultiDofJoint<6> *'
     noncopyable: true
   'dart::dynamics::Skeleton':
-    held_type: '::dart::dynamics::Skeleton *'
+    held_type: 'dart::dynamics::Skeleton *'
     noncopyable: true
   'dart::dynamics::Shape':
     noncopyable: true
+  'dart::dynamics::JacobianNode':
+    held_type: 'dart::dynamics::JacobianNode *'
+    noncopyable: true
+  'dart::dynamics::DegreeOfFreedom':
+    held_type: 'dart::dynamics::DegreeOfFreedom *'
+    noncopyable: true
+  'dart::dynamics::Frame':
+    held_type: 'dart::dynamics::Frame *'
+    noncopyable: true
+  'dart::dynamics::Joint':
+    held_type: 'dart::dynamics::Joint *'
+    noncopyable: true
+  'dart::dynamics::BodyNode':
+    held_type: 'dart::dynamics::BodyNode *'
+    noncopyable: true
+  'dart::dynamics::SoftBodyNode':
+    held_type: 'dart::dynamics::SoftBodyNode *'
+    noncopyable: true
+  'dart::dynamics::MetaSkeleton':
+    held_type: 'dart::dynamics::MetaSkeleton *'
+    noncopyable: true
+  'dart::dynamics::Shape':
+    held_type: 'dart::dynamics::Shape *'
+    noncopyable: true
+  'dart::dynamics::Branch':
+    held_type: 'dart::dynamics::Branch *'
+    noncopyable: true
+  'dart::dynamics::TemplatedJacobianNode<dart::dynamics::EndEffector>':
+    held_type: 'dart::dynamics::TemplatedJacobianNode<dart::dynamics::EndEffector> *'
+    noncopyable: true
+  'dart::dynamics::TemplatedJacobianNode<dart::dynamics::BodyNode>':
+    held_type: 'dart::dynamics::TemplatedJacobianNode<dart::dynamics::BodyNode> *'
+    noncopyable: true
+  'dart::dynamics::SkeletonRefCountingBase':
+    held_type: 'dart::dynamics::SkeletonRefCountingBase *'
+    noncopyable: true
+  'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': ~
+
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
   'const std::vector<ConstShapePtr>& dart::dynamics::Entity::getVisualizationShapes() const': null
