@@ -58,6 +58,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (!decl->hasDefinition() || decl->getDefinition() != decl)
         return false;
 
+    // Skip protected and private classes.
+    if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+        return false;
+
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -356,6 +360,10 @@ bool chimera::Visitor::GenerateClassTemplate(clang::ClassTemplateDecl *decl)
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
+    // Skip protected and private enums.
+    if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+        return false;
+
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
         return false;
