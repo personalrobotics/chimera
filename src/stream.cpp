@@ -3,7 +3,7 @@
 #include <llvm/Support/raw_ostream.h>
 
 chimera::Stream::Stream(StreamType *stream,
-                        const std::string &mangledName,
+                        const std::string &functionPrototype,
                         const std::vector<std::string> &includeNames,
                         const std::string &headerSnippet,
                         const std::string &postincludeSnippet,
@@ -23,7 +23,7 @@ chimera::Stream::Stream(StreamType *stream,
     if (!postincludeSnippet.empty())
         *stream_ << postincludeSnippet << "\n\n";
 
-    *stream << "void " << mangledName << "()\n"
+    *stream << functionPrototype << "\n"
                "{\n";
 }
 
