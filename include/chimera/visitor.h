@@ -16,7 +16,9 @@ public:
     Visitor(clang::CompilerInstance *ci,
             std::unique_ptr<CompiledConfiguration> cc);
 
-    virtual bool VisitDecl(clang::Decl *decl);
+    bool shouldVisitImplicitCode() const;
+    bool shouldVisitTemplateInstantiations() const;
+    bool VisitDecl(clang::Decl *decl);
 
 protected:
     bool GenerateCXXRecord(clang::CXXRecordDecl *decl);
@@ -33,7 +35,6 @@ protected:
                              clang::CXXRecordDecl *class_decl,
                              clang::VarDecl *decl);
 
-    bool GenerateClassTemplate(clang::ClassTemplateDecl *decl);
     bool GenerateEnum(clang::EnumDecl *decl);
     bool GenerateGlobalVar(clang::VarDecl *decl);
     bool GenerateGlobalFunction(clang::FunctionDecl *decl);
