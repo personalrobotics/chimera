@@ -13,8 +13,7 @@ template:
 
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
-  - dart::dynamics
-  - dart::math
+  - dart
 
 # Selected types that need special handling.
 types:
@@ -81,75 +80,68 @@ types:
 declarations:
   'dart::dynamics::ZeroDofJoint':
     name: ZeroDofJoint
-    held_type: 'dart::dynamics::MultiDofJoint<2> *'
-    noncopyable: true
+    held_type: 'dart::dynamics::ZeroDofJoint *'
   'dart::dynamics::MultiDofJoint<2>':
     name: TwoDofJoint
     held_type: 'dart::dynamics::MultiDofJoint<2> *'
-    noncopyable: true
   'dart::dynamics::MultiDofJoint<3>':
     name: ThreeDofJoint
     held_type: 'dart::dynamics::MultiDofJoint<3> *'
-    noncopyable: true
   'dart::dynamics::MultiDofJoint<6>':
     name: SixDofJoint
     held_type: 'dart::dynamics::MultiDofJoint<6> *'
-    noncopyable: true
   'dart::dynamics::Skeleton':
     held_type: 'dart::dynamics::Skeleton *'
-    noncopyable: true
   'dart::dynamics::Shape':
-    noncopyable: true
   'dart::dynamics::JacobianNode':
     held_type: 'dart::dynamics::JacobianNode *'
-    noncopyable: true
   'dart::dynamics::DegreeOfFreedom':
     held_type: 'dart::dynamics::DegreeOfFreedom *'
-    noncopyable: true
   'dart::dynamics::Frame':
     held_type: 'dart::dynamics::Frame *'
-    noncopyable: true
   'dart::dynamics::Joint':
     held_type: 'dart::dynamics::Joint *'
-    noncopyable: true
+  'dart::dynamics::Joint':
+    held_type: 'dart::dynamics::RevoluteJoint *'
+  'dart::dynamics::JacobianNode':
+    held_type: 'dart::dynamics::JacobianNode *'
   'dart::dynamics::BodyNode':
     held_type: 'dart::dynamics::BodyNode *'
-    noncopyable: true
   'dart::dynamics::SoftBodyNode':
     held_type: 'dart::dynamics::SoftBodyNode *'
-    noncopyable: true
   'dart::dynamics::MetaSkeleton':
     held_type: 'dart::dynamics::MetaSkeleton *'
-    noncopyable: true
   'dart::dynamics::Shape':
     held_type: 'dart::dynamics::Shape *'
-    noncopyable: true
+  'dart::dynamics::CylinderShape':
+    held_type: 'dart::dynamics::CylinderShape *'
   'dart::dynamics::Branch':
     held_type: 'dart::dynamics::Branch *'
-    noncopyable: true
+  'dart::dynamics::EndEffector':
+    held_type: 'dart::dynamics::EndEffector *'
+  'dart::dynamics::WholeBodyIK':
+    held_type: 'dart::dynamics::WholeBodyIK *'
   'dart::dynamics::TemplatedJacobianNode<dart::dynamics::EndEffector>':
     held_type: 'dart::dynamics::TemplatedJacobianNode<dart::dynamics::EndEffector> *'
-    noncopyable: true
   'dart::dynamics::TemplatedJacobianNode<dart::dynamics::BodyNode>':
     held_type: 'dart::dynamics::TemplatedJacobianNode<dart::dynamics::BodyNode> *'
-    noncopyable: true
   'dart::dynamics::SkeletonRefCountingBase':
     held_type: 'dart::dynamics::SkeletonRefCountingBase *'
-    noncopyable: true
+  'dart::dynamics::MutexedWeakSkeletonPtr': null
   'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': null
 
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
-  'const std::vector<ConstShapePtr>& dart::dynamics::Entity::getVisualizationShapes() const': null
+  #'const std::vector<ConstShapePtr>& dart::dynamics::Entity::getVisualizationShapes() const': null
   'const dart::dynamics::Frame* dart::dynamics::Entity::getParentFrame() const': null
   'const dart::dynamics::DegreeOfFreedom* dart::dynamics::JacobianNode::getDependentDof(size_t) const': null
-  'const std::vector<const DegreeOfFreedom *>& dart::dynamics::JacobianNode::getDependentDofs() const': null
+  #'const std::vector<const DegreeOfFreedom *>& dart::dynamics::JacobianNode::getDependentDofs() const': null
   'const dart::dynamics::InverseKinematics::ErrorMethod& dart::dynamics::InverseKinematics::getErrorMethod() const': null
   'const dart::dynamics::InverseKinematics::GradientMethod &dart::dynamics::InverseKinematics::getGradientMethod() const': null
   'const dart::dynamics::JacobianNode *dart::dynamics::InverseKinematics::getNode() const': null
   'const dart::dynamics::JacobianNode *dart::dynamics::InverseKinematics::getAffiliation() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::MetaSkeleton::getBodyNode(size_t) const': null
-  'const std::vector<const BodyNode *> &dart::dynamics::MetaSkeleton::getBodyNodes() const': null
+  #'const std::vector<const BodyNode *> &dart::dynamics::MetaSkeleton::getBodyNodes() const': null
   'const dart::dynamics::Joint *dart::dynamics::MetaSkeleton::getJoint(size_t) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::MetaSkeleton::getDof(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::Skeleton::getRootBodyNode(size_t) const': null
@@ -157,17 +149,17 @@ declarations:
   'const dart::dynamics::SoftBodyNode *dart::dynamics::Skeleton::getSoftBodyNode(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::Skeleton::getBodyNode(const std::string &) const': null
   'const dart::dynamics::SoftBodyNode *dart::dynamics::Skeleton::getSoftBodyNode(const std::string &) const': null
-  'const std::vector<const BodyNode *> &dart::dynamics::Skeleton::getBodyNodes() const': null
+  #'const std::vector<const BodyNode *> &dart::dynamics::Skeleton::getBodyNodes() const': null
   'const dart::dynamics::Joint *dart::dynamics::Skeleton::getJoint(size_t) const': null
   'const dart::dynamics::Joint *dart::dynamics::Skeleton::getJoint(const std::string &) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::Skeleton::getDof(size_t) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::Skeleton::getDof(const std::string &) const': null
-  'const std::vector<const DegreeOfFreedom *> &dart::dynamics::Skeleton::getTreeDofs(size_t) const': null
+  #'const std::vector<const DegreeOfFreedom *> &dart::dynamics::Skeleton::getTreeDofs(size_t) const': null
   'const dart::dynamics::EndEffector *dart::dynamics::Skeleton::getEndEffector(size_t) const': null
   'const dart::dynamics::EndEffector *dart::dynamics::Skeleton::getEndEffector(const std::string &) const': null
   'const dart::dynamics::Marker *dart::dynamics::Skeleton::getMarker(const std::string &) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::EndEffector::getDependentDof(size_t) const': null
-  'const std::vector<const DegreeOfFreedom *> &dart::dynamics::EndEffector::getDependentDofs() const': null
+  #'const std::vector<const DegreeOfFreedom *> &dart::dynamics::EndEffector::getDependentDofs() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::EndEffector::getParentBodyNode() const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::ZeroDofJoint::getDof(size_t) const': null
   'const dart::dynamics::PointMass *dart::dynamics::SoftBodyNode::getPointMass(size_t) const': null
@@ -177,7 +169,7 @@ declarations:
   'const dart::dynamics::PointMass *dart::dynamics::PointMass::getConnectedPointMass(size_t) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::ReferentialSkeleton::getDof(size_t) const': null
   'const dart::dynamics::Joint *dart::dynamics::ReferentialSkeleton::getJoint(size_t) const': null
-  'const std::vector<const BodyNode *> &dart::dynamics::ReferentialSkeleton::getBodyNodes() const': null
+  #'const std::vector<const BodyNode *> &dart::dynamics::ReferentialSkeleton::getBodyNodes() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::ReferentialSkeleton::getBodyNode(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::DegreeOfFreedom::getParentBodyNode() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::DegreeOfFreedom::getParentBodyNode() const': null
@@ -187,7 +179,7 @@ declarations:
   'dart::dynamics::DegreeOfFreedom *dart::dynamics::Joint::getDof(size_t)': null
   'const dart::dynamics::BodyNode *dart::dynamics::Joint::getParentBodyNode() const': null
   'const dart::dynamics::BodyNode *dart::dynamics::Joint::getChildBodyNode() const': null
-  'const std::vector<const DegreeOfFreedom *> &dart::dynamics::BodyNode::getDependentDofs() const': null
+  #'const std::vector<const DegreeOfFreedom *> &dart::dynamics::BodyNode::getDependentDofs() const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::BodyNode::getDependentDof(size_t) const': null
   'const dart::dynamics::Marker *dart::dynamics::BodyNode::getMarker(size_t) const': null
   'const dart::dynamics::EndEffector *dart::dynamics::BodyNode::getEndEffector(size_t) const': null
