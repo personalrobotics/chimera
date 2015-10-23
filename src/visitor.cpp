@@ -244,6 +244,8 @@ bool chimera::Visitor::GenerateFunction(
     // builder pattern and will start with '.' since it is a member function.
     if (class_decl)
         stream << ".";
+    else
+        stream << "boost::python::";
 
     // Create the actual function declaration here using its name and its
     // full pointer reference.
@@ -285,6 +287,10 @@ bool chimera::Visitor::GenerateFunction(
     }
 
     stream << ")\n";
+
+    if (!class_decl)
+        stream << ";";
+
     return true;
 }
 
