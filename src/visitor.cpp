@@ -55,6 +55,93 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
+std::vector<std::pair<std::string, std::string>>
+    GetParameterNames(ASTContext &context, clang::FunctionDecl *decl)
+{
+    std::vector<std::pair<std::string, std::string>> params;
+
+    for (ParmVarDecl *param_decl : decl->params())
+    {
+        const std::string param_name = param_decl->getNameAsString();
+        const Type *param_type = param_decl->getType().getTypePtr();
+        std::string param_value;
+
+        if (param_decl->hasDefaultArg()
+            && !param_decl->hasUninstantiatedDefaultArg()
+            && !param_decl->hasUnparsedDefaultArg())
+        {
+            Expr *default_expr = param_decl->getDefaultArg();
+            assert(default_expr);
+
+            Expr::EvalResult result;
+            bool success;
+
+            if (param_type->isReferenceType())
+                success = default_expr->EvaluateAsLValue(result, context);
+            else
+                success = default_expr->EvaluateAsRValue(result, context);
+
+            if (success)
+            {
+                param_value = result.Val.getAsString(
+                    context, param_decl->getType());
+            }
+            else if (default_expr->hasNonTrivialCall(context))
+            {
+                // TODO: How do we print the decl with argument + return types?
+                std::cerr
+                  << "Warning: Unable to evaluate non-trivial call in default"
+                     " value for parameter"
+                  << " '" << param_name << "' of method"
+                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
+            }
+            else
+            {
+                // TODO: How do we print the decl with argument + return types?
+                std::cerr
+                  << "Warning: Failed to evaluate default value for parameter"
+                  << " '" << param_name << "' of method"
+                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
+            }
+        }
+
+        params.push_back(std::make_pair(param_name, param_value));
+    }
+
+    return params;
+}
+
+void GenerateFunctionArguments(
+    ASTContext &context, FunctionDecl *decl, chimera::Stream &stream)
+{
+    // Construct a list of the arguments that are provided to this function,
+    // and define named arguments for them based on their c++ names.
+    const auto params = GetParameterNames(context, decl);
+
+    if (!params.empty())
+    {
+        // TODO: Suppress any default parameters that occur after the first
+        // non-default to default transition. This can only occur if evaluating
+        // the default value of one or more parameters failed.
+
+        // TODO: Assign names to unnamed arguments.
+
+        std::vector<std::string> python_args;
+        for (const auto &param : params)
+        {
+            std::stringstream python_arg;
+            python_arg << "::boost::python::arg(\"" << param.first << "\")";
+
+            if (!param.second.empty())
+                python_arg << " = " << param.second;
+
+            python_args.push_back(python_arg.str());
+        }
+
+        stream << ", (" << join(python_args, ", ") << ")";
+    }
+}
+
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
@@ -206,7 +293,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     }
 
     *stream << ";\n";
-    
+
     return true;
 }
 
@@ -233,7 +320,12 @@ bool chimera::Visitor::GenerateCXXConstructor(
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
-           << ">())\n";
+           << ">()";
+
+    GenerateFunctionArguments(*context_, decl, stream);
+
+    stream << ")\n";
+
     return true;
 }
 
@@ -332,31 +424,8 @@ bool chimera::Visitor::GenerateFunction(
                << return_value_policy << " >()";
     }
 
-    // Construct a list of the arguments that are provided to this function,
-    // and define named arguments for them based on their c++ names.
-    const auto params = GetParameterNames(decl);
-    if (!params.empty())
-    {
-        // TODO: Suppress any default parameters that occur after the first
-        // non-default to default transition. This can only occur if evaluating
-        // the default value of one or more parameters failed.
-
-        // TODO: Assign names to unnamed arguments.
-
-        std::vector<std::string> python_args;
-        for (const auto &param : params)
-        {
-            std::stringstream python_arg;
-            python_arg << "::boost::python::arg(\"" << param.first << "\")";
-
-            if (!param.second.empty())
-                python_arg << " = " << param.second;
-
-            python_args.push_back(python_arg.str());
-        }
-
-        stream << ", (" << join(python_args, ", ") << ")";
-    }
+    // Generate named arguments.
+    GenerateFunctionArguments(*context_, decl, stream);
 
     stream << ")\n";
 
@@ -487,61 +556,6 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
     return base_names;
 }
 
-std::vector<std::pair<std::string, std::string>>
-    chimera::Visitor::GetParameterNames(clang::FunctionDecl *decl) const
-{
-    std::vector<std::pair<std::string, std::string>> params;
-
-    for (ParmVarDecl *param_decl : decl->params())
-    {
-        const std::string param_name = param_decl->getNameAsString();
-        const Type *param_type = param_decl->getType().getTypePtr();
-        std::string param_value;
-
-        if (param_decl->hasDefaultArg()
-            && !param_decl->hasUninstantiatedDefaultArg()
-            && !param_decl->hasUnparsedDefaultArg())
-        {
-            Expr *default_expr = param_decl->getDefaultArg();
-            assert(default_expr);
-
-            Expr::EvalResult result;
-            bool success;
-
-            if (param_type->isReferenceType())
-                success = default_expr->EvaluateAsLValue(result, *context_);
-            else
-                success = default_expr->EvaluateAsRValue(result, *context_);
-
-            if (success)
-            {
-                param_value = result.Val.getAsString(
-                    *context_, param_decl->getType());
-            }
-            else if (default_expr->hasNonTrivialCall(*context_))
-            {
-                // TODO: How do we print the decl with argument + return types?
-                std::cerr
-                  << "Warning: Unable to evaluate non-trivial call in default"
-                     " value for parameter"
-                  << " '" << param_name << "' of method"
-                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
-            }
-            else
-            {
-                // TODO: How do we print the decl with argument + return types?
-                std::cerr
-                  << "Warning: Failed to evaluate default value for parameter"
-                  << " '" << param_name << "' of method"
-                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
-            }
-        }
-
-        params.push_back(std::make_pair(param_name, param_value));
-    }
-
-    return params;
-}
 
 bool chimera::Visitor::IsEnclosed(Decl *decl) const
 {
