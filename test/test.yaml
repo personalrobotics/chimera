@@ -136,7 +136,7 @@ declarations:
   'dart::dynamics::SkeletonRefCountingBase':
     held_type: 'dart::dynamics::SkeletonRefCountingBase *'
     noncopyable: true
-  'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': ~
+  'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': null
 
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
