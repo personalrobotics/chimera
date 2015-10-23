@@ -39,10 +39,10 @@ public:
     void SetOutputPath(const std::string &path);
     
     /**
-     * Set the desired output filename for the top-level binding function.
-     * If unspecified, the default is "chimera_bindings.cpp".
+     * Set the desired output python module for the top-level binding.
+     * If unspecified, the default is "chimera_binding".
      */
-    void SetOutputFilename(const std::string &filename);
+    void SetOutputModuleName(const std::string &moduleName);
 
     /**
      * Process the configuration settings against the current AST.
@@ -66,9 +66,9 @@ public:
     const std::string &GetOutputPath() const;
 
     /**
-     * Get the desired output filename for top-level binding.
+     * Get the desired output python module name for top-level binding.
      */
-    const std::string& GetOutputFilename() const;
+    const std::string& GetOutputModuleName() const;
 
 private:
     Configuration();
@@ -77,7 +77,7 @@ protected:
     YAML::Node configNode_;
     std::string configFilename_;
     std::string outputPath_;
-    std::string outputFilename_;
+    std::string outputModuleName_;
 };
 
 class CompiledConfiguration
