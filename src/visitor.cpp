@@ -184,6 +184,10 @@ bool chimera::Visitor::GenerateFunction(
     if (decl->isDeleted())
         return false;
 
+    // Skip function template declarations.
+    if (decl->getDescribedFunctionTemplate())
+      return false;
+
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, stream))
         return true;
