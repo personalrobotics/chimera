@@ -7,10 +7,14 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <clang/Tooling/ArgumentsAdjusters.h>
+#include <llvm/Config/config.h>
 #include <llvm/Support/CommandLine.h>
 
 #include <memory>
 #include <string>
+
+#define STR_DETAIL(x) #x
+#define STR(x) STR_DETAIL(x)
 
 using namespace clang;
 using namespace clang::tooling;
@@ -79,7 +83,8 @@ int main(int argc, const char **argv)
     // Add a workaround for the bug in clang shipped default with Ubuntu 14.04.
     // https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
-        "-I/usr/lib/llvm-3.6/lib/clang/3.6.2/include", ArgumentInsertPosition::END));
+        "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(LLVM_VERSION_MINOR)
+        "/lib/clang/" LLVM_VERSION_STRING "/include", ArgumentInsertPosition::END));
     
 
     // Run the instantiated tool on the Chimera frontend.
