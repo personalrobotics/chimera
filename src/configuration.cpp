@@ -313,6 +313,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
                parent_.GetConfigFilename(), footer_snippet);
 
     // Add this function to the top-level binding source file.
+    *binding_ << "  void " << mangled_name << "();\n";
     *binding_ << "  " << mangled_name << "();\n";
 
     // Create a stream wrapper to write header and footer of file.
