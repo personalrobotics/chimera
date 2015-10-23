@@ -26,6 +26,16 @@ bool IsCopyable(CXXRecordDecl *decl)
     return true;
 }
 
+bool IsQualTypeCopyable(ASTContext &context, QualType qual_type)
+{
+    // TODO: Is this logic correct?
+
+    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+        return IsCopyable(decl);
+    else
+        return qual_type.isTriviallyCopyableType(context);
+}
+
 bool IsInsideTemplateClass(DeclContext *decl_context)
 {
     if (!decl_context->isRecord())
@@ -211,6 +221,8 @@ bool chimera::Visitor::GenerateCXXConstructor(
         return false;
     else if (decl->isCopyOrMoveConstructor())
         return false;
+    else if (class_decl->isAbstract())
+        return false;
 
     std::vector<std::string> argument_types;
 
@@ -359,12 +371,14 @@ bool chimera::Visitor::GenerateField(
     clang::CXXRecordDecl *class_decl,
     clang::FieldDecl *decl)
 {
+    // TODO: Add support for return_value_type (including if this is false).
+    if (!IsQualTypeCopyable(*context_, decl->getType()))
+        return false;
+
     if (decl->getType().isConstQualified())
         stream << ".def_readonly";
     else
         stream << ".def_readwrite";
-
-    // TODO: Check if a copy constructor is defined for this type.
 
     stream << "(\"" << decl->getNameAsString() << "\","
            << " &" << decl->getQualifiedNameAsString() << ")\n";
