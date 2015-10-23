@@ -10,6 +10,24 @@ using namespace chimera;
 using namespace clang;
 using boost::algorithm::join;
 
+namespace {
+
+bool IsCopyable(CXXRecordDecl *decl)
+{
+    if (decl->isAbstract())
+        return false;
+    else if (!decl->hasCopyConstructorWithConstParam())
+        return false;
+
+    for (CXXConstructorDecl *ctor_decl : decl->ctors())
+        if (ctor_decl->isCopyConstructor() && ctor_decl->isDeleted())
+            return false;
+
+    return true;
+}
+
+} // namespace
+
 // TODO: Support template functions.
 // TODO: Detect missing copy constructors, possibly using:
 //  hasUserDeclaredCopyConstructor()
@@ -78,8 +96,19 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     *stream << "::boost::python::class_<"
             << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
 
+    std::cout << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_)
+              << " hasCopyConstructorWithConstParam "
+                << decl->hasCopyConstructorWithConstParam()
+              << " hasTrivialDefaultConstructor "
+                << decl->hasTrivialCopyConstructor()
+              << " hasNonTrivialDefaultConstructor "
+                << decl->hasNonTrivialCopyConstructor()
+                << std::endl;
+
+
+    const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
-    if (noncopyable_node && noncopyable_node.as<bool>(false))
+    if (noncopyable_node.as<bool>(is_noncopyable))
         *stream << ", ::boost::noncopyable";
 
     if (const YAML::Node &held_type_node = node["held_type"])
