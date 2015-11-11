@@ -21,13 +21,13 @@ static const clang::QualType emptyType_;
  * This is used by functions that need to compile a temporary typedef to
  * resolve a type within the AST.
  */
-std::string generateUniqueTypedefName()
+std::string generateUniqueName()
 {
     // Use a static variable to generate non-duplicate names.
     static size_t counter = 0;
 
     std::stringstream ss;
-    ss << "chimera_typedef_" << (counter++);
+    ss << "chimera_placeholder_" << (counter++);
     return ss.str();
 }
 
@@ -87,7 +87,7 @@ chimera::util::resolveType(clang::CompilerInstance *ci,
                            const llvm::StringRef typeStr)
 {
     auto decl = chimera::util::resolveDeclaration(
-        ci, "typedef " + typeStr.str() + " " + generateUniqueTypedefName());
+        ci, "typedef " + typeStr.str() + " " + generateUniqueName());
     if (!decl)
         return emptyType_;
 
@@ -117,18 +117,17 @@ const NamespaceDecl*
 chimera::util::resolveNamespace(clang::CompilerInstance *ci,
                                 const llvm::StringRef nsStr)
 {
-    auto decl = chimera::util::resolveDeclaration(ci, "using namespace " + nsStr.str());
+    auto decl = chimera::util::resolveDeclaration(
+        ci, "namespace " + generateUniqueName() + " = " + nsStr.str());
     if (!decl)
         return nullptr;
 
-    if (!isa<UsingDirectiveDecl>(decl))
+    if (!isa<NamespaceAliasDecl>(decl))
     {
-        std::cerr << "Expected 'using namespace' declaration, found '"
+        std::cerr << "Expected 'namespace' alias declaration, found '"
                   << decl->getNameAsString() << "'." << std::endl;
         return nullptr;
     }
 
-    return cast<NamespaceDecl>(
-        cast<UsingDirectiveDecl>(decl)
-            ->getNominatedNamespace()->getCanonicalDecl());
+    return cast<NamespaceAliasDecl>(decl)->getNamespace()->getCanonicalDecl();
 }
