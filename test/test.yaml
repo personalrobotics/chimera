@@ -93,6 +93,7 @@ types:
 
 # Selected function and class declarations that need custom parameters.
 declarations:
+  # TODO: Suppress AssimpInputResoruceAdaptor.
   'dart::dynamics::ZeroDofJoint':
     name: ZeroDofJoint
     held_type: 'dart::dynamics::ZeroDofJoint *'
@@ -146,8 +147,14 @@ declarations:
   'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': null
 
   # Suppressed because of bugs in DART:
+  'template <> void dart::common::NameManager<dart::dynamics::Marker *>::removeEntries(const std::string&, dart::dynamics::Marker *const &)': null
   'template <> void dart::common::NameManager<dart::dynamics::BodyNode *>::removeEntries(const std::string&, dart::dynamics::BodyNode *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::SoftBodyNode *>::removeEntries(const std::string&, dart::dynamics::SoftBodyNode *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::EndEffector *>::removeEntries(const std::string&, dart::dynamics::EndEffector *const &)': null
   'template <> void dart::common::NameManager<dart::dynamics::DegreeOfFreedom*>::removeEntries(const std::string&, dart::dynamics::DegreeOfFreedom *const &)': null
+  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::SimpleFrame>>::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::SimpleFrame> const &)': null
+  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::Skeleton> >::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::Skeleton> const &)': null
+
 
 
   # Suppressed because of bugs in Chimera.
