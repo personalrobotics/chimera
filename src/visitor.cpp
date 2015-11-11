@@ -390,7 +390,9 @@ bool chimera::Visitor::GenerateFunction(
         if (return_type->isReferenceType())
         {
             std::cerr
-                << "Warning: Skipped method '"
+                << "Warning: Skipped method "
+                << decl->getQualifiedNameAsString()
+                << " '"
                 << pointer_type.getAsString(printing_policy_)
                 << "' because it returns a reference and no"
                    " 'return_value_policy' was specified.\n";
@@ -399,7 +401,9 @@ bool chimera::Visitor::GenerateFunction(
         else if (return_type->isPointerType())
         {
             std::cerr
-                << "Warning: Skipped method '"
+                << "Warning: Skipped method "
+                << decl->getQualifiedNameAsString()
+                << " '"
                 << pointer_type.getAsString(printing_policy_)
                 << "' because it returns a pointer and no"
                    " 'return_value_policy' was specified.\n";
