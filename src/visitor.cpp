@@ -83,8 +83,20 @@ std::vector<std::pair<std::string, std::string>>
 
             if (success)
             {
-                param_value = result.Val.getAsString(
-                    context, param_decl->getType());
+                if (result.Val.isFloat() && result.Val.getFloat().isInfinity())
+                {
+                    param_value = result.Val.getFloat().isNegative()
+                        ? "-INFINITY" : "INFINITY";
+                }
+                else if (result.Val.isFloat() && result.Val.getFloat().isNaN())
+                {
+                    param_value = "NAN";
+                }
+                else
+                {
+                    param_value = result.Val.getAsString(
+                        context, param_decl->getType());
+                }
             }
             else if (default_expr->hasNonTrivialCall(context))
             {

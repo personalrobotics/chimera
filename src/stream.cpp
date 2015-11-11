@@ -14,7 +14,8 @@ chimera::Stream::Stream(StreamType *stream,
     if (!headerSnippet.empty())
         *stream_ << headerSnippet << "\n\n";
 
-    *stream_ << "#include <boost/python.hpp>\n";
+    *stream_ << "#include <boost/python.hpp>\n"
+                "#include <cmath>\n";
 
     for (const auto &includeName : includeNames)
         *stream_ << "#include <" << includeName << ">\n";
