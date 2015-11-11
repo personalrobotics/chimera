@@ -112,7 +112,8 @@ std::vector<std::pair<std::string, std::string>>
 }
 
 void GenerateFunctionArguments(
-    ASTContext &context, FunctionDecl *decl, chimera::Stream &stream)
+    ASTContext &context, FunctionDecl *decl, bool leading_comma,
+    chimera::Stream &stream)
 {
     // Construct a list of the arguments that are provided to this function,
     // and define named arguments for them based on their c++ names.
@@ -138,7 +139,10 @@ void GenerateFunctionArguments(
             python_args.push_back(python_arg.str());
         }
 
-        stream << ", (" << join(python_args, ", ") << ")";
+        if (leading_comma)
+            stream << ", ";
+
+        stream << "(" << join(python_args, ", ") << ")";
     }
 }
 
@@ -320,11 +324,11 @@ bool chimera::Visitor::GenerateCXXConstructor(
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
-           << ">()";
+           << ">(";
 
-    GenerateFunctionArguments(*context_, decl, stream);
+    GenerateFunctionArguments(*context_, decl, false, stream);
 
-    stream << ")\n";
+    stream << "))\n";
 
     return true;
 }
@@ -425,7 +429,7 @@ bool chimera::Visitor::GenerateFunction(
     }
 
     // Generate named arguments.
-    GenerateFunctionArguments(*context_, decl, stream);
+    GenerateFunctionArguments(*context_, decl, true, stream);
 
     stream << ")\n";
 
