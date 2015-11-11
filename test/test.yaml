@@ -72,8 +72,23 @@ types:
     return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::JointPtr>
   'dart::dynamics::EndEffector *':
     return_value_policy: boost::python::return_by_smart_ptr<dart::dynamics::EndEffectorPtr>
-  # deprecated; allow unsafe access.
+  # allow unsafe access
+  # TODO: Are there smart pointers for these?
   'dart::dynamics::Marker *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::collision::CollisionNode *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::collision::FCLCollisionNode *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::dynamics::InverseKinematics *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::dynamics::JacobianNode *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::collision::Contact &':
+    return_value_policy: boost::python::reference_existing_object
+  'fcl::CollisionObject *':
+    return_value_policy: boost::python::reference_existing_object
+  'dart::planning::PathSegment *':
     return_value_policy: boost::python::reference_existing_object
 
 # Selected function and class declarations that need custom parameters.
@@ -130,8 +145,17 @@ declarations:
   'dart::dynamics::MutexedWeakSkeletonPtr': null
   'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': null
 
+  # Suppressed because of bugs in DART:
+  'template <> void dart::common::NameManager<dart::dynamics::BodyNode *>::removeEntries(const std::string&, dart::dynamics::BodyNode *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::DegreeOfFreedom*>::removeEntries(const std::string&, dart::dynamics::DegreeOfFreedom *const &)': null
+
+
+  # Suppressed because of bugs in Chimera.
+  #'dart::common::Signal<void (std::shared_ptr<dart::dynamics::MetaSkeleton const>, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), dart::common::signal::detail::DefaultCombiner>': null
+
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
+  'dart::gui::GlutWindow': null
   #'const std::vector<ConstShapePtr>& dart::dynamics::Entity::getVisualizationShapes() const': null
   'const dart::dynamics::Frame* dart::dynamics::Entity::getParentFrame() const': null
   'const dart::dynamics::DegreeOfFreedom* dart::dynamics::JacobianNode::getDependentDof(size_t) const': null
