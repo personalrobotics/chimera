@@ -146,6 +146,33 @@ void GenerateFunctionArguments(
     }
 }
 
+bool HasTemplateTemplateArgument(CXXRecordDecl const *decl)
+{
+    if (isa<ClassTemplateSpecializationDecl>(decl)) {
+        auto template_decl = cast<ClassTemplateSpecializationDecl>(decl);
+        const auto &template_args = template_decl->getTemplateArgs();
+
+        for (size_t i = 0; i < template_args.size(); ++i) {
+            const TemplateArgument &template_arg = template_args[i];
+
+            switch (template_arg.getKind()) {
+            case TemplateArgument::Template:
+            case TemplateArgument::TemplateExpansion:
+                // You can get the fully qualified name using this code:
+                //
+                //     template_arg.getAsTemplateOrTemplatePattern()
+                //     .getAsTemplateDecl()->getQualifiedNameAsString()
+                //
+                return true;
+
+            default:
+                break; // do nothing
+            }
+        }
+    }
+    return false;
+}
+
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
@@ -209,6 +236,18 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     // Skip protected and private classes.
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
+
+    // Suppress classes with template template arguments because
+    // getQualifiedNameAsString() does not fully qualify them.
+    // TODO: This is either a bug in libtooling or an error in how we are using
+    // it and should be fixed in a future version.
+    if (HasTemplateTemplateArgument(decl)) {
+        std::cerr
+            << "Warning: Skipped class "
+            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_)
+            << " because it contains a template template parameter.\n";
+        return false;
+    }
 
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
