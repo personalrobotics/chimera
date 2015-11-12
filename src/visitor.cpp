@@ -107,6 +107,9 @@ std::vector<std::pair<std::string, std::string>>
 
             if (success)
             {
+                // Handle special cases for infinite and nan float values.
+                // These values resolve to internal compiler definitions, so
+                // their default string serialization won't resolve correctly.
                 if (result.Val.isFloat() && result.Val.getFloat().isInfinity())
                 {
                     param_value = result.Val.getFloat().isNegative()
