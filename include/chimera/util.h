@@ -64,6 +64,24 @@ const clang::QualType resolveType(clang::CompilerInstance *ci,
 const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);
 
+
+/**
+ * Convert the type into one with fully qualified template.
+ *
+ * Internally uses cling::utils::getFullyQualifiedType().
+ */
+clang::QualType getFullyQualifiedType(clang::QualType QT,
+                                      const clang::ASTContext& Ctx);
+
+/**
+ * Get the fully qualified name for a type. This includes full
+ * qualification of all template parameters etc.
+ *
+ * Internally uses cling::utils::getFullyQualifiedName().
+ */
+std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
+                                      clang::QualType qt);
+
 } // namespace util
 } // namespace chimera
 
