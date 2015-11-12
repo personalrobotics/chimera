@@ -12,6 +12,30 @@ using boost::algorithm::join;
 
 namespace {
 
+bool IsAssignable(CXXRecordDecl *decl)
+{
+    if (decl->isAbstract())
+        return false;
+    else if (!decl->hasCopyAssignmentWithConstParam())
+        return false;
+
+    for (CXXMethodDecl *method_decl : decl->methods())
+        if (method_decl->isCopyAssignmentOperator() && !method_decl->isDeleted())
+            return true;
+
+    return false;
+}
+
+bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
+{
+    // TODO: Is this logic correct?
+
+    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+        return IsAssignable(decl);
+    else
+        return qual_type.isTriviallyCopyableType(context);
+}
+
 bool IsCopyable(CXXRecordDecl *decl)
 {
     if (decl->isAbstract())
@@ -501,6 +525,9 @@ bool chimera::Visitor::GenerateField(
 {
     // TODO: Add support for return_value_type (including if this is false).
     if (!IsQualTypeCopyable(*context_, decl->getType()))
+        return false;
+
+    if (!IsQualTypeAssignable(*context_, decl->getType()))
         return false;
 
     if (decl->getType().isConstQualified())
