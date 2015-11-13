@@ -66,12 +66,12 @@ const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
 
 
 /**
- * Convert the type into one with fully qualified template.
+ * Convert the type into one with fully qualified template parameters.
  *
  * Internally uses cling::utils::getFullyQualifiedType().
  */
-clang::QualType getFullyQualifiedType(clang::QualType QT,
-                                      const clang::ASTContext& Ctx);
+clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
+                                      clang::QualType qt);
 
 /**
  * Get the fully qualified name for a type. This includes full

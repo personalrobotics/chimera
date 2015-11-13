@@ -1,4 +1,5 @@
 #include "chimera/visitor.h"
+#include "chimera/util.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
@@ -268,7 +269,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (HasTemplateTemplateArgument(decl)) {
         std::cerr
             << "Warning: Skipped class "
-            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_)
+            << chimera::util::getFullyQualifiedTypeName(
+                *context_, decl->getTypeForDecl()->getCanonicalTypeInternal())
             << " because it contains a template template parameter.\n";
         return false;
     }
@@ -287,7 +289,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         return false; // Explicitly suppressed.
 
     *stream << "::boost::python::class_<"
-            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
+            << chimera::util::getFullyQualifiedTypeName(
+                *context_, decl->getTypeForDecl()->getCanonicalTypeInternal());
 
     const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
@@ -428,10 +431,13 @@ bool chimera::Visitor::GenerateFunction(
     {
         pointer_type = context_->getPointerType(decl->getType());
     }
-    pointer_type = pointer_type.getCanonicalType();
+    pointer_type = chimera::util::getFullyQualifiedType(*context_,
+                                                        pointer_type);
 
     // Extract the return type of this function declaration.
-    const QualType return_qual_type = decl->getReturnType();
+    const QualType return_qual_type = 
+        chimera::util::getFullyQualifiedType(*context_,
+                                             decl->getReturnType());
     const Type *return_type = return_qual_type.getTypePtr();
 
     // First, check if a return_value_policy was specified for this function.
@@ -485,7 +491,9 @@ bool chimera::Visitor::GenerateFunction(
     // Create the actual function declaration here using its name and its
     // full pointer reference.
     stream << "def(\"" << decl->getNameAsString() << "\""
-           << ", static_cast<" << pointer_type.getAsString(printing_policy_) << ">(&"
+           << ", static_cast<"
+           << chimera::util::getFullyQualifiedTypeName(*context_, pointer_type)
+           << ">(&"
            << decl->getQualifiedNameAsString() << ")";
 
     // If a return value policy was specified, insert it after the function.
@@ -624,7 +632,9 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
         const QualType base_record_type
           = base_record_decl->getTypeForDecl()->getCanonicalTypeInternal();
 
-        base_names.push_back(base_record_type.getAsString(printing_policy_));
+        base_names.push_back(
+            chimera::util::getFullyQualifiedTypeName(*context_, base_record_type)
+        );
     }
 
     return base_names;

@@ -133,14 +133,16 @@ chimera::util::resolveNamespace(clang::CompilerInstance *ci,
     return cast<NamespaceAliasDecl>(decl)->getNamespace()->getCanonicalDecl();
 }
 
-clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
-                                      clang::QualType qt)
+clang::QualType
+chimera::util::getFullyQualifiedType(const clang::ASTContext &context,
+                                     clang::QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedType(qt, context);
 }
 
-std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
-                                      clang::QualType qt)
+std::string
+chimera::util::getFullyQualifiedTypeName(const clang::ASTContext &context,
+                                         clang::QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }
