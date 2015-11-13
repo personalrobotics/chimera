@@ -262,19 +262,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
-    // Suppress classes with template template arguments because
-    // getQualifiedNameAsString() does not fully qualify them.
-    // TODO: This is either a bug in libtooling or an error in how we are using
-    // it and should be fixed in a future version.
-    if (HasTemplateTemplateArgument(decl)) {
-        std::cerr
-            << "Warning: Skipped class "
-            << chimera::util::getFullyQualifiedTypeName(
-                *context_, decl->getTypeForDecl()->getCanonicalTypeInternal())
-            << " because it contains a template template parameter.\n";
-        return false;
-    }
-
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
