@@ -171,33 +171,6 @@ void GenerateFunctionArguments(
     }
 }
 
-bool HasTemplateTemplateArgument(CXXRecordDecl const *decl)
-{
-    if (isa<ClassTemplateSpecializationDecl>(decl)) {
-        auto template_decl = cast<ClassTemplateSpecializationDecl>(decl);
-        const auto &template_args = template_decl->getTemplateArgs();
-
-        for (size_t i = 0; i < template_args.size(); ++i) {
-            const TemplateArgument &template_arg = template_args[i];
-
-            switch (template_arg.getKind()) {
-            case TemplateArgument::Template:
-            case TemplateArgument::TemplateExpansion:
-                // You can get the fully qualified name using this code:
-                //
-                //     template_arg.getAsTemplateOrTemplatePattern()
-                //     .getAsTemplateDecl()->getQualifiedNameAsString()
-                //
-                return true;
-
-            default:
-                break; // do nothing
-            }
-        }
-    }
-    return false;
-}
-
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
