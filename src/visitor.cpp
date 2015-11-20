@@ -292,7 +292,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
-                *context_, decl->getTypeForDecl()->getCanonicalTypeInternal());
+                *context_, QualType(decl->getTypeForDecl(), 0));
 
     const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
@@ -553,7 +553,10 @@ bool chimera::Visitor::GenerateStaticField(
 
     if (!decl->getType().isConstQualified())
     {
-        stream << "[](" << decl->getType().getAsString(printing_policy_) << " value) { "
+        stream << ", []("
+               << chimera::util::getFullyQualifiedTypeName(
+                   *context_, decl->getType())
+               << " value) { "
                << decl->getQualifiedNameAsString() << " = value; }";
     }
 

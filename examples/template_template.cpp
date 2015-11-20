@@ -6,10 +6,21 @@ class B {
 };
 
 template <template <typename> class T>
-class A
-{
-  T<int> y;
+class A {
+public:
+  int bar;
+
+  void foo();
 };
+
+class Banana {
+public:
+  static A<B> baz;
+};
+
+void f(A<B> x)
+{
+}
 
 } // namespace
 
