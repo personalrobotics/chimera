@@ -1559,6 +1559,16 @@ namespace utils {
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
 
+    if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
+      Qualifiers quals = QT.getQualifiers();
+      const Type *class_type = llvm::cast<MemberPointerType>(QT.getTypePtr())->getClass();
+
+      QT = GetFullyQualifiedType(QT->getPointeeType(), Ctx);
+      QT = Ctx.getMemberPointerType(QT, GetFullyQualifiedLocalType(Ctx, class_type));
+      QT = Ctx.getQualifiedType(QT, quals);
+      return QT;
+    }
+
     // In case of myType* we need to strip the pointer first, fully qualifiy
     // and attach the pointer once again.
     if (llvm::isa<PointerType>(QT.getTypePtr())) {
