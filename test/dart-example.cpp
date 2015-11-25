@@ -20,6 +20,8 @@ template <typename _Signature,
 template <typename... _ArgTypes>
 class Signal<void(_ArgTypes...)>
 {
+public:
+  void f();
 };
 
 template <typename T>
@@ -51,7 +53,5 @@ class Entity
 int main(int argc, char **argv)
 {
   using namespace dart::dynamics;
-
-  Entity foo;
 
 }

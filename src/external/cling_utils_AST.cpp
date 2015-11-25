@@ -1561,11 +1561,14 @@ namespace utils {
 
     if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
       Qualifiers quals = QT.getQualifiers();
+
       const Type *class_type = llvm::cast<MemberPointerType>(QT.getTypePtr())->getClass();
+      class_type = GetFullyQualifiedType(class_type->getCanonicalTypeInternal(), Ctx).getTypePtr();
 
       QT = GetFullyQualifiedType(QT->getPointeeType(), Ctx);
-      QT = Ctx.getMemberPointerType(QT, GetFullyQualifiedLocalType(Ctx, class_type));
+      QT = Ctx.getMemberPointerType(QT, class_type);
       QT = Ctx.getQualifiedType(QT, quals);
+
       return QT;
     }
 
