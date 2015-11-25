@@ -1358,7 +1358,9 @@ namespace utils {
     if (prefix) {
       // We intentionally always use ETK_None, we never want
       // the keyword (humm ... what about anonymous types?)
-      QT = Ctx.getElaboratedType(ETK_None,prefix,QT);
+      // TODO: Adding this line produces unqualified types in function
+      // arguments, but removing it causes the class to lose its NNS.
+      //QT = Ctx.getElaboratedType(ETK_None,prefix,QT);
       QT = Ctx.getQualifiedType(QT, prefix_qualifiers);
     } else if (original_prefix) {
       QT = Ctx.getQualifiedType(QT, prefix_qualifiers);
@@ -1668,7 +1670,9 @@ namespace utils {
     if (prefix) {
       // We intentionally always use ETK_None, we never want
       // the keyword (humm ... what about anonymous types?)
-      QT = Ctx.getElaboratedType(ETK_None,prefix,QT);
+      // TODO: Adding this line produces unqualified types in function
+      // arguments, but removing it causes the class to lose its NNS.
+      //QT = Ctx.getElaboratedType(ETK_None,prefix,QT);
       QT = Ctx.getQualifiedType(QT, prefix_qualifiers);
     }
     return QT;
