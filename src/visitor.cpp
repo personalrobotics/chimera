@@ -270,7 +270,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
-                *context_, decl->getTypeForDecl()->getCanonicalTypeInternal());
+                *context_, QualType(decl->getTypeForDecl(), 0));
 
     const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
@@ -615,8 +615,7 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
 
         CXXRecordDecl *const base_record_decl
           = base_decl.getType()->getAsCXXRecordDecl();
-        const QualType base_record_type
-          = base_record_decl->getTypeForDecl()->getCanonicalTypeInternal();
+        const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
         base_names.push_back(
             chimera::util::getFullyQualifiedTypeName(*context_, base_record_type)
