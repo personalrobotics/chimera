@@ -385,11 +385,11 @@ bool chimera::Visitor::GenerateFunction(
     if (class_decl && !cast<CXXMethodDecl>(decl)->isStatic())
     {
         pointer_type = context_->getMemberPointerType(
-            decl->getType(), class_decl->getTypeForDecl());
+            decl->getType()->getCanonicalTypeInternal(), class_decl->getTypeForDecl());
     }
     else
     {
-        pointer_type = context_->getPointerType(decl->getType());
+        pointer_type = context_->getPointerType(decl->getType()->getCanonicalTypeInternal());
     }
     pointer_type = chimera::util::getFullyQualifiedType(*context_,
                                                         pointer_type);
