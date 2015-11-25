@@ -171,6 +171,26 @@ void GenerateFunctionArguments(
     }
 }
 
+std::string getFullyQualifiedDeclName(
+    const ASTContext &context, const TypeDecl *decl)
+{
+    std::stringstream ss;
+    ss << chimera::util::getFullyQualifiedTypeName(
+            context, QualType(decl->getTypeForDecl(), 0))
+       << "::" << decl->getNameAsString();
+    return ss.str();
+}
+
+std::string getFullyQualifiedDeclName(
+    const ASTContext &context, const ValueDecl *decl)
+{
+    std::stringstream ss;
+    ss << chimera::util::getFullyQualifiedTypeName(
+            context, decl->getType())
+       << "::" << decl->getNameAsString();
+    return ss.str();
+}
+
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
@@ -453,8 +473,7 @@ bool chimera::Visitor::GenerateFunction(
     stream << "def(\"" << decl->getNameAsString() << "\""
            << ", static_cast<"
            << chimera::util::getFullyQualifiedTypeName(*context_, pointer_type)
-           << ">(&"
-           << decl->getQualifiedNameAsString() << ")";
+           << ">(&" << getFullyQualifiedDeclName(*context_, class_decl) << ")";
 
     // If a return value policy was specified, insert it after the function.
     if (!return_value_policy.empty())
@@ -492,7 +511,8 @@ bool chimera::Visitor::GenerateField(
         stream << ".def_readwrite";
 
     stream << "(\"" << decl->getNameAsString() << "\","
-           << " &" << decl->getQualifiedNameAsString() << ")\n";
+           << " &" << getFullyQualifiedDeclName(*context_, class_decl)
+           << ")\n";
     return true;
 }
 
@@ -507,12 +527,17 @@ bool chimera::Visitor::GenerateStaticField(
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString() << "\", "
-           << "[]() { return " << decl->getQualifiedNameAsString() << "; }";
+           << "[]() { return "
+           << getFullyQualifiedDeclName(*context_, decl)
+           << "; }";
 
     if (!decl->getType().isConstQualified())
     {
-        stream << "[](" << decl->getType().getAsString(printing_policy_) << " value) { "
-               << decl->getQualifiedNameAsString() << " = value; }";
+        stream << "[]("
+          << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
+          << " value) { "
+          << getFullyQualifiedDeclName(*context_, decl)
+          << " = value; }";
     }
 
     stream << ")\n";
@@ -531,13 +556,14 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
         return false;
 
     *stream << "::boost::python::enum_<"
-            << decl->getQualifiedNameAsString()
+            << getFullyQualifiedDeclName(*context_, decl)
             << ">(\"" << decl->getNameAsString() << "\")\n";
 
     for (EnumConstantDecl *constant_decl : decl->enumerators())
     {
         *stream << ".value(\"" << constant_decl->getNameAsString() << "\", "
-                << constant_decl->getQualifiedNameAsString() << ")\n";
+                << getFullyQualifiedDeclName(*context_, constant_decl)
+                << ")\n";
     }
 
     *stream << ";\n";
@@ -557,7 +583,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
-            << "\") = " << decl->getQualifiedNameAsString() << ";\n";
+            << "\") = " << getFullyQualifiedDeclName(*context_, decl) << ";\n";
     return true;
 }
 
