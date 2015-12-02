@@ -1,4 +1,5 @@
 #include "chimera/visitor.h"
+#include "chimera/util.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
@@ -185,31 +186,11 @@ void GenerateFunctionArguments(
     }
 }
 
-bool HasTemplateTemplateArgument(CXXRecordDecl const *decl)
+std::string getFullyQualifiedDeclTypeAsString(
+    const ASTContext &context, const TypeDecl *decl)
 {
-    if (isa<ClassTemplateSpecializationDecl>(decl)) {
-        auto template_decl = cast<ClassTemplateSpecializationDecl>(decl);
-        const auto &template_args = template_decl->getTemplateArgs();
-
-        for (size_t i = 0; i < template_args.size(); ++i) {
-            const TemplateArgument &template_arg = template_args[i];
-
-            switch (template_arg.getKind()) {
-            case TemplateArgument::Template:
-            case TemplateArgument::TemplateExpansion:
-                // You can get the fully qualified name using this code:
-                //
-                //     template_arg.getAsTemplateOrTemplatePattern()
-                //     .getAsTemplateDecl()->getQualifiedNameAsString()
-                //
-                return true;
-
-            default:
-                break; // do nothing
-            }
-        }
-    }
-    return false;
+    return chimera::util::getFullyQualifiedTypeName(
+        context, QualType(decl->getTypeForDecl(), 0));
 }
 
 } // namespace
@@ -276,18 +257,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
-    // Suppress classes with template template arguments because
-    // getQualifiedNameAsString() does not fully qualify them.
-    // TODO: This is either a bug in libtooling or an error in how we are using
-    // it and should be fixed in a future version.
-    if (HasTemplateTemplateArgument(decl)) {
-        std::cerr
-            << "Warning: Skipped class "
-            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_)
-            << " because it contains a template template parameter.\n";
-        return false;
-    }
-
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -302,7 +271,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         return false; // Explicitly suppressed.
 
     *stream << "::boost::python::class_<"
-            << decl->getTypeForDecl()->getCanonicalTypeInternal().getAsString(printing_policy_);
+            << chimera::util::getFullyQualifiedTypeName(
+                *context_, QualType(decl->getTypeForDecl(), 0));
 
     const bool is_noncopyable = !IsCopyable(decl);
     const YAML::Node &noncopyable_node = node["noncopyable"];
@@ -396,9 +366,21 @@ bool chimera::Visitor::GenerateCXXConstructor(
     std::vector<std::string> argument_types;
 
     for (ParmVarDecl *param_decl : decl->params())
-        argument_types.push_back(param_decl->getType()
-                                            .getCanonicalType()
-                                            .getAsString(printing_policy_));
+    {
+        if (param_decl->getType().getTypePtr()->isRValueReferenceType())
+        {
+            std::cerr
+                << "Warning: Skipped constructor of "
+                << class_decl->getNameAsString()
+                << " because parameter '" << param_decl->getNameAsString()
+                << "' is an rvalue reference.\n";
+            return false;
+        }
+
+        argument_types.push_back(
+           chimera::util::getFullyQualifiedTypeName(
+              *context_, param_decl->getType()));
+    }
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
@@ -443,10 +425,13 @@ bool chimera::Visitor::GenerateFunction(
     {
         pointer_type = context_->getPointerType(decl->getType());
     }
-    pointer_type = pointer_type.getCanonicalType();
+    pointer_type = chimera::util::getFullyQualifiedType(*context_,
+                                                        pointer_type);
 
     // Extract the return type of this function declaration.
-    const QualType return_qual_type = decl->getReturnType();
+    const QualType return_qual_type = 
+        chimera::util::getFullyQualifiedType(*context_,
+                                             decl->getReturnType());
     const Type *return_type = return_qual_type.getTypePtr();
 
     // First, check if a return_value_policy was specified for this function.
@@ -490,6 +475,18 @@ bool chimera::Visitor::GenerateFunction(
         // TODO: Check if return_type is non-copyable.
     }
 
+    // Suppress any functions that take arguments by rvalue reference.
+    for (const ParmVarDecl *const parm_decl : decl->parameters()) {
+        if (parm_decl->getType().getTypePtr()->isRValueReferenceType()) {
+            std::cerr
+                << "Warning: Skipped method "
+                << decl->getQualifiedNameAsString()
+                << " because parameter '" << parm_decl->getNameAsString()
+                << "' is an rvalue reference.\n";
+            return false;
+        }
+    }
+
     // If we are inside a class declaration, this is being called within a
     // builder pattern and will start with '.' since it is a member function.
     if (class_decl)
@@ -500,8 +497,18 @@ bool chimera::Visitor::GenerateFunction(
     // Create the actual function declaration here using its name and its
     // full pointer reference.
     stream << "def(\"" << decl->getNameAsString() << "\""
-           << ", static_cast<" << pointer_type.getAsString(printing_policy_) << ">(&"
-           << decl->getQualifiedNameAsString() << ")";
+           << ", static_cast<"
+           << chimera::util::getFullyQualifiedTypeName(*context_, pointer_type)
+           << ">(&";
+
+    if (class_decl) {
+        stream << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
+               << "::" << decl->getNameAsString();
+    } else {
+        stream << decl->getQualifiedNameAsString();
+    }
+
+    stream << ")";
 
     // If a return value policy was specified, insert it after the function.
     if (!return_value_policy.empty())
@@ -539,7 +546,9 @@ bool chimera::Visitor::GenerateField(
         stream << ".def_readwrite";
 
     stream << "(\"" << decl->getNameAsString() << "\","
-           << " &" << decl->getQualifiedNameAsString() << ")\n";
+           << " &" << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
+           << "::" << decl->getNameAsString()
+           << ")\n";
     return true;
 }
 
@@ -554,12 +563,19 @@ bool chimera::Visitor::GenerateStaticField(
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString() << "\", "
-           << "[]() { return " << decl->getQualifiedNameAsString() << "; }";
+           << "[]() { return "
+           << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
+           << "::" << decl->getNameAsString()
+           << "; }";
 
     if (!decl->getType().isConstQualified())
     {
-        stream << "[](" << decl->getType().getAsString(printing_policy_) << " value) { "
-               << decl->getQualifiedNameAsString() << " = value; }";
+        stream << ", []("
+          << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
+          << " value) { "
+          << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
+          << "::" << decl->getNameAsString()
+          << " = value; }";
     }
 
     stream << ")\n";
@@ -578,13 +594,15 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
         return false;
 
     *stream << "::boost::python::enum_<"
-            << decl->getQualifiedNameAsString()
+            << getFullyQualifiedDeclTypeAsString(*context_, decl)
             << ">(\"" << decl->getNameAsString() << "\")\n";
 
     for (EnumConstantDecl *constant_decl : decl->enumerators())
     {
         *stream << ".value(\"" << constant_decl->getNameAsString() << "\", "
-                << constant_decl->getQualifiedNameAsString() << ")\n";
+                << getFullyQualifiedDeclTypeAsString(*context_, decl)
+                << "::" << constant_decl->getNameAsString()
+                << ")\n";
     }
 
     *stream << ";\n";
@@ -636,10 +654,11 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
 
         CXXRecordDecl *const base_record_decl
           = base_decl.getType()->getAsCXXRecordDecl();
-        const QualType base_record_type
-          = base_record_decl->getTypeForDecl()->getCanonicalTypeInternal();
+        const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
-        base_names.push_back(base_record_type.getAsString(printing_policy_));
+        base_names.push_back(
+            chimera::util::getFullyQualifiedTypeName(*context_, base_record_type)
+        );
     }
 
     return base_names;

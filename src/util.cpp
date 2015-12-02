@@ -1,4 +1,5 @@
 #include "chimera/util.h"
+#include "external/cling_utils_AST.h"
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/Parse/Parser.h>
@@ -130,4 +131,18 @@ chimera::util::resolveNamespace(clang::CompilerInstance *ci,
     }
 
     return cast<NamespaceAliasDecl>(decl)->getNamespace()->getCanonicalDecl();
+}
+
+clang::QualType
+chimera::util::getFullyQualifiedType(const clang::ASTContext &context,
+                                     clang::QualType qt)
+{
+    return cling::utils::TypeName::GetFullyQualifiedType(qt, context);
+}
+
+std::string
+chimera::util::getFullyQualifiedTypeName(const clang::ASTContext &context,
+                                         clang::QualType qt)
+{
+    return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }

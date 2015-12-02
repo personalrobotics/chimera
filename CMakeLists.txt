@@ -65,6 +65,7 @@ add_executable(chimera
   src/stream.cpp
   src/visitor.cpp
   src/util.cpp
+  src/external/cling_utils_AST.cpp
 )
 
 target_link_libraries(chimera
