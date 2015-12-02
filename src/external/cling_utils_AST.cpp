@@ -1574,6 +1574,26 @@ namespace utils {
       return QT;
     }
 
+    if (llvm::isa<FunctionProtoType>(QT.getTypePtr())) {
+      Qualifiers quals = QT.getQualifiers();
+      const FunctionProtoType *function_type = llvm::cast<FunctionProtoType>(QT.getTypePtr());
+
+      QualType return_type = function_type->getReturnType();
+      return_type = GetFullyQualifiedType(return_type, Ctx);
+
+      std::vector<QualType> qualified_param_types;
+      qualified_param_types.reserve(function_type->getNumParams());
+
+      for (const QualType &param_type : function_type->param_types()) {
+        qualified_param_types.push_back(GetFullyQualifiedType(param_type, Ctx));
+      }
+
+      QT = Ctx.getFunctionType(return_type, qualified_param_types, function_type->getExtProtoInfo());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
     // In case of myType* we need to strip the pointer first, fully qualifiy
     // and attach the pointer once again.
     if (llvm::isa<PointerType>(QT.getTypePtr())) {
