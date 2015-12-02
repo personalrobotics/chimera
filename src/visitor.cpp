@@ -532,6 +532,7 @@ bool chimera::Visitor::GenerateStaticField(
     if (!decl->getType().isConstQualified())
     {
         stream << "[]("
+        stream << ", []("
           << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
           << " value) { "
           << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
