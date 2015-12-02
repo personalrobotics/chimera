@@ -351,9 +351,21 @@ bool chimera::Visitor::GenerateCXXConstructor(
     std::vector<std::string> argument_types;
 
     for (ParmVarDecl *param_decl : decl->params())
+    {
+        if (param_decl->getType().getTypePtr()->isRValueReferenceType())
+        {
+            std::cerr
+                << "Warning: Skipped constructor of "
+                << class_decl->getNameAsString()
+                << " because parameter '" << param_decl->getNameAsString()
+                << "' is an rvalue reference.\n";
+            return false;
+        }
+
         argument_types.push_back(
            chimera::util::getFullyQualifiedTypeName(
               *context_, param_decl->getType()));
+    }
 
     stream << ".def(::boost::python::init<"
            << join(argument_types, ", ")
@@ -446,6 +458,18 @@ bool chimera::Visitor::GenerateFunction(
             return false;
         }
         // TODO: Check if return_type is non-copyable.
+    }
+
+    // Suppress any functions that take arguments by rvalue reference.
+    for (const ParmVarDecl *const parm_decl : decl->parameters()) {
+        if (parm_decl->getType().getTypePtr()->isRValueReferenceType()) {
+            std::cerr
+                << "Warning: Skipped method "
+                << decl->getQualifiedNameAsString()
+                << " because parameter '" << parm_decl->getNameAsString()
+                << "' is an rvalue reference.\n";
+            return false;
+        }
     }
 
     // If we are inside a class declaration, this is being called within a
