@@ -4,18 +4,22 @@ arguments:
   - "-I/usr/lib/clang/3.6/include"
 
 template:
-  header:
-    content: '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
-  postinclude:
-    content: '/* postinclude */'
-  footer:
-    content: '/* footer */'
-  main_header:
-    content: '/* main header */'
-  main_postinclude:
-    content: '/* main postinclude */'
-  main_footer:
-    content: '/* main footer */'
+  file:
+    header:
+      content: '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
+    postinclude:
+      content: '/* postinclude */'
+    footer:
+      content: '/* footer */'
+  main:
+    header:
+      content: '/* main header */'
+    postinclude:
+      content: '/* main postinclude */'
+    precontent:
+      content: '/* main precontent */'
+    footer:
+      content: '/* main footer */'
 
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
