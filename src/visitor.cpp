@@ -188,7 +188,7 @@ void GenerateFunctionArguments(
                 use_param_default = true;
 
             // If we reached the parameters with default arguments, write them.
-            if (use_param_default && !param_it->second.empty())
+            if (use_param_default)
                 python_arg << " = " << param_it->second;
 
             // Record this entry to the list of parameter declarations.
