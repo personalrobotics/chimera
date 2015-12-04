@@ -29,7 +29,9 @@ bool IsAssignable(CXXRecordDecl *decl)
 
 bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
 {
-    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+    if (qual_type.isConstQualified())
+        return false;
+    else if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
         return IsAssignable(decl);
     else if (qual_type.getTypePtr()->isArrayType())
         return false;
