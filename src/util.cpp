@@ -111,7 +111,11 @@ chimera::util::resolveRecord(clang::CompilerInstance *ci,
     if (!type)
         return nullptr;
 
-    return cast<RecordDecl>(type->getAsCXXRecordDecl()->getCanonicalDecl());
+    auto cxx_record_type = type->getAsCXXRecordDecl();
+    if (!cxx_record_type)
+        return nullptr;
+
+    return cast<RecordDecl>(cxx_record_type->getCanonicalDecl());
 }
 
 const NamespaceDecl*

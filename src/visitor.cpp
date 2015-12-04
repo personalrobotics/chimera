@@ -149,7 +149,8 @@ bool ContainsIncompleteType(QualType qual_type)
 }
 
 std::vector<std::pair<std::string, std::string>>
-    GetParameterNames(ASTContext &context, clang::FunctionDecl *decl)
+GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &config,
+                  clang::FunctionDecl *decl)
 {
     std::vector<std::pair<std::string, std::string>> params;
 
@@ -213,6 +214,9 @@ std::vector<std::pair<std::string, std::string>>
             }
         }
 
+        // If a constant has been overriden, use the override instead of the
+        // original value.  Currently, this is just done via string-matching.
+        param_value = config.GetConstant(param_value);
         params.push_back(std::make_pair(param_name, param_value));
     }
 
@@ -220,12 +224,12 @@ std::vector<std::pair<std::string, std::string>>
 }
 
 void GenerateFunctionArguments(
-    ASTContext &context, FunctionDecl *decl, bool leading_comma,
-    chimera::Stream &stream)
+    ASTContext &context, const chimera::CompiledConfiguration &config,
+    FunctionDecl *decl, bool leading_comma, chimera::Stream &stream)
 {
     // Construct a list of the arguments that are provided to this function,
     // and define named arguments for them based on their c++ names.
-    const auto params = GetParameterNames(context, decl);
+    const auto params = GetParameterNames(context, config, decl);
 
     if (!params.empty())
     {
@@ -493,7 +497,7 @@ bool chimera::Visitor::GenerateCXXConstructor(
            << join(argument_types, ", ")
            << ">(";
 
-    GenerateFunctionArguments(*context_, decl, false, stream);
+    GenerateFunctionArguments(*context_, *config_, decl, false, stream);
 
     stream << "))\n";
 
@@ -642,7 +646,7 @@ bool chimera::Visitor::GenerateFunction(
     }
 
     // Generate named arguments.
-    GenerateFunctionArguments(*context_, decl, true, stream);
+    GenerateFunctionArguments(*context_, *config_, decl, true, stream);
 
     stream << ")\n";
 
