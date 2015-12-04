@@ -669,20 +669,18 @@ bool chimera::Visitor::GenerateStaticField(
     else if (!decl->isStaticDataMember())
         return false;
 
-    stream << ".add_static_property(\"" << decl->getNameAsString() << "\", "
-           << "[]() { return "
+    stream << ".add_static_property(\"" << decl->getNameAsString()
+           << "\", ::boost::python::make_getter("
            << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
            << "::" << decl->getNameAsString()
-           << "; }";
+           << ")";
 
     if (IsQualTypeAssignable(*context_, decl->getType()))
     {
-        stream << ", []("
-          << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
-          << " value) { "
+        stream << ", ::boost::python::make_setter("
           << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
           << "::" << decl->getNameAsString()
-          << " = value; }";
+          << ")";
     }
 
     stream << ")\n";
