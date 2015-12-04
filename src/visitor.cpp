@@ -80,6 +80,46 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
+// Generate a safe name to use for a CXXRecordDecl.
+//
+// This uses a combination of unqualified names, namespace mangling, and
+// config overrides to resolve the string name that a binding should use for
+// a given C++ class declaration.
+std::string ConstructBindingName(
+    CXXRecordDecl *decl, ASTContext &context,
+    const chimera::CompiledConfiguration &config)
+{
+    const YAML::Node &node = config.GetDeclaration(decl);
+
+    // If a name is specified in the configuration, use that.
+    if (node.IsNull() && node["name"])
+        return node.as<std::string>();
+
+    // If the class is not a template class, use the unqualified string name.
+    if (!isa<ClassTemplateSpecializationDecl>(decl))
+        return decl->getNameAsString();
+
+    // If the class is a template, use the mangled string name so that it does
+    // not collide with other template instantiations.
+    std::string mangled_name;
+    llvm::raw_string_ostream mangled_name_stream(mangled_name);
+    context.createMangleContext()->mangleName(decl, mangled_name_stream);
+    mangled_name = mangled_name_stream.str();
+
+    // Throw a warning that this class name was mangled, because users will
+    // probably want to override these names with more sensible ones.
+    std::cerr << "Warning: The class '"
+              << chimera::util::getFullyQualifiedTypeName(context,
+                    QualType(decl->getTypeForDecl(), 0)) << "'"
+              << " was bound to the mangled name "
+              << "'" << mangled_name << "'"
+              << " because the unqualified class name of "
+              << "'" << decl->getNameAsString() << "'"
+              << " may be ambiguous.\n";
+
+    return mangled_name;
+}
+
 std::vector<std::pair<std::string, std::string>>
     GetParameterNames(ASTContext &context, clang::FunctionDecl *decl)
 {
@@ -295,7 +335,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
                   << join(base_names, ", ") << " >";
     }
 
-    *stream << " >(\"" << node["name"].as<std::string>(decl->getNameAsString())
+    *stream << " >(\"" << ConstructBindingName(decl, *context_, *config_)
             << "\", boost::python::no_init)\n";
 
     // Methods
