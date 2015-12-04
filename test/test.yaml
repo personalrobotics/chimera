@@ -10,6 +10,12 @@ template:
     content: '/* postinclude */'
   footer:
     content: '/* footer */'
+  main_header:
+    content: '/* main header */'
+  main_postinclude:
+    content: '/* main postinclude */'
+  main_footer:
+    content: '/* main footer */'
 
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
