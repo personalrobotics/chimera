@@ -41,7 +41,7 @@ protected:
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
-    std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;
+    std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl);
 
     clang::ASTContext *context_;
     clang::PrintingPolicy printing_policy_;
