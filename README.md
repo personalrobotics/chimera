@@ -19,7 +19,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ## Installation ##
 
-** Requirements **
+**Requirements**
 
 - libclang 3.6
 - llvm 3.6 (+ tools)
@@ -74,7 +74,7 @@ declarations:
     source: 'test.cpp.in'
   'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
     content: '/* Instead of implementing this function, insert this comment! */'
-  'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': ~
+  'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': null
     # This declaration will be suppressed.
   '::dart::dynamics::Shape':
     name: Shape
