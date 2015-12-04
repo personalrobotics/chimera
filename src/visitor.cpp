@@ -97,6 +97,10 @@ std::string ConstructBindingName(
     if (node.IsNull() && node["name"])
         return node.as<std::string>();
 
+    // If this is an anonymous struct, then use the name of its typedef.
+    if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
+        return typedef_decl->getNameAsString();
+
     // If the class is not a template class, use the unqualified string name.
     if (!isa<ClassTemplateSpecializationDecl>(decl))
         return decl->getNameAsString();
