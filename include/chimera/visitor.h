@@ -1,8 +1,8 @@
 #ifndef __CHIMERA_VISITOR_H__
 #define __CHIMERA_VISITOR_H__
 
+#include <set>
 #include "chimera/configuration.h"
-
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -41,11 +41,13 @@ protected:
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;
-    std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl) const;
+    std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl);
 
     clang::ASTContext *context_;
     clang::PrintingPolicy printing_policy_;
     std::unique_ptr<CompiledConfiguration> config_;
+
+    std::set<clang::CXXRecordDecl *> traversed_class_decls_;
 };
 
 } // namespace chimera
