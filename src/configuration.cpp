@@ -230,13 +230,15 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     );
 
     // Resolve customizable snippets that will be inserted into the file.
-    const YAML::Node &template_config = parent_.GetRoot()["template"];
-    std::string header_snippet, postinclude_snippet, footer_snippet;
-    getSnippet(template_config["main_header"],
+    const YAML::Node &template_config = parent_.GetRoot()["template"]["main"];
+    std::string header_snippet, postinclude_snippet, footer_snippet, precontent_snippet;
+    getSnippet(template_config["header"],
                parent_.GetConfigFilename(), header_snippet);
-    getSnippet(template_config["main_postinclude"],
+    getSnippet(template_config["postinclude"],
                parent_.GetConfigFilename(), postinclude_snippet);
-    getSnippet(template_config["main_footer"],
+    getSnippet(template_config["precontent"],
+               parent_.GetConfigFilename(), precontent_snippet);
+    getSnippet(template_config["footer"],
                parent_.GetConfigFilename(), footer_snippet);
 
     // Create a stream wrapper to write header and footer of file.
@@ -244,6 +246,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     binding_.reset(new chimera::Stream(
         stream, binding_prototype, includes_,
         header_snippet, postinclude_snippet, footer_snippet));
+    *binding_ << precontent_snippet << "\n";
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -320,7 +323,7 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     }
 
     // Resolve customizable snippets that will be inserted into the file.
-    const YAML::Node &template_config = parent_.GetRoot()["template"];
+    const YAML::Node &template_config = parent_.GetRoot()["template"]["file"];
     std::string header_snippet, postinclude_snippet, footer_snippet;
     getSnippet(template_config["header"],
                parent_.GetConfigFilename(), header_snippet);
