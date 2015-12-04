@@ -311,7 +311,10 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
         auto *class_decl = cast<CXXRecordDecl>(decl);
 
         if (!IsInsideTemplateClass(class_decl))
-            GenerateCXXRecord(class_decl);
+        {
+            if (GenerateCXXRecord(class_decl))
+                traversed_class_decls_.insert(class_decl->getCanonicalDecl());
+        }
     }
     else if (isa<EnumDecl>(decl))
     {
@@ -339,8 +342,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (traversed_class_decls_.count(decl->getCanonicalDecl()))
         return false;
 
-    traversed_class_decls_.insert(decl->getCanonicalDecl());
-
     // Ignore partial template specializations. These still have unbound
     // template parameters.
     if (isa<ClassTemplatePartialSpecializationDecl>(decl))
@@ -355,6 +356,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (!decl->isCompleteDefinition())
         return false;
 
+    const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false; // Explicitly suppressed.
+
     // Use GetBaseClassNames to traverse base classes before this class and, in
     // the process, generate their bindings (if necessary).
     const std::vector<std::string> default_base_names = GetBaseClassNames(decl);
@@ -367,10 +372,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, *stream))
         return true;
-
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
-        return false; // Explicitly suppressed.
 
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
@@ -773,9 +774,11 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
           = base_decl.getType()->getAsCXXRecordDecl();
         const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
+        // Generate the base class, if necessary.
+        VisitDecl(base_record_decl);
+
         const bool base_exists
-            = traversed_class_decls_.count(base_record_decl->getCanonicalDecl())
-              || GenerateCXXRecord(base_record_decl->getDefinition());
+            = traversed_class_decls_.count(base_record_decl->getCanonicalDecl());
         const std::string base_name
             = chimera::util::getFullyQualifiedTypeName(*context_, base_record_type);
 
