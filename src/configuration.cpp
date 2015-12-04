@@ -265,8 +265,7 @@ chimera::CompiledConfiguration::GetDeclaration(const clang::Decl *decl) const
 const YAML::Node&
 chimera::CompiledConfiguration::GetType(const clang::QualType type) const
 {
-    const auto canonical_type =
-        chimera::util::getFullyQualifiedType(ci_->getASTContext(), type);
+    const auto canonical_type = type.getCanonicalType();
     for (const auto &entry : types_)
     {
         if (entry.first == canonical_type)
