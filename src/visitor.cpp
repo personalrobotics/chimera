@@ -29,10 +29,12 @@ bool IsAssignable(CXXRecordDecl *decl)
 
 bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
 {
-    // TODO: Is this logic correct?
-
-    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+    if (qual_type.isConstQualified())
+        return false;
+    else if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
         return IsAssignable(decl);
+    else if (qual_type.getTypePtr()->isArrayType())
+        return false;
     else
         return qual_type.isTriviallyCopyableType(context);
 }
@@ -120,6 +122,28 @@ std::string ConstructBindingName(
     return mangled_name;
 }
 
+bool ContainsIncompleteType(QualType qual_type)
+{
+    const Type *type = qual_type.getTypePtr();
+
+    // TODO: We're probably missing a few cases here.
+
+    if (isa<PointerType>(type))
+    {
+        const PointerType *pointer_type = cast<PointerType>(type);
+        return ContainsIncompleteType(pointer_type->getPointeeType());
+    }
+    else if (isa<ReferenceType>(type))
+    {
+        const ReferenceType *reference_type = cast<ReferenceType>(type);
+        return ContainsIncompleteType(reference_type->getPointeeType());
+    }
+    else
+    {
+        return type->isIncompleteType();
+    }
+}
+
 std::vector<std::pair<std::string, std::string>>
     GetParameterNames(ASTContext &context, clang::FunctionDecl *decl)
 {
@@ -201,21 +225,37 @@ void GenerateFunctionArguments(
 
     if (!params.empty())
     {
-        // TODO: Suppress any default parameters that occur after the first
-        // non-default to default transition. This can only occur if evaluating
-        // the default value of one or more parameters failed.
+        // Find the last empty parameter, or return the beginning of the list.
+        // This gets us an iterator to parameters that can have defaults, while
+        // suppressing defaults that occurred before a default that we failed
+        // to evaluate.
+        const auto last_blank_param = find_if(params.rbegin(), params.rend(),
+            [](const std::pair<std::string, std::string> &param) {
+                return param.second.empty();
+            });
+        const auto param_defaults_begin = last_blank_param.base();
 
         // TODO: Assign names to unnamed arguments.
 
         std::vector<std::string> python_args;
-        for (const auto &param : params)
+        bool use_param_default = false;
+
+        for (auto param_it = params.begin(); param_it != params.end(); ++param_it)
         {
             std::stringstream python_arg;
-            python_arg << "::boost::python::arg(\"" << param.first << "\")";
 
-            if (!param.second.empty())
-                python_arg << " = " << param.second;
+            // Add the named argument directive.
+            python_arg << "::boost::python::arg(\"" << param_it->first << "\")";
 
+            // If this is the first default param, set flag to start serializing them.
+            if (param_defaults_begin == param_it)
+                use_param_default = true;
+
+            // If we reached the parameters with default arguments, write them.
+            if (use_param_default)
+                python_arg << " = " << param_it->second;
+
+            // Record this entry to the list of parameter declarations.
             python_args.push_back(python_arg.str());
         }
 
@@ -300,6 +340,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
 
     // Skip protected and private classes.
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
+        return false;
+
+    // Skip incomplete types. Boost.Python requires RTTI, which requires the
+    // complete type.
+    if (!decl->isCompleteDefinition())
         return false;
 
     // Open a stream object unique to this CXX record's mangled name.
@@ -449,7 +494,24 @@ bool chimera::Visitor::GenerateFunction(
 
     // Skip function template declarations.
     if (decl->getDescribedFunctionTemplate())
-      return false;
+        return false;
+
+    // Skip functions that have incomplete argument types. Boost.Python
+    // requires RTTI information about all arguments, including references and
+    // pointers.
+    for (const ParmVarDecl *param : decl->params())
+    {
+        if (ContainsIncompleteType(param->getOriginalType()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << decl->getQualifiedNameAsString()
+                << " because argument '"
+                << param->getNameAsString()
+                << "' has an incomplete type.\n";
+            return false;
+        }
+    }
 
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, stream))
@@ -613,7 +675,7 @@ bool chimera::Visitor::GenerateStaticField(
            << "::" << decl->getNameAsString()
            << "; }";
 
-    if (!decl->getType().isConstQualified())
+    if (IsQualTypeAssignable(*context_, decl->getType()))
     {
         stream << ", []("
           << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
