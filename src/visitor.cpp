@@ -82,6 +82,28 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
+bool ContainsIncompleteType(QualType qual_type)
+{
+    const Type *type = qual_type.getTypePtr();
+
+    // TODO: We're probably missing a few cases here.
+
+    if (isa<PointerType>(type))
+    {
+        const PointerType *pointer_type = cast<PointerType>(type);
+        return ContainsIncompleteType(pointer_type->getPointeeType());
+    }
+    else if (isa<ReferenceType>(type))
+    {
+        const ReferenceType *reference_type = cast<ReferenceType>(type);
+        return ContainsIncompleteType(reference_type->getPointeeType());
+    }
+    else
+    {
+        return type->isIncompleteType();
+    }
+}
+
 std::vector<std::pair<std::string, std::string>>
     GetParameterNames(ASTContext &context, clang::FunctionDecl *decl)
 {
@@ -280,6 +302,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
+    // Skip incomplete types. Boost.Python requires RTTI, which requires the
+    // complete type.
+    if (!decl->isCompleteDefinition())
+        return false;
+
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -427,7 +454,24 @@ bool chimera::Visitor::GenerateFunction(
 
     // Skip function template declarations.
     if (decl->getDescribedFunctionTemplate())
-      return false;
+        return false;
+
+    // Skip functions that have incomplete argument types. Boost.Python
+    // requires RTTI information about all arguments, including references and
+    // pointers.
+    for (const ParmVarDecl *param : decl->params())
+    {
+        if (ContainsIncompleteType(param->getOriginalType()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << decl->getQualifiedNameAsString()
+                << " because argument '"
+                << param->getNameAsString()
+                << "' has an incomplete type.\n";
+            return false;
+        }
+    }
 
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, stream))
