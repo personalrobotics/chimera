@@ -275,10 +275,10 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
 
     // Use the C++ mangler to create the mangled binding filename.
-    llvm::SmallString<1024> base_input_buffer;
-    llvm::raw_svector_ostream base_input_stream(base_input_buffer);
-    mangler_->mangleName(named_decl, base_input_stream);
-    std::string mangled_name = base_input_stream.str();
+    std::string mangled_name;
+    llvm::raw_string_ostream mangled_name_stream(mangled_name);
+    mangler_->mangleName(named_decl, mangled_name_stream);
+    mangled_name = mangled_name_stream.str();
 
     // Create an output file depending on the provided parameters.
     std::string binding_filename =
