@@ -23,8 +23,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   PREFIX ""
 )
 target_link_libraries(${PROJECT_NAME}
-  #boost_numpy
-  #boost_numpy_eigen
+  boost_numpy
+  boost_numpy_eigen
   ${Boost_LIBRARIES}
   ${BoostNumpy_LIBRARIES}
   ${BoostNumpyEigen_LIBRARIES}
