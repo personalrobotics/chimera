@@ -347,6 +347,22 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (!decl->isCompleteDefinition())
         return false;
 
+    // Traverse base classes before this class.
+    // TODO: Merge this with GetBaseNames.
+    traversed_class_decls_.insert(decl->getCanonicalDecl());
+
+    for (CXXBaseSpecifier &base_decl : decl->bases())
+    {
+        if (base_decl.getAccessSpecifier() != AS_public)
+            continue;
+
+        CXXRecordDecl *base_record_decl
+            = base_decl.getType()->getAsCXXRecordDecl();
+
+        if (!traversed_class_decls_.count(base_record_decl->getCanonicalDecl()))
+            GenerateCXXRecord(base_record_decl->getDefinition());
+    }
+
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
