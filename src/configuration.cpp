@@ -275,6 +275,13 @@ chimera::CompiledConfiguration::GetType(const clang::QualType type) const
     return emptyNode_;
 }
 
+std::string
+chimera::CompiledConfiguration::GetConstant(const std::string &value) const
+{
+    const YAML::Node &constants = parent_.GetRoot()["constants"];
+    return constants[value].as<std::string>(value);
+}
+
 std::unique_ptr<chimera::Stream>
 chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 {

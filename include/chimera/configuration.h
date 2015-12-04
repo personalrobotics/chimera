@@ -104,6 +104,12 @@ public:
     const YAML::Node& GetType(const clang::QualType type) const;
 
     /**
+     * Get the string constant overriding with a specific constexpr value,
+     * or return the original value if no override is found.
+     */
+    std::string GetConstant(const std::string &value) const;
+
+    /**
      * Get a file pointer used for the output a given decl.
      *
      * This output path is an individual `.cpp` file created according to the

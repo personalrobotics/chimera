@@ -25,6 +25,11 @@ template:
 namespaces:
   - dart
 
+# String replacements for various constants used in default arguments.
+constants:
+  '&cout': 'std::cout'
+  'Frame': '::dart::Shape::SimpleFrame'
+
 # Selected types that need special handling.
 types:
   'const double &':
