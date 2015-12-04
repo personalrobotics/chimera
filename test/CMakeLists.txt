@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.8)
 project(dartpy)
 
 find_package(Boost REQUIRED COMPONENTS python)
+find_package(BoostNumpy REQUIRED)
+find_package(BoostNumpyEigen REQUIRED)
 find_package(DART REQUIRED)
 find_package(PythonLibs REQUIRED)
 
@@ -21,7 +23,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   PREFIX ""
 )
 target_link_libraries(${PROJECT_NAME}
+  #boost_numpy
+  #boost_numpy_eigen
   ${Boost_LIBRARIES}
+  ${BoostNumpy_LIBRARIES}
+  ${BoostNumpyEigen_LIBRARIES}
   ${DART_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
