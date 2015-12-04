@@ -1573,7 +1573,6 @@ namespace utils {
     }
 
     if (llvm::isa<FunctionProtoType>(QT.getTypePtr())) {
-      Qualifiers quals = QT.getQualifiers();
       const FunctionProtoType *function_type = llvm::cast<FunctionProtoType>(QT.getTypePtr());
 
       QualType return_type = function_type->getReturnType();
@@ -1586,7 +1585,66 @@ namespace utils {
         qualified_param_types.push_back(GetFullyQualifiedType(param_type, Ctx));
       }
 
+      Qualifiers quals = QT.getQualifiers();
       QT = Ctx.getFunctionType(return_type, qualified_param_types, function_type->getExtProtoInfo());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<ConstantArrayType>(QT.getTypePtr())) {
+      const ConstantArrayType *array_type = llvm::cast<ConstantArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getConstantArrayType(element_type, array_type->getSize(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<DependentSizedArrayType>(QT.getTypePtr())) {
+      const DependentSizedArrayType *array_type = llvm::cast<DependentSizedArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getDependentSizedArrayType(element_type, array_type->getSizeExpr(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
+        array_type->getBracketsRange());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<IncompleteArrayType>(QT.getTypePtr())) {
+      const IncompleteArrayType *array_type = llvm::cast<IncompleteArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getIncompleteArrayType(element_type,
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<VariableArrayType>(QT.getTypePtr())) {
+      const VariableArrayType *array_type = llvm::cast<VariableArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getVariableArrayType(element_type, array_type->getSizeExpr(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
+        array_type->getBracketsRange());
       QT = Ctx.getQualifiedType(QT, quals);
 
       return QT;
