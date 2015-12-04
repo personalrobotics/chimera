@@ -653,17 +653,19 @@ bool chimera::Visitor::GenerateField(
     clang::CXXRecordDecl *class_decl,
     clang::FieldDecl *decl)
 {
-    // TODO: Add support for return_value_type (including if this is false).
+    // TODO: Add support for YAML overrides.
+
+    // TODO: Add support for return_value_policy if set in the YAML override,
+    // even if this is false. If a return_value_policy is specified we'll have
+    // to use add_property() with make_getter and/or make_setter instead of
+    // def_readonly or def_readwrite.
     if (!IsQualTypeCopyable(*context_, decl->getType()))
         return false;
 
-    if (!IsQualTypeAssignable(*context_, decl->getType()))
-        return false;
-
-    if (decl->getType().isConstQualified())
-        stream << ".def_readonly";
-    else
+    if (IsQualTypeAssignable(*context_, decl->getType()))
         stream << ".def_readwrite";
+    else
+        stream << ".def_readonly";
 
     stream << "(\"" << decl->getNameAsString() << "\","
            << " &" << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
@@ -677,6 +679,8 @@ bool chimera::Visitor::GenerateStaticField(
     clang::CXXRecordDecl *class_decl,
     clang::VarDecl *decl)
 {
+    // TODO: Add support for YAML overrides, including return_value_policy.
+
     if (decl->getAccess() != AS_public)
         return false;
     else if (!decl->isStaticDataMember())
