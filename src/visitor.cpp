@@ -315,7 +315,10 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
         auto *class_decl = cast<CXXRecordDecl>(decl);
 
         if (!IsInsideTemplateClass(class_decl))
-            GenerateCXXRecord(class_decl);
+        {
+            if (GenerateCXXRecord(class_decl))
+                traversed_class_decls_.insert(class_decl->getCanonicalDecl());
+        }
     }
     else if (isa<EnumDecl>(decl))
     {
@@ -331,10 +334,16 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     return true;
 }
 
-bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
+bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
 {
     // Only traverse CXX records that contain the actual class definition.
-    if (!decl->hasDefinition() || decl->getDefinition() != decl)
+    if (!decl->hasDefinition())
+        return false;
+
+    decl = decl->getDefinition();
+
+    // Avoid generating duplicates of the same class.
+    if (traversed_class_decls_.count(decl->getCanonicalDecl()))
         return false;
 
     // Ignore partial template specializations. These still have unbound
@@ -351,6 +360,14 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (!decl->isCompleteDefinition())
         return false;
 
+    const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false; // Explicitly suppressed.
+
+    // Use GetBaseClassNames to traverse base classes before this class and, in
+    // the process, generate their bindings (if necessary).
+    const std::vector<std::string> default_base_names = GetBaseClassNames(decl);
+
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -359,10 +376,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, *stream))
         return true;
-
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
-        return false; // Explicitly suppressed.
 
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
@@ -377,7 +390,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
         *stream << ", " << held_type_node.as<std::string>();
 
     std::vector<std::string> base_names
-        = node["bases"].as<std::vector<std::string> >(GetBaseClassNames(decl));
+        = node["bases"].as<std::vector<std::string> >(default_base_names);
     if (!base_names.empty())
     {
         *stream << ", ::boost::python::bases<"
@@ -644,17 +657,19 @@ bool chimera::Visitor::GenerateField(
     clang::CXXRecordDecl *class_decl,
     clang::FieldDecl *decl)
 {
-    // TODO: Add support for return_value_type (including if this is false).
+    // TODO: Add support for YAML overrides.
+
+    // TODO: Add support for return_value_policy if set in the YAML override,
+    // even if this is false. If a return_value_policy is specified we'll have
+    // to use add_property() with make_getter and/or make_setter instead of
+    // def_readonly or def_readwrite.
     if (!IsQualTypeCopyable(*context_, decl->getType()))
         return false;
 
-    if (!IsQualTypeAssignable(*context_, decl->getType()))
-        return false;
-
-    if (decl->getType().isConstQualified())
-        stream << ".def_readonly";
-    else
+    if (IsQualTypeAssignable(*context_, decl->getType()))
         stream << ".def_readwrite";
+    else
+        stream << ".def_readonly";
 
     stream << "(\"" << decl->getNameAsString() << "\","
            << " &" << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
@@ -668,6 +683,8 @@ bool chimera::Visitor::GenerateStaticField(
     clang::CXXRecordDecl *class_decl,
     clang::VarDecl *decl)
 {
+    // TODO: Add support for YAML overrides, including return_value_policy.
+
     if (decl->getAccess() != AS_public)
         return false;
     else if (!decl->isStaticDataMember())
@@ -750,7 +767,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(
-    CXXRecordDecl *decl) const
+    CXXRecordDecl *decl)
 {
     std::vector<std::string> base_names;
 
@@ -765,9 +782,24 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
           = base_decl.getType()->getAsCXXRecordDecl();
         const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
-        base_names.push_back(
-            chimera::util::getFullyQualifiedTypeName(*context_, base_record_type)
-        );
+        // Generate the base class, if necessary.
+        VisitDecl(base_record_decl);
+
+        const bool base_exists
+            = traversed_class_decls_.count(base_record_decl->getCanonicalDecl());
+        const std::string base_name
+            = chimera::util::getFullyQualifiedTypeName(*context_, base_record_type);
+
+        if (base_exists)
+            base_names.push_back(base_name);
+        else
+        {
+            std::cerr << "Warning: Omitted base class '" << base_name
+                      << "' of class '"
+                      << chimera::util::getFullyQualifiedTypeName(*context_,
+                            QualType(decl->getTypeForDecl(), 0))
+                      << "' because it could not be wrapped.\n";
+        }
     }
 
     return base_names;
