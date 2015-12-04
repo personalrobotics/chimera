@@ -159,6 +159,8 @@ declarations:
   'Assimp::IOStream': null
   'dart::dynamics::AssimpInputResourceAdaptor': null
   'dart::optimizer::IpoptSolver': null
+  'dart::optimizer::NloptSolver': null
+  'dart::optimizer::DartTNLP': null
 
   # Suppressed because of bugs in Chimera.
   #'dart::common::Signal<void (std::shared_ptr<dart::dynamics::MetaSkeleton const>, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), dart::common::signal::detail::DefaultCombiner>': null
