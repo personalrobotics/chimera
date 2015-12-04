@@ -29,10 +29,10 @@ bool IsAssignable(CXXRecordDecl *decl)
 
 bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
 {
-    // TODO: Is this logic correct?
-
     if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
         return IsAssignable(decl);
+    else if (qual_type.getTypePtr()->isArrayType())
+        return false;
     else
         return qual_type.isTriviallyCopyableType(context);
 }
@@ -573,7 +573,7 @@ bool chimera::Visitor::GenerateStaticField(
            << "::" << decl->getNameAsString()
            << "; }";
 
-    if (!decl->getType().isConstQualified())
+    if (IsQualTypeAssignable(*context_, decl->getType()))
     {
         stream << ", []("
           << chimera::util::getFullyQualifiedTypeName(*context_, decl->getType())
