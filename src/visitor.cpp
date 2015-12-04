@@ -253,6 +253,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *const decl)
     if (!decl->hasDefinition() || decl->getDefinition() != decl)
         return false;
 
+    // Ignore partial template specializations. These still have unbound
+    // template parameters.
+    if (isa<ClassTemplatePartialSpecializationDecl>(decl))
+        return false;
+
     // Skip protected and private classes.
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
