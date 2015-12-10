@@ -1,5 +1,5 @@
 project(chimera)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0.2)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
 ###########
@@ -47,11 +47,6 @@ endif()
 include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
 
-# TODO: move this somewhere else.
-include_directories("${CMAKE_CURRENT_LIST_DIR}/external/cling/include")
-
-message(STATUS ${CMAKE_CXX_FLAGS})
-
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
   core
@@ -60,6 +55,14 @@ llvm_map_components_to_libnames(llvm_libs
   option
 )
 
+# Build the external tools: Mustache and Cling.
+add_subdirectory(external/mstch)
+include_directories(${mstch_INCLUDE_DIR})
+
+add_subdirectory(external/cling)
+include_directories(${cling_utils_INCLUDE_DIR})
+
+# Build the main chimera executable.
 add_executable(chimera
   src/chimera.cpp
   src/configuration.cpp
@@ -68,12 +71,15 @@ add_executable(chimera
   src/stream.cpp
   src/visitor.cpp
   src/util.cpp
-  # TODO: move this somewhere else.
-  external/cling/src/cling_utils_AST.cpp
 )
 
 target_link_libraries(chimera
   ${YAMLCPP_LIBRARIES}
   ${CLANG_LIBS}
   ${llvm_libs}
+)
+
+target_link_libraries(chimera
+  mstch
+  cling_utils
 )
