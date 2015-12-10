@@ -47,6 +47,9 @@ endif()
 include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
 
+# TODO: move this somewhere else.
+include_directories("${CMAKE_CURRENT_LIST_DIR}/external/cling/include")
+
 message(STATUS ${CMAKE_CXX_FLAGS})
 
 ## Use LLVM CMake macro to collate and order link libraries.
@@ -65,7 +68,8 @@ add_executable(chimera
   src/stream.cpp
   src/visitor.cpp
   src/util.cpp
-  src/external/cling/cling_utils_AST.cpp
+  # TODO: move this somewhere else.
+  external/cling/src/cling_utils_AST.cpp
 )
 
 target_link_libraries(chimera

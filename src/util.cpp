@@ -1,5 +1,5 @@
 #include "chimera/util.h"
-#include "external/cling/cling_utils_AST.h"
+#include "cling_utils_AST.h"
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/Parse/Parser.h>
