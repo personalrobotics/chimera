@@ -1,0 +1,15 @@
+[submodule "vendor/Catch"]
+	path = vendor/Catch
+	url = https://github.com/philsquared/Catch.git
+[submodule "vendor/spec"]
+	path = vendor/spec
+	url = https://github.com/mustache/spec.git
+[submodule "vendor/benchmark"]
+	path = vendor/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "vendor/headerize"]
+	path = vendor/headerize
+	url = https://github.com/no1msd/headerize.git
+[submodule "vendor/rapidjson"]
+	path = vendor/rapidjson
+	url = https://github.com/miloyip/rapidjson.git
