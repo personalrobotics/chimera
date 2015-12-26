@@ -71,6 +71,7 @@ add_executable(chimera
   src/stream.cpp
   src/visitor.cpp
   src/util.cpp
+  src/mstch.cpp
 )
 
 target_link_libraries(chimera
