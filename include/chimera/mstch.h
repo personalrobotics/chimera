@@ -18,15 +18,25 @@ namespace chimera
 namespace mstch
 {
 
+template<typename T>
 class ClangWrapper: public ::mstch::object
 {
+//static_assert(std::is_base_of<clang::NamedDecl, T>::value,
+//              "'T' must derive from clang::NamedDecl");
 public:
-    ClangWrapper(const clang::NamedDecl *decl,
-                 const ::chimera::CompiledConfiguration &config);
+    ClangWrapper(const T *decl,
+                 const ::chimera::CompiledConfiguration &config)
+    : decl_(decl), config_(config)
+    {
+        // Do nothing.
+    }
 
+protected:
+    const T *decl_;
+    const ::chimera::CompiledConfiguration &config_;
 };
 
-class CXXRecord: public ::mstch::object
+class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
     CXXRecord(const clang::CXXRecordDecl *decl,
@@ -47,13 +57,9 @@ public:
     
     ::mstch::node fields();
     ::mstch::node staticFields();
-
-private:
-    const clang::CXXRecordDecl *decl_;
-    const ::chimera::CompiledConfiguration &config_;
 };
 
-class Enum: public ::mstch::object
+class Enum: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
     Enum(const clang::EnumDecl *decl,
@@ -64,13 +70,9 @@ public:
     ::mstch::node mangledName();
     
     ::mstch::node values();
-
-private:
-    const clang::EnumDecl *decl_;
-    const ::chimera::CompiledConfiguration &config_;
 };
 
-class Function: public ::mstch::object
+class Function: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
     Function(const clang::FunctionDecl *decl,
@@ -83,13 +85,9 @@ public:
     ::mstch::node type();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
-
-private:
-    const clang::FunctionDecl *decl_;
-    const ::chimera::CompiledConfiguration &config_;
 };
 
-class GlobalVar: public ::mstch::object
+class GlobalVar: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
     GlobalVar(const clang::VarDecl *decl,
@@ -102,10 +100,6 @@ public:
     ::mstch::node type();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
-
-private:
-    const clang::VarDecl *decl_;
-    const ::chimera::CompiledConfiguration &config_;
 };
 
 } // namespace mstch

@@ -8,8 +8,7 @@ namespace mstch
 CXXRecord::CXXRecord(
     const clang::CXXRecordDecl *decl,
     const ::chimera::CompiledConfiguration &config)
-: decl_(decl)
-, config_(config)
+: ClangWrapper(decl, config)
 {
     register_methods(this, {
         {"bases", &CXXRecord::bases},
