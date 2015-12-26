@@ -151,6 +151,12 @@ chimera::util::getFullyQualifiedTypeName(const clang::ASTContext &context,
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }
 
+std::string chimera::util::getFullyQualifiedDeclTypeAsString(
+    const ASTContext &context, const TypeDecl *decl)
+{
+    return chimera::util::getFullyQualifiedTypeName(
+        context, QualType(decl->getTypeForDecl(), 0));
+}
 
 bool chimera::util::isAssignable(CXXRecordDecl *decl)
 {

@@ -74,14 +74,20 @@ clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
                                       clang::QualType qt);
 
 /**
- * Get the fully qualified name for a type. This includes full
- * qualification of all template parameters etc.
+ * Get the fully qualified name for a type.
+ * This includes full qualification of all template parameters, etc.
  *
  * Internally uses cling::utils::getFullyQualifiedName().
  */
 std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
                                       clang::QualType qt);
 
+/**
+ * Get the fully qualified name for the type used in a type declaration.
+ * This includes full qualification of all template parameters, etc.
+ */
+std::string getFullyQualifiedDeclTypeAsString(const clang::ASTContext &context,
+											  const clang::TypeDecl *decl);
 
 /**
  * Determines if a CXXRecordDecl is referring to a type that could be assigned to.
