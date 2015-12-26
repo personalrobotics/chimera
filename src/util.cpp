@@ -32,7 +32,7 @@ std::string generateUniqueName()
     return ss.str();
 }
 
-} // namespace anonymous
+} // namespace
 
 const NamedDecl*
 chimera::util::resolveDeclaration(CompilerInstance *ci,
