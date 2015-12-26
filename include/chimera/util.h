@@ -82,6 +82,32 @@ clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
 std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
                                       clang::QualType qt);
 
+
+/**
+ * Determines if a CXXRecordDecl is referring to a type that could be assigned to.
+ */
+bool isAssignable(clang::CXXRecordDecl *decl);
+
+/**
+ * Determines if a QualType is referring to a type that could be assigned to.
+ */
+bool isAssignable(clang::ASTContext &context, clang::QualType qual_type);
+
+/**
+ * Determines if a CXXRecordDecl is referring to a class that is copyable.
+ */
+bool isCopyable(clang::CXXRecordDecl *decl);
+
+/**
+ * Determines if a QualType is referring to a type that is copyable.
+ */
+bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
+
+/**
+ * Determines if a particular declaration is within the context of a template class.
+ */
+bool isInsideTemplateClass(clang::DeclContext *decl_context);
+
 } // namespace util
 } // namespace chimera
 

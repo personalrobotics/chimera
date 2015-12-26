@@ -32,7 +32,7 @@ std::string generateUniqueName()
     return ss.str();
 }
 
-}
+} // namespace anonymous
 
 const NamedDecl*
 chimera::util::resolveDeclaration(CompilerInstance *ci,
@@ -149,4 +149,74 @@ chimera::util::getFullyQualifiedTypeName(const clang::ASTContext &context,
                                          clang::QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
+}
+
+
+bool chimera::util::isAssignable(CXXRecordDecl *decl)
+{
+    if (decl->isAbstract())
+        return false;
+    else if (!decl->hasCopyAssignmentWithConstParam())
+        return false;
+
+    for (CXXMethodDecl *method_decl : decl->methods())
+        if (method_decl->isCopyAssignmentOperator() && !method_decl->isDeleted())
+            return true;
+
+    return false;
+}
+
+bool chimera::util::isAssignable(ASTContext &context, QualType qual_type)
+{
+    if (qual_type.isConstQualified())
+        return false;
+    else if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+        return isAssignable(decl);
+    else if (qual_type.getTypePtr()->isArrayType())
+        return false;
+    else
+        return qual_type.isTriviallyCopyableType(context);
+}
+
+bool chimera::util::isCopyable(CXXRecordDecl *decl)
+{
+    if (decl->isAbstract())
+        return false;
+    else if (!decl->hasCopyConstructorWithConstParam())
+        return false;
+
+    for (CXXConstructorDecl *ctor_decl : decl->ctors())
+        if (ctor_decl->isCopyConstructor() && !ctor_decl->isDeleted())
+            return true;
+
+    return false;
+}
+
+bool chimera::util::isCopyable(ASTContext &context, QualType qual_type)
+{
+    // TODO: Is this logic correct?
+
+    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
+        return isCopyable(decl);
+    else
+        return qual_type.isTriviallyCopyableType(context);
+}
+
+bool chimera::util::isInsideTemplateClass(DeclContext *decl_context)
+{
+    if (!decl_context->isRecord())
+        return false;
+
+    if (isa<CXXRecordDecl>(decl_context))
+    {
+        CXXRecordDecl *record_decl = cast<CXXRecordDecl>(decl_context);
+        if (record_decl->getDescribedClassTemplate())
+            return true;
+    }
+
+    DeclContext *parent_context = decl_context->getParent();
+    if (parent_context)
+        return isInsideTemplateClass(parent_context);
+    else
+        return false;
 }
