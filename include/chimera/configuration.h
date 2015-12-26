@@ -120,6 +120,11 @@ public:
     const clang::ASTContext &GetContext() const;
 
     /**
+     * Return if a declaration is enclosed by one of the configured namespaces.
+     */
+    bool IsEnclosed(const clang::Decl *decl) const;
+
+    /**
      * Get a file pointer used for the output a given decl.
      *
      * This output path is an individual `.cpp` file created according to the
