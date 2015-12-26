@@ -9,7 +9,6 @@
 #include <clang/Tooling/ArgumentsAdjusters.h>
 #include <llvm/Config/config.h>
 #include <llvm/Support/CommandLine.h>
-
 #include <memory>
 #include <string>
 

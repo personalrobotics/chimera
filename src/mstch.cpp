@@ -1,4 +1,7 @@
 #include "chimera/mstch.h"
+#include "chimera/util.h"
+
+using namespace clang;
 
 namespace chimera
 {
@@ -6,7 +9,7 @@ namespace mstch
 {
 
 CXXRecord::CXXRecord(
-    const clang::CXXRecordDecl *decl,
+    const CXXRecordDecl *decl,
     const ::chimera::CompiledConfiguration &config)
 : ClangWrapper(decl, config)
 {
@@ -23,7 +26,8 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::type()
 {
-    return std::string{"type"};
+    return chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
 }
 
 ::mstch::node CXXRecord::isCopyable()

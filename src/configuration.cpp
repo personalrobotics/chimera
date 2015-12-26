@@ -281,6 +281,16 @@ chimera::CompiledConfiguration::GetConstant(const std::string &value) const
     return constants[value].as<std::string>(value);
 }
 
+clang::CompilerInstance *chimera::CompiledConfiguration::GetCompilerInstance() const
+{
+    return ci_;
+}
+
+const clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
+{
+    return ci_->getASTContext();
+}
+
 std::unique_ptr<chimera::Stream>
 chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 {

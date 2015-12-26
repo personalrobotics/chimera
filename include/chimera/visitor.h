@@ -1,11 +1,12 @@
 #ifndef __CHIMERA_VISITOR_H__
 #define __CHIMERA_VISITOR_H__
 
-#include <set>
 #include "chimera/configuration.h"
+
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
+#include <set>
 
 namespace chimera
 {

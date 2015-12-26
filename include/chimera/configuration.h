@@ -110,6 +110,16 @@ public:
     std::string GetConstant(const std::string &value) const;
 
     /**
+     * Gets the compiler instance used by this configuration.
+     */
+    clang::CompilerInstance *GetCompilerInstance() const;
+
+    /**
+     * Gets the AST context used by this configuration.
+     */
+    const clang::ASTContext &GetContext() const;
+
+    /**
      * Get a file pointer used for the output a given decl.
      *
      * This output path is an individual `.cpp` file created according to the

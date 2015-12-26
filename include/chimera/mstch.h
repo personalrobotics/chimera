@@ -10,8 +10,9 @@
 #define __CHIMERA_MSTCH_H__
 
 #include "chimera/configuration.h"
+
+#include <clang/AST/AST.h>
 #include <mstch/mstch.hpp>
-#include <clang/AST/ASTContext.h>
 
 namespace chimera
 {
