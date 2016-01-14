@@ -138,27 +138,27 @@ chimera::util::resolveNamespace(clang::CompilerInstance *ci,
 }
 
 clang::QualType
-chimera::util::getFullyQualifiedType(const clang::ASTContext &context,
+chimera::util::getFullyQualifiedType(clang::ASTContext &context,
                                      clang::QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedType(qt, context);
 }
 
 std::string
-chimera::util::getFullyQualifiedTypeName(const clang::ASTContext &context,
+chimera::util::getFullyQualifiedTypeName(clang::ASTContext &context,
                                          clang::QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }
 
 std::string chimera::util::getFullyQualifiedDeclTypeAsString(
-    const ASTContext &context, const TypeDecl *decl)
+    ASTContext &context, const TypeDecl *decl)
 {
     return chimera::util::getFullyQualifiedTypeName(
         context, QualType(decl->getTypeForDecl(), 0));
 }
 
-bool chimera::util::isAssignable(CXXRecordDecl *decl)
+bool chimera::util::isAssignable(const CXXRecordDecl *decl)
 {
     if (decl->isAbstract())
         return false;
@@ -184,7 +184,7 @@ bool chimera::util::isAssignable(ASTContext &context, QualType qual_type)
         return qual_type.isTriviallyCopyableType(context);
 }
 
-bool chimera::util::isCopyable(CXXRecordDecl *decl)
+bool chimera::util::isCopyable(const CXXRecordDecl *decl)
 {
     if (decl->isAbstract())
         return false;
@@ -208,19 +208,20 @@ bool chimera::util::isCopyable(ASTContext &context, QualType qual_type)
         return qual_type.isTriviallyCopyableType(context);
 }
 
-bool chimera::util::isInsideTemplateClass(DeclContext *decl_context)
+bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
 {
     if (!decl_context->isRecord())
         return false;
 
     if (isa<CXXRecordDecl>(decl_context))
     {
-        CXXRecordDecl *record_decl = cast<CXXRecordDecl>(decl_context);
+        const CXXRecordDecl *record_decl =
+            cast<const CXXRecordDecl>(decl_context);
         if (record_decl->getDescribedClassTemplate())
             return true;
     }
 
-    DeclContext *parent_context = decl_context->getParent();
+    const DeclContext *parent_context = decl_context->getParent();
     if (parent_context)
         return isInsideTemplateClass(parent_context);
     else

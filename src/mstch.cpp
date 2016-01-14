@@ -32,7 +32,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::isCopyable()
 {
-    return false;
+    return chimera::util::isCopyable(decl_);
 }
 
 ::mstch::node CXXRecord::name()

@@ -286,7 +286,7 @@ clang::CompilerInstance *chimera::CompiledConfiguration::GetCompilerInstance() c
     return ci_;
 }
 
-const clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
+clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 {
     return ci_->getASTContext();
 }

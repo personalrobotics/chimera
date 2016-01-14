@@ -275,7 +275,7 @@ void GenerateFunctionArguments(
 }
 
 std::string getFullyQualifiedDeclTypeAsString(
-    const ASTContext &context, const TypeDecl *decl)
+    ASTContext &context, const TypeDecl *decl)
 {
     return chimera::util::getFullyQualifiedTypeName(
         context, QualType(decl->getTypeForDecl(), 0));

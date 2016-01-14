@@ -70,7 +70,7 @@ const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
  *
  * Internally uses cling::utils::getFullyQualifiedType().
  */
-clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
+clang::QualType getFullyQualifiedType(clang::ASTContext &context,
                                       clang::QualType qt);
 
 /**
@@ -79,20 +79,20 @@ clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
  *
  * Internally uses cling::utils::getFullyQualifiedName().
  */
-std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
+std::string getFullyQualifiedTypeName(clang::ASTContext &context,
                                       clang::QualType qt);
 
 /**
  * Get the fully qualified name for the type used in a type declaration.
  * This includes full qualification of all template parameters, etc.
  */
-std::string getFullyQualifiedDeclTypeAsString(const clang::ASTContext &context,
+std::string getFullyQualifiedDeclTypeAsString(clang::ASTContext &context,
 											  const clang::TypeDecl *decl);
 
 /**
  * Determine if a CXXRecordDecl is referring to a type that could be assigned to.
  */
-bool isAssignable(clang::CXXRecordDecl *decl);
+bool isAssignable(const clang::CXXRecordDecl *decl);
 
 /**
  * Determine if a QualType is referring to a type that could be assigned to.
@@ -102,7 +102,7 @@ bool isAssignable(clang::ASTContext &context, clang::QualType qual_type);
 /**
  * Determine if a CXXRecordDecl is referring to a class that is copyable.
  */
-bool isCopyable(clang::CXXRecordDecl *decl);
+bool isCopyable(const clang::CXXRecordDecl *decl);
 
 /**
  * Determine if a QualType is referring to a type that is copyable.
@@ -112,7 +112,7 @@ bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
 /**
  * Determine if a declaration is within the context of a template class.
  */
-bool isInsideTemplateClass(clang::DeclContext *decl_context);
+bool isInsideTemplateClass(const clang::DeclContext *decl_context);
 
 } // namespace util
 } // namespace chimera

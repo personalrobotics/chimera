@@ -117,7 +117,7 @@ public:
     /**
      * Gets the AST context used by this configuration.
      */
-    const clang::ASTContext &GetContext() const;
+    clang::ASTContext &GetContext() const;
 
     /**
      * Return if a declaration is enclosed by one of the configured namespaces.
