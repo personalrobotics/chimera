@@ -15,7 +15,8 @@ CXXRecord::CXXRecord(
 {
     register_methods(this, {
         {"bases", &CXXRecord::bases},
-        {"type", &CXXRecord::type}
+        {"type", &CXXRecord::type},
+        {"is_copyable", &CXXRecord::isCopyable}
     });
 }
 
