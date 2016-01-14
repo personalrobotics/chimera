@@ -28,6 +28,7 @@ public:
     ClangWrapper(const T *decl,
                  const ::chimera::CompiledConfiguration &config)
     : decl_(decl), config_(config)
+    , decl_config_(config_.GetDeclaration(decl_))
     {
         // Do nothing.
     }
@@ -35,6 +36,7 @@ public:
 protected:
     const T *decl_;
     const ::chimera::CompiledConfiguration &config_;
+    const YAML::Node &decl_config_;
 };
 
 class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>

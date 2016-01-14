@@ -2,6 +2,7 @@
 #include "cling_utils_AST.h"
 
 #include <clang/AST/ASTConsumer.h>
+#include <clang/AST/Mangle.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Sema/Sema.h>
 #include <iostream>
@@ -135,6 +136,49 @@ chimera::util::resolveNamespace(clang::CompilerInstance *ci,
     }
 
     return cast<NamespaceAliasDecl>(decl)->getNamespace()->getCanonicalDecl();
+}
+
+std::string
+chimera::util::constructMangledName(clang::ASTContext &context,
+                                    const clang::CXXRecordDecl *decl)
+{
+    std::string mangled_name;
+    llvm::raw_string_ostream mangled_name_stream(mangled_name);
+    context.createMangleContext()->mangleName(decl, mangled_name_stream);
+    return mangled_name_stream.str();
+}
+
+std::string
+chimera::util::constructBindingName(clang::ASTContext &context,
+                                    const clang::CXXRecordDecl *decl)
+{
+    // If this is an anonymous struct, then use the name of its typedef.
+    if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
+        return typedef_decl->getNameAsString();
+
+    // If the class is not a template class, use the unqualified string name.
+    if (!isa<ClassTemplateSpecializationDecl>(decl))
+        return decl->getNameAsString();
+
+    // If the class is a template, use the mangled string name so that it does
+    // not collide with other template instantiations.
+    std::string mangled_name;
+    llvm::raw_string_ostream mangled_name_stream(mangled_name);
+    context.createMangleContext()->mangleName(decl, mangled_name_stream);
+    mangled_name = mangled_name_stream.str();
+
+    // Throw a warning that this class name was mangled, because users will
+    // probably want to override these names with more sensible ones.
+    std::cerr << "Warning: The class '"
+              << chimera::util::getFullyQualifiedTypeName(context,
+                    QualType(decl->getTypeForDecl(), 0)) << "'"
+              << " was bound to the mangled name "
+              << "'" << mangled_name << "'"
+              << " because the unqualified class name of "
+              << "'" << decl->getNameAsString() << "'"
+              << " may be ambiguous.\n";
+
+    return mangled_name;
 }
 
 clang::QualType

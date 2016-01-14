@@ -16,7 +16,9 @@ CXXRecord::CXXRecord(
     register_methods(this, {
         {"bases", &CXXRecord::bases},
         {"type", &CXXRecord::type},
-        {"is_copyable", &CXXRecord::isCopyable}
+        {"is_copyable", &CXXRecord::isCopyable},
+        {"name", &CXXRecord::name},
+        {"mangled_name", &CXXRecord::mangledName}
     });
 }
 
@@ -27,28 +29,43 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::type()
 {
+    if (decl_config_["type"])
+        return node.as<std::string>();
+
     return chimera::util::getFullyQualifiedTypeName(
         config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
 }
 
 ::mstch::node CXXRecord::isCopyable()
 {
+    if (decl_config_["is_copyable"])
+        return node.as<bool>();
+
     return chimera::util::isCopyable(decl_);
 }
 
 ::mstch::node CXXRecord::name()
 {
-    return std::string{"type"};
+    if (decl_config_["name"])
+        return node.as<std::string>();
+
+    return chimera::util::constructBindingName(
+        config_.GetContext(), decl_);
 }
 
 ::mstch::node chimera::mstch::CXXRecord::uniquishName()
 {
-    return std::string{"uniquishName"};
+    // TODO: implement this properly.
+    return name();
 }
 
 ::mstch::node chimera::mstch::CXXRecord::mangledName()
 {
-    return std::string{"mangledName"};
+    if (decl_config_["mangled_name"])
+        return node.as<std::string>();
+
+    return chimera::util::constructMangledName
+        config_.GetContext(), decl_);
 }
 
 ::mstch::node chimera::mstch::CXXRecord::constructors()

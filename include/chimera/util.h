@@ -90,6 +90,24 @@ std::string getFullyQualifiedDeclTypeAsString(clang::ASTContext &context,
 											  const clang::TypeDecl *decl);
 
 /**
+ * Generate a safe name to use for a CXXRecordDecl.
+ *
+ * This uses a combination of unqualified names, namespace mangling, and
+ * config overrides to resolve the string name that a binding should use for
+ * a given C++ class declaration.
+ */
+std::string constructBindingName(clang::ASTContext &context,
+								 const clang::CXXRecordDecl *decl);
+
+/**
+ * Generate the C++ mangled name for a class.
+ *
+ * This name is generated from the Clang compiler name mangler.
+ */
+std::string constructMangledName(clang::ASTContext &context,
+                                 const clang::CXXRecordDecl *decl);
+
+/**
  * Determine if a CXXRecordDecl is referring to a type that could be assigned to.
  */
 bool isAssignable(const clang::CXXRecordDecl *decl);
