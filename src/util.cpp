@@ -2,6 +2,7 @@
 #include "cling_utils_AST.h"
 
 #include <clang/AST/ASTConsumer.h>
+#include "clang/AST/DeclTemplate.h"
 #include <clang/AST/Mangle.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Sema/Sema.h>
@@ -15,7 +16,7 @@ namespace
 /**
  * Empty QualType used when returning a type-resolution failure.
  */
-static const clang::QualType emptyType_;
+static const QualType emptyType_;
 
 /**
  * Generates incremental typedef names to avoid namespace conflicts.
@@ -85,7 +86,7 @@ chimera::util::resolveDeclaration(CompilerInstance *ci,
 }
 
 const QualType
-chimera::util::resolveType(clang::CompilerInstance *ci,
+chimera::util::resolveType(CompilerInstance *ci,
                            const llvm::StringRef typeStr)
 {
     auto decl = chimera::util::resolveDeclaration(
@@ -105,7 +106,7 @@ chimera::util::resolveType(clang::CompilerInstance *ci,
 }
 
 const RecordDecl*
-chimera::util::resolveRecord(clang::CompilerInstance *ci,
+chimera::util::resolveRecord(CompilerInstance *ci,
                              const llvm::StringRef recordStr)
 {
     auto type = chimera::util::resolveType(ci, recordStr).getTypePtrOrNull();
@@ -120,7 +121,7 @@ chimera::util::resolveRecord(clang::CompilerInstance *ci,
 }
 
 const NamespaceDecl*
-chimera::util::resolveNamespace(clang::CompilerInstance *ci,
+chimera::util::resolveNamespace(CompilerInstance *ci,
                                 const llvm::StringRef nsStr)
 {
     auto decl = chimera::util::resolveDeclaration(
@@ -139,8 +140,8 @@ chimera::util::resolveNamespace(clang::CompilerInstance *ci,
 }
 
 std::string
-chimera::util::constructMangledName(clang::ASTContext &context,
-                                    const clang::CXXRecordDecl *decl)
+chimera::util::constructMangledName(ASTContext &context,
+                                    const CXXRecordDecl *decl)
 {
     std::string mangled_name;
     llvm::raw_string_ostream mangled_name_stream(mangled_name);
@@ -149,8 +150,8 @@ chimera::util::constructMangledName(clang::ASTContext &context,
 }
 
 std::string
-chimera::util::constructBindingName(clang::ASTContext &context,
-                                    const clang::CXXRecordDecl *decl)
+chimera::util::constructBindingName(ASTContext &context,
+                                    const CXXRecordDecl *decl)
 {
     // If this is an anonymous struct, then use the name of its typedef.
     if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
@@ -181,16 +182,16 @@ chimera::util::constructBindingName(clang::ASTContext &context,
     return mangled_name;
 }
 
-clang::QualType
-chimera::util::getFullyQualifiedType(clang::ASTContext &context,
-                                     clang::QualType qt)
+QualType
+chimera::util::getFullyQualifiedType(ASTContext &context,
+                                     QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedType(qt, context);
 }
 
 std::string
-chimera::util::getFullyQualifiedTypeName(clang::ASTContext &context,
-                                         clang::QualType qt)
+chimera::util::getFullyQualifiedTypeName(ASTContext &context,
+                                         QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }

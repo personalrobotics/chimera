@@ -22,8 +22,8 @@ namespace mstch
 template<typename T>
 class ClangWrapper: public ::mstch::object
 {
-//static_assert(std::is_base_of<clang::NamedDecl, T>::value,
-//              "'T' must derive from clang::NamedDecl");
+static_assert(std::is_base_of<clang::NamedDecl, T>::value,
+              "'T' must derive from clang::NamedDecl");
 public:
     ClangWrapper(const T *decl,
                  const ::chimera::CompiledConfiguration &config)

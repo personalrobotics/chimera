@@ -29,7 +29,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::type()
 {
-    if (decl_config_["type"])
+    if (const YAML::Node &node = decl_config_["type"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedTypeName(
@@ -38,7 +38,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::isCopyable()
 {
-    if (decl_config_["is_copyable"])
+    if (const YAML::Node &node = decl_config_["is_copyable"])
         return node.as<bool>();
 
     return chimera::util::isCopyable(decl_);
@@ -46,7 +46,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::name()
 {
-    if (decl_config_["name"])
+    if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
     return chimera::util::constructBindingName(
@@ -61,10 +61,10 @@ CXXRecord::CXXRecord(
 
 ::mstch::node chimera::mstch::CXXRecord::mangledName()
 {
-    if (decl_config_["mangled_name"])
+    if (const YAML::Node &node = decl_config_["mangled_name"])
         return node.as<std::string>();
 
-    return chimera::util::constructMangledName
+    return chimera::util::constructMangledName(
         config_.GetContext(), decl_);
 }
 
