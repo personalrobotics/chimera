@@ -107,7 +107,7 @@ public:
     ::mstch::node returnValuePolicy();
 };
 
-using GlobalVar = ClangWrapper<clang::VarDecl>;
+using Var = ClangWrapper<clang::VarDecl>;
 
 } // namespace mstch
 } // namespace chimera
