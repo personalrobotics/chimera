@@ -87,7 +87,21 @@ std::string getFullyQualifiedTypeName(clang::ASTContext &context,
  * This includes full qualification of all template parameters, etc.
  */
 std::string getFullyQualifiedDeclTypeAsString(clang::ASTContext &context,
-											  const clang::TypeDecl *decl);
+                                              const clang::TypeDecl *decl);
+
+/**
+ * Get the base CXX record declarations for a CXXRecordDecl.
+ *
+ * This filters over all the base record entries for the given declaration
+ * and returns the public entries. A set of 'available' decls can be
+ * provided, in which case only base decls that exist in this set will be
+ * returned.
+ */
+std::set<const clang::CXXRecordDecl *> getBaseClassDecls(
+    const clang::CXXRecordDecl *decl);
+std::set<const clang::CXXRecordDecl *> getBaseClassDecls(
+    const clang::CXXRecordDecl *decl,
+    std::set<const clang::CXXRecordDecl *> available_decls);
 
 /**
  * Generate a safe name to use for a CXXRecordDecl.
@@ -97,7 +111,7 @@ std::string getFullyQualifiedDeclTypeAsString(clang::ASTContext &context,
  * a given C++ class declaration.
  */
 std::string constructBindingName(clang::ASTContext &context,
-								 const clang::CXXRecordDecl *decl);
+                                 const clang::CXXRecordDecl *decl);
 
 /**
  * Generate the C++ mangled name for a class.

@@ -272,3 +272,52 @@ bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
     else
         return false;
 }
+
+std::set<const CXXRecordDecl *>
+chimera::util::getBaseClassDecls(const CXXRecordDecl *decl)
+{
+    std::set<const CXXRecordDecl *> base_decls;
+
+    for (const CXXBaseSpecifier &base_decl : decl->bases())
+    {
+        if (base_decl.getAccessSpecifier() != AS_public)
+            continue;
+
+        // TODO: Filter out transitive base classes.
+
+        base_decls.insert(base_decl.getType()->getAsCXXRecordDecl());
+    }
+
+    return base_decls;
+}
+
+std::set<const CXXRecordDecl *>
+chimera::util::getBaseClassDecls(
+    const CXXRecordDecl *decl,
+    std::set<const CXXRecordDecl *> available_decls)
+{
+    // Get all base classes.
+    std::set<const CXXRecordDecl *> all_base_decls =
+        chimera::util::getBaseClassDecls(decl);
+
+    // Filter the classes by availability.
+    std::set<const CXXRecordDecl *> base_decls;
+    for (const CXXRecordDecl *base_decl : all_base_decls)
+    {
+        const bool base_available =
+            available_decls.count(base_decl);
+
+        if (base_available)
+            base_decls.insert(base_decl);
+        else
+        {
+            std::cerr << "Warning: Omitted base class '"
+                      << base_decl->getNameAsString()
+                      << "' of class '"
+                      << decl->getNameAsString()
+                      << "' because it could not be wrapped.\n";
+        }
+    }
+
+    return base_decls;
+}

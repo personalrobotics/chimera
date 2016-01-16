@@ -24,7 +24,18 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::bases()
 {
-    return ::mstch::array{std::string{"base"}};
+    // TODO: add filtering for undefined base classes.
+    std::set<const CXXRecordDecl *> base_decls =
+        chimera::util::getBaseClassDecls(decl_);
+
+    ::mstch::array base_templates;
+    for(auto base_decl : base_decls)
+    {
+        base_templates.push_back(
+            std::make_shared<CXXRecord>(base_decl, config_));
+    }
+
+    return base_templates;
 }
 
 ::mstch::node CXXRecord::type()
