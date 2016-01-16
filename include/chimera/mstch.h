@@ -25,9 +25,9 @@ class ClangWrapper: public ::mstch::object
 static_assert(std::is_base_of<clang::NamedDecl, T>::value,
               "'T' must derive from clang::NamedDecl");
 public:
-    ClangWrapper(const T *decl,
-                 const ::chimera::CompiledConfiguration &config)
-    : decl_(decl), config_(config)
+    ClangWrapper(const ::chimera::CompiledConfiguration &config,
+                 const T *decl)
+    : config_(config), decl_(decl)
     , decl_config_(config_.GetDeclaration(decl_))
     {
         register_methods(this, {
@@ -53,16 +53,16 @@ public:
     }
 
 protected:
-    const T *decl_;
     const ::chimera::CompiledConfiguration &config_;
+    const T *decl_;
     const YAML::Node &decl_config_;
 };
 
 class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
-    CXXRecord(const clang::CXXRecordDecl *decl,
-              const ::chimera::CompiledConfiguration &config);
+    CXXRecord(const ::chimera::CompiledConfiguration &config,
+              const clang::CXXRecordDecl *decl);
 
     ::mstch::node bases();
     ::mstch::node type();
@@ -84,8 +84,8 @@ public:
 class Enum: public ClangWrapper<clang::EnumDecl>
 {
 public:
-    Enum(const clang::EnumDecl *decl,
-         const ::chimera::CompiledConfiguration &config);
+    Enum(const ::chimera::CompiledConfiguration &config,
+         const clang::EnumDecl *decl);
 
     ::mstch::node type();
     ::mstch::node values();
@@ -93,21 +93,40 @@ public:
 
 using EnumConstant = ClangWrapper<clang::EnumConstantDecl>;
 
+class Field: public ClangWrapper<clang::FieldDecl>
+{
+public:
+    Field(const ::chimera::CompiledConfiguration &config,
+          const clang::FieldDecl *decl,
+          const clang::CXXRecordDecl *class_decl);
+
+    ::mstch::node returnValuePolicy();
+
+private:
+    const clang::CXXRecordDecl *class_decl_;
+};
+
 class Function: public ClangWrapper<clang::FunctionDecl>
 {
 public:
-    Function(const clang::FunctionDecl *decl,
-             const ::chimera::CompiledConfiguration &config);
-
-    ::mstch::node uniquishName();
-    ::mstch::node mangledName();
+    Function(const ::chimera::CompiledConfiguration &config,
+             const clang::FunctionDecl *decl,
+             const clang::CXXRecordDecl *class_decl = NULL);
 
     ::mstch::node type();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
+
+private:
+    const clang::CXXRecordDecl *class_decl_;
 };
 
-using Var = ClangWrapper<clang::VarDecl>;
+class Var: public ClangWrapper<clang::VarDecl>
+{
+public:
+    Var(const ::chimera::CompiledConfiguration &config,
+        const clang::VarDecl *decl);
+};
 
 } // namespace mstch
 } // namespace chimera

@@ -9,9 +9,9 @@ namespace mstch
 {
 
 CXXRecord::CXXRecord(
-    const CXXRecordDecl *decl,
-    const ::chimera::CompiledConfiguration &config)
-: ClangWrapper(decl, config)
+    const ::chimera::CompiledConfiguration &config,
+    const CXXRecordDecl *decl)
+: ClangWrapper(config, decl)
 {
     register_methods(this, {
         {"bases", &CXXRecord::bases},
@@ -33,7 +33,7 @@ CXXRecord::CXXRecord(
     for(auto base_decl : base_decls)
     {
         base_templates.push_back(
-            std::make_shared<CXXRecord>(base_decl, config_));
+            std::make_shared<CXXRecord>(config_, base_decl));
     }
 
     return base_templates;
@@ -105,9 +105,9 @@ CXXRecord::CXXRecord(
     return ::mstch::array{std::string{"base"}};
 }
 
-Enum::Enum(const clang::EnumDecl *decl,
-           const ::chimera::CompiledConfiguration &config)
-: ClangWrapper(decl, config)
+Enum::Enum(const ::chimera::CompiledConfiguration &config,
+           const clang::EnumDecl *decl)
+: ClangWrapper(config, decl)
 {
     register_methods(this, {
         {"name", &Enum::name},
@@ -132,9 +132,61 @@ Enum::Enum(const clang::EnumDecl *decl,
     {
         constants.push_back(
             std::make_shared<EnumConstant>(
-                constant_decl, config_));
+                config_, constant_decl));
     }
     return constants;
+}
+
+Field::Field(const ::chimera::CompiledConfiguration &config,
+             const FieldDecl *decl,
+             const CXXRecordDecl *class_decl)
+: ClangWrapper(config, decl)
+, class_decl_(class_decl)
+{
+    register_methods(this, {
+        {"return_value_policy", &Field::returnValuePolicy}
+    });
+}
+
+::mstch::node Field::returnValuePolicy()
+{
+    return ::mstch::array{std::string{"base"}};
+}
+
+Function::Function(const ::chimera::CompiledConfiguration &config,
+                   const clang::FunctionDecl *decl,
+                   const CXXRecordDecl *class_decl)
+: ClangWrapper(config, decl)
+, class_decl_(class_decl)
+{
+    register_methods(this, {
+        {"type", &Function::type},
+        {"params", &Function::params},
+        {"return_value_policy", &Function::returnValuePolicy}
+    });
+}
+
+::mstch::node Function::type()
+{
+    return std::string{"base"};
+}
+
+::mstch::node Function::params()
+{
+    return ::mstch::array{std::string{"base"}};
+}
+
+::mstch::node Function::returnValuePolicy()
+{
+    return std::string{"base"};
+}
+
+Var::Var(const ::chimera::CompiledConfiguration &config,
+         const clang::VarDecl *decl)
+: ClangWrapper(config, decl)
+{
+    register_methods(this, {
+    });
 }
 
 } // namespace mstch
