@@ -82,26 +82,31 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::constructors()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
 ::mstch::node CXXRecord::methods()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
 ::mstch::node CXXRecord::staticMethods()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
 ::mstch::node CXXRecord::fields()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
 ::mstch::node CXXRecord::staticFields()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
@@ -220,6 +225,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::params()
 {
+    // TODO: Implement this method.
     return ::mstch::array{std::string{"base"}};
 }
 
@@ -243,11 +249,39 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
 }
 
-Var::Var(const ::chimera::CompiledConfiguration &config,
-         const clang::VarDecl *decl)
+Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
+                     const clang::ParmVarDecl *decl,
+                     const CXXRecordDecl *class_decl)
+: ClangWrapper(config, decl)
+, class_decl_(class_decl)
+{
+    register_methods(this, {
+        {"type", &Parameter::type},
+        {"value", &Parameter::value}
+    });
+}
+
+::mstch::node Parameter::type()
+{
+    if (const YAML::Node &node = decl_config_["type"])
+        return node.as<std::string>();
+
+    return chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), decl_->getType());
+}
+
+::mstch::node Parameter::value()
+{
+    // TODO: Implement this method.
+    return std::string{""};
+}
+
+Variable::Variable(const ::chimera::CompiledConfiguration &config,
+                   const clang::VarDecl *decl)
 : ClangWrapper(config, decl)
 {
     register_methods(this, {
+        // TODO: fill these methods in.
     });
 }
 

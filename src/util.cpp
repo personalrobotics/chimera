@@ -321,3 +321,63 @@ chimera::util::getBaseClassDecls(
 
     return base_decls;
 }
+
+std::string
+chimera::util::constructParameterValue(clang::ASTContext &context,
+                                       clang::ParmVarDecl *decl)
+{
+    std::string value;
+
+    if (decl->hasDefaultArg()
+        && !decl->hasUninstantiatedDefaultArg()
+        && !decl->hasUnparsedDefaultArg())
+    {
+        Expr *default_expr = decl->getDefaultArg();
+        assert(default_expr);
+
+        Expr::EvalResult result;
+        bool success;
+
+        if (decl->getType().getTypePtr()->isReferenceType())
+            success = default_expr->EvaluateAsLValue(result, context);
+        else
+            success = default_expr->EvaluateAsRValue(result, context);
+
+        if (success)
+        {
+            // Handle special cases for infinite and nan float values.
+            // These values resolve to internal compiler definitions, so
+            // their default string serialization won't resolve correctly.
+            if (result.Val.isFloat() && result.Val.getFloat().isInfinity())
+            {
+                return result.Val.getFloat().isNegative()
+                    ? "-INFINITY" : "INFINITY";
+            }
+            else if (result.Val.isFloat() && result.Val.getFloat().isNaN())
+            {
+                return "NAN";
+            }
+            else
+            {
+                return result.Val.getAsString(context, decl->getType());
+            }
+        }
+        else if (default_expr->hasNonTrivialCall(context))
+        {
+            // TODO: How do we print the decl with argument + return types?
+            std::cerr
+              << "Warning: Unable to evaluate non-trivial call in default"
+                 " value for parameter"
+              << " '" << decl->getNameAsString() << "'.\n";
+        }
+        else
+        {
+            // TODO: How do we print the decl with argument + return types?
+            std::cerr
+              << "Warning: Failed to evaluate default value for parameter"
+              << " '" << decl->getNameAsString() << "'.\n";
+        }
+    }
+
+    return "";
+}

@@ -124,11 +124,25 @@ private:
     const clang::CXXRecordDecl *class_decl_;
 };
 
-class Var: public ClangWrapper<clang::VarDecl>
+class Parameter: public ClangWrapper<clang::ParmVarDecl>
 {
 public:
-    Var(const ::chimera::CompiledConfiguration &config,
-        const clang::VarDecl *decl);
+    Parameter(const ::chimera::CompiledConfiguration &config,
+              const clang::ParmVarDecl *decl,
+              const clang::CXXRecordDecl *class_decl);
+
+    ::mstch::node type();
+    ::mstch::node value();
+
+private:
+    const clang::CXXRecordDecl *class_decl_;
+};
+
+class Variable: public ClangWrapper<clang::VarDecl>
+{
+public:
+    Variable(const ::chimera::CompiledConfiguration &config,
+             const clang::VarDecl *decl);
 };
 
 } // namespace mstch

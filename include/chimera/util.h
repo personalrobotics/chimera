@@ -122,6 +122,14 @@ std::string constructMangledName(clang::ASTContext &context,
                                  const clang::CXXRecordDecl *decl);
 
 /**
+ * Construct the default value of a parameter as a string expression.
+ *
+ * If unable to construct the default value, return an empty string.
+ */
+std::string constructParameterValue(clang::ASTContext &context,
+                                    clang::ParmVarDecl *decl);
+
+/**
  * Determine if a CXXRecordDecl is referring to a type that could be assigned to.
  */
 bool isAssignable(const clang::CXXRecordDecl *decl);
