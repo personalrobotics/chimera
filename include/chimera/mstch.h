@@ -73,7 +73,6 @@ public:
     ::mstch::node mangledName();
     
     ::mstch::node constructors();
-    
     ::mstch::node methods();
     ::mstch::node staticMethods();
     
@@ -100,6 +99,9 @@ public:
           const clang::FieldDecl *decl,
           const clang::CXXRecordDecl *class_decl);
 
+    ::mstch::node type();
+    ::mstch::node isAssignable();
+    ::mstch::node isCopyable();
     ::mstch::node returnValuePolicy();
 
 private:

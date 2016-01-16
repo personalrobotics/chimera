@@ -144,13 +144,46 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
 , class_decl_(class_decl)
 {
     register_methods(this, {
+        {"type", &Field::type},
+        {"is_assignable", &Field::isAssignable},
+        {"is_copyable", &Field::isCopyable},
         {"return_value_policy", &Field::returnValuePolicy}
     });
 }
 
+::mstch::node Field::type()
+{
+    if (const YAML::Node &node = decl_config_["type"])
+        return node.as<std::string>();
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(
+        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+}
+
+::mstch::node Field::isAssignable()
+{
+    if (const YAML::Node &node = decl_config_["is_assignable"])
+        return node.as<std::string>();
+
+    return chimera::util::isAssignable(
+        config_.GetContext(), decl_->getType());
+}
+
+::mstch::node Field::isCopyable()
+{
+    if (const YAML::Node &node = decl_config_["is_copyable"])
+        return node.as<std::string>();
+
+    return chimera::util::isCopyable(
+        config_.GetContext(), decl_->getType());
+}
+
 ::mstch::node Field::returnValuePolicy()
 {
-    return ::mstch::array{std::string{"base"}};
+    if (const YAML::Node &node = decl_config_["return_value_policy"])
+        return node.as<std::string>();
+
+    return std::string{""};
 }
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
@@ -178,7 +211,10 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::returnValuePolicy()
 {
-    return std::string{"base"};
+    if (const YAML::Node &node = decl_config_["mangled_name"])
+        return node.as<std::string>();
+
+    return std::string{""};
 }
 
 Var::Var(const ::chimera::CompiledConfiguration &config,
