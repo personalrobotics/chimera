@@ -131,7 +131,7 @@ Enum::Enum(const clang::EnumDecl *decl,
     for (const EnumConstantDecl *constant_decl : decl_->enumerators())
     {
         constants.push_back(
-            std::make_shared<ClangWrapper<EnumConstantDecl>>(
+            std::make_shared<EnumConstant>(
                 constant_decl, config_));
     }
     return constants;

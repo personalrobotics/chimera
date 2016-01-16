@@ -31,7 +31,8 @@ public:
     , decl_config_(config_.GetDeclaration(decl_))
     {
         register_methods(this, {
-            {"name", &ClangWrapper::name}
+            {"name", &ClangWrapper::name},
+            {"qualified_name", &ClangWrapper::qualifiedName}
         });
     }
 
@@ -41,6 +42,14 @@ public:
             return node.as<std::string>();
 
         return decl_->getNameAsString();
+    }
+
+    ::mstch::node qualifiedName()
+    {
+        if (const YAML::Node &node = decl_config_["qualified_name"])
+            return node.as<std::string>();
+
+        return decl_->getQualifiedNameAsString();
     }
 
 protected:
@@ -82,6 +91,8 @@ public:
     ::mstch::node values();
 };
 
+using EnumConstant = ClangWrapper<clang::EnumConstantDecl>;
+
 class Function: public ClangWrapper<clang::FunctionDecl>
 {
 public:
@@ -96,19 +107,7 @@ public:
     ::mstch::node returnValuePolicy();
 };
 
-class GlobalVar: public ClangWrapper<clang::VarDecl>
-{
-public:
-    GlobalVar(const clang::VarDecl *decl,
-              const ::chimera::CompiledConfiguration &config);
-
-    ::mstch::node uniquishName();
-    ::mstch::node mangledName();
-
-    ::mstch::node type();
-    ::mstch::node params();
-    ::mstch::node returnValuePolicy();
-};
+using GlobalVar = ClangWrapper<clang::VarDecl>;
 
 } // namespace mstch
 } // namespace chimera
