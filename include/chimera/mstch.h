@@ -99,10 +99,10 @@ public:
           const clang::FieldDecl *decl,
           const clang::CXXRecordDecl *class_decl);
 
-    ::mstch::node type();
     ::mstch::node isAssignable();
     ::mstch::node isCopyable();
     ::mstch::node returnValuePolicy();
+    ::mstch::node qualifiedName();
 
 private:
     const clang::CXXRecordDecl *class_decl_;
@@ -118,6 +118,7 @@ public:
     ::mstch::node type();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
+    ::mstch::node qualifiedName();
 
 private:
     const clang::CXXRecordDecl *class_decl_;

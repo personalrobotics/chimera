@@ -144,16 +144,15 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
 , class_decl_(class_decl)
 {
     register_methods(this, {
-        {"type", &Field::type},
         {"is_assignable", &Field::isAssignable},
         {"is_copyable", &Field::isCopyable},
         {"return_value_policy", &Field::returnValuePolicy}
     });
 }
 
-::mstch::node Field::type()
+::mstch::node Field::qualifiedName()
 {
-    if (const YAML::Node &node = decl_config_["type"])
+    if (const YAML::Node &node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(
@@ -201,7 +200,22 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::type()
 {
-    return std::string{"base"};
+    if (const YAML::Node &node = decl_config_["type"])
+        return node.as<std::string>();
+
+    QualType pointer_type;
+    if (class_decl_ && !cast<CXXMethodDecl>(decl_)->isStatic())
+    {
+        pointer_type = config_.GetContext().getMemberPointerType(
+            decl_->getType(), class_decl_->getTypeForDecl());
+    }
+    else
+    {
+        pointer_type = config_.GetContext().getPointerType(decl_->getType());
+    }
+
+    return chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), pointer_type);
 }
 
 ::mstch::node Function::params()
@@ -211,10 +225,22 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::returnValuePolicy()
 {
-    if (const YAML::Node &node = decl_config_["mangled_name"])
+    if (const YAML::Node &node = decl_config_["return_value_policy"])
         return node.as<std::string>();
 
     return std::string{""};
+}
+
+::mstch::node Function::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    if (!class_decl_)
+        return decl_->getQualifiedNameAsString();
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(
+        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
 }
 
 Var::Var(const ::chimera::CompiledConfiguration &config,
