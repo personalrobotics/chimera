@@ -30,7 +30,17 @@ public:
     : decl_(decl), config_(config)
     , decl_config_(config_.GetDeclaration(decl_))
     {
-        // Do nothing.
+        register_methods(this, {
+            {"name", &ClangWrapper::name}
+        });
+    }
+
+    ::mstch::node name()
+    {
+        if (const YAML::Node &node = decl_config_["name"])
+            return node.as<std::string>();
+
+        return decl_->getNameAsString();
     }
 
 protected:
@@ -49,7 +59,7 @@ public:
     ::mstch::node type();
     ::mstch::node isCopyable();
 
-    ::mstch::node name();
+    ::mstch::node bindingName();
     ::mstch::node uniquishName();
     ::mstch::node mangledName();
     
@@ -62,26 +72,22 @@ public:
     ::mstch::node staticFields();
 };
 
-class Enum: public ClangWrapper<clang::CXXRecordDecl>
+class Enum: public ClangWrapper<clang::EnumDecl>
 {
 public:
     Enum(const clang::EnumDecl *decl,
          const ::chimera::CompiledConfiguration &config);
 
-    ::mstch::node name();
-    ::mstch::node uniquishName();
-    ::mstch::node mangledName();
-    
+    ::mstch::node type();
     ::mstch::node values();
 };
 
-class Function: public ClangWrapper<clang::CXXRecordDecl>
+class Function: public ClangWrapper<clang::FunctionDecl>
 {
 public:
     Function(const clang::FunctionDecl *decl,
              const ::chimera::CompiledConfiguration &config);
 
-    ::mstch::node name();
     ::mstch::node uniquishName();
     ::mstch::node mangledName();
 
@@ -90,13 +96,12 @@ public:
     ::mstch::node returnValuePolicy();
 };
 
-class GlobalVar: public ClangWrapper<clang::CXXRecordDecl>
+class GlobalVar: public ClangWrapper<clang::VarDecl>
 {
 public:
     GlobalVar(const clang::VarDecl *decl,
               const ::chimera::CompiledConfiguration &config);
 
-    ::mstch::node name();
     ::mstch::node uniquishName();
     ::mstch::node mangledName();
 

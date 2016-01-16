@@ -17,7 +17,8 @@ CXXRecord::CXXRecord(
         {"bases", &CXXRecord::bases},
         {"type", &CXXRecord::type},
         {"is_copyable", &CXXRecord::isCopyable},
-        {"name", &CXXRecord::name},
+        {"binding_name", &CXXRecord::bindingName},
+        {"uniquish_name", &CXXRecord::uniquishName},
         {"mangled_name", &CXXRecord::mangledName}
     });
 }
@@ -55,7 +56,7 @@ CXXRecord::CXXRecord(
     return chimera::util::isCopyable(decl_);
 }
 
-::mstch::node CXXRecord::name()
+::mstch::node CXXRecord::bindingName()
 {
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
@@ -64,13 +65,13 @@ CXXRecord::CXXRecord(
         config_.GetContext(), decl_);
 }
 
-::mstch::node chimera::mstch::CXXRecord::uniquishName()
+::mstch::node CXXRecord::uniquishName()
 {
     // TODO: implement this properly.
     return name();
 }
 
-::mstch::node chimera::mstch::CXXRecord::mangledName()
+::mstch::node CXXRecord::mangledName()
 {
     if (const YAML::Node &node = decl_config_["mangled_name"])
         return node.as<std::string>();
@@ -79,29 +80,61 @@ CXXRecord::CXXRecord(
         config_.GetContext(), decl_);
 }
 
-::mstch::node chimera::mstch::CXXRecord::constructors()
+::mstch::node CXXRecord::constructors()
 {
     return ::mstch::array{std::string{"base"}};
 }
 
-::mstch::node chimera::mstch::CXXRecord::methods()
+::mstch::node CXXRecord::methods()
 {
     return ::mstch::array{std::string{"base"}};
 }
 
-::mstch::node chimera::mstch::CXXRecord::staticMethods()
+::mstch::node CXXRecord::staticMethods()
 {
     return ::mstch::array{std::string{"base"}};
 }
 
-::mstch::node chimera::mstch::CXXRecord::fields()
+::mstch::node CXXRecord::fields()
 {
     return ::mstch::array{std::string{"base"}};
 }
 
-::mstch::node chimera::mstch::CXXRecord::staticFields()
+::mstch::node CXXRecord::staticFields()
 {
     return ::mstch::array{std::string{"base"}};
+}
+
+Enum::Enum(const clang::EnumDecl *decl,
+           const ::chimera::CompiledConfiguration &config)
+: ClangWrapper(decl, config)
+{
+    register_methods(this, {
+        {"name", &Enum::name},
+        {"type", &Enum::type},
+        {"values", &Enum::values}
+    });
+}
+
+::mstch::node Enum::type()
+{
+    if (const YAML::Node &node = decl_config_["type"])
+        return node.as<std::string>();
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(
+        config_.GetContext(), decl_);
+}
+
+::mstch::node Enum::values()
+{
+    ::mstch::array constants;
+    for (const EnumConstantDecl *constant_decl : decl_->enumerators())
+    {
+        constants.push_back(
+            std::make_shared<ClangWrapper<EnumConstantDecl>>(
+                constant_decl, config_));
+    }
+    return constants;
 }
 
 } // namespace mstch
