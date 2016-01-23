@@ -130,21 +130,33 @@ std::string constructParameterValue(clang::ASTContext &context,
                                     clang::ParmVarDecl *decl);
 
 /**
- * Returns whether a declaration contains incomplete argument types.
+ * Returns whether a type contains incomplete argument types.
  *
  * This is useful in cases where we need RTTI information about all arguments,
  * including references and pointers.
  */
 bool containsIncompleteType(clang::QualType qual_type);
+
+/**
+ * Returns whether any function parameters contain incomplete argument types.
+ *
+ * This is useful in cases where we need RTTI information about all arguments,
+ * including references and pointers.
+ */
 bool containsIncompleteType(const clang::FunctionDecl *decl);
 
 /**
- * Determine if a CXXRecordDecl is referring to a type that could be assigned to.
+ * Returns whether any function parameters contain RValue references.
+ */
+bool containsRValueReference(clang::FunctionDecl *decl);
+
+/**
+ * Determine if a CXXRecordDecl is referring to a type that could be assigned.
  */
 bool isAssignable(const clang::CXXRecordDecl *decl);
 
 /**
- * Determine if a QualType is referring to a type that could be assigned to.
+ * Determine if a QualType is referring to a type that could be assigned.
  */
 bool isAssignable(clang::ASTContext &context, clang::QualType qual_type);
 

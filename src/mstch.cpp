@@ -8,17 +8,6 @@ namespace chimera
 namespace mstch
 {
 
-Constructor::Constructor(const ::chimera::CompiledConfiguration &config,
-                         const CXXConstructorDecl *decl,
-                         const CXXRecordDecl *class_decl)
-: ClangWrapper(config, decl)
-, class_decl_(class_decl)
-{
-    register_methods(this, {
-        // TODO: fill these methods in.
-    });
-}
-
 CXXRecord::CXXRecord(
     const ::chimera::CompiledConfiguration &config,
     const CXXRecordDecl *decl)
@@ -98,17 +87,35 @@ CXXRecord::CXXRecord(
 ::mstch::node CXXRecord::constructors()
 {
     ::mstch::array constructors;
+
+    // If the class is abstract, do not enumerate any constructors.
+    if (decl_->isAbstract())
+        return constructors;
+
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
-
-        if (isa<CXXConstructorDecl>(method_decl))
+        if (method_decl->isDeleted())
+            continue;
+        if (!isa<CXXConstructorDecl>(method_decl))
+            continue;
+        if (chimera::util::containsRValueReference(method_decl))
         {
-            constructors.push_back(
-                std::make_shared<Constructor>(
-                    config_, cast<CXXConstructorDecl>(method_decl), decl_));
+            std::cerr
+                << "Warning: Skipped constructor of "
+                << decl_->getNameAsString()
+                << " because a parameter was an rvalue reference.\n";
+            continue;
         }
+
+        const CXXConstructorDecl *constructor_decl =
+            cast<CXXConstructorDecl>(method_decl);
+        if (constructor_decl->isCopyOrMoveConstructor())
+            continue;
+
+        constructors.push_back(std::make_shared<Function>(
+            config_, method_decl, decl_));
     }
     return constructors;
 }
@@ -138,7 +145,13 @@ CXXRecord::CXXRecord(
         // requires RTTI information about all arguments, including references
         // and pointers.
         if (chimera::util::containsIncompleteType(method_decl))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << method_decl->getQualifiedNameAsString()
+                << " because an argument has an incomplete type.\n";
             continue;
+        }
 
         methods.push_back(
             std::make_shared<Function>(
@@ -357,8 +370,29 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
 , class_decl_(class_decl)
 {
     register_methods(this, {
-        // TODO: fill these methods in.
+        {"is_assignable", &Variable::isAssignable},
     });
+}
+
+::mstch::node Variable::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    if (!class_decl_)
+        return decl_->getQualifiedNameAsString();
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(
+        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+}
+
+::mstch::node Variable::isAssignable()
+{
+    if (const YAML::Node &node = decl_config_["is_assignable"])
+        return node.as<std::string>();
+
+    return chimera::util::isAssignable(
+        config_.GetContext(), decl_->getType());
 }
 
 } // namespace mstch

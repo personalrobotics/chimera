@@ -409,15 +409,17 @@ bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
     for (const ParmVarDecl *param : decl->params())
     {
         if (containsIncompleteType(param->getOriginalType()))
-        {
-            std::cerr
-                << "Warning: Skipped function "
-                << decl->getQualifiedNameAsString()
-                << " because argument '"
-                << param->getNameAsString()
-                << "' has an incomplete type.\n";
             return true;
-        }
+    }
+    return false;
+}
+
+bool chimera::util::containsRValueReference(clang::FunctionDecl *decl)
+{
+    for (ParmVarDecl *param_decl : decl->params())
+    {
+        if (param_decl->getType().getTypePtr()->isRValueReferenceType())
+            return true;
     }
     return false;
 }
