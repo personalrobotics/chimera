@@ -8,6 +8,17 @@ namespace chimera
 namespace mstch
 {
 
+Constructor::Constructor(const ::chimera::CompiledConfiguration &config,
+                         const clang::CXXConstructorDecl *decl,
+                         const clang::CXXRecordDecl *class_decl)
+: ClangWrapper(config, decl)
+, class_decl_(class_decl)
+{
+    register_methods(this, {
+        // TODO: fill these methods in.
+    });
+}
+
 CXXRecord::CXXRecord(
     const ::chimera::CompiledConfiguration &config,
     const CXXRecordDecl *decl)
@@ -68,7 +79,7 @@ CXXRecord::CXXRecord(
 ::mstch::node CXXRecord::uniquishName()
 {
     // TODO: implement this properly.
-    return name();
+    return bindingName();
 }
 
 ::mstch::node CXXRecord::mangledName()
@@ -82,8 +93,21 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::constructors()
 {
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
+    // Assemble a list of public constructors for this class.
+    ::mstch::array constructors;
+    for (CXXMethodDecl *const method_decl : decl_->methods())
+    {
+        if (method_decl->getAccess() != AS_public)
+            continue; // skip protected and private members
+
+        if (isa<CXXConstructorDecl>(method_decl))
+        {
+            constructors.push_back(
+                std::make_shared<Constructor>(
+                    config_, cast<CXXConstructorDecl>(method_decl), decl_));
+        }
+    }
+    return constructors;
 }
 
 ::mstch::node CXXRecord::methods()

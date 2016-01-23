@@ -58,6 +58,16 @@ protected:
     const YAML::Node &decl_config_;
 };
 
+class Constructor: public ClangWrapper<clang::CXXConstructorDecl>
+{
+public:
+    Constructor(const ::chimera::CompiledConfiguration &config,
+                const clang::CXXConstructorDecl *decl,
+                const clang::CXXRecordDecl *class_decl);
+private:
+    const clang::CXXRecordDecl *class_decl_;
+};
+
 class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
