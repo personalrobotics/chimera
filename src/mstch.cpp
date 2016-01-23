@@ -32,7 +32,9 @@ CXXRecord::CXXRecord(
         {"uniquish_name", &CXXRecord::uniquishName},
         {"mangled_name", &CXXRecord::mangledName},
         {"constructors", &CXXRecord::constructors},
-        {"methods", &CXXRecord::methods}
+        {"methods", &CXXRecord::methods},
+        {"fields", &CXXRecord::fields},
+        {"static_fields", &CXXRecord::staticFields}
     });
 }
 
