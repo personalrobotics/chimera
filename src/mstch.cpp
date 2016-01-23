@@ -37,7 +37,8 @@ CXXRecord::CXXRecord(
     for(auto base_decl : base_decls)
     {
         base_templates.push_back(
-            std::make_shared<CXXRecord>(config_, base_decl));
+            std::make_shared<CXXRecord>(
+                config_, base_decl));
     }
 
     return base_templates;
@@ -114,8 +115,9 @@ CXXRecord::CXXRecord(
         if (constructor_decl->isCopyOrMoveConstructor())
             continue;
 
-        constructors.push_back(std::make_shared<Function>(
-            config_, method_decl, decl_));
+        constructors.push_back(
+            std::make_shared<Function>(
+                config_, method_decl, decl_));
     }
     return constructors;
 }
@@ -155,7 +157,7 @@ CXXRecord::CXXRecord(
 
         methods.push_back(
             std::make_shared<Function>(
-                    config_, cast<CXXConstructorDecl>(method_decl), decl_));
+                    config_, method_decl, decl_));
     }
     return methods;
 }
@@ -173,7 +175,8 @@ CXXRecord::CXXRecord(
             continue;
 
         fields.push_back(
-            std::make_shared<Field>(config_, field_decl, decl_));
+            std::make_shared<Field>(
+                config_, field_decl, decl_));
     }
     return fields;
 }
@@ -193,7 +196,8 @@ CXXRecord::CXXRecord(
             continue;
 
         static_fields.push_back(
-            std::make_shared<Variable>(config_, static_field_decl, decl_));
+            std::make_shared<Variable>(
+                config_, static_field_decl, decl_));
     }
     return static_fields;
 }
@@ -312,8 +316,15 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::params()
 {
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
+    ::mstch::array params;
+    for (const ParmVarDecl *param_decl : decl_->params())
+    {
+        // TODO: implement default value filtering.
+        params.push_back(
+            std::make_shared<Parameter>(
+                config_, param_decl, decl_, class_decl_));
+    }
+    return params;
 }
 
 ::mstch::node Function::returnValuePolicy()
@@ -338,9 +349,13 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
                      const ParmVarDecl *decl,
-                     const CXXRecordDecl *class_decl)
+                     const FunctionDecl *method_decl,
+                     const CXXRecordDecl *class_decl,
+                     bool use_default)
 : ClangWrapper(config, decl)
 , class_decl_(class_decl)
+, method_decl_(method_decl)
+, use_default_(use_default)
 {
     register_methods(this, {
         {"type", &Parameter::type},

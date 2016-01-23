@@ -32,6 +32,7 @@ public:
     {
         register_methods(this, {
             {"name", &ClangWrapper::name},
+            {"override", &ClangWrapper::override},
             {"qualified_name", &ClangWrapper::qualifiedName}
         });
     }
@@ -42,6 +43,12 @@ public:
             return node.as<std::string>();
 
         return decl_->getNameAsString();
+    }
+
+    ::mstch::node override()
+    {
+        // TODO: implement this method.
+        return "";
     }
 
     ::mstch::node qualifiedName()
@@ -112,7 +119,7 @@ class Function: public ClangWrapper<clang::FunctionDecl>
 public:
     Function(const ::chimera::CompiledConfiguration &config,
              const clang::FunctionDecl *decl,
-             const clang::CXXRecordDecl *class_decl = NULL);
+             const clang::CXXRecordDecl *class_decl=NULL);
 
     ::mstch::node type();
     ::mstch::node params();
@@ -128,13 +135,17 @@ class Parameter: public ClangWrapper<clang::ParmVarDecl>
 public:
     Parameter(const ::chimera::CompiledConfiguration &config,
               const clang::ParmVarDecl *decl,
-              const clang::CXXRecordDecl *class_decl);
+              const clang::FunctionDecl *method_decl,
+              const clang::CXXRecordDecl *class_decl,
+              bool use_default=true);
 
     ::mstch::node type();
     ::mstch::node value();
 
 private:
     const clang::CXXRecordDecl *class_decl_;
+    const clang::FunctionDecl *method_decl_;
+    const bool use_default_;
 };
 
 class Variable: public ClangWrapper<clang::VarDecl>
@@ -142,7 +153,7 @@ class Variable: public ClangWrapper<clang::VarDecl>
 public:
     Variable(const ::chimera::CompiledConfiguration &config,
              const clang::VarDecl *decl,
-             const clang::CXXRecordDecl *class_decl = NULL);
+             const clang::CXXRecordDecl *class_decl=NULL);
 
     ::mstch::node isAssignable();
     ::mstch::node qualifiedName();
