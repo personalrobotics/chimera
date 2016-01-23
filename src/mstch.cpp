@@ -95,7 +95,6 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::constructors()
 {
-    // Assemble a list of public constructors for this class.
     ::mstch::array constructors;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
@@ -114,7 +113,6 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::methods()
 {
-    // Assemble a list of public constructors for this class.
     ::mstch::array methods;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
@@ -149,8 +147,16 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::fields()
 {
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
+    ::mstch::array fields;
+    for (FieldDecl *const field_decl : decl_->fields())
+    {
+        if (field_decl->getAccess() != AS_public)
+            continue; // skip protected and private fields
+
+        fields.push_back(
+            std::make_shared<Field>(config_, field_decl, decl_));
+    }
+    return fields;
 }
 
 ::mstch::node CXXRecord::staticFields()
