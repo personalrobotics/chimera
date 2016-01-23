@@ -9,8 +9,8 @@ namespace mstch
 {
 
 Constructor::Constructor(const ::chimera::CompiledConfiguration &config,
-                         const clang::CXXConstructorDecl *decl,
-                         const clang::CXXRecordDecl *class_decl)
+                         const CXXConstructorDecl *decl,
+                         const CXXRecordDecl *class_decl)
 : ClangWrapper(config, decl)
 , class_decl_(class_decl)
 {
@@ -153,6 +153,10 @@ CXXRecord::CXXRecord(
         if (field_decl->getAccess() != AS_public)
             continue; // skip protected and private fields
 
+        if (!chimera::util::isCopyable(
+                config_.GetContext(), field_decl->getType()))
+            continue;
+
         fields.push_back(
             std::make_shared<Field>(config_, field_decl, decl_));
     }
@@ -161,12 +165,26 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::staticFields()
 {
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
+    ::mstch::array static_fields;
+    for (Decl *const child_decl : decl_->decls())
+    {
+        if (!isa<VarDecl>(child_decl))
+            continue;
+
+        const VarDecl *static_field_decl = cast<VarDecl>(child_decl);
+        if (static_field_decl->getAccess() != AS_public)
+            continue;
+        else if (!static_field_decl->isStaticDataMember())
+            continue;
+
+        static_fields.push_back(
+            std::make_shared<Variable>(config_, static_field_decl, decl_));
+    }
+    return static_fields;
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config,
-           const clang::EnumDecl *decl)
+           const EnumDecl *decl)
 : ClangWrapper(config, decl)
 {
     register_methods(this, {
@@ -246,7 +264,7 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
 }
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
-                   const clang::FunctionDecl *decl,
+                   const FunctionDecl *decl,
                    const CXXRecordDecl *class_decl)
 : ClangWrapper(config, decl)
 , class_decl_(class_decl)
@@ -305,7 +323,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 }
 
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
-                     const clang::ParmVarDecl *decl,
+                     const ParmVarDecl *decl,
                      const CXXRecordDecl *class_decl)
 : ClangWrapper(config, decl)
 , class_decl_(class_decl)
@@ -332,8 +350,10 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 }
 
 Variable::Variable(const ::chimera::CompiledConfiguration &config,
-                   const clang::VarDecl *decl)
+                   const VarDecl *decl,
+                   const CXXRecordDecl *class_decl)
 : ClangWrapper(config, decl)
+, class_decl_(class_decl)
 {
     register_methods(this, {
         // TODO: fill these methods in.

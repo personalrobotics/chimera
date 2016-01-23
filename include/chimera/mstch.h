@@ -64,6 +64,7 @@ public:
     Constructor(const ::chimera::CompiledConfiguration &config,
                 const clang::CXXConstructorDecl *decl,
                 const clang::CXXRecordDecl *class_decl);
+
 private:
     const clang::CXXRecordDecl *class_decl_;
 };
@@ -151,7 +152,11 @@ class Variable: public ClangWrapper<clang::VarDecl>
 {
 public:
     Variable(const ::chimera::CompiledConfiguration &config,
-             const clang::VarDecl *decl);
+             const clang::VarDecl *decl,
+             const clang::CXXRecordDecl *class_decl = NULL);
+
+private:
+    const clang::CXXRecordDecl *class_decl_;
 };
 
 } // namespace mstch
