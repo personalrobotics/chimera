@@ -30,7 +30,9 @@ CXXRecord::CXXRecord(
         {"is_copyable", &CXXRecord::isCopyable},
         {"binding_name", &CXXRecord::bindingName},
         {"uniquish_name", &CXXRecord::uniquishName},
-        {"mangled_name", &CXXRecord::mangledName}
+        {"mangled_name", &CXXRecord::mangledName},
+        {"constructors", &CXXRecord::constructors},
+        {"methods", &CXXRecord::methods}
     });
 }
 
@@ -112,14 +114,37 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::methods()
 {
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
-}
+    // Assemble a list of public constructors for this class.
+    ::mstch::array methods;
+    for (CXXMethodDecl *const method_decl : decl_->methods())
+    {
+        if (method_decl->getAccess() != AS_public)
+            continue; // skip protected and private members
+        if (isa<CXXConversionDecl>(method_decl))
+            continue;
+        if (isa<CXXDestructorDecl>(method_decl))
+            continue;
+        if (isa<CXXConstructorDecl>(method_decl))
+            continue;
+        if (method_decl->isOverloadedOperator())
+            continue;
+        if (method_decl->isStatic())
+            continue;
+        if (method_decl->isDeleted())
+            continue;
+        if (method_decl->getDescribedFunctionTemplate())
+            continue;
+        // Skip functions that have incomplete argument types. Boost.Python
+        // requires RTTI information about all arguments, including references
+        // and pointers.
+        if (chimera::util::containsIncompleteType(method_decl))
+            continue;
 
-::mstch::node CXXRecord::staticMethods()
-{
-    // TODO: Implement this method.
-    return ::mstch::array{std::string{"base"}};
+        methods.push_back(
+            std::make_shared<Function>(
+                    config_, cast<CXXConstructorDecl>(method_decl), decl_));
+    }
+    return methods;
 }
 
 ::mstch::node CXXRecord::fields()

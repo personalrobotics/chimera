@@ -323,8 +323,8 @@ chimera::util::getBaseClassDecls(
 }
 
 std::string
-chimera::util::constructParameterValue(clang::ASTContext &context,
-                                       clang::ParmVarDecl *decl)
+chimera::util::constructParameterValue(ASTContext &context,
+                                       ParmVarDecl *decl)
 {
     std::string value;
 
@@ -380,4 +380,44 @@ chimera::util::constructParameterValue(clang::ASTContext &context,
           << " '" << decl->getNameAsString() << "'.\n";
         return "";
     }
+}
+
+bool chimera::util::containsIncompleteType(QualType qual_type)
+{
+    const Type *type = qual_type.getTypePtr();
+
+    // TODO: We're probably missing a few cases here.
+
+    if (isa<PointerType>(type))
+    {
+        const PointerType *pointer_type = cast<PointerType>(type);
+        return containsIncompleteType(pointer_type->getPointeeType());
+    }
+    else if (isa<ReferenceType>(type))
+    {
+        const ReferenceType *reference_type = cast<ReferenceType>(type);
+        return containsIncompleteType(reference_type->getPointeeType());
+    }
+    else
+    {
+        return type->isIncompleteType();
+    }
+}
+
+bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
+{
+    for (const ParmVarDecl *param : decl->params())
+    {
+        if (containsIncompleteType(param->getOriginalType()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << decl->getQualifiedNameAsString()
+                << " because argument '"
+                << param->getNameAsString()
+                << "' has an incomplete type.\n";
+            return true;
+        }
+    }
+    return false;
 }
