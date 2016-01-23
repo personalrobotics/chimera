@@ -225,8 +225,7 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"is_assignable", &Field::isAssignable},
         {"is_copyable", &Field::isCopyable},
-        {"return_value_policy", &Field::returnValuePolicy},
-        {"qualified_name", &Field::qualifiedName}
+        {"return_value_policy", &Field::returnValuePolicy}
     });
 }
 
@@ -274,8 +273,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"type", &Function::type},
         {"params", &Function::params},
-        {"return_value_policy", &Function::returnValuePolicy},
-        {"qualified_name", &Field::qualifiedName}
+        {"return_value_policy", &Function::returnValuePolicy}
     });
 }
 
