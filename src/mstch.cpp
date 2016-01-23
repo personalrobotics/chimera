@@ -190,7 +190,6 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
 : ClangWrapper(config, decl)
 {
     register_methods(this, {
-        {"name", &Enum::name},
         {"type", &Enum::type},
         {"values", &Enum::values}
     });
@@ -226,7 +225,8 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"is_assignable", &Field::isAssignable},
         {"is_copyable", &Field::isCopyable},
-        {"return_value_policy", &Field::returnValuePolicy}
+        {"return_value_policy", &Field::returnValuePolicy},
+        {"qualified_name", &Field::qualifiedName}
     });
 }
 
@@ -274,7 +274,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"type", &Function::type},
         {"params", &Function::params},
-        {"return_value_policy", &Function::returnValuePolicy}
+        {"return_value_policy", &Function::returnValuePolicy},
+        {"qualified_name", &Field::qualifiedName}
     });
 }
 
