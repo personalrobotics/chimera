@@ -246,15 +246,6 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     });
 }
 
-::mstch::node Field::qualifiedName()
-{
-    if (const YAML::Node &node = decl_config_["qualified_name"])
-        return node.as<std::string>();
-
-    return chimera::util::getFullyQualifiedDeclTypeAsString(
-        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
-}
-
 ::mstch::node Field::isAssignable()
 {
     if (const YAML::Node &node = decl_config_["is_assignable"])
@@ -279,6 +270,15 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
         return node.as<std::string>();
 
     return std::string{""};
+}
+
+::mstch::node Field::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(
+        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
 }
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
