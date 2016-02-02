@@ -41,7 +41,9 @@ bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
 
 bool IsCopyable(CXXRecordDecl *decl)
 {
-    if (decl->isAbstract())
+    if (!decl->hasDefinition())
+        return false;
+    else if (decl->isAbstract())
         return false;
     else if (!decl->hasCopyConstructorWithConstParam())
         return false;
@@ -356,7 +358,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return false;
 
     // Skip protected and private classes.
-    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
+    if (decl->getAccess() != AS_public)
         return false;
 
     // Skip incomplete types. Boost.Python requires RTTI, which requires the
