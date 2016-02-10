@@ -1,13 +1,12 @@
 #ifndef __CHIMERA_CONFIGURATION_H__
 #define __CHIMERA_CONFIGURATION_H__
 
-#include "chimera/stream.h"
-
 #include <clang/AST/DeclBase.h>
 #include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <map>
 #include <memory>
+#include <mstch/mstch.hpp>
 #include <set>
 #include <yaml-cpp/yaml.h>
 
@@ -125,23 +124,10 @@ public:
     bool IsEnclosed(const clang::Decl *decl) const;
 
     /**
-     * Get a file pointer used for the output a given decl.
-     *
-     * This output path is an individual `.cpp` file created according to the
-     * mangled name of the decl.
-     *
-     * The file pointer should be closed after the output has been written.
+     * Render a particular mstch template based on some declaration.
+     * This context must contain a "mangled_name" from which to create the filename.
      */
-    std::unique_ptr<Stream>GetOutputFile(const clang::Decl *decl) const;
-
-    /**
-     * Dump any hard-coded overrides in place of this declaration, if they
-     * are defined in the `content` (for strings) or `source` (for files)
-     * fields of the YAML configuration for this declaration.
-     *
-     * Returns `true` if an override was found and dumped, `false` otherwise.
-     */
-    bool DumpOverride(const clang::Decl *decl, chimera::Stream &stream) const;
+    bool Render(std::string view, std::string key, const std::shared_ptr<mstch::object> &template_context) const;
 
 private:
     CompiledConfiguration(const Configuration &parent,
@@ -156,7 +142,6 @@ protected:
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
     std::unique_ptr<clang::MangleContext> mangler_;
-    std::unique_ptr<chimera::Stream> binding_;
 
     friend class Configuration;
 };

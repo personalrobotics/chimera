@@ -213,6 +213,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
     }
 
+/*
     // Create the top-level binding source file.
     std::string binding_filename =
         parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp";
@@ -247,6 +248,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         stream, binding_prototype, includes_,
         header_snippet, postinclude_snippet, footer_snippet));
     *binding_ << precontent_snippet << "\n";
+    */
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -305,33 +307,22 @@ bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
     return false;
 }
 
-std::unique_ptr<chimera::Stream>
-chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
+bool
+chimera::CompiledConfiguration::Render(std::string view, std::string key,
+                                       const std::shared_ptr<mstch::object> &context) const
 {
-    // Try to convert to a canonical named declaration.
-    const auto canonical_decl = decl->getCanonicalDecl();
-    if (!isa<clang::NamedDecl>(canonical_decl))
+    // Get the mangled name property if it exists.
+    if (!context->has("mangled_name"))
     {
-        std::cerr << "Cannot serialize unnamed declaration." << std::endl;
-        canonical_decl->dumpColor();
-        return nullptr;
+        std::cerr << "Cannot serialize template with no mangled name." << std::endl;
+        return false;
     }
-
-    const auto named_decl = cast<clang::NamedDecl>(canonical_decl);
-
-    // Use the C++ mangler to create the mangled binding filename.
-    std::string mangled_name;
-    llvm::raw_string_ostream mangled_name_stream(mangled_name);
-    mangler_->mangleName(named_decl, mangled_name_stream);
-    mangled_name = mangled_name_stream.str();
+    std::string mangled_name = ::mstch::render("{{mangled_name}}", context);
 
     // Create an output file depending on the provided parameters.
     std::string binding_filename =
         parent_.GetOutputPath() + "/" + mangled_name + ".cpp";
-    std::string binding_prototype =
-        "void " + mangled_name + "()";
-    // TODO: In newer Clang versions, this function returns std::unique<>.
-    auto *stream = ci_->createOutputFile(
+    auto stream = ci_->createOutputFile(
         binding_filename,
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
@@ -347,9 +338,9 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
         std::cerr << "Failed to create output file "
                   << "'" << binding_filename << "'"
                   << " for "
-                  << "'" << named_decl->getQualifiedNameAsString() << "'."
+                  << "'" << ::mstch::render("{{name}}", context) << "'."
                   << std::endl;
-        return nullptr;
+        return false;
     }
 
     // Resolve customizable snippets that will be inserted into the file.
@@ -362,17 +353,21 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     getSnippet(template_config["footer"],
                parent_.GetConfigFilename(), footer_snippet);
 
-    // Add this function to the top-level binding source file.
-    *binding_ << "  " << binding_prototype << ";\n";
-    *binding_ << "  " << mangled_name << "();\n\n";
+    // Augment top-level context as necessary.
+    ::mstch::map full_context {
+        {"header", header_snippet},
+        {"postinclude", postinclude_snippet},
+        {"footer", footer_snippet},
+        {key, context}
+    };
 
-    // Create a stream wrapper to write header and footer of file.
+    // Render the mstch template to the given output file.
+    *stream << ::mstch::render(view, full_context);
     std::cout << binding_filename << std::endl;
-    return std::unique_ptr<chimera::Stream>(new chimera::Stream(
-        stream, binding_prototype, includes_,
-        header_snippet, postinclude_snippet, footer_snippet));
+    return true;
 }
 
+/**
 bool chimera::CompiledConfiguration::DumpOverride(
     const clang::Decl *decl, chimera::Stream &stream) const
 {
@@ -386,3 +381,4 @@ bool chimera::CompiledConfiguration::DumpOverride(
     }
     return false;
 }
+*/

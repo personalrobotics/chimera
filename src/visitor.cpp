@@ -124,20 +124,9 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (node.IsNull())
         return false;
 
-    // Open a stream object unique to this CXX record's mangled name.
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
-        return false;
-
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, *stream))
-        return true;
-
     // Serialize using a mstch template.
-    ::mstch::map context; // TODO: globals from config.
-    context["class"] = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
-    *stream << ::mstch::render(CLASS_BINDING_CPP, context);
-    return true;
+    auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
+    return config_->Render(CLASS_BINDING_CPP, "class", context);
 }
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
@@ -151,20 +140,9 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
     if (node.IsNull())
         return false;
 
-    // Open a stream object unique to this Enum's mangled name.
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
-        return false;
-
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, *stream))
-        return true;
-
     // Serialize using a mstch template.
-    ::mstch::map context; // TODO: globals from config.
-    context["enum"] = std::make_shared<chimera::mstch::Enum>(*config_, decl);
-    *stream << ::mstch::render(CLASS_BINDING_CPP, context);
-    return true;
+    auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
+    return config_->Render(ENUM_BINDING_CPP, "enum", context);
 }
 
 bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
@@ -179,20 +157,9 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     if (node.IsNull())
         return false;
 
-    // Open a stream object unique to this variable's mangled name.
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
-        return false;
-
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, *stream))
-        return true;
-
     // Serialize using a mstch template.
-    ::mstch::map context; // TODO: globals from config.
-    context["variable"] = std::make_shared<chimera::mstch::Variable>(*config_, decl);
-    *stream << ::mstch::render(VAR_BINDING_CPP, context);
-    return true;
+	auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
+    return config_->Render(VAR_BINDING_CPP, "variable", context);
 }
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
@@ -207,18 +174,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     if (node.IsNull())
         return false;
 
-    // Open a stream object unique to this function's mangled name.
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
-        return false;
-
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, *stream))
-        return true;
-
     // Serialize using a mstch template.
-    ::mstch::map context; // TODO: globals from config.
-    context["function"] = std::make_shared<chimera::mstch::Function>(*config_, decl);
-    *stream << ::mstch::render(FUNCTION_BINDING_CPP, context);
-    return true;
+    auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
+    return config_->Render(FUNCTION_BINDING_CPP, "function", context);
 }
