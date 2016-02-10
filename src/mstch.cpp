@@ -1,3 +1,4 @@
+#include "chimera/configuration.h"
 #include "chimera/mstch.h"
 #include "chimera/util.h"
 

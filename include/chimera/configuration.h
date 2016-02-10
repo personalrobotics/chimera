@@ -12,6 +12,20 @@
 
 namespace chimera
 {
+namespace mstch
+{
+
+class CXXRecord;
+class Enum;
+class Function;
+class Variable;
+
+} // mstch
+} // chimera
+
+
+namespace chimera
+{
 
 class CompiledConfiguration;
 
@@ -134,11 +148,17 @@ public:
      * Render a particular mstch template based on some declaration.
      * This context must contain a "mangled_name" from which to create the filename.
      */
-    bool Render(std::string view, std::string key, const std::shared_ptr<mstch::object> &template_context);
+    bool Render(const std::shared_ptr<chimera::mstch::CXXRecord> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Enum> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Function> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
 
 private:
     CompiledConfiguration(const Configuration &parent,
                           clang::CompilerInstance *ci);
+
+    bool Render(std::string view, std::string key,
+                const std::shared_ptr<::mstch::object> &template_context);
 
 protected:
     static const YAML::Node emptyNode_;

@@ -4,6 +4,18 @@ arguments:
   - "-I/usr/lib/clang/3.6/include"
 
 template:
+  module:
+    source:
+      'templates/module.mstch.cpp'
+  cxx_record:
+    source:
+      'templates/cxx_record.mstch.cpp'
+  enum:
+    '/** Enums not implemented yet! */'
+  function:
+    '/** Global functions not implemented yet! */'
+  variable:
+    '/** Global variables not implemented yet! */'
   file:
     header:
       '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'

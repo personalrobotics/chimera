@@ -64,6 +64,7 @@ include_directories(${cling_utils_INCLUDE_DIR})
 
 # Build the main chimera executable.
 add_executable(chimera
+  src/boost_python_mstch.cpp
   src/chimera.cpp
   src/configuration.cpp
   src/consumer.cpp

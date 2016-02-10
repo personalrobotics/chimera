@@ -2,9 +2,6 @@
 #include "chimera/util.h"
 #include "chimera/visitor.h"
 
-// TODO: Clean this up and move to something other than a header.
-#include "chimera/boost_python_mstch.h"
-
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
 #include <iostream>
@@ -137,7 +134,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl,
                                                                &traversed_class_decls_);
-    return config_->Render(CLASS_BINDING_CPP, "class", context);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
@@ -153,7 +150,7 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
-    return config_->Render(ENUM_BINDING_CPP, "enum", context);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
@@ -170,7 +167,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
 
     // Serialize using a mstch template.
 	auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
-    return config_->Render(VAR_BINDING_CPP, "variable", context);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
@@ -187,5 +184,5 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
-    return config_->Render(FUNCTION_BINDING_CPP, "function", context);
+    return config_->Render(context);
 }

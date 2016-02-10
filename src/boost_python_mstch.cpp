@@ -14,12 +14,12 @@ const std::string CLASS_BINDING_CPP = R"(
 
 class {{class.mangled_name}}
 {
-	{{{prebody}}}
-	/* constructors */
-	/* methods */
-	/* static methods */
-	/* fields */
-	{{{postbody}}}
+    {{{prebody}}}
+    /* constructors */
+    /* methods */
+    /* static methods */
+    /* fields */
+    {{{postbody}}}
 }
 {{{postcontent}}}
 {{{footer}}}
@@ -32,16 +32,16 @@ const std::string ENUM_BINDING_CPP = R"(
  */
 )";
 
-const std::string VAR_BINDING_CPP = R"(
+const std::string FUNCTION_BINDING_CPP = R"(
 /**
- * Automatically generated global variable binding for '{{variable.name}}'.
+ * Automatically generated function binding for '{{function.name}}'.
  * Generated on {{date}}.
  */
 )";
 
-const std::string FUNCTION_BINDING_CPP = R"(
+const std::string VAR_BINDING_CPP = R"(
 /**
- * Automatically generated function binding for '{{function.name}}'.
+ * Automatically generated global variable binding for '{{variable.name}}'.
  * Generated on {{date}}.
  */
 )";

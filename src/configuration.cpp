@@ -1,4 +1,5 @@
 #include "chimera/configuration.h"
+#include "chimera/mstch.h"
 #include "chimera/util.h"
 
 // TODO: Clean this up and move to something other than a header.
@@ -196,7 +197,10 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     };
 
     // Render the mstch template to the given output file.
-    *stream << ::mstch::render(MODULE_CPP, full_context);
+    std::string view = Lookup(parent_.GetRoot()["template"]["module"]);
+    if (view.empty())
+        view = MODULE_CPP;
+    *stream << ::mstch::render(view, full_context);
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -305,7 +309,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 
 bool
 chimera::CompiledConfiguration::Render(std::string view, std::string key,
-                                       const std::shared_ptr<mstch::object> &context)
+                                       const std::shared_ptr<::mstch::object> &context)
 {
     // Get the mangled name property if it exists.
     if (!context->has("mangled_name"))
@@ -356,4 +360,36 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     // Record this binding name for use at the top-level.
     bindings_.push_back(mangled_name);
     return true;
+}
+
+bool chimera::CompiledConfiguration::Render(const std::shared_ptr<chimera::mstch::CXXRecord> context)
+{
+    std::string view = Lookup(parent_.GetRoot()["template"]["cxx_record"]);
+    if (view.empty())
+        view = CLASS_BINDING_CPP;
+    return Render(view, "class", context);
+}
+
+bool chimera::CompiledConfiguration::Render(const std::shared_ptr<chimera::mstch::Enum> context)
+{
+    std::string view = Lookup(parent_.GetRoot()["template"]["enum"]);
+    if (view.empty())
+        view = ENUM_BINDING_CPP;
+    return Render(view, "enum", context);
+}
+
+bool chimera::CompiledConfiguration::Render(const std::shared_ptr<chimera::mstch::Function> context)
+{
+    std::string view = Lookup(parent_.GetRoot()["template"]["function"]);
+    if (view.empty())
+        view = FUNCTION_BINDING_CPP;
+    return Render(view, "function", context);
+}
+
+bool chimera::CompiledConfiguration::Render(const std::shared_ptr<chimera::mstch::Variable> context)
+{
+    std::string view = Lookup(parent_.GetRoot()["template"]["variable"]);
+    if (view.empty())
+        view = VAR_BINDING_CPP;
+    return Render(VAR_BINDING_CPP, "variable", context);
 }
