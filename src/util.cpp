@@ -141,7 +141,7 @@ chimera::util::resolveNamespace(CompilerInstance *ci,
 
 std::string
 chimera::util::constructMangledName(ASTContext &context,
-                                    const CXXRecordDecl *decl)
+                                    const NamedDecl *decl)
 {
     std::string mangled_name;
     llvm::raw_string_ostream mangled_name_stream(mangled_name);
@@ -163,10 +163,7 @@ chimera::util::constructBindingName(ASTContext &context,
 
     // If the class is a template, use the mangled string name so that it does
     // not collide with other template instantiations.
-    std::string mangled_name;
-    llvm::raw_string_ostream mangled_name_stream(mangled_name);
-    context.createMangleContext()->mangleName(decl, mangled_name_stream);
-    mangled_name = mangled_name_stream.str();
+    std::string mangled_name = chimera::util::constructMangledName(context, decl);
 
     // Throw a warning that this class name was mangled, because users will
     // probably want to override these names with more sensible ones.

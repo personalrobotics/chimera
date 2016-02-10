@@ -10,6 +10,7 @@
 #define __CHIMERA_MSTCH_H__
 
 #include "chimera/configuration.h"
+#include "chimera/util.h"
 
 #include <clang/AST/AST.h>
 #include <mstch/mstch.hpp>
@@ -31,19 +32,12 @@ public:
     , decl_config_(config_.GetDeclaration(decl_))
     {
         register_methods(this, {
-            {"name", &ClangWrapper::name},
             {"config", &ClangWrapper::config},
+            {"name", &ClangWrapper::name},
+            {"mangled_name", &ClangWrapper::mangledName},
             {"override", &ClangWrapper::override},
             {"qualified_name", &ClangWrapper::qualifiedName}
         });
-    }
-
-    ::mstch::node name()
-    {
-        if (const YAML::Node &node = decl_config_["name"])
-            return node.as<std::string>();
-
-        return decl_->getNameAsString();
     }
 
     ::mstch::node config()
@@ -57,6 +51,23 @@ public:
             }
         }
         return mstch_config;
+    }
+
+    ::mstch::node name()
+    {
+        if (const YAML::Node &node = decl_config_["name"])
+            return node.as<std::string>();
+
+        return decl_->getNameAsString();
+    }
+
+    ::mstch::node mangledName()
+    {
+        if (const YAML::Node &node = decl_config_["mangled_name"])
+            return node.as<std::string>();
+
+        return chimera::util::constructMangledName(
+            config_.GetContext(), decl_);
     }
 
     ::mstch::node override()

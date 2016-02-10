@@ -119,7 +119,7 @@ std::string constructBindingName(clang::ASTContext &context,
  * This name is generated from the Clang compiler name mangler.
  */
 std::string constructMangledName(clang::ASTContext &context,
-                                 const clang::CXXRecordDecl *decl);
+                                 const clang::NamedDecl *decl);
 
 /**
  * Construct the default value of a parameter as a string expression.

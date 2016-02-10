@@ -19,7 +19,6 @@ CXXRecord::CXXRecord(
         {"is_copyable", &CXXRecord::isCopyable},
         {"binding_name", &CXXRecord::bindingName},
         {"uniquish_name", &CXXRecord::uniquishName},
-        {"mangled_name", &CXXRecord::mangledName},
         {"constructors", &CXXRecord::constructors},
         {"methods", &CXXRecord::methods},
         {"fields", &CXXRecord::fields},
@@ -74,15 +73,6 @@ CXXRecord::CXXRecord(
 {
     // TODO: implement this properly.
     return bindingName();
-}
-
-::mstch::node CXXRecord::mangledName()
-{
-    if (const YAML::Node &node = decl_config_["mangled_name"])
-        return node.as<std::string>();
-
-    return chimera::util::constructMangledName(
-        config_.GetContext(), decl_);
 }
 
 ::mstch::node CXXRecord::constructors()
