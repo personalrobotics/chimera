@@ -149,8 +149,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
 
     // Serialize using a mstch template.
     const auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
-    std::string output = ::mstch::render(CLASS_BINDING_CPP, context);
-    *stream << output;
+    *stream << ::mstch::render(CLASS_BINDING_CPP, context);
     return true;
 }
 
@@ -171,8 +170,7 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 
     // Serialize using a mstch template.
     const auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
-    std::string output = ::mstch::render(CLASS_BINDING_CPP, context);
-    *stream << output;
+    *stream << ::mstch::render(CLASS_BINDING_CPP, context);
     return true;
 }
 
@@ -194,8 +192,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
 
     // Serialize using a mstch template.
     const auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
-    std::string output = ::mstch::render(VAR_BINDING_CPP, context);
-    *stream << output;
+    *stream << ::mstch::render(VAR_BINDING_CPP, context);
     return true;
 }
 
@@ -217,7 +214,6 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 
     // Serialize using a mstch template.
     const auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
-    std::string output = ::mstch::render(FUNCTION_BINDING_CPP, context);
-    *stream << output;
+    *stream << ::mstch::render(FUNCTION_BINDING_CPP, context);
     return true;
 }
