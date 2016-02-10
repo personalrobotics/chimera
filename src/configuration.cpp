@@ -103,7 +103,6 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     const chimera::Configuration &parent, CompilerInstance *ci)
 : parent_(parent)
 , ci_(ci)
-, mangler_(ci->getASTContext().createMangleContext())
 {   
     // Get a reference to the configuration YAML structure.
     const YAML::Node &configNode = parent.GetRoot();

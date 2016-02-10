@@ -147,7 +147,6 @@ protected:
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
-    std::unique_ptr<clang::MangleContext> mangler_;
 
     friend class Configuration;
 };
