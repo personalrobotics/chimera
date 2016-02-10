@@ -37,21 +37,6 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
-
-bool IsEnclosed(const chimera::CompiledConfiguration &config_, Decl *decl)
-{
-    // Filter over the namespaces and only traverse ones that are enclosed
-    // by one of the configuration namespaces.
-    for (const auto &it : config_.GetNamespaces())
-    {
-        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 }
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
@@ -76,7 +61,7 @@ bool chimera::Visitor::shouldVisitImplicitCode() const
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
     // Only visit declarations in namespaces we are configured to read.
-    if (!IsEnclosed(*config_, decl))
+    if (!config_->IsEnclosed(decl))
         return true;
 
     if (isa<CXXRecordDecl>(decl))
@@ -149,7 +134,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return true;
 
     // Serialize using a mstch template.
-    const auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
+    ::mstch::map context; // TODO: globals from config.
+    context["class"] = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
     *stream << ::mstch::render(CLASS_BINDING_CPP, context);
     return true;
 }
@@ -175,7 +161,8 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
         return true;
 
     // Serialize using a mstch template.
-    const auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
+    ::mstch::map context; // TODO: globals from config.
+    context["enum"] = std::make_shared<chimera::mstch::Enum>(*config_, decl);
     *stream << ::mstch::render(CLASS_BINDING_CPP, context);
     return true;
 }
@@ -202,7 +189,8 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return true;
 
     // Serialize using a mstch template.
-    const auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
+    ::mstch::map context; // TODO: globals from config.
+    context["variable"] = std::make_shared<chimera::mstch::Variable>(*config_, decl);
     *stream << ::mstch::render(VAR_BINDING_CPP, context);
     return true;
 }
@@ -229,7 +217,8 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return true;
 
     // Serialize using a mstch template.
-    const auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
+    ::mstch::map context; // TODO: globals from config.
+    context["function"] = std::make_shared<chimera::mstch::Function>(*config_, decl);
     *stream << ::mstch::render(FUNCTION_BINDING_CPP, context);
     return true;
 }
