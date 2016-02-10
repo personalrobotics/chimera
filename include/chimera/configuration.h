@@ -82,6 +82,7 @@ protected:
 class CompiledConfiguration
 {
 public:
+    virtual ~CompiledConfiguration();
     CompiledConfiguration(const CompiledConfiguration&) = delete;
     CompiledConfiguration &operator=(const CompiledConfiguration&) = delete;
 
@@ -133,7 +134,7 @@ public:
      * Render a particular mstch template based on some declaration.
      * This context must contain a "mangled_name" from which to create the filename.
      */
-    bool Render(std::string view, std::string key, const std::shared_ptr<mstch::object> &template_context) const;
+    bool Render(std::string view, std::string key, const std::shared_ptr<mstch::object> &template_context);
 
 private:
     CompiledConfiguration(const Configuration &parent,
@@ -143,10 +144,10 @@ protected:
     static const YAML::Node emptyNode_;
     const Configuration &parent_;
     clang::CompilerInstance *ci_;
-    std::vector<std::string> includes_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
+    ::mstch::array bindings_;
 
     friend class Configuration;
 };

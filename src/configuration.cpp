@@ -1,6 +1,9 @@
 #include "chimera/configuration.h"
 #include "chimera/util.h"
 
+// TODO: Clean this up and move to something other than a header.
+#include "chimera/boost_python_mstch.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -107,10 +110,6 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Get a reference to the configuration YAML structure.
     const YAML::Node &configNode = parent.GetRoot();
 
-    // Compile the list of input files into the list of includes.
-    for (const auto &input_file : ci->getInvocation().getFrontendOpts().Inputs)
-        includes_.push_back(input_file.getFile());
-
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : configNode["namespaces"])
     {
@@ -163,15 +162,16 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                       << "'" << type_str << "'" << std::endl;
         }
     }
+}
 
-/*
+chimera::CompiledConfiguration::~CompiledConfiguration()
+{
     // Create the top-level binding source file.
     std::string binding_filename =
         parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp";
-    std::string binding_prototype =
-        "BOOST_PYTHON_MODULE(" + parent_.GetOutputModuleName() + ")";
-    // TODO: In newer Clang versions, this function returns std::unique<>.
-    auto *stream = ci_->createOutputFile(
+
+    // Create an output file depending on the provided parameters.
+    auto stream = ci_->createOutputFile(
         binding_filename,
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
@@ -182,24 +182,21 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     );
 
     // Resolve customizable snippets that will be inserted into the file.
+    // Augment top-level context as necessary.
     const YAML::Node &template_config = parent_.GetRoot()["template"]["main"];
-    std::string header_snippet, postinclude_snippet, footer_snippet, precontent_snippet;
-    getSnippet(template_config["header"],
-               parent_.GetConfigFilename(), header_snippet);
-    getSnippet(template_config["postinclude"],
-               parent_.GetConfigFilename(), postinclude_snippet);
-    getSnippet(template_config["precontent"],
-               parent_.GetConfigFilename(), precontent_snippet);
-    getSnippet(template_config["footer"],
-               parent_.GetConfigFilename(), footer_snippet);
+    ::mstch::map full_context {
+        {"header", Lookup(template_config["header"])},
+        {"precontent", Lookup(template_config["precontent"])},
+        {"prebody", Lookup(template_config["prebody"])},
+        {"footer", Lookup(template_config["footer"])},
+        {"module", ::mstch::map {
+            {"name", parent_.GetOutputModuleName()},
+            {"bindings", bindings_},
+        }}
+    };
 
-    // Create a stream wrapper to write header and footer of file.
-    std::cout << binding_filename << std::endl;
-    binding_.reset(new chimera::Stream(
-        stream, binding_prototype, includes_,
-        header_snippet, postinclude_snippet, footer_snippet));
-    *binding_ << precontent_snippet << "\n";
-    */
+    // Render the mstch template to the given output file.
+    *stream << ::mstch::render(MODULE_CPP, full_context);
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -308,7 +305,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 
 bool
 chimera::CompiledConfiguration::Render(std::string view, std::string key,
-                                       const std::shared_ptr<mstch::object> &context) const
+                                       const std::shared_ptr<mstch::object> &context)
 {
     // Get the mangled name property if it exists.
     if (!context->has("mangled_name"))
@@ -355,21 +352,8 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     // Render the mstch template to the given output file.
     *stream << ::mstch::render(view, full_context);
     std::cout << binding_filename << std::endl;
+
+    // Record this binding name for use at the top-level.
+    bindings_.push_back(mangled_name);
     return true;
 }
-
-/**
-bool chimera::CompiledConfiguration::DumpOverride(
-    const clang::Decl *decl, chimera::Stream &stream) const
-{
-    const YAML::Node &node = GetDeclaration(decl);
-
-    std::string snippet;
-    if (getSnippet(node, parent_.GetConfigFilename(), snippet))
-    {
-        stream << snippet << '\n';
-        return true;
-    }
-    return false;
-}
-*/
