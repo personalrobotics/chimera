@@ -139,6 +139,7 @@ public:
               const clang::CXXRecordDecl *class_decl,
               bool use_default=true);
 
+    ::mstch::node name();
     ::mstch::node type();
     ::mstch::node value();
 

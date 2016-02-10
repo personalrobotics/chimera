@@ -358,9 +358,18 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 , use_default_(use_default)
 {
     register_methods(this, {
+        {"name", &Parameter::name},
         {"type", &Parameter::type},
         {"value", &Parameter::value}
     });
+}
+
+::mstch::node Parameter::name()
+{
+    if (const YAML::Node &node = decl_config_["name"])
+        return node.as<std::string>();
+
+    return decl_->getNameAsString();
 }
 
 ::mstch::node Parameter::type()
@@ -374,8 +383,70 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Parameter::value()
 {
-    // TODO: Implement this method.
-    return std::string{""};
+    if (!decl_->hasDefaultArg())
+        return "";
+    if (decl_->hasUninstantiatedDefaultArg())
+        return "";
+    if (decl_->hasUnparsedDefaultArg())
+        return "";
+
+    const Expr *default_expr = decl_->getDefaultArg();
+    assert(default_expr);
+
+    Expr::EvalResult result;
+    bool success;
+
+    const Type *param_type = decl_->getType().getTypePtr();
+    if (param_type->isReferenceType())
+        success = default_expr->EvaluateAsLValue(result, config_.GetContext());
+    else
+        success = default_expr->EvaluateAsRValue(result, config_.GetContext());
+
+    std::string param_value;
+    if (success)
+    {
+        // Handle special cases for infinite and nan float values.
+        // These values resolve to internal compiler definitions, so
+        // their default string serialization won't resolve correctly.
+        if (result.Val.isFloat() && result.Val.getFloat().isInfinity())
+        {
+            param_value = result.Val.getFloat().isNegative()
+                ? "-INFINITY" : "INFINITY";
+        }
+        else if (result.Val.isFloat() && result.Val.getFloat().isNaN())
+        {
+            param_value = "NAN";
+        }
+        else
+        {
+            param_value = result.Val.getAsString(
+                config_.GetContext(), decl_->getType());
+        }
+    }
+    // TODO: Ask Clang developers why this requires a const-cast?
+    else if (const_cast<Expr *>(default_expr)->hasNonTrivialCall(config_.GetContext()))
+    {
+        // TODO: How do we print the decl with argument + return types?
+        const std::string param_name = decl_->getNameAsString();
+        std::cerr
+          << "Warning: Unable to evaluate non-trivial call in default"
+             " value for parameter"
+          << " '" << param_name << "' of method"
+          << " '" << method_decl_->getQualifiedNameAsString() << "'.\n";
+    }
+    else
+    {
+        // TODO: How do we print the decl with argument + return types?
+        const std::string param_name = decl_->getNameAsString();
+        std::cerr
+          << "Warning: Failed to evaluate default value for parameter"
+          << " '" << param_name << "' of method"
+          << " '" << method_decl_->getQualifiedNameAsString() << "'.\n";
+    }
+
+    // If a constant has been overriden, use the override instead of the
+    // original value.  Currently, this is just done via string-matching.
+    return config_.GetConstant(param_value);
 }
 
 Variable::Variable(const ::chimera::CompiledConfiguration &config,
