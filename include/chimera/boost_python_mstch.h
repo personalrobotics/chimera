@@ -5,40 +5,53 @@
  */
 std::string CLASS_BINDING_CPP = R"(
 /**
- * Automatically generated binding for {{class.name}}.
+ * Automatically generated class binding for '{{class.name}}'.
  * Generated on {{date}}.
  */
+{{{header}}}
+{{#includes}}
+#include <{{{.}}}>
+{{/includes}}
+{{{precontent}}}
+
+class {{class.mangled_name}}
+{
+	{{{prebody}}}
+	/* constructors */
+	/* methods */
+	/* static methods */
+	/* fields */
+	{{{postbody}}}
+}
+{{{postcontent}}}
+{{{footer}}}
 )";
 
-/**
- * Chimera templates to generate boost::python bindings.
- */
 std::string ENUM_BINDING_CPP = R"(
 /**
- * Automatically generated binding for {{enum.name}}.
+ * Automatically generated enum binding for '{{enum.name}}'.
  * Generated on {{date}}.
  */
 )";
 
 std::string VAR_BINDING_CPP = R"(
 /**
- * Automatically generated binding for {{variable.name}}.
+ * Automatically generated global variable binding for '{{variable.name}}'.
  * Generated on {{date}}.
  */
 )";
 
 std::string FUNCTION_BINDING_CPP = R"(
 /**
- * Automatically generated binding for {{function.name}}.
+ * Automatically generated function binding for '{{function.name}}'.
  * Generated on {{date}}.
  */
 )";
 
 std::string MODULE_CPP = R"(
 /**
- * Automatically generated chimera binding.
+ * Automatically generated chimera module '{{module.name}}'.
  * Generated on {{date}}.
- *
  *
  * To use this binding, compile all included source files, then
  * add the resulting `.so` to your python path and run:

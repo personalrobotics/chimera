@@ -63,7 +63,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::bindingName()
 {
-    if (const YAML::Node &node = decl_config_["name"])
+    if (const YAML::Node &node = decl_config_["binding_name"])
         return node.as<std::string>();
 
     return chimera::util::constructBindingName(

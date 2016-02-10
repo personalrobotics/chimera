@@ -32,6 +32,7 @@ public:
     {
         register_methods(this, {
             {"name", &ClangWrapper::name},
+            {"config", &ClangWrapper::config},
             {"override", &ClangWrapper::override},
             {"qualified_name", &ClangWrapper::qualifiedName}
         });
@@ -43,6 +44,19 @@ public:
             return node.as<std::string>();
 
         return decl_->getNameAsString();
+    }
+
+    ::mstch::node config()
+    {
+        ::mstch::map mstch_config;
+        for(YAML::const_iterator it=decl_config_.begin(); it!=decl_config_.end(); ++it) {
+            std::string value = config_.Lookup(it->second);
+            if (!value.empty())
+            {
+                mstch_config[it->first.as<std::string>()] = value;
+            }
+        }
+        return mstch_config;
     }
 
     ::mstch::node override()

@@ -124,6 +124,12 @@ public:
     bool IsEnclosed(const clang::Decl *decl) const;
 
     /**
+     * Checks if a particular node is a string or contains a "source" entry to load.
+     * This is useful for resolving entries that might be pulled in from files.
+     */
+    std::string Lookup(const YAML::Node &node) const;
+
+    /**
      * Render a particular mstch template based on some declaration.
      * This context must contain a "mangled_name" from which to create the filename.
      */

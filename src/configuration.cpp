@@ -21,54 +21,6 @@ size_t countWordsInString(const std::string & str)
                          std::istream_iterator<std::string>());
 }
 
-bool getSnippet(const YAML::Node &node, const std::string &config_path,
-                std::string &snippet)
-{
-    if (const YAML::Node &content_node = node["content"])
-    {
-        snippet = content_node.as<std::string>();
-        return true;
-    }
-    else if (const YAML::Node &source_node = node["source"])
-    {
-        // Concatenate YAML filepath with source relative path.
-        // TODO: this is somewhat brittle.
-        std::string source_path = source_node.as<std::string>();
-
-        if (source_path.front() != '/')
-        {
-            std::size_t found = config_path.rfind("/");
-            if (found != std::string::npos)
-            {
-                source_path = config_path.substr(0, found) + "/" + source_path;
-            }
-            else
-            {
-                source_path = "./" + source_path;
-            }
-        }
-
-        // Try to open configuration file.
-        std::ifstream source(source_path);
-        if (source.fail())
-        {
-            std::cerr << "Warning: Failed to open source '"
-                      << source_path << "': " << strerror(errno) << std::endl;
-            return true;
-        }
-
-        // Copy file content to the output stream.
-        snippet.assign(std::istreambuf_iterator<char>(source),
-                       std::istreambuf_iterator<char>());
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
 } // namespace
 
 
@@ -307,6 +259,54 @@ bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
     return false;
 }
 
+std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
+{
+    std::string config_path = parent_.GetConfigFilename();
+
+    // If the node simply contains a string, return it.
+    if (node.Type() == YAML::NodeType::Scalar)
+        return node.as<std::string>();
+    
+    // If the node contains a "source:" entry, load from that.
+    if (const YAML::Node &source_node = node["source"])
+    {
+        // Concatenate YAML filepath with source relative path.
+        // TODO: this is somewhat brittle.
+        std::string source_path = source_node.as<std::string>();
+
+        if (source_path.front() != '/')
+        {
+            std::size_t found = config_path.rfind("/");
+            if (found != std::string::npos)
+            {
+                source_path = config_path.substr(0, found) + "/" + source_path;
+            }
+            else
+            {
+                source_path = "./" + source_path;
+            }
+        }
+
+        // Try to open configuration file.
+        std::ifstream source(source_path);
+        if (source.fail())
+        {
+            std::cerr << "Warning: Failed to open source '"
+                      << source_path << "': " << strerror(errno) << std::endl;
+            return "";
+        }
+
+        // Copy file content to the output stream.
+        std::string snippet;
+        snippet.assign(std::istreambuf_iterator<char>(source),
+                       std::istreambuf_iterator<char>());
+        return snippet;
+    }
+
+    // Return an empty string if not available.
+    return "";
+}
+
 bool
 chimera::CompiledConfiguration::Render(std::string view, std::string key,
                                        const std::shared_ptr<mstch::object> &context) const
@@ -344,20 +344,12 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     }
 
     // Resolve customizable snippets that will be inserted into the file.
-    const YAML::Node &template_config = parent_.GetRoot()["template"]["file"];
-    std::string header_snippet, postinclude_snippet, footer_snippet;
-    getSnippet(template_config["header"],
-               parent_.GetConfigFilename(), header_snippet);
-    getSnippet(template_config["postinclude"],
-               parent_.GetConfigFilename(), postinclude_snippet);
-    getSnippet(template_config["footer"],
-               parent_.GetConfigFilename(), footer_snippet);
-
     // Augment top-level context as necessary.
+    const YAML::Node &template_config = parent_.GetRoot()["template"]["file"];
     ::mstch::map full_context {
-        {"header", header_snippet},
-        {"postinclude", postinclude_snippet},
-        {"footer", footer_snippet},
+        {"header", Lookup(template_config["header"])},
+        {"precontent", Lookup(template_config["precontent"])},
+        {"footer", Lookup(template_config["footer"])},
         {key, context}
     };
 

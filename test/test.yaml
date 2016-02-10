@@ -6,20 +6,20 @@ arguments:
 template:
   file:
     header:
-      content: '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
-    postinclude:
-      content: '/* postinclude */'
+      '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
+    precontent:
+      '/* postinclude */'
     footer:
-      content: '/* footer */'
+      '/* footer */'
   main:
     header:
-      content: '/* main header */'
-    postinclude:
-      content: '#include <boost/eigen_numpy.h>'
+      '/* main header */'
     precontent:
-      content: '  SetupEigenConverters();'
+      '#include <boost/eigen_numpy.h>'
+    prebody:
+      'SetupEigenConverters();'
     footer:
-      content: '/* main footer */'
+      '/* main footer */'
 
 # The C++ namespaces that will be extracted by Chimera
 namespaces:
@@ -173,9 +173,9 @@ declarations:
   # Suppressed because these are optional components.
   'Assimp::IOStream': null
   'dart::dynamics::AssimpInputResourceAdaptor': null
-  'dart::optimizer::IpoptSolver': null
+  # 'dart::optimizer::IpoptSolver': null
   'dart::optimizer::NloptSolver': null
-  'dart::optimizer::DartTNLP': null
+  #'dart::optimizer::DartTNLP': null
 
   # Suppressed because of bugs in Chimera.
   #'dart::common::Signal<void (std::shared_ptr<dart::dynamics::MetaSkeleton const>, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), dart::common::signal::detail::DefaultCombiner>': null
@@ -211,7 +211,7 @@ declarations:
   'const dart::dynamics::Marker *dart::dynamics::Skeleton::getMarker(const std::string &) const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::EndEffector::getDependentDof(size_t) const': null
   #'const std::vector<const DegreeOfFreedom *> &dart::dynamics::EndEffector::getDependentDofs() const': null
-  'const dart::dynamics::BodyNode *dart::dynamics::EndEffector::getParentBodyNode() const': null
+  #'const dart::dynamics::BodyNode *dart::dynamics::EndEffector::getParentBodyNode() const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::ZeroDofJoint::getDof(size_t) const': null
   'const dart::dynamics::PointMass *dart::dynamics::SoftBodyNode::getPointMass(size_t) const': null
   'const dart::dynamics::PointMassNotifier *dart::dynamics::SoftBodyNode::getNotifier() const': null
@@ -233,7 +233,7 @@ declarations:
   #'const std::vector<const DegreeOfFreedom *> &dart::dynamics::BodyNode::getDependentDofs() const': null
   'const dart::dynamics::DegreeOfFreedom *dart::dynamics::BodyNode::getDependentDof(size_t) const': null
   'const dart::dynamics::Marker *dart::dynamics::BodyNode::getMarker(size_t) const': null
-  'const dart::dynamics::EndEffector *dart::dynamics::BodyNode::getEndEffector(size_t) const': null
+  #'const dart::dynamics::EndEffector *dart::dynamics::BodyNode::getEndEffector(size_t) const': null
   'const dart::dynamics::Joint *dart::dynamics::BodyNode::getChildJoint(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::BodyNode::getChildBodyNode(size_t) const': null
   'const dart::dynamics::BodyNode *dart::dynamics::BodyNode::getParentBodyNode() const': null
