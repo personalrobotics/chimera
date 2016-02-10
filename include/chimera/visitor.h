@@ -32,7 +32,7 @@ private:
     clang::PrintingPolicy printing_policy_;
     std::unique_ptr<CompiledConfiguration> config_;
 
-    std::set<clang::CXXRecordDecl *> traversed_class_decls_;
+    std::set<const clang::CXXRecordDecl *> traversed_class_decls_;
 };
 
 } // namespace chimera

@@ -124,8 +124,19 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (node.IsNull())
         return false;
 
+    // Ensure traversal of base classes before this class.
+    std::set<const CXXRecordDecl *> base_decls =
+        chimera::util::getBaseClassDecls(decl);
+    for(auto base_decl : base_decls)
+    {
+        if (traversed_class_decls_.find(base_decl->getCanonicalDecl())
+                != traversed_class_decls_.end())
+            VisitDecl(const_cast<CXXRecordDecl *>(base_decl));
+    }
+
     // Serialize using a mstch template.
-    auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl);
+    auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl,
+                                                               &traversed_class_decls_);
     return config_->Render(CLASS_BINDING_CPP, "class", context);
 }
 

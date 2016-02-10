@@ -94,7 +94,8 @@ class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>
 {
 public:
     CXXRecord(const ::chimera::CompiledConfiguration &config,
-              const clang::CXXRecordDecl *decl);
+              const clang::CXXRecordDecl *decl,
+              const std::set<const clang::CXXRecordDecl*> *available_decls = NULL);
 
     ::mstch::node bases();
     ::mstch::node type();
@@ -109,6 +110,9 @@ public:
     
     ::mstch::node fields();
     ::mstch::node staticFields();
+
+protected:
+    const std::set<const clang::CXXRecordDecl *> *available_decls_;
 };
 
 class Enum: public ClangWrapper<clang::EnumDecl>

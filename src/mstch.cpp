@@ -10,8 +10,10 @@ namespace mstch
 
 CXXRecord::CXXRecord(
     const ::chimera::CompiledConfiguration &config,
-    const CXXRecordDecl *decl)
+    const CXXRecordDecl *decl,
+    const std::set<const CXXRecordDecl*> *available_decls)
 : ClangWrapper(config, decl)
+, available_decls_(available_decls)
 {
     register_methods(this, {
         {"bases", &CXXRecord::bases},
@@ -28,10 +30,28 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::bases()
 {
-    // TODO: add filtering for undefined base classes.
+    // Get all bases of this class.
     std::set<const CXXRecordDecl *> base_decls =
         chimera::util::getBaseClassDecls(decl_);
 
+    // If a list of available decls is provided, only use available base classes.
+    if (available_decls_)
+    {
+        std::set<const CXXRecordDecl *> available_base_decls;
+        std::copy_if(
+            base_decls.begin(), base_decls.end(),
+            std::inserter(available_base_decls, available_base_decls.end()),
+            [this](const CXXRecordDecl* base_decl)
+            {
+                return (available_decls_->find(base_decl->getCanonicalDecl()) 
+                            != available_decls_->end());
+            }
+        );
+        base_decls = available_base_decls;
+    }
+
+    // Convert each base class to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
     ::mstch::array base_templates;
     for(auto base_decl : base_decls)
     {
