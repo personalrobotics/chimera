@@ -134,9 +134,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (!decl->isCompleteDefinition())
         return false;
 
+    // Ignore declarations that have been explicitly suppressed.
     const YAML::Node &node = config_->GetDeclaration(decl);
     if (node.IsNull())
-        return false; // Explicitly suppressed.
+        return false;
 
     // Open a stream object unique to this CXX record's mangled name.
     auto stream = config_->GetOutputFile(decl);
@@ -157,6 +158,11 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
     // Skip protected and private enums.
     if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+        return false;
+
+    // Ignore declarations that have been explicitly suppressed.
+    const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
         return false;
 
     // Open a stream object unique to this Enum's mangled name.
@@ -181,6 +187,11 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     else if (!decl->isThisDeclarationADefinition())
         return false;
 
+    // Ignore declarations that have been explicitly suppressed.
+    const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false;
+
     // Open a stream object unique to this variable's mangled name.
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -202,6 +213,11 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
     else if (decl->isOverloadedOperator())
         return false; // TODO: Wrap overloaded operators.
+
+    // Ignore declarations that have been explicitly suppressed.
+    const YAML::Node &node = config_->GetDeclaration(decl);
+    if (node.IsNull())
+        return false;
 
     // Open a stream object unique to this function's mangled name.
     auto stream = config_->GetOutputFile(decl);
