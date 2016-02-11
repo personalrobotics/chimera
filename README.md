@@ -21,8 +21,8 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 **Requirements**
 
-- libclang 3.6
-- llvm 3.6 (+ tools)
+- libclang 3.6 or above
+- llvm 3.6 or above (+ tools)
 - libedit
 - yaml-cpp
 
