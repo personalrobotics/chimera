@@ -358,8 +358,25 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return false;
 
     // Skip protected and private classes.
-    if (decl->getAccess() != AS_public)
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
+
+    // Incantations necessary to handle nested template classes.
+    // TODO: This likely handles only one level of nesting.
+    // See: http://stackoverflow.com/q/35376737/111426
+    if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
+    {
+      if (decl2->getAccess() == AS_private
+       || decl2->getAccess() == AS_protected)
+        return false;
+
+      if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
+      {
+        if (decl3->getAccess() == AS_private
+         || decl3->getAccess() == AS_protected)
+          return false;
+      }
+    }
 
     // Skip incomplete types. Boost.Python requires RTTI, which requires the
     // complete type.
