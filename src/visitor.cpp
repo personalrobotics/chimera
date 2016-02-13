@@ -802,7 +802,16 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
         // TODO: Filter out transitive base classes.
 
         CXXRecordDecl *const base_record_decl
-          = base_decl.getType()->getAsCXXRecordDecl();
+            = base_decl.getType()->getAsCXXRecordDecl();
+        if (!base_record_decl)
+        {
+            std::cerr << "Warning: Omitted base class of class "
+                      << chimera::util::getFullyQualifiedTypeName(*context_,
+                            QualType(decl->getTypeForDecl(), 0))
+                      << "' because it is not a CXXRecordDecl.\n";
+            continue;
+        }
+
         const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
         // Generate the base class, if necessary.
