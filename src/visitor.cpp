@@ -705,6 +705,12 @@ bool chimera::Visitor::GenerateStaticField(
     clang::CXXRecordDecl *class_decl,
     clang::VarDecl *decl)
 {
+    // TODO: How should we handle AS_none here.
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
+        return false;
+    if (!decl->isStaticDataMember())
+        return false;
+
     // TODO: Add support for YAML overrides, including return_value_policy.
 
     if (decl->getAccess() != AS_public)
