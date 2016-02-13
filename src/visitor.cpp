@@ -713,9 +713,8 @@ bool chimera::Visitor::GenerateStaticField(
 
     // TODO: Add support for YAML overrides, including return_value_policy.
 
-    if (decl->getAccess() != AS_public)
-        return false;
-    else if (!decl->isStaticDataMember())
+    // Finally, try the default return_value_policy.
+    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString()
