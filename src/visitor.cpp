@@ -774,6 +774,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     if (!stream)
         return false;
 
+    // TODO: Support return_value_policy for global variables.
+    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+        return false;
+
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
             << "\") = " << decl->getQualifiedNameAsString() << ";\n";
     return true;
