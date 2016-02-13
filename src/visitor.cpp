@@ -283,6 +283,29 @@ std::string getFullyQualifiedDeclTypeAsString(
         context, QualType(decl->getTypeForDecl(), 0));
 }
 
+bool needsReturnValuePolicy(NamedDecl *decl, const Type *return_type)
+{
+    if (return_type->isReferenceType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a reference and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
+    }
+    else if (return_type->isPointerType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a pointer and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
