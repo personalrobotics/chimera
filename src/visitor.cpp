@@ -616,34 +616,10 @@ bool chimera::Visitor::GenerateFunction(
             = type_node["return_value_policy"].as<std::string>("");
     }
 
-    // Finally, try the default return_value_policy. This is only acceptable if
-    // the output is copy constructable.
-    if (return_value_policy.empty())
-    {
-        if (return_type->isReferenceType())
-        {
-            std::cerr
-                << "Warning: Skipped method "
-                << decl->getQualifiedNameAsString()
-                << " '"
-                << pointer_type.getAsString(printing_policy_)
-                << "' because it returns a reference and no"
-                   " 'return_value_policy' was specified.\n";
-            return false;
-        }
-        else if (return_type->isPointerType())
-        {
-            std::cerr
-                << "Warning: Skipped method "
-                << decl->getQualifiedNameAsString()
-                << " '"
-                << pointer_type.getAsString(printing_policy_)
-                << "' because it returns a pointer and no"
-                   " 'return_value_policy' was specified.\n";
-            return false;
-        }
-        // TODO: Check if return_type is non-copyable.
-    }
+    // Finally, try the default return_value_policy.
+    if (return_value_policy.empty()
+     && needsReturnValuePolicy(decl, return_type))
+        return false;
 
     // Suppress any functions that take arguments by rvalue reference.
     for (const ParmVarDecl *const parm_decl : decl->parameters()) {
