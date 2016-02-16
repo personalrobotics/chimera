@@ -10,14 +10,16 @@
 void {{class.mangled_name}}
 {
     {{{prebody}}}
-    ::boost::python::class_<{{{class.qualified_name}}},
+    ::boost::python::class_<{{{class.qualified_name}}}{{#class.bases?}},
         ::boost::python::bases<{{#class.bases}}{{{qualified_name}}}{{^last}},
-                               {{/last}}{{/class.bases}}> >("{{class.name}}")
+                               {{/last}}{{/class.bases}}>{{/class.bases?}}>("{{class.name}}")
 
     /* constructors */
     {{#class.constructors}}
     .def(::boost::python::init<{{#params}}{{{type}}}{{^last}},
-                               {{/last}}{{/params}}>())
+                               {{/last}}{{/params}}>
+            (({{#params}}::boost::python::arg("{{name}}"){{^last}},
+              {{/last}}{{/params}})))
     {{/class.constructors}}
 
     /* methods */
