@@ -83,6 +83,11 @@ target_link_libraries("${PROJECT_NAME}"
   ${llvm_libs}
 )
 
+target_link_libraries("${PROJECT_NAME}"
+  mstch
+  cling_utils
+)
+
 #############
 ## INSTALL ##
 #############

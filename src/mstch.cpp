@@ -154,6 +154,7 @@ CXXRecord::CXXRecord(
             continue;
         if (method_decl->getDescribedFunctionTemplate())
             continue;
+
         // Skip functions that have incomplete argument types. Boost.Python
         // requires RTTI information about all arguments, including references
         // and pointers.
@@ -166,9 +167,17 @@ CXXRecord::CXXRecord(
             continue;
         }
 
-        methods.push_back(
-            std::make_shared<Function>(
-                    config_, method_decl, decl_));
+        // Generate the method wrapper (but don't add it just yet).
+        auto method = std::make_shared<Function>(config_, method_decl, decl_);
+
+        // Check if a return_value_policy can be generated for this function.
+        if (::mstch::render("{{return_value_policy}}", method).empty()
+                && chimera::util::needsReturnValuePolicy(
+                    method_decl, method_decl->getReturnType().getTypePtr()))
+            continue;
+
+        // Now that we know it can be generated, add the method.
+        methods.push_back(method);
     }
     return methods;
 }
@@ -203,7 +212,12 @@ CXXRecord::CXXRecord(
         const VarDecl *static_field_decl = cast<VarDecl>(child_decl);
         if (static_field_decl->getAccess() != AS_public)
             continue;
-        else if (!static_field_decl->isStaticDataMember())
+        if (!static_field_decl->isStaticDataMember())
+            continue;
+
+        // Check if a return_value_policy can be generated for this function.
+        if (chimera::util::needsReturnValuePolicy(
+                static_field_decl, static_field_decl->getType().getTypePtr()))
             continue;
 
         static_fields.push_back(

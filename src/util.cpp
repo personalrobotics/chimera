@@ -411,12 +411,35 @@ bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
     return false;
 }
 
-bool chimera::util::containsRValueReference(clang::FunctionDecl *decl)
+bool chimera::util::containsRValueReference(FunctionDecl *decl)
 {
     for (ParmVarDecl *param_decl : decl->params())
     {
         if (param_decl->getType().getTypePtr()->isRValueReferenceType())
             return true;
+    }
+    return false;
+}
+
+bool chimera::util::needsReturnValuePolicy(const NamedDecl *decl, const Type *return_type)
+{
+    if (return_type->isReferenceType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a reference and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
+    }
+    else if (return_type->isPointerType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a pointer and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
     }
     return false;
 }

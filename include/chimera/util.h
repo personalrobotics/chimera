@@ -175,6 +175,15 @@ bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
  */
 bool isInsideTemplateClass(const clang::DeclContext *decl_context);
 
+/**
+ * Return whether a return value policy needs to be specfied for a declaration.
+ *
+ * In certain cases, it is possible to deduce the return value policy that
+ * should be used for a given declaration and return type.  This function
+ * checks and returns false if the return value policy can be deduced.
+ */
+bool needsReturnValuePolicy(const clang::NamedDecl *decl, const clang::Type *return_type);
+
 } // namespace util
 } // namespace chimera
 

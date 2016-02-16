@@ -117,13 +117,13 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
     {
       if (decl2->getAccess() == AS_private
-       || decl2->getAccess() == AS_protected)
+            || decl2->getAccess() == AS_protected)
         return false;
 
       if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
       {
         if (decl3->getAccess() == AS_private
-         || decl3->getAccess() == AS_protected)
+            || decl3->getAccess() == AS_protected)
           return false;
       }
     }
@@ -183,7 +183,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
 
     // Serialize using a mstch template.
@@ -201,6 +201,10 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // Ignore declarations that have been explicitly suppressed.
     const YAML::Node &node = config_->GetDeclaration(decl);
     if (node.IsNull())
+        return false;
+
+    // TODO: Support return_value_policy for global functions.
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
 
     // Serialize using a mstch template.
