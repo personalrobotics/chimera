@@ -10,9 +10,10 @@
 void {{class.mangled_name}}
 {
     {{{prebody}}}
-    ::boost::python::class_<{{{class.qualified_name}}}{{#class.bases?}},
+    ::boost::python::class_<{{{class.qualified_name}}}{{^class.is_copyable?}},
+        ::boost::noncopyable{{/class.is_copyable?}}{{#class.bases?}},
         ::boost::python::bases<{{#class.bases}}{{{qualified_name}}}{{^last}},
-                               {{/last}}{{/class.bases}}>{{/class.bases?}}>("{{class.name}}")
+                               {{/last}}{{/class.bases}}>{{/class.bases?}}>("{{class.name}}", boost::python::no_init)
 
     /* constructors */
     {{#class.constructors}}
