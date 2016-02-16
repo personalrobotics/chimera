@@ -641,7 +641,12 @@ bool chimera::Visitor::GenerateFunction(
     // Next, check if a return_value_policy is defined on the return type.
     if (return_value_policy.empty())
     {
-        const YAML::Node &type_node = config_->GetType(return_qual_type);
+        const YAML::Node type_node = config_->GetType(return_qual_type);
+
+        // Suppress this return type.
+        if (type_node.IsNull())
+          return false;
+
         return_value_policy
             = type_node["return_value_policy"].as<std::string>("");
     }
