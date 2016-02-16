@@ -1,5 +1,5 @@
 /**
- * Automatically generated class binding for '{{class.name}}'.
+ * Automatically generated Boost.Python class binding for '{{class.name}}'.
  */
 {{{header}}}
 {{#includes}}
