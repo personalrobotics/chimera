@@ -391,5 +391,5 @@ bool chimera::CompiledConfiguration::Render(const std::shared_ptr<chimera::mstch
     std::string view = Lookup(parent_.GetRoot()["template"]["variable"]);
     if (view.empty())
         view = VAR_BINDING_CPP;
-    return Render(VAR_BINDING_CPP, "variable", context);
+    return Render(view, "variable", context);
 }

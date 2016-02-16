@@ -11,11 +11,14 @@ template:
     source:
       'templates/cxx_record.mstch.cpp'
   enum:
-    '/** Enums not implemented yet! */'
+    source:
+      'templates/enum.mstch.cpp'
   function:
-    '/** Global functions not implemented yet! */'
+    source:
+      'templates/function.mstch.cpp'
   variable:
-    '/** Global variables not implemented yet! */'
+    source:
+      'templates/variable.mstch.cpp'
   file:
     header:
       '#include </homes/mkoval/dart-ws/src/dartpy/src/pointers.h>'
