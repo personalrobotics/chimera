@@ -2,6 +2,8 @@
 #include "chimera/mstch.h"
 #include "chimera/util.h"
 
+#include <vector>
+
 using namespace clang;
 
 namespace chimera
@@ -31,6 +33,8 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::bases()
 {
+    ::mstch::array base_templates;
+
     // Get all bases of this class.
     std::set<const CXXRecordDecl *> base_decls =
         chimera::util::getBaseClassDecls(decl_);
@@ -53,14 +57,22 @@ CXXRecord::CXXRecord(
 
     // Convert each base class to a template object.
     // Since template objects are lazily-evaluated, this isn't expensive.
-    ::mstch::array base_templates;
-    for(auto base_decl : base_decls)
+    std::vector<std::shared_ptr<CXXRecord>> base_vector;
+    for(const auto *base_decl : base_decls)
     {
-        base_templates.push_back(
+        base_vector.push_back(
             std::make_shared<CXXRecord>(
                 config_, base_decl));
     }
 
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (base_vector.size() > 0)
+        base_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto base_template : base_vector)
+        base_templates.push_back(base_template);
     return base_templates;
 }
 
@@ -98,12 +110,15 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::constructors()
 {
-    ::mstch::array constructors;
+    ::mstch::array constructor_templates;
 
     // If the class is abstract, do not enumerate any constructors.
     if (decl_->isAbstract())
-        return constructors;
+        return constructor_templates;
 
+    // Convert each constructor to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Function>> constructor_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
         if (method_decl->getAccess() != AS_public)
@@ -126,16 +141,29 @@ CXXRecord::CXXRecord(
         if (constructor_decl->isCopyOrMoveConstructor())
             continue;
 
-        constructors.push_back(
+        constructor_vector.push_back(
             std::make_shared<Function>(
                 config_, method_decl, decl_));
     }
-    return constructors;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (constructor_vector.size() > 0)
+        constructor_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto constructor_template : constructor_vector)
+        constructor_templates.push_back(constructor_template);
+    return constructor_templates;
 }
 
 ::mstch::node CXXRecord::methods()
 {
-    ::mstch::array methods;
+    ::mstch::array method_templates;
+
+    // Convert each method to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Function>> method_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
         if (method_decl->getAccess() != AS_public)
@@ -177,14 +205,27 @@ CXXRecord::CXXRecord(
             continue;
 
         // Now that we know it can be generated, add the method.
-        methods.push_back(method);
+        method_vector.push_back(method);
     }
-    return methods;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (method_vector.size() > 0)
+        method_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto method_template : method_vector)
+        method_templates.push_back(method_template);
+    return method_templates;
 }
 
 ::mstch::node CXXRecord::fields()
 {
-    ::mstch::array fields;
+    ::mstch::array field_templates;
+
+    // Convert each field to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Field>> field_vector;
     for (FieldDecl *const field_decl : decl_->fields())
     {
         if (field_decl->getAccess() != AS_public)
@@ -194,16 +235,29 @@ CXXRecord::CXXRecord(
                 config_.GetContext(), field_decl->getType()))
             continue;
 
-        fields.push_back(
+        field_vector.push_back(
             std::make_shared<Field>(
                 config_, field_decl, decl_));
     }
-    return fields;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (field_vector.size() > 0)
+        field_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto field_template : field_vector)
+        field_templates.push_back(field_template);
+    return field_templates;
 }
 
 ::mstch::node CXXRecord::staticFields()
 {
-    ::mstch::array static_fields;
+    ::mstch::array static_field_templates;
+
+    // Convert each static field to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Variable>> static_field_vector;
     for (Decl *const child_decl : decl_->decls())
     {
         if (!isa<VarDecl>(child_decl))
@@ -220,11 +274,20 @@ CXXRecord::CXXRecord(
                 static_field_decl, static_field_decl->getType().getTypePtr()))
             continue;
 
-        static_fields.push_back(
+        static_field_vector.push_back(
             std::make_shared<Variable>(
                 config_, static_field_decl, decl_));
     }
-    return static_fields;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (static_field_vector.size() > 0)
+        static_field_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto static_field_template : static_field_vector)
+        static_field_templates.push_back(static_field_template);
+    return static_field_templates;
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config,
@@ -248,14 +311,27 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Enum::values()
 {
-    ::mstch::array constants;
+    ::mstch::array constant_templates;
+
+    // Convert each enum constant to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<EnumConstant>> constant_vector;
     for (const EnumConstantDecl *constant_decl : decl_->enumerators())
     {
-        constants.push_back(
+        constant_vector.push_back(
             std::make_shared<EnumConstant>(
                 config_, constant_decl));
     }
-    return constants;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (constant_vector.size() > 0)
+        constant_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto constant_template : constant_templates)
+        constant_templates.push_back(constant_template);
+    return constant_templates;
 }
 
 Field::Field(const ::chimera::CompiledConfiguration &config,
@@ -341,15 +417,28 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::params()
 {
-    ::mstch::array params;
+    ::mstch::array param_templates;
+
+    // Convert each parameter to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Parameter>> param_vector;
     for (const ParmVarDecl *param_decl : decl_->params())
     {
         // TODO: implement default value filtering.
-        params.push_back(
+        param_vector.push_back(
             std::make_shared<Parameter>(
                 config_, param_decl, decl_, class_decl_));
     }
-    return params;
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (param_vector.size() > 0)
+        param_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto param_template : param_templates)
+        param_templates.push_back(param_template);
+    return param_templates;
 }
 
 ::mstch::node Function::returnValuePolicy()

@@ -27,12 +27,14 @@ static_assert(std::is_base_of<clang::NamedDecl, T>::value,
               "'T' must derive from clang::NamedDecl");
 public:
     ClangWrapper(const ::chimera::CompiledConfiguration &config,
-                 const T *decl)
+                 const T *decl, bool last=false)
     : config_(config), decl_(decl)
     , decl_config_(config_.GetDeclaration(decl_))
+    , last_(last)
     {
         register_methods(this, {
             {"config", &ClangWrapper::config},
+            {"last", &ClangWrapper::last},
             {"name", &ClangWrapper::name},
             {"mangled_name", &ClangWrapper::mangledName},
             {"override", &ClangWrapper::override},
@@ -51,6 +53,11 @@ public:
             }
         }
         return mstch_config;
+    }
+
+    ::mstch::node last()
+    {
+        return last_;
     }
 
     ::mstch::node name()
@@ -84,10 +91,16 @@ public:
         return decl_->getQualifiedNameAsString();
     }
 
+    void setLast(bool is_last)
+    {
+        last_ = is_last;
+    }
+
 protected:
     const ::chimera::CompiledConfiguration &config_;
     const T *decl_;
     const YAML::Node &decl_config_;
+    bool last_;
 };
 
 class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>
