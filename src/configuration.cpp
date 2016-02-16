@@ -288,8 +288,12 @@ chimera::CompiledConfiguration::GetType(const clang::QualType type) const
 std::string
 chimera::CompiledConfiguration::GetConstant(const std::string &value) const
 {
-    const YAML::Node &constants = parent_.GetRoot()["constants"];
-    return constants[value].as<std::string>(value);
+    if (const YAML::Node constants = parent_.GetRoot()["constants"])
+    {
+      if (const YAML::Node constant = constants[value])
+        return constant.as<std::string>(value);
+    }
+    return "";
 }
 
 chimera::StreamUniquePtr
@@ -426,7 +430,6 @@ bool chimera::CompiledConfiguration::DumpNamespace(
       return false;
 
     // Generate the Python module.
-    const size_t isubmodule = dumped_namespaces_.size();
     const std::string module_path = parent_.GetOutputModuleName() + "."
         + join(std::begin(module_list), std::end(module_list), ".");
 

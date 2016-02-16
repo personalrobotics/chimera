@@ -3,6 +3,7 @@
 #include "external/cling_utils_AST.h"
 
 #include <algorithm>
+#include <clang/Lex/Lexer.h>
 #include <boost/algorithm/string/join.hpp>
 #include <iostream>
 #include <llvm/Support/raw_ostream.h>
@@ -94,11 +95,11 @@ std::string ConstructBindingName(
     CXXRecordDecl *decl, ASTContext &context,
     const chimera::CompiledConfiguration &config)
 {
-    const YAML::Node &node = config.GetDeclaration(decl);
+    const YAML::Node node = config.GetDeclaration(decl);
 
     // If a name is specified in the configuration, use that.
-    if (node.IsNull() && node["name"])
-        return node.as<std::string>();
+    if (!node.IsNull() && node["name"])
+        return node["name"].as<std::string>();
 
     // If this is an anonymous struct, then use the name of its typedef.
     if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
@@ -161,9 +162,26 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
     {
         const std::string param_name = param_decl->getNameAsString();
         const Type *param_type = param_decl->getType().getTypePtr();
+        std::string source_text = "UNKNOWN";
         std::string param_value;
 
-        if (param_decl->hasDefaultArg()
+        // First, try to resolve a string overload.
+        const SourceRange source_range = param_decl->getDefaultArgRange();
+        const auto char_range = CharSourceRange::getTokenRange(source_range);
+        bool is_invalid = false;
+        const StringRef source_text_ref = clang::Lexer::getSourceText(
+            char_range, context.getSourceManager(), context.getLangOpts(),
+            &is_invalid);
+
+        if (!is_invalid)
+        {
+            source_text = source_text_ref.str();
+            param_value = config.GetConstant(source_text);
+        }
+
+        // Otherwise, try to evaluate the expression.
+        if (param_value.empty()
+            && param_decl->hasDefaultArg()
             && !param_decl->hasUninstantiatedDefaultArg()
             && !param_decl->hasUnparsedDefaultArg())
         {
@@ -202,7 +220,8 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
             {
                 // TODO: How do we print the decl with argument + return types?
                 std::cerr
-                  << "Warning: Unable to evaluate non-trivial call in default"
+                  << "Warning: Unable to evaluate non-trivial call '"
+                  << source_text << "' in default"
                      " value for parameter"
                   << " '" << param_name << "' of method"
                   << " '" << decl->getQualifiedNameAsString() << "'.\n";
@@ -211,7 +230,8 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
             {
                 // TODO: How do we print the decl with argument + return types?
                 std::cerr
-                  << "Warning: Failed to evaluate default value for parameter"
+                  << "Warning: Failed to evaluate default value '"
+                  << source_text << "' for parameter"
                   << " '" << param_name << "' of method"
                   << " '" << decl->getQualifiedNameAsString() << "'.\n";
             }
@@ -284,24 +304,29 @@ std::string getFullyQualifiedDeclTypeAsString(
         context, QualType(decl->getTypeForDecl(), 0));
 }
 
-bool needsReturnValuePolicy(NamedDecl *decl, const Type *return_type)
+bool needsReturnValuePolicy(
+    const ASTContext &context, NamedDecl *decl, const Type *return_type)
 {
     if (return_type->isReferenceType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
-            << "' because it returns a reference and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns a reference of type '"
+            << chimera::util::getFullyQualifiedTypeName(
+                  context, QualType(return_type, 0))
+            << "' and no 'return_value_policy' was specified.\n";
         return true;
     }
     else if (return_type->isPointerType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
-            << "' because it returns a pointer and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns a pointer of type '"
+            << chimera::util::getFullyQualifiedTypeName(
+                  context, QualType(return_type, 0))
+            << "'and no 'return_value_policy' was specified.\n";
         return true;
     }
     return false;
@@ -623,7 +648,7 @@ bool chimera::Visitor::GenerateFunction(
 
     // Finally, try the default return_value_policy.
     if (return_value_policy.empty()
-     && needsReturnValuePolicy(decl, return_type))
+     && needsReturnValuePolicy(*context_, decl, return_type))
         return false;
 
     // Suppress any functions that take arguments by rvalue reference.
@@ -719,7 +744,7 @@ bool chimera::Visitor::GenerateStaticField(
     // TODO: Add support for YAML overrides, including return_value_policy.
 
     // Finally, try the default return_value_policy.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (needsReturnValuePolicy(*context_, decl, decl->getType().getTypePtr()))
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString()
@@ -788,26 +813,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (needsReturnValuePolicy(*context_, decl, decl->getType().getTypePtr()))
         return false;
 
     // Update the Python scope for new declaration.
-#if 0
-    std::cerr << "GlobalVar "
-              << decl->getQualifiedNameAsString() << "\n"
-              << "| getMemberSpecializationInfo "
-              << decl->getMemberSpecializationInfo() << "\n"
-              << "| getDescribedVarTemplate "
-              << decl->getDescribedVarTemplate() << "\n"
-              << "| getInstantiatedFromStaticDataMember "
-              << decl->getInstantiatedFromStaticDataMember() << "\n"
-              << "| getTemplateSpecializationKind"
-              << decl->getTemplateSpecializationKind() << "\n"
-              << "| isStaticDataMember"
-              << std::flush;
-#endif
-
-
     if (!GenerateGlobalScope(*stream, decl->getDeclContext()))
         return false; // Parent scope was suppressed.
 
