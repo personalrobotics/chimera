@@ -69,6 +69,21 @@ bool getSnippet(const YAML::Node &node, const std::string &config_path,
     }
 }
 
+template <class Iterator>
+std::string join(
+    Iterator begin, Iterator end, const std::string &delimiter)
+{
+  if (begin == end)
+    return "";
+
+  std::stringstream stream;
+
+  for (Iterator it = begin; it != end; ++it)
+    stream << delimiter << *it;
+
+  return stream.str().substr(delimiter.size());
+}
+
 } // namespace
 
 
@@ -273,11 +288,15 @@ chimera::CompiledConfiguration::GetType(const clang::QualType type) const
 std::string
 chimera::CompiledConfiguration::GetConstant(const std::string &value) const
 {
-    const YAML::Node &constants = parent_.GetRoot()["constants"];
-    return constants[value].as<std::string>(value);
+    if (const YAML::Node constants = parent_.GetRoot()["constants"])
+    {
+      if (const YAML::Node constant = constants[value])
+        return constant.as<std::string>(value);
+    }
+    return "";
 }
 
-std::unique_ptr<chimera::Stream>
+chimera::StreamUniquePtr
 chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
 {
     // Try to convert to a canonical named declaration.
@@ -334,15 +353,23 @@ chimera::CompiledConfiguration::GetOutputFile(const clang::Decl *decl) const
     getSnippet(template_config["footer"],
                parent_.GetConfigFilename(), footer_snippet);
 
-    // Add this function to the top-level binding source file.
-    *binding_ << "  " << binding_prototype << ";\n";
-    *binding_ << "  " << mangled_name << "();\n\n";
-
     // Create a stream wrapper to write header and footer of file.
     std::cout << binding_filename << std::endl;
-    return std::unique_ptr<chimera::Stream>(new chimera::Stream(
+    return StreamUniquePtr(
+      new chimera::Stream(
         stream, binding_prototype, includes_,
-        header_snippet, postinclude_snippet, footer_snippet));
+        header_snippet, postinclude_snippet, footer_snippet),
+      [this, binding_prototype, mangled_name](chimera::Stream *stream)
+      {
+        // Add this function to the top-level binding source file. This must
+        // occur when the stream is closed to avoid generating references to
+        // namespaces that do not yet exist.
+        *binding_ << "  " << binding_prototype << ";\n";
+        *binding_ << "  " << mangled_name << "();\n\n";
+
+        delete stream;
+      }
+    );
 }
 
 bool chimera::CompiledConfiguration::DumpOverride(
@@ -357,4 +384,71 @@ bool chimera::CompiledConfiguration::DumpOverride(
         return true;
     }
     return false;
+}
+
+bool chimera::CompiledConfiguration::DumpNamespace(
+    const clang::NestedNameSpecifier *nns)
+{
+    if (nns->getKind() != clang::NestedNameSpecifier::Namespace)
+      throw std::runtime_error("NestedNameSpecifier is not a Namespace.");
+
+    const clang::NamespaceDecl *canonical_decl
+      = nns->getAsNamespace()->getCanonicalDecl();
+
+    // Check if a Python module was already created for this namespace.
+    if (dumped_namespaces_.count(canonical_decl))
+        return false;
+
+    // Build a list of NestedNameeSpecifiers starting at the root.
+    std::vector<const NestedNameSpecifier *> namespaces;
+    while (nns)
+    {
+      namespaces.push_back(nns);
+      nns = nns->getPrefix();
+    }
+
+    std::reverse(std::begin(namespaces), std::end(namespaces));
+
+    std::vector<std::string> module_list;
+    for (const NestedNameSpecifier *nns : namespaces)
+    {
+      if (nns->getKind() != clang::NestedNameSpecifier::Namespace)
+        throw std::runtime_error(
+          "Prefix of NestedNameSpecifier is not all Namespaces.");
+
+      const NamespaceDecl *namespace_decl
+        = nns->getAsNamespace()->getCanonicalDecl();
+
+      // Skip root namespaces.
+      if (namespaces_.count(namespace_decl))
+        continue;
+
+      module_list.push_back(namespace_decl->getNameAsString());
+    }
+
+    if (module_list.empty())
+      return false;
+
+    // Generate the Python module.
+    const std::string module_path = parent_.GetOutputModuleName() + "."
+        + join(std::begin(module_list), std::end(module_list), ".");
+
+    *binding_
+        << "  ::boost::python::scope()";
+
+    for (const std::string &submodule_name : module_list)
+      *binding_ << ".attr(\"" << submodule_name << "\")";
+
+    *binding_
+        << " = "
+           "::boost::python::object("
+           // TODO: What does handle<> do?
+           "::boost::python::handle<>("
+           // TODO: Should this be borrowed() or incref()?
+           "::boost::python::borrowed("
+           "::PyImport_AddModule(\""
+        << module_path << "\"))));\n\n";
+
+    dumped_namespaces_.insert(canonical_decl);
+    return true;
 }

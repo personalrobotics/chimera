@@ -1,7 +1,9 @@
 #include "chimera/visitor.h"
 #include "chimera/util.h"
+#include "external/cling_utils_AST.h"
 
 #include <algorithm>
+#include <clang/Lex/Lexer.h>
 #include <boost/algorithm/string/join.hpp>
 #include <iostream>
 #include <llvm/Support/raw_ostream.h>
@@ -93,11 +95,11 @@ std::string ConstructBindingName(
     CXXRecordDecl *decl, ASTContext &context,
     const chimera::CompiledConfiguration &config)
 {
-    const YAML::Node &node = config.GetDeclaration(decl);
+    const YAML::Node node = config.GetDeclaration(decl);
 
     // If a name is specified in the configuration, use that.
-    if (node.IsNull() && node["name"])
-        return node.as<std::string>();
+    if (!node.IsNull() && node["name"])
+        return node["name"].as<std::string>();
 
     // If this is an anonymous struct, then use the name of its typedef.
     if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
@@ -160,9 +162,26 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
     {
         const std::string param_name = param_decl->getNameAsString();
         const Type *param_type = param_decl->getType().getTypePtr();
+        std::string source_text = "UNKNOWN";
         std::string param_value;
 
-        if (param_decl->hasDefaultArg()
+        // First, try to resolve a string overload.
+        const SourceRange source_range = param_decl->getDefaultArgRange();
+        const auto char_range = CharSourceRange::getTokenRange(source_range);
+        bool is_invalid = false;
+        const StringRef source_text_ref = clang::Lexer::getSourceText(
+            char_range, context.getSourceManager(), context.getLangOpts(),
+            &is_invalid);
+
+        if (!is_invalid)
+        {
+            source_text = source_text_ref.str();
+            param_value = config.GetConstant(source_text);
+        }
+
+        // Otherwise, try to evaluate the expression.
+        if (param_value.empty()
+            && param_decl->hasDefaultArg()
             && !param_decl->hasUninstantiatedDefaultArg()
             && !param_decl->hasUnparsedDefaultArg())
         {
@@ -201,7 +220,8 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
             {
                 // TODO: How do we print the decl with argument + return types?
                 std::cerr
-                  << "Warning: Unable to evaluate non-trivial call in default"
+                  << "Warning: Unable to evaluate non-trivial call '"
+                  << source_text << "' in default"
                      " value for parameter"
                   << " '" << param_name << "' of method"
                   << " '" << decl->getQualifiedNameAsString() << "'.\n";
@@ -210,7 +230,8 @@ GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &con
             {
                 // TODO: How do we print the decl with argument + return types?
                 std::cerr
-                  << "Warning: Failed to evaluate default value for parameter"
+                  << "Warning: Failed to evaluate default value '"
+                  << source_text << "' for parameter"
                   << " '" << param_name << "' of method"
                   << " '" << decl->getQualifiedNameAsString() << "'.\n";
             }
@@ -283,24 +304,29 @@ std::string getFullyQualifiedDeclTypeAsString(
         context, QualType(decl->getTypeForDecl(), 0));
 }
 
-bool needsReturnValuePolicy(NamedDecl *decl, const Type *return_type)
+bool needsReturnValuePolicy(
+    const ASTContext &context, NamedDecl *decl, const Type *return_type)
 {
     if (return_type->isReferenceType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
-            << "' because it returns a reference and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns a reference of type '"
+            << chimera::util::getFullyQualifiedTypeName(
+                  context, QualType(return_type, 0))
+            << "' and no 'return_value_policy' was specified.\n";
         return true;
     }
     else if (return_type->isPointerType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
-            << "' because it returns a pointer and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns a pointer of type '"
+            << chimera::util::getFullyQualifiedTypeName(
+                  context, QualType(return_type, 0))
+            << "'and no 'return_value_policy' was specified.\n";
         return true;
     }
     return false;
@@ -422,6 +448,10 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // Get configuration, and use any overrides if they exist.
     if (config_->DumpOverride(decl, *stream))
         return true;
+
+    // Update the Python scope for new declaration.
+    if (!GenerateScope(*stream, decl))
+      return false; // Parent scope was suppressed.
 
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
@@ -611,14 +641,19 @@ bool chimera::Visitor::GenerateFunction(
     // Next, check if a return_value_policy is defined on the return type.
     if (return_value_policy.empty())
     {
-        const YAML::Node &type_node = config_->GetType(return_qual_type);
+        const YAML::Node type_node = config_->GetType(return_qual_type);
+
+        // Suppress this return type.
+        if (type_node.IsNull())
+          return false;
+
         return_value_policy
             = type_node["return_value_policy"].as<std::string>("");
     }
 
     // Finally, try the default return_value_policy.
     if (return_value_policy.empty()
-     && needsReturnValuePolicy(decl, return_type))
+     && needsReturnValuePolicy(*context_, decl, return_type))
         return false;
 
     // Suppress any functions that take arguments by rvalue reference.
@@ -714,7 +749,7 @@ bool chimera::Visitor::GenerateStaticField(
     // TODO: Add support for YAML overrides, including return_value_policy.
 
     // Finally, try the default return_value_policy.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (needsReturnValuePolicy(*context_, decl, decl->getType().getTypePtr()))
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString()
@@ -746,6 +781,10 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
     if (!stream)
         return false;
 
+    // Update the Python scope for new declaration.
+    if (!GenerateScope(*stream, decl))
+      return false; // Parent scope was suppressed.
+
     *stream << "::boost::python::enum_<"
             << getFullyQualifiedDeclTypeAsString(*context_, decl)
             << ">(\"" << decl->getNameAsString() << "\")\n";
@@ -769,14 +808,22 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
     else if (!decl->isThisDeclarationADefinition())
         return false;
+    // Static data members inside a class templates will incorrectly generate a
+    // function call.
+    else if (decl->isStaticDataMember())
+        return false;
 
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (needsReturnValuePolicy(*context_, decl, decl->getType().getTypePtr()))
         return false;
+
+    // Update the Python scope for new declaration.
+    if (!GenerateGlobalScope(*stream, decl->getDeclContext()))
+        return false; // Parent scope was suppressed.
 
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
             << "\") = " << decl->getQualifiedNameAsString() << ";\n";
@@ -794,7 +841,123 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     if (!stream)
         return false;
 
+    // Update the Python scope for new declaration.
+    if (!GenerateGlobalScope(*stream, decl->getEnclosingNamespaceContext()))
+        return false; // Parent scope was suppressed.
+
     return GenerateFunction(*stream, nullptr, decl);
+}
+
+bool chimera::Visitor::GenerateScope(
+    chimera::Stream &stream, TagDecl *decl)
+{
+  NestedNameSpecifier *const nns
+    = cling::utils::TypeName::CreateNestedNameSpecifier(
+        *context_, decl, true);
+
+  return GenerateScope(stream, nns->getPrefix());
+}
+
+bool chimera::Visitor::GenerateScope(
+    chimera::Stream &stream, NestedNameSpecifier *nns)
+{
+  const std::set<const clang::NamespaceDecl *> &base_namespaces
+   = config_->GetNamespaces();
+
+  // Build a list of NestedNameeSpecifiers starting at the root.
+  std::vector<NestedNameSpecifier *> namespaces;
+
+  while (nns)
+  {
+    namespaces.push_back(nns);
+    nns = nns->getPrefix();
+  }
+
+  std::reverse(std::begin(namespaces), std::end(namespaces));
+
+  // Generate Boost.Python scopes in forward order.
+  std::vector<std::string> module_names;
+
+  for (NestedNameSpecifier *const nns : namespaces)
+  {
+    switch (nns->getKind())
+    {
+    case NestedNameSpecifier::Namespace:
+    {
+      // Skip root namespaces.
+      NamespaceDecl *decl = nns->getAsNamespace()->getCanonicalDecl();
+      if (!base_namespaces.count(decl))
+      {
+        config_->DumpNamespace(nns);
+        module_names.push_back(nns->getAsNamespace()->getNameAsString());
+      }
+      break;
+    }
+
+    case NestedNameSpecifier::TypeSpec:
+    {
+      CXXRecordDecl *decl = nns->getAsType()->getAsCXXRecordDecl();
+      if (!decl)
+        throw std::runtime_error("TypeSpec is not a CXXRecordDecl.");
+
+      // Suppress this class if a parent scope was suppressed.
+      const std::string binding_name = ConstructBindingName(
+        decl, *context_, *config_);
+      if (binding_name.empty())
+        return false;
+
+      // Generate outer classes before inner classes.
+      if (!IsInsideTemplateClass(decl))
+      {
+          if (GenerateCXXRecord(decl))
+              traversed_class_decls_.insert(decl->getCanonicalDecl());
+      }
+
+      module_names.push_back(decl->getNameAsString());
+      break;
+    }
+
+    case NestedNameSpecifier::Global:
+    case NestedNameSpecifier::Identifier:
+    case NestedNameSpecifier::NamespaceAlias:
+    case NestedNameSpecifier::Super:
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+      throw std::runtime_error("Unsupported type of NestedNameSpecifier.");
+
+    default:
+      throw std::runtime_error("Unknown type of NestedNameSpecifier.");
+    }
+  }
+
+  // TODO: I don't know why this has to be done on a separate line. Putting
+  // this inline in the boost::python::scope doesn't create a new scope.
+  stream << "::boost::python::object parent_object("
+            "::boost::python::scope()";
+
+  for (const std::string &module_name : module_names)
+    stream << ".attr(\"" << module_name << "\")";
+
+  stream << ");\n"
+            "::boost::python::scope parent_scope(parent_object);\n\n";
+
+  return true;
+}
+
+bool chimera::Visitor::GenerateGlobalScope(
+  chimera::Stream &stream, clang::DeclContext *decl)
+{
+    if (!decl)
+        return false;
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl);
+    if (!namespace_decl)
+        throw std::runtime_error("DeclContext is not a NamespaceDecl.");
+
+    clang::NestedNameSpecifier *nns
+      = cling::utils::TypeName::CreateNestedNameSpecifier(
+          *context_, namespace_decl);
+
+    return GenerateScope(stream, nns);
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(

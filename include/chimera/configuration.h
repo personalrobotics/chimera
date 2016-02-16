@@ -16,6 +16,9 @@ namespace chimera
 
 class CompiledConfiguration;
 
+using StreamUniquePtr = std::unique_ptr<
+  chimera::Stream, std::function<void (chimera::Stream *)>>;
+
 class Configuration
 {
 public:
@@ -117,7 +120,13 @@ public:
      *
      * The file pointer should be closed after the output has been written.
      */
-    std::unique_ptr<Stream>GetOutputFile(const clang::Decl *decl) const;
+    StreamUniquePtr GetOutputFile(const clang::Decl *decl) const;
+
+    /**
+     * Create a Python module corresponding to a namespace. Returns true if
+     * content was generated and otherwise false.
+     */
+    bool DumpNamespace(const clang::NestedNameSpecifier *nns);
 
     /**
      * Dump any hard-coded overrides in place of this declaration, if they
@@ -142,6 +151,7 @@ protected:
     std::set<const clang::NamespaceDecl*> namespaces_;
     std::unique_ptr<clang::MangleContext> mangler_;
     std::unique_ptr<chimera::Stream> binding_;
+    std::set<const clang::NamespaceDecl*> dumped_namespaces_;
 
     friend class Configuration;
 };
