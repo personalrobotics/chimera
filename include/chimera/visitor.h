@@ -41,6 +41,9 @@ protected:
 
     bool GenerateScope(chimera::Stream &stream,
                        clang::NestedNameSpecifier *nns);
+    bool GenerateScope(chimera::Stream &stream, clang::TagDecl *decl);
+    bool GenerateGlobalScope(
+        chimera::Stream &stream, clang::DeclContext *decl);
 
 private:
     bool IsEnclosed(clang::Decl *decl) const;

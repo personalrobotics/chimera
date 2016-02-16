@@ -424,11 +424,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (config_->DumpOverride(decl, *stream))
         return true;
 
-
-    NestedNameSpecifier *const nns
-      = cling::utils::TypeName::CreateNestedNameSpecifier(
-          *context_, decl, true);
-    if (!GenerateScope(*stream, nns->getPrefix()))
+    // Update the Python scope for new declaration.
+    if (!GenerateScope(*stream, decl))
       return false; // Parent scope was suppressed.
 
     *stream << "::boost::python::class_<"
@@ -754,6 +751,10 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
     if (!stream)
         return false;
 
+    // Update the Python scope for new declaration.
+    if (!GenerateScope(*stream, decl))
+      return false; // Parent scope was suppressed.
+
     *stream << "::boost::python::enum_<"
             << getFullyQualifiedDeclTypeAsString(*context_, decl)
             << ">(\"" << decl->getNameAsString() << "\")\n";
@@ -777,6 +778,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
     else if (!decl->isThisDeclarationADefinition())
         return false;
+    // Static data members inside a class templates will incorrectly generate a
+    // function call.
+    else if (decl->isStaticDataMember())
+        return false;
 
     auto stream = config_->GetOutputFile(decl);
     if (!stream)
@@ -785,6 +790,26 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     // TODO: Support return_value_policy for global variables.
     if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
+
+    // Update the Python scope for new declaration.
+#if 0
+    std::cerr << "GlobalVar "
+              << decl->getQualifiedNameAsString() << "\n"
+              << "| getMemberSpecializationInfo "
+              << decl->getMemberSpecializationInfo() << "\n"
+              << "| getDescribedVarTemplate "
+              << decl->getDescribedVarTemplate() << "\n"
+              << "| getInstantiatedFromStaticDataMember "
+              << decl->getInstantiatedFromStaticDataMember() << "\n"
+              << "| getTemplateSpecializationKind"
+              << decl->getTemplateSpecializationKind() << "\n"
+              << "| isStaticDataMember"
+              << std::flush;
+#endif
+
+
+    if (!GenerateGlobalScope(*stream, decl->getDeclContext()))
+        return false; // Parent scope was suppressed.
 
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
             << "\") = " << decl->getQualifiedNameAsString() << ";\n";
@@ -802,7 +827,21 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     if (!stream)
         return false;
 
+    // Update the Python scope for new declaration.
+    if (!GenerateGlobalScope(*stream, decl->getEnclosingNamespaceContext()))
+        return false; // Parent scope was suppressed.
+
     return GenerateFunction(*stream, nullptr, decl);
+}
+
+bool chimera::Visitor::GenerateScope(
+    chimera::Stream &stream, TagDecl *decl)
+{
+  NestedNameSpecifier *const nns
+    = cling::utils::TypeName::CreateNestedNameSpecifier(
+        *context_, decl, true);
+
+  return GenerateScope(stream, nns->getPrefix());
 }
 
 bool chimera::Visitor::GenerateScope(
@@ -888,6 +927,23 @@ bool chimera::Visitor::GenerateScope(
             "::boost::python::scope parent_scope(parent_object);\n\n";
 
   return true;
+}
+
+bool chimera::Visitor::GenerateGlobalScope(
+  chimera::Stream &stream, clang::DeclContext *decl)
+{
+    if (!decl)
+        return false;
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl);
+    if (!namespace_decl)
+        throw std::runtime_error("DeclContext is not a NamespaceDecl.");
+
+    clang::NestedNameSpecifier *nns
+      = cling::utils::TypeName::CreateNestedNameSpecifier(
+          *context_, namespace_decl);
+
+    return GenerateScope(stream, nns);
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(
