@@ -118,7 +118,7 @@ CXXRecord::CXXRecord(
 
     // Convert each constructor to a template object.
     // Since template objects are lazily-evaluated, this isn't expensive.
-    std::vector<std::shared_ptr<Function>> constructor_vector;
+    std::vector<std::shared_ptr<Method>> constructor_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
         if (method_decl->getAccess() != AS_public)
@@ -142,7 +142,7 @@ CXXRecord::CXXRecord(
             continue;
 
         constructor_vector.push_back(
-            std::make_shared<Function>(
+            std::make_shared<Method>(
                 config_, method_decl, decl_));
     }
 
@@ -163,7 +163,7 @@ CXXRecord::CXXRecord(
 
     // Convert each method to a template object.
     // Since template objects are lazily-evaluated, this isn't expensive.
-    std::vector<std::shared_ptr<Function>> method_vector;
+    std::vector<std::shared_ptr<Method>> method_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
         if (method_decl->getAccess() != AS_public)
@@ -175,8 +175,6 @@ CXXRecord::CXXRecord(
         if (isa<CXXConstructorDecl>(method_decl))
             continue;
         if (method_decl->isOverloadedOperator())
-            continue;
-        if (method_decl->isStatic())
             continue;
         if (method_decl->isDeleted())
             continue;
@@ -196,13 +194,19 @@ CXXRecord::CXXRecord(
         }
 
         // Generate the method wrapper (but don't add it just yet).
-        auto method = std::make_shared<Function>(config_, method_decl, decl_);
+        auto method = std::make_shared<Method>(config_, method_decl, decl_);
 
         // Check if a return_value_policy can be generated for this function.
         if (::mstch::render("{{return_value_policy}}", method).empty()
                 && chimera::util::needsReturnValuePolicy(
                     method_decl, method_decl->getReturnType().getTypePtr()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << method_decl->getQualifiedNameAsString()
+                << " because it requires a return value policy.\n";
             continue;
+        }
 
         // Now that we know it can be generated, add the method.
         method_vector.push_back(method);
@@ -459,6 +463,22 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(
         config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+}
+
+Method::Method(const ::chimera::CompiledConfiguration &config,
+               const CXXMethodDecl *decl,
+               const CXXRecordDecl *class_decl)
+: Function(config, decl, class_decl)
+, method_decl_(decl)
+{
+    register_methods(this, {
+        {"is_static", &Method::isStatic}
+    });
+}
+
+::mstch::node Method::isStatic()
+{
+    return method_decl_->isStatic();
 }
 
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,

@@ -156,6 +156,7 @@ private:
     const clang::CXXRecordDecl *class_decl_;
 };
 
+// TODO: refactor Function to not need class_decl at all.
 class Function: public ClangWrapper<clang::FunctionDecl>
 {
 public:
@@ -170,6 +171,19 @@ public:
 
 private:
     const clang::CXXRecordDecl *class_decl_;
+};
+
+class Method: public Function
+{
+public:
+    Method(const ::chimera::CompiledConfiguration &config,
+           const clang::CXXMethodDecl *decl,
+           const clang::CXXRecordDecl *class_decl=NULL);
+
+    ::mstch::node isStatic();
+
+private:
+    const clang::CXXMethodDecl *method_decl_;
 };
 
 class Parameter: public ClangWrapper<clang::ParmVarDecl>

@@ -27,15 +27,9 @@ void {{class.mangled_name}}
     {{#class.methods}}
     .def("{{name}}",
          static_cast<{{{type}}}>(&{{qualified_name}}){{#return_value_policy}},
-            ::boost::python::return_value_policy<{{{.}}}>(){{/return_value_policy}})
+            ::boost::python::return_value_policy<{{{.}}}>(){{/return_value_policy}}){{#is_static}}
+    .staticmethod("{{name}}"){{/is_static}}
     {{/class.methods}}
-
-    /* static methods */
-    {{#class.static_methods}}
-    .def("{{name}}",
-         static_cast<{{{type}}}>(&{{qualified_name}}))
-    .staticmethod("{{name}}")
-    {{/class.static_methods}}
 
     /* fields */
     {{#class.fields}}
