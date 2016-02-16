@@ -101,6 +101,13 @@ protected:
     const T *decl_;
     const YAML::Node &decl_config_;
     bool last_;
+
+    template <typename Derived, ::mstch::node (Derived::*Func)() >
+    ::mstch::node isNonFalse()
+    {
+        ::mstch::map context{{"data", (static_cast<Derived*>(this)->*Func)()}};
+        return ::mstch::render("{{^data}}NONE{{/data}}", context).empty();
+    }
 };
 
 class CXXRecord: public ClangWrapper<clang::CXXRecordDecl>

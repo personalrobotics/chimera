@@ -20,14 +20,19 @@ CXXRecord::CXXRecord(
 {
     register_methods(this, {
         {"bases", &CXXRecord::bases},
+        {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
         {"type", &CXXRecord::type},
         {"is_copyable", &CXXRecord::isCopyable},
         {"binding_name", &CXXRecord::bindingName},
         {"uniquish_name", &CXXRecord::uniquishName},
         {"constructors", &CXXRecord::constructors},
+        {"constructors?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
         {"methods", &CXXRecord::methods},
+        {"methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
         {"fields", &CXXRecord::fields},
-        {"static_fields", &CXXRecord::staticFields}
+        {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
+        {"static_fields", &CXXRecord::staticFields},
+        {"static_fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
     });
 }
 
@@ -395,6 +400,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"type", &Function::type},
         {"params", &Function::params},
+        {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_value_policy", &Function::returnValuePolicy}
     });
 }
