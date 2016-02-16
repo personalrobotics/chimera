@@ -11,20 +11,20 @@ void {{class.mangled_name}}
 {
     {{{prebody}}}
     ::boost::python::class_<{{{class.qualified_name}}},
-        ::boost::python::bases<{{#class.bases}}{{{qualified_name}}}
-                               {{/class.bases}}> >("{{class.name}}")
+        ::boost::python::bases<{{#class.bases}}{{{qualified_name}}}{{^last}},
+                               {{/last}}{{/class.bases}}> >("{{class.name}}")
 
     /* constructors */
     {{#class.constructors}}
-    .def(::boost::python::init<{{#params}}{{{type}}}
-                               {{/params}}>())
+    .def(::boost::python::init<{{#params}}{{{type}}}{{^last}},
+                               {{/last}}{{/params}}>())
     {{/class.constructors}}
 
     /* methods */
     {{#class.methods}}
     .def("{{name}}",
          static_cast<{{{type}}}>(&{{qualified_name}}){{#return_value_policy}},
-         ::boost::python::return_value_policy<boost::python::copy_const_reference >(){{/return_value_policy}})
+            ::boost::python::return_value_policy<{{{.}}}>(){{/return_value_policy}})
     {{/class.methods}}
 
     /* static methods */

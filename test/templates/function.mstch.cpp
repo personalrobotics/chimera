@@ -12,8 +12,8 @@ void {{function.mangled_name}}()
     {{{prebody}}}
     boost::python::def("{{function.name}}",
         static_cast<{{{function.type}}}>(&{{function.qualified_name}}),
-            ({{#function.params}}::boost::python::arg("{{name}}"),
-             {{/function.params}}));
+            ({{#function.params}}::boost::python::arg("{{name}}"){{^last}},
+             {{last}}{{/function.params}}));
     {{{postbody}}}
 }
 {{{postcontent}}}

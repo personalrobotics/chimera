@@ -10,9 +10,8 @@
 void {{enum.mangled_name}}()
 {
     {{{prebody}}}
-    ::boost::python::enum_<{{enum.qualified_name}}>("{{enum.name}}")
-        {{#enum.values}}.value("{{name}}", {{qualified_name}})
-        {{/enum.values}}
+    ::boost::python::enum_<{{enum.qualified_name}}>("{{enum.name}}"){{#enum.values}}
+        .value("{{name}}", {{qualified_name}}){{/enum.values}}
     {{{postbody}}};
 }
 {{{postcontent}}}
