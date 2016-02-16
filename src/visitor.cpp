@@ -1,5 +1,6 @@
 #include "chimera/visitor.h"
 #include "chimera/util.h"
+#include "external/cling_utils_AST.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
@@ -423,6 +424,13 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (config_->DumpOverride(decl, *stream))
         return true;
 
+
+    NestedNameSpecifier *const nns
+      = cling::utils::TypeName::CreateNestedNameSpecifier(
+          *context_, decl, true);
+    if (!GenerateScope(*stream, nns->getPrefix()))
+      return false; // Parent scope was suppressed.
+
     *stream << "::boost::python::class_<"
             << chimera::util::getFullyQualifiedTypeName(
                 *context_, QualType(decl->getTypeForDecl(), 0));
@@ -795,6 +803,83 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
 
     return GenerateFunction(*stream, nullptr, decl);
+}
+
+bool chimera::Visitor::GenerateScope(
+    chimera::Stream &stream, NestedNameSpecifier *nns)
+{
+  const std::set<const clang::NamespaceDecl *> &base_namespaces
+   = config_->GetNamespaces();
+
+  // Build a list of NestedNameeSpecifiers starting at the root.
+  std::vector<NestedNameSpecifier *> namespaces;
+
+  while (nns)
+  {
+    namespaces.push_back(nns);
+    nns = nns->getPrefix();
+  }
+
+  std::reverse(std::begin(namespaces), std::end(namespaces));
+
+  // Generate Boost.Python scopes in forward order.
+  std::vector<std::string> module_names;
+
+  for (NestedNameSpecifier *const nns : namespaces)
+  {
+    switch (nns->getKind())
+    {
+    case NestedNameSpecifier::Namespace:
+    {
+      // Skip root namespaces.
+      NamespaceDecl *decl = nns->getAsNamespace()->getCanonicalDecl();
+      if (!base_namespaces.count(decl))
+      {
+        config_->DumpNamespace(nns);
+        module_names.push_back(nns->getAsNamespace()->getNameAsString());
+      }
+      break;
+    }
+
+    case NestedNameSpecifier::TypeSpec:
+    {
+      CXXRecordDecl *decl = nns->getAsType()->getAsCXXRecordDecl();
+      if (!decl)
+        throw std::runtime_error("TypeSpec is not a CXXRecordDecl.");
+
+      // Suppress this class if a parent scope was suppressed.
+      // TODO: We may have already generated output by this point.
+      const std::string binding_name = ConstructBindingName(
+        decl, *context_, *config_);
+      if (binding_name.empty())
+        return false;
+
+      module_names.push_back(decl->getNameAsString());
+      break;
+    }
+
+    case NestedNameSpecifier::Global:
+    case NestedNameSpecifier::Identifier:
+    case NestedNameSpecifier::NamespaceAlias:
+    case NestedNameSpecifier::Super:
+    case NestedNameSpecifier::TypeSpecWithTemplate:
+      throw std::runtime_error("Unsupported type of NestedNameSpecifier.");
+
+    default:
+      throw std::runtime_error("Unknown type of NestedNameSpecifier.");
+    }
+  }
+
+  stream << "::boost::python::object parent_object("
+            "::boost::python::scope()";
+
+  for (const std::string &module_name : module_names)
+    stream << ".attr(\"" << module_name << "\")";
+
+  stream << ");\n"
+            "::boost::python::scope parent_scope(parent_object);\n\n";
+
+  return true;
 }
 
 std::vector<std::string> chimera::Visitor::GetBaseClassNames(

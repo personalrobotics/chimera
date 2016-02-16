@@ -39,9 +39,13 @@ protected:
     bool GenerateGlobalVar(clang::VarDecl *decl);
     bool GenerateGlobalFunction(clang::FunctionDecl *decl);
 
+    bool GenerateScope(chimera::Stream &stream,
+                       clang::NestedNameSpecifier *nns);
+
 private:
     bool IsEnclosed(clang::Decl *decl) const;
     std::vector<std::string> GetBaseClassNames(clang::CXXRecordDecl *decl);
+
 
     clang::ASTContext *context_;
     clang::PrintingPolicy printing_policy_;
