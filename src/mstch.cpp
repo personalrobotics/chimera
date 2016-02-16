@@ -329,7 +329,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
         constant_vector.back()->setLast(true);
 
     // Copy each template into the mstch template array.
-    for (auto constant_template : constant_templates)
+    for (auto constant_template : constant_vector)
         constant_templates.push_back(constant_template);
     return constant_templates;
 }
@@ -436,7 +436,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         param_vector.back()->setLast(true);
 
     // Copy each template into the mstch template array.
-    for (auto param_template : param_templates)
+    for (auto param_template : param_vector)
         param_templates.push_back(param_template);
     return param_templates;
 }
