@@ -1,6 +1,9 @@
 project(chimera)
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+
+set(RUNTIME_INSTALL_DIR "bin")
+set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
 
 ###########
 ## SETUP ##
@@ -63,7 +66,7 @@ add_subdirectory(external/cling)
 include_directories(${cling_utils_INCLUDE_DIR})
 
 # Build the main chimera executable.
-add_executable(chimera
+add_executable("${PROJECT_NAME}"
   src/boost_python_mstch.cpp
   src/chimera.cpp
   src/configuration.cpp
@@ -74,13 +77,34 @@ add_executable(chimera
   src/mstch.cpp
 )
 
-target_link_libraries(chimera
+target_link_libraries("${PROJECT_NAME}"
   ${YAMLCPP_LIBRARIES}
   ${CLANG_LIBS}
   ${llvm_libs}
 )
 
-target_link_libraries(chimera
-  mstch
-  cling_utils
+#############
+## INSTALL ##
+#############
+install(TARGETS "${PROJECT_NAME}"
+  EXPORT "${PROJECT_NAME}Targets"
+  RUNTIME DESTINATION "${RUNTIME_INSTALL_DIR}"
+)
+install(EXPORT "${PROJECT_NAME}Targets"
+  FILE "${PROJECT_NAME}Targets.cmake"
+  DESTINATION "${SHARE_INSTALL_DIR}/cmake"
+)
+install(FILES "package.xml"
+  DESTINATION "${SHARE_INSTALL_DIR}"
+)
+
+# Generate and install a Config.cmake file.
+# TODO: We should also generate a _VERSION file.
+include(CMakePackageConfigHelpers)
+configure_package_config_file("cmake/${PROJECT_NAME}Config.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION "${SHARE_INSTALL_DIR}/cmake"
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  DESTINATION "${SHARE_INSTALL_DIR}/cmake"
 )

@@ -1,0 +1,7 @@
+set(AIKIDO_VERSION x.y.z)
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/chimeraTargets.cmake")
+
+get_target_property(chimera_EXECUTABLE chimera LOCATION)

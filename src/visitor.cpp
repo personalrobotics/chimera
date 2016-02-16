@@ -111,6 +111,23 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
+    // Incantations necessary to handle nested template classes.
+    // TODO: This likely handles only one level of nesting.
+    // See: http://stackoverflow.com/q/35376737/111426
+    if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
+    {
+      if (decl2->getAccess() == AS_private
+       || decl2->getAccess() == AS_protected)
+        return false;
+
+      if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
+      {
+        if (decl3->getAccess() == AS_private
+         || decl3->getAccess() == AS_protected)
+          return false;
+      }
+    }
+
     // Skip incomplete types. Boost.Python requires RTTI, which requires the
     // complete type.
     if (!decl->isCompleteDefinition())
@@ -163,6 +180,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     // Ignore declarations that have been explicitly suppressed.
     const YAML::Node &node = config_->GetDeclaration(decl);
     if (node.IsNull())
+        return false;
+
+    // TODO: Support return_value_policy for global variables.
+    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
 
     // Serialize using a mstch template.

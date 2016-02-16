@@ -1,0 +1,31 @@
+<?xml version="1.0"?> 
+<package format="2">
+  <!-- This is a Catkin package.xml file to optionally support building DART in
+       a Catkin workspace. Catkin is not required to build DART. For more
+       information, see: http://ros.org/reps/rep-0136.html -->
+  <name>chimera</name>
+  <version>0.0.1</version>
+  <description>
+    Chimera is a tool for generating Boost.Python bindings from C/C++ header
+    files. It uses the Clang/LLVM toolchain, making it capable of automatically
+    handling fairly complex source files.
+  </description>
+  <url type="website">https://github.com/personalrobotics/chimera</url>
+  <url type="repository">https://github.com/personalrobotics/chimera.git</url>
+  <url type="bugtracker">https://github.com/personalrobotics/chimera/issues</url>
+  <maintainer email="mkoval@cs.cmu.edu">Michael Koval</maintainer>
+  <maintainer email="pkv@cs.cmu.edu">Pras Velagapudi</maintainer>
+  <author email="mkoval@cs.cmu.edu">Michael Koval</author>
+  <author email="pkv@cs.cmu.edu">Pras Velagapudi</author>
+  <license>unreleased</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <buildtool_depend>pkg-config</buildtool_depend>
+  <depend>yaml-cpp</depend>
+  <!-- TODO: <depend>clang</depend> -->
+  <!-- TODO: <depend>llvm</depend> -->
+  <!-- These are required by REP-136. -->
+  <exec_depend>catkin</exec_depend>
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
