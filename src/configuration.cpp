@@ -156,10 +156,6 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Get a reference to the configuration YAML structure.
     const YAML::Node &configNode = parent.GetRoot();
 
-    // Compile the list of input files into the list of includes.
-    for (const auto &input_file : ci->getInvocation().getFrontendOpts().Inputs)
-        includes_.push_back(input_file.getFile());
-
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : configNode["namespaces"])
     {

@@ -283,6 +283,29 @@ std::string getFullyQualifiedDeclTypeAsString(
         context, QualType(decl->getTypeForDecl(), 0));
 }
 
+bool needsReturnValuePolicy(NamedDecl *decl, const Type *return_type)
+{
+    if (return_type->isReferenceType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a reference and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
+    }
+    else if (return_type->isPointerType())
+    {
+        std::cerr
+            << "Warning: Skipped method "
+            << decl->getQualifiedNameAsString()
+            << "' because it returns a pointer and no"
+               " 'return_value_policy' was specified.\n";
+        return true;
+    }
+    return false;
+}
+
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
@@ -358,8 +381,25 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return false;
 
     // Skip protected and private classes.
-    if (decl->getAccess() != AS_public)
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
+
+    // Incantations necessary to handle nested template classes.
+    // TODO: This likely handles only one level of nesting.
+    // See: http://stackoverflow.com/q/35376737/111426
+    if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
+    {
+      if (decl2->getAccess() == AS_private
+       || decl2->getAccess() == AS_protected)
+        return false;
+
+      if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
+      {
+        if (decl3->getAccess() == AS_private
+         || decl3->getAccess() == AS_protected)
+          return false;
+      }
+    }
 
     // Skip incomplete types. Boost.Python requires RTTI, which requires the
     // complete type.
@@ -576,34 +616,10 @@ bool chimera::Visitor::GenerateFunction(
             = type_node["return_value_policy"].as<std::string>("");
     }
 
-    // Finally, try the default return_value_policy. This is only acceptable if
-    // the output is copy constructable.
-    if (return_value_policy.empty())
-    {
-        if (return_type->isReferenceType())
-        {
-            std::cerr
-                << "Warning: Skipped method "
-                << decl->getQualifiedNameAsString()
-                << " '"
-                << pointer_type.getAsString(printing_policy_)
-                << "' because it returns a reference and no"
-                   " 'return_value_policy' was specified.\n";
-            return false;
-        }
-        else if (return_type->isPointerType())
-        {
-            std::cerr
-                << "Warning: Skipped method "
-                << decl->getQualifiedNameAsString()
-                << " '"
-                << pointer_type.getAsString(printing_policy_)
-                << "' because it returns a pointer and no"
-                   " 'return_value_policy' was specified.\n";
-            return false;
-        }
-        // TODO: Check if return_type is non-copyable.
-    }
+    // Finally, try the default return_value_policy.
+    if (return_value_policy.empty()
+     && needsReturnValuePolicy(decl, return_type))
+        return false;
 
     // Suppress any functions that take arguments by rvalue reference.
     for (const ParmVarDecl *const parm_decl : decl->parameters()) {
@@ -689,11 +705,16 @@ bool chimera::Visitor::GenerateStaticField(
     clang::CXXRecordDecl *class_decl,
     clang::VarDecl *decl)
 {
+    // TODO: How should we handle AS_none here.
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
+        return false;
+    if (!decl->isStaticDataMember())
+        return false;
+
     // TODO: Add support for YAML overrides, including return_value_policy.
 
-    if (decl->getAccess() != AS_public)
-        return false;
-    else if (!decl->isStaticDataMember())
+    // Finally, try the default return_value_policy.
+    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
         return false;
 
     stream << ".add_static_property(\"" << decl->getNameAsString()
@@ -753,6 +774,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     if (!stream)
         return false;
 
+    // TODO: Support return_value_policy for global variables.
+    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+        return false;
+
     *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
             << "\") = " << decl->getQualifiedNameAsString() << ";\n";
     return true;
@@ -785,7 +810,16 @@ std::vector<std::string> chimera::Visitor::GetBaseClassNames(
         // TODO: Filter out transitive base classes.
 
         CXXRecordDecl *const base_record_decl
-          = base_decl.getType()->getAsCXXRecordDecl();
+            = base_decl.getType()->getAsCXXRecordDecl();
+        if (!base_record_decl)
+        {
+            std::cerr << "Warning: Omitted base class of class "
+                      << chimera::util::getFullyQualifiedTypeName(*context_,
+                            QualType(decl->getTypeForDecl(), 0))
+                      << "' because it is not a CXXRecordDecl.\n";
+            continue;
+        }
+
         const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
 
         // Generate the base class, if necessary.
