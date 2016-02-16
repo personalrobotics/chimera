@@ -439,7 +439,9 @@ bool chimera::CompiledConfiguration::DumpNamespace(
     *binding_
         << " = "
            "::boost::python::object("
+           // TODO: What does handle<> do?
            "::boost::python::handle<>("
+           // TODO: Should this be borrowed() or incref()?
            "::boost::python::borrowed("
            "::PyImport_AddModule(\""
         << module_path << "\"))));\n\n";

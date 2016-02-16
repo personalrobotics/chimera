@@ -848,11 +848,17 @@ bool chimera::Visitor::GenerateScope(
         throw std::runtime_error("TypeSpec is not a CXXRecordDecl.");
 
       // Suppress this class if a parent scope was suppressed.
-      // TODO: We may have already generated output by this point.
       const std::string binding_name = ConstructBindingName(
         decl, *context_, *config_);
       if (binding_name.empty())
         return false;
+
+      // Generate outer classes before inner classes.
+      if (!IsInsideTemplateClass(decl))
+      {
+          if (GenerateCXXRecord(decl))
+              traversed_class_decls_.insert(decl->getCanonicalDecl());
+      }
 
       module_names.push_back(decl->getNameAsString());
       break;
@@ -870,6 +876,8 @@ bool chimera::Visitor::GenerateScope(
     }
   }
 
+  // TODO: I don't know why this has to be done on a separate line. Putting
+  // this inline in the boost::python::scope doesn't create a new scope.
   stream << "::boost::python::object parent_object("
             "::boost::python::scope()";
 
