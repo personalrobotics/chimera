@@ -38,11 +38,12 @@ public:
             {"name", &ClangWrapper::name},
             {"mangled_name", &ClangWrapper::mangledName},
             {"override", &ClangWrapper::override},
-            {"qualified_name", &ClangWrapper::qualifiedName}
+            {"qualified_name", &ClangWrapper::qualifiedName},
+            {"scope", &ClangWrapper::scope},
         });
     }
 
-    ::mstch::node config()
+    virtual ::mstch::node config()
     {
         ::mstch::map mstch_config;
         for(YAML::const_iterator it=decl_config_.begin(); it!=decl_config_.end(); ++it) {
@@ -60,7 +61,7 @@ public:
         return last_;
     }
 
-    ::mstch::node name()
+    virtual ::mstch::node name()
     {
         if (const YAML::Node &node = decl_config_["name"])
             return node.as<std::string>();
@@ -68,7 +69,7 @@ public:
         return decl_->getNameAsString();
     }
 
-    ::mstch::node mangledName()
+    virtual ::mstch::node mangledName()
     {
         if (const YAML::Node &node = decl_config_["mangled_name"])
             return node.as<std::string>();
@@ -77,13 +78,19 @@ public:
             config_.GetContext(), decl_);
     }
 
-    ::mstch::node override()
+    virtual ::mstch::node override()
     {
         // TODO: implement this method.
-        return "";
+        return std::string{""};
     }
 
-    ::mstch::node qualifiedName()
+    virtual ::mstch::node scope()
+    {
+        // Default is empty, overriden in subclasses.
+        return std::string{""};
+    }
+
+    virtual ::mstch::node qualifiedName()
     {
         if (const YAML::Node &node = decl_config_["qualified_name"])
             return node.as<std::string>();
@@ -119,11 +126,11 @@ public:
 
     ::mstch::node bases();
     ::mstch::node type();
+    ::mstch::node scope();
     ::mstch::node isCopyable();
 
     ::mstch::node bindingName();
     ::mstch::node uniquishName();
-    ::mstch::node mangledName();
     
     ::mstch::node constructors();
     ::mstch::node methods();
@@ -141,6 +148,7 @@ public:
     Enum(const ::chimera::CompiledConfiguration &config,
          const clang::EnumDecl *decl);
 
+    ::mstch::node scope();
     ::mstch::node type();
     ::mstch::node values();
 };
@@ -174,6 +182,7 @@ public:
     ::mstch::node type();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
+    ::mstch::node scope();
     ::mstch::node qualifiedName();
 
 private:
@@ -191,6 +200,15 @@ public:
 
 private:
     const clang::CXXMethodDecl *method_decl_;
+};
+
+class Namespace: public ClangWrapper<clang::NamespaceDecl>
+{
+public:
+    Namespace(const ::chimera::CompiledConfiguration &config,
+              const clang::NamespaceDecl *decl);
+
+    ::mstch::node scope();
 };
 
 class Parameter: public ClangWrapper<clang::ParmVarDecl>
@@ -221,6 +239,7 @@ public:
 
     ::mstch::node isAssignable();
     ::mstch::node qualifiedName();
+    ::mstch::node scope();
 
 private:
     const clang::CXXRecordDecl *class_decl_;
