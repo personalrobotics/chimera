@@ -178,6 +178,18 @@ CXXRecord::CXXRecord(
         config_.GetContext(), decl_);
 }
 
+::mstch::node CXXRecord::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    // In the special case of CXXRecords, the fully-qualified name of the
+    // class is pretty much always identical to the type declaration. Since
+    // the clang typename resolution works better than the qualified name
+    // resolution, we simply use it again here.
+    return type();
+}
+
 ::mstch::node CXXRecord::constructors()
 {
     ::mstch::array constructor_templates;

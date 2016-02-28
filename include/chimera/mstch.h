@@ -130,7 +130,8 @@ public:
     ::mstch::node isCopyable();
 
     ::mstch::node name();
-    
+    ::mstch::node qualifiedName();
+
     ::mstch::node constructors();
     ::mstch::node methods();
     

@@ -122,14 +122,6 @@ std::string constructMangledName(clang::ASTContext &context,
                                  const clang::NamedDecl *decl);
 
 /**
- * Construct the default value of a parameter as a string expression.
- *
- * If unable to construct the default value, return an empty string.
- */
-std::string constructParameterValue(clang::ASTContext &context,
-                                    clang::ParmVarDecl *decl);
-
-/**
  * Returns whether a type contains incomplete argument types.
  *
  * This is useful in cases where we need RTTI information about all arguments,
