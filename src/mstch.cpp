@@ -279,10 +279,8 @@ CXXRecord::CXXRecord(
                 && chimera::util::needsReturnValuePolicy(
                     method_decl, method_decl->getReturnType().getTypePtr()))
         {
-            std::cerr
-                << "Warning: Skipped function "
-                << method_decl->getQualifiedNameAsString()
-                << " because it requires a return value policy.\n";
+            // `needsReturnValuePolicy()` already prints an error message,
+            // so just continue to the next method if we got here.
             continue;
         }
 
@@ -540,10 +538,20 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::returnValuePolicy()
 {
+    // First, check if a return_value_policy was specified for this function.
     if (const YAML::Node &node = decl_config_["return_value_policy"])
         return node.as<std::string>();
 
-    return std::string{""};
+    // Extract the return type of this function declaration.
+    const QualType return_qual_type =
+        chimera::util::getFullyQualifiedType(config_.GetContext(),
+                                             decl_->getReturnType());
+    const Type *return_type = return_qual_type.getTypePtr();
+
+    // Next, check if a return_value_policy is defined on the return type.
+    // If not, default to an empty string.
+    if (const YAML::Node &type_node = config_.GetType(return_qual_type))
+        return type_node["return_value_policy"].as<std::string>("");
 }
 
 ::mstch::node Function::qualifiedName()

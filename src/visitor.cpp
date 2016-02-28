@@ -34,7 +34,45 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
+/**
+ * Gets a pointer to an enclosing class declaration if one exists.
+ * Returns null if there is no enclosing class.
+ */
+CXXRecordDecl *GetEnclosingClassDecl(DeclContext *decl_context)
+{
+    DeclContext *parent_context = decl_context->getParent();
+
+    // TODO: replace this with null-ing cast operation.
+    return (isa<CXXRecordDecl>(parent_context)) ?
+        cast<CXXRecordDecl>(parent_context) : NULL;
 }
+
+/**
+ * Gets a pointer to an enclosing class declaration if one exists.
+ * Returns null if there is no enclosing class.
+ */
+CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
+{
+    decl = decl->getCanonicalDecl();
+
+    if (isa<DeclContext>(decl))
+    {
+        GetEnclosingClassDecl(cast<DeclContext>(decl));
+    }
+    else if (isa<VarDecl>(decl))
+    {
+        return GetEnclosingClassDecl(
+            cast<VarDecl>(decl)->getDeclContext());
+    }
+    else if (isa<FunctionDecl>(decl))
+    {
+        return GetEnclosingClassDecl(
+            cast<FunctionDecl>(decl)->getEnclosingNamespaceContext());
+    }
+    return NULL;
+}
+
+} // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
@@ -61,6 +99,21 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     if (!config_->IsEnclosed(decl))
         return true;
 
+    // Only visit declarations whose enclosing classes are generatable.
+    auto *enclosing_decl = GetEnclosingClassDecl(decl);
+    if (enclosing_decl)
+    {
+        // If the enclosing class is not yet visited, visit it.
+        // (VisitDecl checks for re-visits, so we don't need to do it here.)
+        VisitDecl(enclosing_decl);
+
+        // If after visiting, the class was still not created, then do not
+        // generate this enclosed definition.
+        if (traversed_class_decls_.find(enclosing_decl->getCanonicalDecl())
+                == traversed_class_decls_.end())
+            return true;
+    }
+
     if (isa<CXXRecordDecl>(decl))
     {
         // Every class template is represented by a CXXRecordDecl and a
@@ -84,9 +137,13 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
             GenerateEnum(cast<EnumDecl>(decl));
     }
     else if (isa<VarDecl>(decl))
+    {
         GenerateGlobalVar(cast<VarDecl>(decl));
+    }
     else if (isa<FunctionDecl>(decl))
+    {
         GenerateGlobalFunction(cast<FunctionDecl>(decl));
+    }
 
     return true;
 }
@@ -99,7 +156,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     decl = decl->getDefinition();
 
     // Avoid generating duplicates of the same class.
-    if (traversed_class_decls_.count(decl->getCanonicalDecl()))
+    if (traversed_class_decls_.find(decl->getCanonicalDecl())
+            != traversed_class_decls_.end())
         return false;
 
     // Ignore partial template specializations. These still have unbound
@@ -144,7 +202,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     for(auto base_decl : base_decls)
     {
         if (traversed_class_decls_.find(base_decl->getCanonicalDecl())
-                != traversed_class_decls_.end())
+                == traversed_class_decls_.end())
             VisitDecl(const_cast<CXXRecordDecl *>(base_decl));
     }
 
