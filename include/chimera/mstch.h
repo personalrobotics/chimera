@@ -129,8 +129,7 @@ public:
     ::mstch::node scope();
     ::mstch::node isCopyable();
 
-    ::mstch::node bindingName();
-    ::mstch::node uniquishName();
+    ::mstch::node name();
     
     ::mstch::node constructors();
     ::mstch::node methods();

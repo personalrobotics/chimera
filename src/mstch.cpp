@@ -87,8 +87,6 @@ CXXRecord::CXXRecord(
         {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
         {"type", &CXXRecord::type},
         {"is_copyable", &CXXRecord::isCopyable},
-        {"binding_name", &CXXRecord::bindingName},
-        {"uniquish_name", &CXXRecord::uniquishName},
         {"constructors", &CXXRecord::constructors},
         {"constructors?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
         {"methods", &CXXRecord::methods},
@@ -171,19 +169,13 @@ CXXRecord::CXXRecord(
     return chimera::util::isCopyable(decl_);
 }
 
-::mstch::node CXXRecord::bindingName()
+::mstch::node CXXRecord::name()
 {
-    if (const YAML::Node &node = decl_config_["binding_name"])
+    if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
     return chimera::util::constructBindingName(
         config_.GetContext(), decl_);
-}
-
-::mstch::node CXXRecord::uniquishName()
-{
-    // TODO: implement this properly.
-    return bindingName();
 }
 
 ::mstch::node CXXRecord::constructors()
@@ -546,12 +538,14 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     const QualType return_qual_type =
         chimera::util::getFullyQualifiedType(config_.GetContext(),
                                              decl_->getReturnType());
-    const Type *return_type = return_qual_type.getTypePtr();
 
     // Next, check if a return_value_policy is defined on the return type.
     // If not, default to an empty string.
     if (const YAML::Node &type_node = config_.GetType(return_qual_type))
         return type_node["return_value_policy"].as<std::string>("");
+
+    // Return empty string if no return value policy exists.
+    return std::string{""};
 }
 
 ::mstch::node Function::qualifiedName()
