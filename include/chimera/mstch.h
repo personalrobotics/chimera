@@ -64,7 +64,17 @@ public:
     virtual ::mstch::node name()
     {
         if (const YAML::Node &node = decl_config_["name"])
+        {
+            // Convert a `null` to an empty string.
+            // This helps users semantically mark names that should be
+            // omitted in their configuration files, although we will
+            // actually ignore any name that evaluates to an empty string.
+            if (node.IsNull())
+            {
+                return std::string{""};
+            }
             return node.as<std::string>();
+        }
 
         return decl_->getNameAsString();
     }

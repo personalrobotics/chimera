@@ -114,10 +114,11 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : configNode["namespaces"])
     {
-        std::string ns_str = it.as<std::string>();
+        std::string ns_str = it.first.as<std::string>();
         auto ns = chimera::util::resolveNamespace(ci, ns_str);
         if (ns)
         {
+            declarations_[ns] = it.second;
             namespaces_.insert(ns);
         }
         else
