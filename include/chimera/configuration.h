@@ -101,6 +101,12 @@ public:
     CompiledConfiguration &operator=(const CompiledConfiguration&) = delete;
 
     /**
+     * Adds a namespace to an ordered set of traversed namespaces.
+     * This set can later be rendered in a template.
+     */
+    void AddTraversedNamespace(const clang::NamespaceDecl* decl);
+
+    /**
      * Return list of namespace declarations that should be included.
      */
     const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
@@ -167,7 +173,9 @@ protected:
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
-    ::mstch::array bindings_;
+
+    std::set<std::string> binding_names_;
+    std::set<const clang::NamespaceDecl*> binding_namespaces_;
 
     friend class Configuration;
 };

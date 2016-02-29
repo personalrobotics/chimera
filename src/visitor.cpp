@@ -144,6 +144,13 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     {
         GenerateGlobalFunction(cast<FunctionDecl>(decl));
     }
+    else if (isa<NamespaceDecl>(decl))
+    {
+        // We don't need to generate anything here, but we should
+        // tell the compiled configuration that we reached this
+        // namespace during traversal.
+        config_->AddTraversedNamespace(cast<NamespaceDecl>(decl));
+    }
 
     return true;
 }

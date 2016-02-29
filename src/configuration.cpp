@@ -183,6 +183,17 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         false // Create missing directories in the output path
     );
 
+    // Create collections for the ordered sets of bindings and namespaces.
+    ::mstch::array binding_names(binding_names_.begin(),
+                                 binding_names_.end());
+    ::mstch::array binding_namespaces;
+    for (const clang::NamespaceDecl *namespace_decl : binding_namespaces_)
+    {
+        binding_namespaces.push_back(
+            std::make_shared<chimera::mstch::Namespace>(
+                *this, namespace_decl));
+    }
+
     // Resolve customizable snippets that will be inserted into the file.
     // Augment top-level context as necessary.
     const YAML::Node &template_config = parent_.GetRoot()["template"]["main"];
@@ -193,7 +204,8 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         {"footer", Lookup(template_config["footer"])},
         {"module", ::mstch::map {
             {"name", parent_.GetOutputModuleName()},
-            {"bindings", bindings_},
+            {"bindings", binding_names},
+            {"namespaces", binding_namespaces}
         }}
     };
 
@@ -202,6 +214,12 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     if (view.empty())
         view = MODULE_CPP;
     *stream << ::mstch::render(view, full_context);
+}
+
+void
+chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
+{
+    binding_namespaces_.insert(decl->getCanonicalDecl());
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -359,7 +377,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     std::cout << binding_filename << std::endl;
 
     // Record this binding name for use at the top-level.
-    bindings_.push_back(mangled_name);
+    binding_names_.insert(mangled_name);
     return true;
 }
 
