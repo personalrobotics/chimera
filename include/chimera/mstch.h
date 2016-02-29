@@ -158,12 +158,24 @@ public:
     Enum(const ::chimera::CompiledConfiguration &config,
          const clang::EnumDecl *decl);
 
+    ::mstch::node qualifiedName();
     ::mstch::node scope();
     ::mstch::node type();
     ::mstch::node values();
 };
 
-using EnumConstant = ClangWrapper<clang::EnumConstantDecl>;
+class EnumConstant: public ClangWrapper<clang::EnumConstantDecl>
+{
+public:
+    EnumConstant(const ::chimera::CompiledConfiguration &config,
+                 const clang::EnumConstantDecl *decl,
+                 const clang::EnumDecl *enum_decl);
+
+    ::mstch::node qualifiedName();
+
+private:
+    const clang::EnumDecl *enum_decl_;
+};
 
 class Field: public ClangWrapper<clang::FieldDecl>
 {

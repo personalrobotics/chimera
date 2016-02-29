@@ -384,6 +384,18 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     });
 }
 
+::mstch::node Enum::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    // In the special case of Enums, the fully-qualified name of the
+    // class is pretty much always identical to the type declaration. Since
+    // the clang typename resolution works better than the qualified name
+    // resolution, we simply use it again here.
+    return type();
+}
+
 ::mstch::node Enum::scope()
 {
     const NestedNameSpecifier *nns =
@@ -413,7 +425,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     {
         constant_vector.push_back(
             std::make_shared<EnumConstant>(
-                config_, constant_decl));
+                config_, constant_decl, decl_));
     }
 
     // Find and flag the last item.
@@ -425,6 +437,28 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     for (auto constant_template : constant_vector)
         constant_templates.push_back(constant_template);
     return constant_templates;
+}
+
+EnumConstant::EnumConstant(const ::chimera::CompiledConfiguration &config,
+                           const EnumConstantDecl *decl,
+                           const EnumDecl *enum_decl)
+: ClangWrapper(config, decl)
+, enum_decl_(enum_decl)
+{
+    // Do nothing.
+}
+
+::mstch::node EnumConstant::qualifiedName()
+{
+    if (const YAML::Node &node = decl_config_["qualified_name"])
+        return node.as<std::string>();
+
+    // In the special case of EnumConstants, rather than letting clang try to
+    // fully resolve the qualified name, we can simply get it from appending
+    // this value to the parent Enum's qualified name.
+    auto enumeration = std::make_shared<Enum>(config_, enum_decl_);
+    return ::mstch::render("{{type}}", enumeration) + "::" +
+        decl_->getNameAsString();
 }
 
 Field::Field(const ::chimera::CompiledConfiguration &config,
