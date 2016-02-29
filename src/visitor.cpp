@@ -258,10 +258,35 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 {
-    if (isa<clang::CXXMethodDecl>(decl))
+    // Only generate functions when we reach their actual definition.
+    if (!decl->isThisDeclarationADefinition())
         return false;
+    // Ignore functions that are actually methods of CXXRecords.
+    else if (isa<clang::CXXMethodDecl>(decl))
+        return false;
+    // Ignore overloaded operators (we can't currently wrap them).
     else if (decl->isOverloadedOperator())
         return false; // TODO: Wrap overloaded operators.
+    // Ignore unspecialized template functions.
+    else if (decl->getDescribedFunctionTemplate())
+        return false;
+
+    // Skip functions that have incomplete argument types. Boost.Python
+    // requires RTTI information about all arguments, including references and
+    // pointers.
+    for (const clang::ParmVarDecl *param : decl->params())
+    {
+        if (chimera::util::containsIncompleteType(param->getOriginalType()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << decl->getQualifiedNameAsString()
+                << " because argument '"
+                << param->getNameAsString()
+                << "' has an incomplete type.\n";
+            return false;
+        }
+    }
 
     // Ignore declarations that have been explicitly suppressed.
     const YAML::Node &node = config_->GetDeclaration(decl);
