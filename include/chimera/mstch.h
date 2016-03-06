@@ -141,6 +141,7 @@ public:
 
     ::mstch::node name();
     ::mstch::node qualifiedName();
+    ::mstch::node heldType();
 
     ::mstch::node constructors();
     ::mstch::node methods();
