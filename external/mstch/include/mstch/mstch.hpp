@@ -33,8 +33,8 @@ class object_t {
 
   // This is a modification to the original mstch implementation that allows
   // registration of non-member (static or global) functions on mstch::object.
-  void register_lambda(std::string name, std::function<N()> method) {
-    this->methods.insert({name, method});
+  void register_lambda(std::string name, std::function<N()> func) {
+    this->methods.insert({name, func});
   }
 
  private:
