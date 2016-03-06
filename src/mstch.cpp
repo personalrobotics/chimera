@@ -3,6 +3,7 @@
 #include "chimera/util.h"
 #include "cling_utils_AST.h"
 
+#include <iostream>
 #include <vector>
 
 using namespace clang;
@@ -66,7 +67,12 @@ namespace mstch
 
     auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
     if (!namespace_decl)
-        throw std::runtime_error("Decl was not enclosed by a namespace.");
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
 
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(
@@ -293,6 +299,16 @@ CXXRecord::CXXRecord(
         {
             // `needsReturnValuePolicy()` already prints an error message,
             // so just continue to the next method if we got here.
+            continue;
+        }
+
+        // Suppress any functions that take arguments by rvalue reference.
+        if (chimera::util::containsRValueReference(method_decl))
+        {
+            std::cerr
+                << "Warning: Skipped constructor of "
+                << decl_->getNameAsString()
+                << " because a parameter was an rvalue reference.\n";
             continue;
         }
 
