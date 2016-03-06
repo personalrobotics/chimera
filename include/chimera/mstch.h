@@ -54,27 +54,12 @@ public:
 
         // Override certain entries with our clang-generated information.
         register_methods(this, {
-            {"config", &ClangWrapper::config},
             {"last", &ClangWrapper::last},
             {"name", &ClangWrapper::name},
             {"mangled_name", &ClangWrapper::mangledName},
-            {"override", &ClangWrapper::override},
             {"qualified_name", &ClangWrapper::qualifiedName},
             {"scope", &ClangWrapper::scope},
         });
-    }
-
-    virtual ::mstch::node config()
-    {
-        ::mstch::map mstch_config;
-        for(YAML::const_iterator it=decl_config_.begin(); it!=decl_config_.end(); ++it) {
-            std::string value = config_.Lookup(it->second);
-            if (!value.empty())
-            {
-                mstch_config[it->first.as<std::string>()] = value;
-            }
-        }
-        return mstch_config;
     }
 
     ::mstch::node last()
@@ -107,12 +92,6 @@ public:
 
         return chimera::util::constructMangledName(
             config_.GetContext(), decl_);
-    }
-
-    virtual ::mstch::node override()
-    {
-        // TODO: implement this method.
-        return std::string{""};
     }
 
     virtual ::mstch::node scope()

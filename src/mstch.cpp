@@ -131,7 +131,6 @@ CXXRecord::CXXRecord(
         {"bases", &CXXRecord::bases},
         {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
         {"type", &CXXRecord::type},
-        {"held_type", &CXXRecord::heldType},
         {"is_copyable", &CXXRecord::isCopyable},
         {"constructors", &CXXRecord::constructors},
         {"constructors?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
@@ -234,13 +233,6 @@ CXXRecord::CXXRecord(
     // the clang typename resolution works better than the qualified name
     // resolution, we simply use it again here.
     return type();
-}
-
-::mstch::node CXXRecord::heldType()
-{
-    if (const YAML::Node &node = decl_config_["held_type"])
-        return node.as<std::string>();
-    return std::string{""};
 }
 
 ::mstch::node CXXRecord::constructors()
@@ -557,9 +549,21 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Field::returnValuePolicy()
 {
+    // First, check if a return_value_policy was specified for this function.
     if (const YAML::Node &node = decl_config_["return_value_policy"])
         return node.as<std::string>();
 
+    // Extract the value type of this field declaration.
+    const QualType value_qual_type =
+        chimera::util::getFullyQualifiedType(config_.GetContext(),
+                                             decl_->getType());
+
+    // Next, check if a return_value_policy is defined on the value type.
+    if (const YAML::Node &type_node =
+            config_.GetType(value_qual_type)["return_value_policy"])
+        return type_node.as<std::string>();
+
+    // Return an empty string if no return value policy exists.
     return std::string{""};
 }
 
@@ -649,11 +653,11 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
                                              decl_->getReturnType());
 
     // Next, check if a return_value_policy is defined on the return type.
-    // If not, default to an empty string.
-    if (const YAML::Node &type_node = config_.GetType(return_qual_type))
-        return type_node["return_value_policy"].as<std::string>("");
+    if (const YAML::Node &type_node =
+            config_.GetType(return_qual_type)["return_value_policy"])
+        return type_node.as<std::string>();
 
-    // Return empty string if no return value policy exists.
+    // Return an empty string if no return value policy exists.
     return std::string{""};
 }
 
