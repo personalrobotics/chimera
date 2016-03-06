@@ -3,6 +3,7 @@
 #include "chimera/util.h"
 #include "cling_utils_AST.h"
 
+#include <iostream>
 #include <vector>
 
 using namespace clang;
@@ -66,7 +67,12 @@ namespace mstch
 
     auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
     if (!namespace_decl)
-        throw std::runtime_error("Decl was not enclosed by a namespace.");
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
 
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(

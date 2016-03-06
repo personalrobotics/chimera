@@ -138,7 +138,14 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
     }
     else if (isa<VarDecl>(decl))
     {
-        GenerateGlobalVar(cast<VarDecl>(decl));
+        // Variables inside a CXXRecordDecl are handled above. This check is
+        // necessary suppress namespace-scope definitions of static member
+        // variables, which are required to enable ODR-use of constexpr static
+        // member variables.
+        //
+        // See: http://stackoverflow.com/a/28446388/111426
+        if (!isa<CXXRecordDecl>(decl->getDeclContext()))
+            GenerateGlobalVar(cast<VarDecl>(decl));
     }
     else if (isa<FunctionDecl>(decl))
     {
