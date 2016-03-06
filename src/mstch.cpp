@@ -92,6 +92,7 @@ CXXRecord::CXXRecord(
         {"bases", &CXXRecord::bases},
         {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
         {"type", &CXXRecord::type},
+        {"held_type", &CXXRecord::heldType},
         {"is_copyable", &CXXRecord::isCopyable},
         {"constructors", &CXXRecord::constructors},
         {"constructors?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
@@ -194,6 +195,13 @@ CXXRecord::CXXRecord(
     // the clang typename resolution works better than the qualified name
     // resolution, we simply use it again here.
     return type();
+}
+
+::mstch::node CXXRecord::heldType()
+{
+    if (const YAML::Node &node = decl_config_["held_type"])
+        return node.as<std::string>();
+    return std::string{""};
 }
 
 ::mstch::node CXXRecord::constructors()
