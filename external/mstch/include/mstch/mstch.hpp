@@ -31,6 +31,12 @@ class object_t {
       this->methods.insert({item.first, std::bind(item.second, s)});
   }
 
+  // This is a modification to the original mstch implementation that allows
+  // registration of non-member (static or global) functions on mstch::object.
+  void register_lambda(std::string name, std::function<N()> method) {
+    this->methods.insert({name, method});
+  }
+
  private:
   std::map<std::string, std::function<N()>> methods;
   mutable std::map<std::string, N> cache;
