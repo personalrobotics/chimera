@@ -302,6 +302,16 @@ CXXRecord::CXXRecord(
             continue;
         }
 
+        // Suppress any functions that take arguments by rvalue reference.
+        if (chimera::util::containsRValueReference(method_decl))
+        {
+            std::cerr
+                << "Warning: Skipped constructor of "
+                << decl_->getNameAsString()
+                << " because a parameter was an rvalue reference.\n";
+            continue;
+        }
+
         // Now that we know it can be generated, add the method.
         method_vector.push_back(method);
     }
