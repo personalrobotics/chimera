@@ -195,7 +195,7 @@ CXXRecord::CXXRecord(
 {
     if (const YAML::Node &node = decl_config_["held_type"])
         return node.as<std::string>();
-    return "";
+    return std::string{""};
 }
 
 ::mstch::node CXXRecord::constructors()
