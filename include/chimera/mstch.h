@@ -20,6 +20,55 @@ namespace chimera
 namespace mstch
 {
 
+/**
+ * Wrapper that generates context for a YAML node.
+ *
+ * This function automatically converts known datatypes from YAML::Node entries
+ * to `mstch` context entries.
+ */
+::mstch::node YAMLWrapper(const YAML::Node &node)
+{
+    
+    switch (node.type()) 
+    {
+    case YAML::NodeType::Undefined:
+        {
+            return NULL;
+        }
+    case YAML::NodeType::Null:
+        {
+            return NULL;
+        }
+    case YAML::NodeType::Scalar:
+        {
+            return node.as<std::string>();
+        }
+    case YAML::NodeType::Sequence:
+        {
+            mstch::array context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                context.push_back(mstch::lambda {[it]() -> mstch::node {
+                    return YAMLWrapper(*it);
+                }});
+            }
+            return context;
+        }
+    case YAML::NodeType::Map:
+        {
+            mstch::map context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                std::string name = it->first.as<std::string>();
+                context[name] = mstch::lambda {[it]() -> mstch::node {
+                    return YAMLWrapper(*it);
+                }};
+            }
+            return context;
+        }
+    }
+}
+
 template<typename T>
 class ClangWrapper: public ::mstch::object
 {
@@ -32,6 +81,17 @@ public:
     , decl_config_(config_.GetDeclaration(decl_))
     , last_(last)
     {
+        // Add entries from the YAML configuration directly into the object.
+        // This wraps each YAML node in a recursive conversion wrapper.
+        for(YAML::const_iterator it=config_.begin(); it!=config_.end(); ++it)
+        {
+            std::string name = it->first.as<std::string>();
+            register_method(this, {
+                {name, mstch::lambda{[it]() -> mstch::node { return YAMLWrapper(*it); }} }
+            });
+        }
+
+        // Override certain entries with our clang-generated information.
         register_methods(this, {
             {"config", &ClangWrapper::config},
             {"last", &ClangWrapper::last},
