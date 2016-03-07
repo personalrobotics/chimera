@@ -57,7 +57,7 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
 
     if (isa<DeclContext>(decl))
     {
-        GetEnclosingClassDecl(cast<DeclContext>(decl));
+        return GetEnclosingClassDecl(cast<DeclContext>(decl));
     }
     else if (isa<VarDecl>(decl))
     {
