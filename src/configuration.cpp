@@ -215,6 +215,7 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     if (view.empty())
         view = MODULE_CPP;
     *stream << ::mstch::render(view, full_context);
+    std::cout << binding_filename << std::endl;
 }
 
 void
