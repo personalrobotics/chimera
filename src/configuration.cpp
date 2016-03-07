@@ -273,9 +273,40 @@ bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
     return false;
 }
 
+bool chimera::CompiledConfiguration::IsSuppressed(const QualType type) const
+{
+    return (chimera::CompiledConfiguration::GetType(type).IsNull());
+}
+
 bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
 {
-    return chimera::CompiledConfiguration::GetDeclaration(decl).IsNull();
+    const auto config = chimera::CompiledConfiguration::GetDeclaration(decl);
+
+    // If the declaration is directly suppressed, report this.
+    if (config.IsNull())
+        return true;
+
+    // Functions can be suppressed if they return a suppressed type.
+    if (isa<FunctionDecl>(decl) && !config["return_value_policy"])
+    {
+        const FunctionDecl *function_decl = cast<FunctionDecl>(decl);
+        const QualType return_qual_type =
+            chimera::util::getFullyQualifiedType(
+                GetContext(), function_decl->getReturnType());
+        return IsSuppressed(return_qual_type);
+    }
+    // Fields can be suppressed if they represent a suppressed type.
+    else if (isa<FieldDecl>(decl) && !config["return_value_policy"])
+    {
+        const FieldDecl *field_decl = cast<FieldDecl>(decl);
+        const QualType value_qual_type =
+            chimera::util::getFullyQualifiedType(
+                GetContext(), field_decl->getType());
+        return IsSuppressed(value_qual_type);
+    }
+
+    // If no other rules apply, report that the declaration was not suppressed.
+    return false;
 }
 
 std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const

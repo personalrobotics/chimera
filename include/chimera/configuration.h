@@ -144,8 +144,18 @@ public:
 
     /**
      * Return if a declaration should not be generated.
+     *
+     * This can happen because it is marked as suppressed in the configuration,
+     * or because it depends on a type that is marked as suppressed.
      */
     bool IsSuppressed(const clang::Decl *decl) const;
+
+    /**
+     * Return if a type should not be generated.
+     *
+     * This can happen because it is marked as suppressed in the configuration.
+     */
+    bool IsSuppressed(const clang::QualType type) const;
 
     /**
      * Checks if a particular node is a string or contains a "source" entry to load.
