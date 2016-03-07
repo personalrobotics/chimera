@@ -650,11 +650,6 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     std::vector<std::shared_ptr<Parameter>> param_vector;
     for (const ParmVarDecl *param_decl : decl_->params())
     {
-        // Create a parameter template and add it to the parameter array.
-        param_vector.push_back(
-            std::make_shared<Parameter>(
-                config_, param_decl, decl_, class_decl_));
-
         // If argument-limiting is occurring, drop all parameters past the
         // argument limit.
         if (argument_limit_ >= 0)
@@ -662,6 +657,11 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
             if (static_cast<int>(param_vector.size()) >= argument_limit_)
                 break;
         }
+
+        // Create a parameter template and add it to the parameter array.
+        param_vector.push_back(
+            std::make_shared<Parameter>(
+                config_, param_decl, decl_, class_decl_));
     }
 
     // Find and flag the last item.
