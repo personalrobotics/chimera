@@ -113,13 +113,13 @@ public:
 
     virtual ::mstch::node comment()
     {
-        std::stringstream ss;
+        ::mstch::array comment_lines;
         const auto *comment =
             config_.GetContext().getCommentForDecl(decl_->getCanonicalDecl(), nullptr);
 
         // Ignore empty/missing comments.
         if(comment == nullptr)
-            return std::string{""};
+            return comment_lines;
 
         // Aggregate comment blocks into one large string.
         for(auto comment_it = comment->child_begin();
@@ -136,11 +136,14 @@ public:
                 text_it != commentSection->child_end(); ++text_it)
             {
                 if(clang::isa<clang::comments::TextComment>(*text_it))
-                    ss << clang::cast<clang::comments::TextComment>(*text_it)->getText().str();
+                {
+                    auto text = clang::cast<clang::comments::TextComment>(*text_it);
+                    comment_lines.push_back(text->getText().str());
+                }
             }
         }
 
-        return ss.str();
+        return comment_lines;
     }
 
     void setLast(bool is_last)
