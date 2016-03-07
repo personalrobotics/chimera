@@ -203,6 +203,7 @@ public:
              const clang::CXXRecordDecl *class_decl=NULL,
              const int argument_limit = -1);
 
+    ::mstch::node isConst();
     ::mstch::node type();
     ::mstch::node overloads();
     ::mstch::node params();
