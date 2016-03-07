@@ -644,7 +644,6 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 , argument_limit_(argument_limit)
 {
     register_methods(this, {
-        {"is_const", &Function::isConst},
         {"type", &Function::type},
         {"overloads", &Function::overloads},
         {"params", &Function::params},
@@ -652,11 +651,6 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"return_type", &Function::returnType},
         {"return_value_policy", &Function::returnValuePolicy},
     });
-}
-
-::mstch::node Function::isConst()
-{
-    return (class_decl_ && cast<CXXMethodDecl>(decl_)->isConst());
 }
 
 ::mstch::node Function::scope()
@@ -791,8 +785,14 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
 , method_decl_(decl)
 {
     register_methods(this, {
+        {"is_const", &Method::isConst},
         {"is_static", &Method::isStatic},
     });
+}
+
+::mstch::node Method::isConst()
+{
+    return method_decl_->isConst();
 }
 
 ::mstch::node Method::isStatic()

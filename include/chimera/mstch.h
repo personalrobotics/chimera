@@ -243,7 +243,6 @@ public:
              const clang::CXXRecordDecl *class_decl=NULL,
              const int argument_limit = -1);
 
-    ::mstch::node isConst();
     ::mstch::node type();
     ::mstch::node overloads();
     ::mstch::node params();
@@ -264,6 +263,7 @@ public:
            const clang::CXXMethodDecl *decl,
            const clang::CXXRecordDecl *class_decl=NULL);
 
+    ::mstch::node isConst();
     ::mstch::node isStatic();
 
 private:
