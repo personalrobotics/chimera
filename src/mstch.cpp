@@ -144,7 +144,7 @@ CXXRecord::CXXRecord(
         {"static_fields", &CXXRecord::staticFields},
         {"static_fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
         {"static_methods", &CXXRecord::staticMethods},
-        {"static_methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>}
+        {"static_methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
     });
 }
 
@@ -492,7 +492,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
 {
     register_methods(this, {
         {"type", &Enum::type},
-        {"values", &Enum::values}
+        {"values", &Enum::values},
     });
 }
 
@@ -584,7 +584,7 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
         {"is_assignable", &Field::isAssignable},
         {"is_copyable", &Field::isCopyable},
-        {"return_value_policy", &Field::returnValuePolicy}
+        {"return_value_policy", &Field::returnValuePolicy},
     });
 }
 
@@ -650,7 +650,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"params", &Function::params},
         {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_type", &Function::returnType},
-        {"return_value_policy", &Function::returnValuePolicy}
+        {"return_value_policy", &Function::returnValuePolicy},
     });
 }
 
@@ -791,7 +791,7 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
 , method_decl_(decl)
 {
     register_methods(this, {
-        {"is_static", &Method::isStatic}
+        {"is_static", &Method::isStatic},
     });
 }
 
@@ -828,7 +828,7 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 {
     register_methods(this, {
         {"name", &Parameter::name},
-        {"type", &Parameter::type}
+        {"type", &Parameter::type},
     });
 }
 
