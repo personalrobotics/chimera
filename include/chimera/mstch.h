@@ -245,7 +245,8 @@ public:
     Parameter(const ::chimera::CompiledConfiguration &config,
               const clang::ParmVarDecl *decl,
               const clang::FunctionDecl *method_decl,
-              const clang::CXXRecordDecl *class_decl);
+              const clang::CXXRecordDecl *class_decl,
+              const std::string default_name = "");
 
     ::mstch::node name();
     ::mstch::node type();
@@ -253,6 +254,7 @@ public:
 private:
     const clang::FunctionDecl *method_decl_;
     const clang::CXXRecordDecl *class_decl_;
+    const std::string default_name_;
 };
 
 class Variable: public ClangWrapper<clang::VarDecl>

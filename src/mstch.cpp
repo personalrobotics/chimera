@@ -4,6 +4,7 @@
 #include "cling_utils_AST.h"
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 using namespace clang;
@@ -248,6 +249,8 @@ CXXRecord::CXXRecord(
     std::vector<std::shared_ptr<Method>> constructor_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
+        if (config_.IsSuppressed(method_decl))
+            continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
         if (method_decl->isDeleted())
@@ -293,6 +296,8 @@ CXXRecord::CXXRecord(
     std::vector<std::shared_ptr<Method>> method_vector;
     for (CXXMethodDecl *const method_decl : decl_->methods())
     {
+        if (config_.IsSuppressed(method_decl))
+            continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
         if (isa<CXXConversionDecl>(method_decl))
@@ -367,6 +372,8 @@ CXXRecord::CXXRecord(
     std::vector<std::shared_ptr<Field>> field_vector;
     for (FieldDecl *const field_decl : decl_->fields())
     {
+        if (config_.IsSuppressed(field_decl))
+            continue;
         if (field_decl->getAccess() != AS_public)
             continue; // skip protected and private fields
 
@@ -399,6 +406,8 @@ CXXRecord::CXXRecord(
     std::vector<std::shared_ptr<Variable>> static_field_vector;
     for (Decl *const child_decl : decl_->decls())
     {
+        if (config_.IsSuppressed(child_decl))
+            continue;
         if (!isa<VarDecl>(child_decl))
             continue;
 
@@ -478,6 +487,8 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     std::vector<std::shared_ptr<EnumConstant>> constant_vector;
     for (const EnumConstantDecl *constant_decl : decl_->enumerators())
     {
+        if (config_.IsSuppressed(constant_decl))
+            continue;
         constant_vector.push_back(
             std::make_shared<EnumConstant>(
                 config_, constant_decl, decl_));
@@ -649,7 +660,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     // Convert each parameter to a template object.
     // Since template objects are lazily-evaluated, this isn't expensive.
     std::vector<std::shared_ptr<Parameter>> param_vector;
-    for (const ParmVarDecl *param_decl : decl_->params())
+    for (unsigned param_idx = 0; param_idx < decl_->getNumParams(); ++param_idx)
     {
         // If argument-limiting is occurring, drop all parameters past the
         // argument limit.
@@ -659,10 +670,15 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
                 break;
         }
 
+        // Construct a default name, just in case it is unspecified.
+        std::stringstream ss;
+        ss << "_arg" << param_idx << "_";
+
         // Create a parameter template and add it to the parameter array.
+        const ParmVarDecl *param_decl = decl_->getParamDecl(param_idx);
         param_vector.push_back(
             std::make_shared<Parameter>(
-                config_, param_decl, decl_, class_decl_));
+                config_, param_decl, decl_, class_decl_, ss.str()));
     }
 
     // Find and flag the last item.
@@ -755,10 +771,12 @@ Namespace::Namespace(const ::chimera::CompiledConfiguration &config,
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
                      const ParmVarDecl *decl,
                      const FunctionDecl *method_decl,
-                     const CXXRecordDecl *class_decl)
+                     const CXXRecordDecl *class_decl,
+                     const std::string default_name)
 : ClangWrapper(config, decl)
 , method_decl_(method_decl)
 , class_decl_(class_decl)
+, default_name_(default_name)
 {
     register_methods(this, {
         {"name", &Parameter::name},
@@ -771,7 +789,9 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
-    return decl_->getNameAsString();
+    // Use the "default_name" if the name would otherwise be empty.
+    std::string name = decl_->getNameAsString();
+    return (name.empty()) ? default_name_: name;
 }
 
 ::mstch::node Parameter::type()

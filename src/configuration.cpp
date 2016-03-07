@@ -272,6 +272,11 @@ bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
     return false;
 }
 
+bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
+{
+    return chimera::CompiledConfiguration::GetDeclaration(decl).IsNull();
+}
+
 std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 {
     std::string config_path = parent_.GetConfigFilename();

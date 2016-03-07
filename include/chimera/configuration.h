@@ -143,6 +143,11 @@ public:
     bool IsEnclosed(const clang::Decl *decl) const;
 
     /**
+     * Return if a declaration should not be generated.
+     */
+    bool IsSuppressed(const clang::Decl *decl) const;
+
+    /**
      * Checks if a particular node is a string or contains a "source" entry to load.
      * This is useful for resolving entries that might be pulled in from files.
      */

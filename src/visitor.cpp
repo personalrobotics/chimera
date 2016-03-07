@@ -206,8 +206,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
+    if (config_->IsSuppressed(decl))
         return false;
 
     // Ensure traversal of base classes before this class.
@@ -233,8 +232,7 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
+    if (config_->IsSuppressed(decl))
         return false;
 
     // Serialize using a mstch template.
@@ -250,8 +248,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
+    if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global variables.
@@ -296,8 +293,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     }
 
     // Ignore declarations that have been explicitly suppressed.
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
+    if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global functions.
