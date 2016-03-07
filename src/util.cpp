@@ -27,7 +27,7 @@ static const QualType emptyType_;
 std::string generateUniqueName()
 {
     // Use a static variable to generate non-duplicate names.
-    static size_t counter = 0;
+    static unsigned counter = 0;
 
     std::stringstream ss;
     ss << "chimera_placeholder_" << (counter++);

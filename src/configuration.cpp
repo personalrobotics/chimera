@@ -18,7 +18,7 @@ namespace
  *
  * See: http://stackoverflow.com/a/3672259 
  */
-size_t countWordsInString(const std::string & str)
+unsigned countWordsInString(const std::string & str)
 {
     std::stringstream stream(str);
     return std::distance(std::istream_iterator<std::string>(stream),
