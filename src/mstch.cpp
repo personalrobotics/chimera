@@ -3,6 +3,7 @@
 #include "chimera/util.h"
 #include "cling_utils_AST.h"
 
+#include <boost/variant/get.hpp>
 #include <iostream>
 #include <vector>
 
@@ -48,6 +49,7 @@ namespace mstch
         }
     case YAML::NodeType::Undefined:
     case YAML::NodeType::Null:
+    default:
         return nullptr;
     }
 }
@@ -140,6 +142,8 @@ CXXRecord::CXXRecord(
         {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
         {"static_fields", &CXXRecord::staticFields},
         {"static_fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
+        {"static_methods", &CXXRecord::staticMethods},
+        {"static_methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>}
     });
 }
 
@@ -356,6 +360,50 @@ CXXRecord::CXXRecord(
     for (auto method_template : method_vector)
         method_templates.push_back(method_template);
     return method_templates;
+}
+
+::mstch::node CXXRecord::staticMethods()
+{
+    ::mstch::array method_templates = boost::get<::mstch::array>(methods());
+    std::map<std::string, bool> is_static_method;
+
+    // Iterate through all methods searching for static ones.
+    for (const ::mstch::node method_node : method_templates)
+    {
+        // Resolve the static-ness and name of each function from method templates.
+        const auto method = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const std::string name = boost::get<std::string>(method->at("name"));
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+
+        // Throw a warning if a static and non-static method share a name.
+        if ((is_static_method.find(name) != is_static_method.end()) &&
+                (is_static_method[name] != is_static))
+        {
+            std::cerr
+                << "Warning: Method '" << name << "' has ambiguous static and"
+                << "non-static declarations. This may cause errors because"
+                << "this binding is using a list of named static methods."
+                << " Consider renaming one of the conflicting functions in the"
+                << " configuration YAML.\n";
+
+            // If there are any non-static methods, do not mark as static.
+            is_static_method[name] = false;
+        }
+        else
+        {
+            // Update the map with the static-ness of this method.
+            is_static_method[name] = is_static;
+        }
+    }
+
+    // Add all static method names to this list.
+    ::mstch::array static_method_list;
+    for (auto const& entry : is_static_method)
+    {
+        if (entry.second)
+            static_method_list.push_back(entry.first);
+    }
+    return static_method_list;
 }
 
 ::mstch::node CXXRecord::fields()
