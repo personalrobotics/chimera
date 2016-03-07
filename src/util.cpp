@@ -341,44 +341,80 @@ bool chimera::util::containsIncompleteType(QualType qual_type)
     }
 }
 
-bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
+bool chimera::util::containsIncompleteType(
+    ASTContext &context, const FunctionDecl *decl)
 {
-    for (const ParmVarDecl *param : decl->params())
+    for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
-        if (containsIncompleteType(param->getOriginalType()))
+        const ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
+        if (containsIncompleteType(param_decl->getOriginalType()))
+        {
+            std::cerr
+                << "Warning: Skipped function "
+                << decl->getQualifiedNameAsString()
+                << " because argument '"
+                << param_decl->getNameAsString()
+                << "' has an incomplete type '"
+                << chimera::util::getFullyQualifiedTypeName(
+                    context, param_decl->getType())
+                <<  "'.\n";
             return true;
+        }
     }
     return false;
 }
 
-bool chimera::util::containsRValueReference(FunctionDecl *decl)
+bool chimera::util::containsRValueReference(
+    ASTContext &context, FunctionDecl *decl)
 {
-    for (ParmVarDecl *param_decl : decl->params())
+    for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
+        ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
         if (param_decl->getType().getTypePtr()->isRValueReferenceType())
+        {
+            std::cerr
+                << "Warning: Skipped method '"
+                << decl->getQualifiedNameAsString()
+                << "' because";
+
+            if (param_decl->getNameAsString().empty())
+                std::cerr << " the parameter at index " << iparam;
+            else
+                std::cerr
+                    << " parameter '" << param_decl->getNameAsString() << "'";
+
+            std::cerr
+                << " is an rvalue reference of type '"
+                << getFullyQualifiedTypeName(context, param_decl->getType())
+                << "'.\n";
+
             return true;
+        }
     }
     return false;
 }
 
-bool chimera::util::needsReturnValuePolicy(const NamedDecl *decl, const Type *return_type)
+bool chimera::util::needsReturnValuePolicy(
+    ASTContext &context, const NamedDecl *decl, QualType return_type)
 {
-    if (return_type->isReferenceType())
+    if (return_type.getTypePtr()->isReferenceType())
     {
         std::cerr
             << "Warning: Skipped method "
             << decl->getQualifiedNameAsString()
-            << "' because it returns a reference and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns the reference type '"
+            << getFullyQualifiedTypeName(context, return_type)
+            << "'and no 'return_value_policy' was specified.\n";
         return true;
     }
-    else if (return_type->isPointerType())
+    else if (return_type.getTypePtr()->isPointerType())
     {
         std::cerr
             << "Warning: Skipped method "
             << decl->getQualifiedNameAsString()
-            << "' because it returns a pointer and no"
-               " 'return_value_policy' was specified.\n";
+            << "' because it returns the pointer type '"
+            << getFullyQualifiedTypeName(context, return_type)
+            << "' and no 'return_value_policy' was specified.\n";
         return true;
     }
     return false;
