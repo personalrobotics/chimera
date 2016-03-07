@@ -13,7 +13,9 @@
 #include "chimera/util.h"
 
 #include <clang/AST/AST.h>
+#include <clang/AST/Comment.h>
 #include <mstch/mstch.hpp>
+#include <sstream>
 
 namespace chimera
 {
@@ -59,6 +61,7 @@ public:
             {"mangled_name", &ClangWrapper::mangledName},
             {"qualified_name", &ClangWrapper::qualifiedName},
             {"scope", &ClangWrapper::scope},
+            {"comment", &ClangWrapper::comment},
         });
     }
 
@@ -106,6 +109,38 @@ public:
             return node.as<std::string>();
 
         return decl_->getQualifiedNameAsString();
+    }
+
+    virtual ::mstch::node comment()
+    {
+        std::stringstream ss;
+        const auto *comment =
+            config_.GetContext().getCommentForDecl(decl_->getCanonicalDecl(), nullptr);
+
+        // Ignore empty/missing comments.
+        if(comment == nullptr)
+            return std::string{""};
+
+        // Aggregate comment blocks into one large string.
+        for(auto comment_it = comment->child_begin();
+            comment_it != comment->child_end(); ++comment_it)
+        {
+            // Look for block comment sections.
+            const auto *commentSection = *comment_it;
+            if(commentSection->getCommentKind() !=
+                    clang::comments::BlockContentComment::ParagraphCommentKind)
+                continue;
+
+            // Combine the inline text of these sections together.
+            for(auto text_it = commentSection->child_begin();
+                text_it != commentSection->child_end(); ++text_it)
+            {
+                if(clang::isa<clang::comments::TextComment>(*text_it))
+                    ss << clang::cast<clang::comments::TextComment>(*text_it)->getText().str();
+            }
+        }
+
+        return ss.str();
     }
 
     void setLast(bool is_last)
