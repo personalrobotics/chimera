@@ -207,6 +207,7 @@ public:
     ::mstch::node type();
     ::mstch::node overloads();
     ::mstch::node params();
+    ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
     ::mstch::node scope();
     ::mstch::node qualifiedName();

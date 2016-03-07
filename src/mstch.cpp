@@ -590,6 +590,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"overloads", &Function::overloads},
         {"params", &Function::params},
         {"params?", &Function::isNonFalse<Function, &Function::params>},
+        {"return_type", &Function::returnType},
         {"return_value_policy", &Function::returnValuePolicy}
     });
 }
@@ -673,6 +674,18 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     for (auto param_template : param_vector)
         param_templates.push_back(param_template);
     return param_templates;
+}
+
+::mstch::node Function::returnType()
+{
+    // First, check if a return_value_policy was specified for this function.
+    if (const YAML::Node &node = decl_config_["return_type"])
+        return node.as<std::string>();
+
+    // Extract the return type of this function declaration.
+    return chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), decl_->getReturnType());
+
 }
 
 ::mstch::node Function::returnValuePolicy()
