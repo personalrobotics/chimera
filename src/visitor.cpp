@@ -190,7 +190,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     {
       if (decl2->getAccess() == AS_private
             || decl2->getAccess() == AS_protected)
-        return false;
+          return false;
 
       if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
       {
@@ -215,20 +215,20 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     for(auto base_decl : base_decls)
     {
         if (traversed_class_decls_.find(base_decl->getCanonicalDecl())
-                == traversed_class_decls_.end())
+              == traversed_class_decls_.end())
             VisitDecl(const_cast<CXXRecordDecl *>(base_decl));
     }
 
     // Serialize using a mstch template.
-    auto context = std::make_shared<chimera::mstch::CXXRecord>(*config_, decl,
-                                                               &traversed_class_decls_);
+    auto context = std::make_shared<chimera::mstch::CXXRecord>(
+        *config_, decl, &traversed_class_decls_);
     return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
     // Skip protected and private enums.
-    if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
@@ -252,7 +252,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (chimera::util::needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (chimera::util::needsReturnValuePolicy(*context_, decl, decl->getType()))
         return false;
 
     // Serialize using a mstch template.
@@ -278,26 +278,15 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // Skip functions that have incomplete argument types. Boost.Python
     // requires RTTI information about all arguments, including references and
     // pointers.
-    for (const clang::ParmVarDecl *param : decl->params())
-    {
-        if (chimera::util::containsIncompleteType(param->getOriginalType()))
-        {
-            std::cerr
-                << "Warning: Skipped function "
-                << decl->getQualifiedNameAsString()
-                << " because argument '"
-                << param->getNameAsString()
-                << "' has an incomplete type.\n";
-            return false;
-        }
-    }
+    if (chimera::util::containsIncompleteType(*context_, decl))
+        return false;
 
     // Ignore declarations that have been explicitly suppressed.
     if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global functions.
-    if (chimera::util::needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (chimera::util::needsReturnValuePolicy(*context_, decl, decl->getType()))
         return false;
 
     // Serialize using a mstch template.

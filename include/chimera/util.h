@@ -135,12 +135,18 @@ bool containsIncompleteType(clang::QualType qual_type);
  * This is useful in cases where we need RTTI information about all arguments,
  * including references and pointers.
  */
-bool containsIncompleteType(const clang::FunctionDecl *decl);
+// TODO: This function only needs clang::ASTContext for error message generation.
+//       Remove the argument once error handling is refactored.
+bool containsIncompleteType(
+    clang::ASTContext &context, const clang::FunctionDecl *decl);
 
 /**
  * Returns whether any function parameters contain RValue references.
  */
-bool containsRValueReference(clang::FunctionDecl *decl);
+// TODO: This function only needs clang::ASTContext for error message generation.
+//       Remove the argument once error handling is refactored.
+bool containsRValueReference(
+    clang::ASTContext &context, clang::FunctionDecl *decl);
 
 /**
  * Determine if a CXXRecordDecl is referring to a type that could be assigned.
@@ -174,7 +180,10 @@ bool isInsideTemplateClass(const clang::DeclContext *decl_context);
  * should be used for a given declaration and return type.  This function
  * checks and returns false if the return value policy can be deduced.
  */
-bool needsReturnValuePolicy(const clang::NamedDecl *decl, const clang::Type *return_type);
+// TODO: This function only needs clang::ASTContext for error message generation.
+//       Remove the argument once error handling is refactored.
+bool needsReturnValuePolicy(clang::ASTContext &context,
+    const clang::NamedDecl *decl, clang::QualType return_type);
 
 /**
  * Returns the minimum and maximum number of arguments that a function can take.
