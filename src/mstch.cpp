@@ -586,7 +586,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 {
     register_methods(this, {
         {"type", &Function::type},
-        {"overloads", &Function::params},
+        {"overloads", &Function::overloads},
         {"params", &Function::params},
         {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_value_policy", &Function::returnValuePolicy}
