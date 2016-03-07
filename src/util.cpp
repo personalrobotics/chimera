@@ -383,3 +383,18 @@ bool chimera::util::needsReturnValuePolicy(const NamedDecl *decl, const Type *re
     }
     return false;
 }
+
+std::pair<size_t, size_t>
+chimera::util::getFunctionArgumentRange(const clang::FunctionDecl *decl)
+{
+    const size_t max_arguments = decl->getNumParams();
+
+    size_t min_arguments = 0;
+    for (; min_arguments < max_arguments; ++min_arguments)
+    {
+        if (decl->getParamDecl(min_arguments)->hasDefaultArg())
+            break;
+    }
+
+    return std::pair<size_t, size_t>(min_arguments, max_arguments);
+}

@@ -200,9 +200,11 @@ class Function: public ClangWrapper<clang::FunctionDecl>
 public:
     Function(const ::chimera::CompiledConfiguration &config,
              const clang::FunctionDecl *decl,
-             const clang::CXXRecordDecl *class_decl=NULL);
+             const clang::CXXRecordDecl *class_decl=NULL,
+             const int argument_limit = -1);
 
     ::mstch::node type();
+    ::mstch::node overloads();
     ::mstch::node params();
     ::mstch::node returnValuePolicy();
     ::mstch::node scope();
@@ -210,6 +212,7 @@ public:
 
 private:
     const clang::CXXRecordDecl *class_decl_;
+    const int argument_limit_;
 };
 
 class Method: public Function

@@ -578,12 +578,15 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
                    const FunctionDecl *decl,
-                   const CXXRecordDecl *class_decl)
+                   const CXXRecordDecl *class_decl,
+                   const int argument_limit)
 : ClangWrapper(config, decl)
 , class_decl_(class_decl)
+, argument_limit_(argument_limit)
 {
     register_methods(this, {
         {"type", &Function::type},
+        {"overloads", &Function::params},
         {"params", &Function::params},
         {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_value_policy", &Function::returnValuePolicy}
@@ -615,6 +618,23 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         config_.GetContext(), pointer_type);
 }
 
+::mstch::node Function::overloads()
+{
+    ::mstch::array overloads;
+
+    // Create a list of wrappers that re-wrap this function with a subset of
+    // the full set of arguments (i.e. omitting some of the default arguments).
+    auto arg_range = chimera::util::getFunctionArgumentRange(decl_);
+    for (size_t n_args = arg_range.first; n_args <= arg_range.second; ++n_args)
+    {
+        overloads.push_back(
+            std::make_shared<Function>(
+                config_, decl_, class_decl_, n_args));
+    }
+
+    return overloads;
+}
+
 ::mstch::node Function::params()
 {
     ::mstch::array param_templates;
@@ -624,10 +644,18 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     std::vector<std::shared_ptr<Parameter>> param_vector;
     for (const ParmVarDecl *param_decl : decl_->params())
     {
-        // TODO: implement default value filtering.
+        // Create a parameter template and add it to the parameter array.
         param_vector.push_back(
             std::make_shared<Parameter>(
                 config_, param_decl, decl_, class_decl_));
+
+        // If argument-limiting is occurring, drop all parameters past the
+        // argument limit.
+        if (argument_limit_ >= 0)
+        {
+            if (param_vector.size() >= argument_limit_)
+                break;
+        }
     }
 
     // Find and flag the last item.

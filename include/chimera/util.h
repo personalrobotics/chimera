@@ -176,6 +176,13 @@ bool isInsideTemplateClass(const clang::DeclContext *decl_context);
  */
 bool needsReturnValuePolicy(const clang::NamedDecl *decl, const clang::Type *return_type);
 
+/**
+ * Returns the minimum and maximum number of arguments that a function can take.
+ *
+ * This is possible when the function takes some number of default arguments.
+ */
+std::pair<size_t, size_t> getFunctionArgumentRange(const clang::FunctionDecl *decl);
+
 } // namespace util
 } // namespace chimera
 
