@@ -181,7 +181,7 @@ bool needsReturnValuePolicy(const clang::NamedDecl *decl, const clang::Type *ret
  *
  * This is possible when the function takes some number of default arguments.
  */
-std::pair<size_t, size_t> getFunctionArgumentRange(const clang::FunctionDecl *decl);
+std::pair<unsigned, unsigned> getFunctionArgumentRange(const clang::FunctionDecl *decl);
 
 } // namespace util
 } // namespace chimera

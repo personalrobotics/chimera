@@ -625,7 +625,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     // Create a list of wrappers that re-wrap this function with a subset of
     // the full set of arguments (i.e. omitting some of the default arguments).
     auto arg_range = chimera::util::getFunctionArgumentRange(decl_);
-    for (size_t n_args = arg_range.first; n_args <= arg_range.second; ++n_args)
+    for (unsigned n_args = arg_range.first; n_args <= arg_range.second; ++n_args)
     {
         overloads.push_back(
             std::make_shared<Function>(
@@ -653,7 +653,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         // argument limit.
         if (argument_limit_ >= 0)
         {
-            if (param_vector.size() >= argument_limit_)
+            if (static_cast<int>(param_vector.size()) >= argument_limit_)
                 break;
         }
     }
