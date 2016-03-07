@@ -108,6 +108,10 @@ public:
 
     /**
      * Return list of namespace declarations that should be included.
+     *
+     * Note: these declarations will be lexically ordered.  Normally this
+     * is desirable since parent namespaces will naturally be lexically
+     * ordered before their children.
      */
     const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
 
@@ -122,12 +126,6 @@ public:
      * or return an empty YAML node if no configuration was found.
      */
     const YAML::Node& GetType(const clang::QualType type) const;
-
-    /**
-     * Get the string constant overriding with a specific constexpr value,
-     * or return the original value if no override is found.
-     */
-    std::string GetConstant(const std::string &value) const;
 
     /**
      * Gets the compiler instance used by this configuration.
@@ -174,7 +172,7 @@ protected:
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
 
-    std::set<std::string> binding_names_;
+    std::vector<std::string> binding_names_;
     std::set<const clang::NamespaceDecl*> binding_namespaces_;
 
     friend class Configuration;

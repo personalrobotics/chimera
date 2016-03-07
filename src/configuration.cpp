@@ -205,6 +205,7 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         {"module", ::mstch::map {
             {"name", parent_.GetOutputModuleName()},
             {"bindings", binding_names},
+            // Note: binding namespaces will be lexically ordered.
             {"namespaces", binding_namespaces}
         }}
     };
@@ -245,13 +246,6 @@ chimera::CompiledConfiguration::GetType(const clang::QualType type) const
             return entry.second;
     }
     return emptyNode_;
-}
-
-std::string
-chimera::CompiledConfiguration::GetConstant(const std::string &value) const
-{
-    const YAML::Node &constants = parent_.GetRoot()["constants"];
-    return constants[value].as<std::string>(value);
 }
 
 clang::CompilerInstance *chimera::CompiledConfiguration::GetCompilerInstance() const
@@ -377,7 +371,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     std::cout << binding_filename << std::endl;
 
     // Record this binding name for use at the top-level.
-    binding_names_.insert(mangled_name);
+    binding_names_.push_back(mangled_name);
     return true;
 }
 
