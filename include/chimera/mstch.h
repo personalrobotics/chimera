@@ -235,7 +235,8 @@ private:
 };
 
 // TODO: refactor Function to not need class_decl at all.
-class Function: public ClangWrapper<clang::FunctionDecl>
+class Function: public ClangWrapper<clang::FunctionDecl>,
+                public std::enable_shared_from_this<Function>
 {
 public:
     Function(const ::chimera::CompiledConfiguration &config,
@@ -249,6 +250,7 @@ public:
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
     ::mstch::node scope();
+    ::mstch::node usesDefaults();
     ::mstch::node qualifiedName();
 
 private:

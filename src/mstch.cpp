@@ -650,6 +650,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_type", &Function::returnType},
         {"return_value_policy", &Function::returnValuePolicy},
+        {"uses_defaults", &Function::usesDefaults},
     });
 }
 
@@ -685,12 +686,16 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     // Create a list of wrappers that re-wrap this function with a subset of
     // the full set of arguments (i.e. omitting some of the default arguments).
     auto arg_range = chimera::util::getFunctionArgumentRange(decl_);
-    for (unsigned n_args = arg_range.first; n_args <= arg_range.second; ++n_args)
+    for (unsigned n_args = arg_range.first; n_args < arg_range.second; ++n_args)
     {
         overloads.push_back(
             std::make_shared<Function>(
                 config_, decl_, class_decl_, n_args));
     }
+
+    // Add this function to its own list of overloads.
+    // It can be distinguished from other copies because `uses_defaults=false`.
+    overloads.push_back(shared_from_this());
 
     return overloads;
 }
@@ -764,6 +769,11 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
     // Return an empty string if no return value policy exists.
     return std::string{""};
+}
+
+::mstch::node Function::usesDefaults()
+{
+    return argument_limit_ >= 0;
 }
 
 ::mstch::node Function::qualifiedName()
