@@ -62,6 +62,7 @@ public:
             {"qualified_name", &ClangWrapper::qualifiedName},
             {"scope", &ClangWrapper::scope},
             {"comment", &ClangWrapper::comment},
+            {"?comment", &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::comment>},
         });
     }
 
