@@ -261,14 +261,9 @@ CXXRecord::CXXRecord(
             continue;
         if (!isa<CXXConstructorDecl>(method_decl))
             continue;
-        if (chimera::util::containsRValueReference(method_decl))
-        {
-            std::cerr
-                << "Warning: Skipped constructor of "
-                << decl_->getNameAsString()
-                << " because a parameter was an rvalue reference.\n";
+        if (chimera::util::containsRValueReference(
+                config_.GetContext(), method_decl))
             continue;
-        }
 
         const CXXConstructorDecl *constructor_decl =
             cast<CXXConstructorDecl>(method_decl);
@@ -320,22 +315,17 @@ CXXRecord::CXXRecord(
         // Skip functions that have incomplete argument types. Boost.Python
         // requires RTTI information about all arguments, including references
         // and pointers.
-        if (chimera::util::containsIncompleteType(method_decl))
-        {
-            std::cerr
-                << "Warning: Skipped function "
-                << method_decl->getQualifiedNameAsString()
-                << " because an argument has an incomplete type.\n";
+        if (chimera::util::containsIncompleteType(
+                config_.GetContext(), method_decl))
             continue;
-        }
 
         // Generate the method wrapper (but don't add it just yet).
         auto method = std::make_shared<Method>(config_, method_decl, decl_);
 
         // Check if a return_value_policy can be generated for this function.
         if (::mstch::render("{{return_value_policy}}", method).empty()
-                && chimera::util::needsReturnValuePolicy(
-                    method_decl, method_decl->getReturnType().getTypePtr()))
+                && chimera::util::needsReturnValuePolicy(config_.GetContext(),
+                    method_decl, method_decl->getReturnType()))
         {
             // `needsReturnValuePolicy()` already prints an error message,
             // so just continue to the next method if we got here.
@@ -343,14 +333,9 @@ CXXRecord::CXXRecord(
         }
 
         // Suppress any functions that take arguments by rvalue reference.
-        if (chimera::util::containsRValueReference(method_decl))
-        {
-            std::cerr
-                << "Warning: Skipped constructor of "
-                << decl_->getNameAsString()
-                << " because a parameter was an rvalue reference.\n";
+        if (chimera::util::containsRValueReference(
+                config_.GetContext(), method_decl))
             continue;
-        }
 
         // Now that we know it can be generated, add the method.
         method_vector.push_back(method);
@@ -466,8 +451,8 @@ CXXRecord::CXXRecord(
             continue;
 
         // Check if a return_value_policy can be generated for this function.
-        if (chimera::util::needsReturnValuePolicy(
-                static_field_decl, static_field_decl->getType().getTypePtr()))
+        if (chimera::util::needsReturnValuePolicy(config_.GetContext(),
+                static_field_decl, static_field_decl->getType()))
             continue;
 
         static_field_vector.push_back(
