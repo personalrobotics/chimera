@@ -733,7 +733,6 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     // Extract the return type of this function declaration.
     return chimera::util::getFullyQualifiedTypeName(
         config_.GetContext(), decl_->getReturnType());
-
 }
 
 ::mstch::node Function::returnValuePolicy()
