@@ -1,4 +1,4 @@
-set(AIKIDO_VERSION x.y.z)
+set(chimera_VERSION x.y.z)
 
 @PACKAGE_INIT@
 
