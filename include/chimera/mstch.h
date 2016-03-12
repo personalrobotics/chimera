@@ -94,8 +94,7 @@ public:
         if (const YAML::Node &node = decl_config_["mangled_name"])
             return node.as<std::string>();
 
-        return chimera::util::constructMangledName(
-            config_.GetContext(), decl_);
+        return chimera::util::constructMangledName(decl_);
     }
 
     virtual ::mstch::node scope()
