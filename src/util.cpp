@@ -140,18 +140,17 @@ chimera::util::resolveNamespace(CompilerInstance *ci,
 }
 
 std::string
-chimera::util::constructMangledName(ASTContext &context,
-                                    const NamedDecl *decl)
+chimera::util::constructMangledName(const NamedDecl *decl)
 {
     std::string mangled_name;
     llvm::raw_string_ostream mangled_name_stream(mangled_name);
-    context.createMangleContext()->mangleName(decl, mangled_name_stream);
+    decl->getASTContext().createMangleContext()
+        ->mangleName(decl, mangled_name_stream);
     return mangled_name_stream.str();
 }
 
 std::string
-chimera::util::constructBindingName(ASTContext &context,
-                                    const CXXRecordDecl *decl)
+chimera::util::constructBindingName(const CXXRecordDecl *decl)
 {
     // If this is an anonymous struct, then use the name of its typedef.
     if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
@@ -163,13 +162,12 @@ chimera::util::constructBindingName(ASTContext &context,
 
     // If the class is a template, use the mangled string name so that it does
     // not collide with other template instantiations.
-    std::string mangled_name = chimera::util::constructMangledName(context, decl);
+    std::string mangled_name = chimera::util::constructMangledName(decl);
 
     // Throw a warning that this class name was mangled, because users will
     // probably want to override these names with more sensible ones.
     std::cerr << "Warning: The class '"
-              << chimera::util::getFullyQualifiedTypeName(context,
-                    QualType(decl->getTypeForDecl(), 0)) << "'"
+              << chimera::util::getFullyQualifiedDeclTypeAsString(decl) << "'"
               << " was bound to the mangled name "
               << "'" << mangled_name << "'"
               << " because the unqualified class name of "
@@ -193,11 +191,11 @@ chimera::util::getFullyQualifiedTypeName(ASTContext &context,
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }
 
-std::string chimera::util::getFullyQualifiedDeclTypeAsString(
-    ASTContext &context, const TypeDecl *decl)
+std::string
+chimera::util::getFullyQualifiedDeclTypeAsString(const TypeDecl *decl)
 {
     return chimera::util::getFullyQualifiedTypeName(
-        context, QualType(decl->getTypeForDecl(), 0));
+        decl->getASTContext(), QualType(decl->getTypeForDecl(), 0));
 }
 
 bool chimera::util::isAssignable(const CXXRecordDecl *decl)
@@ -341,8 +339,7 @@ bool chimera::util::containsIncompleteType(QualType qual_type)
     }
 }
 
-bool chimera::util::containsIncompleteType(
-    ASTContext &context, const FunctionDecl *decl)
+bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
@@ -356,7 +353,7 @@ bool chimera::util::containsIncompleteType(
                 << param_decl->getNameAsString()
                 << "' has an incomplete type '"
                 << chimera::util::getFullyQualifiedTypeName(
-                    context, param_decl->getType())
+                    decl->getASTContext(), param_decl->getType())
                 <<  "'.\n";
             return true;
         }
@@ -364,12 +361,11 @@ bool chimera::util::containsIncompleteType(
     return false;
 }
 
-bool chimera::util::containsRValueReference(
-    ASTContext &context, FunctionDecl *decl)
+bool chimera::util::containsRValueReference(const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
-        ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
+        const ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
         if (param_decl->getType().getTypePtr()->isRValueReferenceType())
         {
             std::cerr
@@ -385,7 +381,8 @@ bool chimera::util::containsRValueReference(
 
             std::cerr
                 << " is an rvalue reference of type '"
-                << getFullyQualifiedTypeName(context, param_decl->getType())
+                << chimera::util::getFullyQualifiedTypeName(
+                    decl->getASTContext(), param_decl->getType())
                 << "'.\n";
 
             return true;
@@ -394,8 +391,8 @@ bool chimera::util::containsRValueReference(
     return false;
 }
 
-bool chimera::util::needsReturnValuePolicy(
-    ASTContext &context, const NamedDecl *decl, QualType return_type)
+bool
+chimera::util::needsReturnValuePolicy(const NamedDecl *decl, QualType return_type)
 {
     if (return_type.getTypePtr()->isReferenceType())
     {
@@ -403,7 +400,7 @@ bool chimera::util::needsReturnValuePolicy(
             << "Warning: Skipped method "
             << decl->getQualifiedNameAsString()
             << "' because it returns the reference type '"
-            << getFullyQualifiedTypeName(context, return_type)
+            << getFullyQualifiedTypeName(decl->getASTContext(), return_type)
             << "'and no 'return_value_policy' was specified.\n";
         return true;
     }
@@ -413,7 +410,7 @@ bool chimera::util::needsReturnValuePolicy(
             << "Warning: Skipped method "
             << decl->getQualifiedNameAsString()
             << "' because it returns the pointer type '"
-            << getFullyQualifiedTypeName(context, return_type)
+            << getFullyQualifiedTypeName(decl->getASTContext(), return_type)
             << "' and no 'return_value_policy' was specified.\n";
         return true;
     }

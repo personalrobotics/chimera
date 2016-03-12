@@ -224,8 +224,7 @@ CXXRecord::CXXRecord(
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
-    return chimera::util::constructBindingName(
-        config_.GetContext(), decl_);
+    return chimera::util::constructBindingName(decl_);
 }
 
 ::mstch::node CXXRecord::qualifiedName()
@@ -261,8 +260,7 @@ CXXRecord::CXXRecord(
             continue;
         if (!isa<CXXConstructorDecl>(method_decl))
             continue;
-        if (chimera::util::containsRValueReference(
-                config_.GetContext(), method_decl))
+        if (chimera::util::containsRValueReference(method_decl))
             continue;
 
         const CXXConstructorDecl *constructor_decl =
@@ -315,8 +313,7 @@ CXXRecord::CXXRecord(
         // Skip functions that have incomplete argument types. Boost.Python
         // requires RTTI information about all arguments, including references
         // and pointers.
-        if (chimera::util::containsIncompleteType(
-                config_.GetContext(), method_decl))
+        if (chimera::util::containsIncompleteType(method_decl))
             continue;
 
         // Generate the method wrapper (but don't add it just yet).
@@ -324,7 +321,7 @@ CXXRecord::CXXRecord(
 
         // Check if a return_value_policy can be generated for this function.
         if (::mstch::render("{{return_value_policy}}", method).empty()
-                && chimera::util::needsReturnValuePolicy(config_.GetContext(),
+                && chimera::util::needsReturnValuePolicy(
                     method_decl, method_decl->getReturnType()))
         {
             // `needsReturnValuePolicy()` already prints an error message,
@@ -333,8 +330,7 @@ CXXRecord::CXXRecord(
         }
 
         // Suppress any functions that take arguments by rvalue reference.
-        if (chimera::util::containsRValueReference(
-                config_.GetContext(), method_decl))
+        if (chimera::util::containsRValueReference(method_decl))
             continue;
 
         // Now that we know it can be generated, add the method.
@@ -451,7 +447,7 @@ CXXRecord::CXXRecord(
             continue;
 
         // Check if a return_value_policy can be generated for this function.
-        if (chimera::util::needsReturnValuePolicy(config_.GetContext(),
+        if (chimera::util::needsReturnValuePolicy(
                 static_field_decl, static_field_decl->getType()))
             continue;
 
@@ -507,8 +503,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["type"])
         return node.as<std::string>();
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(
-        config_.GetContext(), decl_);
+    return chimera::util::getFullyQualifiedDeclTypeAsString(decl_);
 }
 
 ::mstch::node Enum::values()
@@ -616,8 +611,8 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(
-        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_) +
+        "::" + decl_->getNameAsString();
 }
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
@@ -768,8 +763,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (!class_decl_)
         return decl_->getQualifiedNameAsString();
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(
-        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+        + "::" + decl_->getNameAsString();
 }
 
 Method::Method(const ::chimera::CompiledConfiguration &config,
@@ -864,8 +859,8 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
     if (!class_decl_)
         return decl_->getQualifiedNameAsString();
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(
-        config_.GetContext(), class_decl_) + "::" + decl_->getNameAsString();
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+        + "::" + decl_->getNameAsString();
 }
 
 ::mstch::node Variable::scope()

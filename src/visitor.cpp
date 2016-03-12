@@ -252,7 +252,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (chimera::util::needsReturnValuePolicy(*context_, decl, decl->getType()))
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
         return false;
 
     // Serialize using a mstch template.
@@ -278,7 +278,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // Skip functions that have incomplete argument types. Boost.Python
     // requires RTTI information about all arguments, including references and
     // pointers.
-    if (chimera::util::containsIncompleteType(*context_, decl))
+    if (chimera::util::containsIncompleteType(decl))
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
@@ -286,7 +286,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
 
     // TODO: Support return_value_policy for global functions.
-    if (chimera::util::needsReturnValuePolicy(*context_, decl, decl->getType()))
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
         return false;
 
     // Serialize using a mstch template.
