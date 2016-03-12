@@ -76,8 +76,7 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
-: context_(&(ci->getASTContext()))
-, printing_policy_(ci->getLangOpts())
+: printing_policy_(ci->getLangOpts())
 , config_(std::move(cc))
 {
     // Do nothing.
