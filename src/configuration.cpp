@@ -190,7 +190,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
         else
         {
-            std::cerr << "Unable to resolve declaration: "
+            std::cerr << "Unable to resolve class declaration: "
                       << "'" << decl_str << "'" << std::endl;
             exit(-2);
         }
@@ -207,7 +207,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
         else
         {
-            std::cerr << "Unable to resolve declaration: "
+            std::cerr << "Unable to resolve function declaration: "
                       << "'" << decl_str << "'" << std::endl;
             exit(-2);
         }
