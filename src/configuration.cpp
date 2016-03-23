@@ -17,18 +17,6 @@ namespace
 {
 
 /**
- * Counts the number of whitespace-separated words in a string.
- *
- * See: http://stackoverflow.com/a/3672259 
- */
-unsigned countWordsInString(const std::string & str)
-{
-    std::stringstream stream(str);
-    return std::distance(std::istream_iterator<std::string>(stream),
-                         std::istream_iterator<std::string>());
-}
-
-/**
  * Map of counts of each long prefix encountered.
  *
  * This allows the generation of safe incrementing filenames in the case
