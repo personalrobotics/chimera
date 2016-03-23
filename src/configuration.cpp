@@ -76,6 +76,11 @@ void chimera::Configuration::SetOutputModuleName(const std::string &moduleName)
     outputModuleName_ = moduleName.empty() ? "chimera_binding" : moduleName;
 }
 
+void chimera::Configuration::AddInputNamespaceName(const std::string &namespaceName)
+{
+    inputNamespaceNames_.push_back(namespaceName);
+}
+
 std::unique_ptr<chimera::CompiledConfiguration>
 chimera::Configuration::Process(CompilerInstance *ci) const
 {
@@ -109,7 +114,21 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 , ci_(ci)
 {   
     // Get a reference to the configuration YAML structure.
-    const YAML::Node &configNode = parent.GetRoot();
+    const YAML::Node &configNode = parent.configNode_;
+
+    // Resolve command-line namespaces.  Since these cannot include
+    // configuration information, they are simpler to handle.
+    for (const std::string &ns_str : parent.inputNamespaceNames_)
+    {
+        auto ns = chimera::util::resolveNamespace(ci, ns_str);
+        if (!ns)
+        {
+            std::cerr << "Unable to resolve namespace: "
+                      << "'" << ns_str << "'." << std::endl;
+            continue;
+        }
+        namespaces_.insert(ns);
+    }
 
     // Resolve namespace configuration entries within provided AST.
     for(const auto &it : configNode["namespaces"])
