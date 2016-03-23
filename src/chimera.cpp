@@ -46,6 +46,11 @@ static cl::opt<bool> UseCMode(
     "use-c", cl::cat(ChimeraCategory),
     cl::desc("Parse input files as C instead of C++"));
 
+// Option for switching from C++ to C source.
+static cl::opt<bool> SuppressDocs(
+    "no-docs", cl::cat(ChimeraCategory),
+    cl::desc("Suppress the extraction of documentation from C++ comments"));
+
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
     "\n"
@@ -74,6 +79,11 @@ int main(int argc, const char **argv)
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
+
+    // Add or suppress clang documentation flag as specified.
+    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
+        SuppressDocs ? "-Wno-documentation" : "-Wdocumentation",
+        ArgumentInsertPosition::BEGIN));
 
     // Add the appropriate C/C++ language flag.
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
