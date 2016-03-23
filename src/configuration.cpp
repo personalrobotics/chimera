@@ -125,6 +125,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve namespace: "
                       << "'" << ns_str << "'." << std::endl;
+            exit(-1);
         }
     }
 
@@ -146,6 +147,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve declaration: "
                       << "'" << decl_str << "'" << std::endl;
+            exit(-2);
         }
     }
 
@@ -162,6 +164,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve type: "
                       << "'" << type_str << "'" << std::endl;
+            exit(-3);
         }
     }
 }
