@@ -124,7 +124,7 @@ std::string constructMangledName(const clang::NamedDecl *decl);
  * This is useful in cases where we need RTTI information about all arguments,
  * including references and pointers.
  */
-bool containsIncompleteType(clang::QualType qual_type);
+bool containsIncompleteType(clang::Sema &sema, clang::QualType qual_type);
 
 /**
  * Returns whether any function parameters contain incomplete argument types.
@@ -132,7 +132,7 @@ bool containsIncompleteType(clang::QualType qual_type);
  * This is useful in cases where we need RTTI information about all arguments,
  * including references and pointers.
  */
-bool containsIncompleteType(const clang::FunctionDecl *decl);
+bool containsIncompleteType(clang::Sema &sema, const clang::FunctionDecl *decl);
 
 /**
  * Returns whether any function parameters contain RValue references.

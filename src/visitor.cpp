@@ -277,7 +277,8 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // Skip functions that have incomplete argument types. Boost.Python
     // requires RTTI information about all arguments, including references and
     // pointers.
-    if (chimera::util::containsIncompleteType(decl))
+    if (chimera::util::containsIncompleteType(
+            config_->GetCompilerInstance()->getSema(), decl))
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
