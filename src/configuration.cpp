@@ -186,6 +186,17 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         false // Create missing directories in the output path
     );
 
+    // If file creation failed, report the error and fail immediately.
+    if (!stream)
+    {
+        std::cerr << "Failed to create output file "
+                  << "'" << binding_filename << "'"
+                  << " for "
+                  << "'" << ::mstch::render("{{name}}", context) << "'."
+                  << std::endl;
+        exit(-4);
+    }
+
     // Create collections for the ordered sets of bindings and namespaces.
     ::mstch::array binding_names(binding_names_.begin(),
                                  binding_names_.end());
@@ -346,7 +357,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
         {
             std::cerr << "Warning: Failed to open source '"
                       << source_path << "': " << strerror(errno) << std::endl;
-            return "";
+            exit(-5);
         }
 
         // Copy file content to the output stream.
@@ -385,7 +396,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
         false // Create missing directories in the output path
     );
 
-    // If file creation failed, report the error and return a nullptr.
+    // If file creation failed, report the error and fail immediately.
     if (!stream)
     {
         std::cerr << "Failed to create output file "
@@ -393,7 +404,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
                   << " for "
                   << "'" << ::mstch::render("{{name}}", context) << "'."
                   << std::endl;
-        return false;
+        exit(-6);
     }
 
     // Resolve customizable snippets that will be inserted into the file.
