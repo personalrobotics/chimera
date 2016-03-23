@@ -67,7 +67,7 @@ types:
     convert_to: 'class BodyNodePtr'
 
 # Selected function and class declarations that need custom parameters.
-declarations:
+functions:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
     return_value_policy: ::boost::python::copy_const_reference
   'bool ::dart::dynamics::Skeleton::isImpulseApplied() const':
@@ -76,6 +76,8 @@ declarations:
     content: '/* Instead of implementing this function, insert this comment! */'
   'Eigen::VectorXd & ::dart::optimizer::GradientDescentSolver::getEqConstraintWeights()': null
     # This declaration will be suppressed.
+
+classes:
   '::dart::dynamics::Shape':
     name: Shape
     bases: []

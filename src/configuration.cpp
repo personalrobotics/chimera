@@ -191,16 +191,28 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
     }
 
-    // Resolve namespace configuration entries within provided AST.
-    for(const auto &it : configNode["declarations"])
+    // Resolve class/struct configuration entries within provided AST.
+    for(const auto &it : configNode["classes"])
     {
         std::string decl_str = it.first.as<std::string>();
+        auto decl = chimera::util::resolveRecord(ci, decl_str);
+        if (decl)
+        {
+            declarations_[decl] = it.second;
+        }
+        else
+        {
+            std::cerr << "Unable to resolve declaration: "
+                      << "'" << decl_str << "'" << std::endl;
+            exit(-2);
+        }
+    }
 
-        // If there are multiple words, assume a full declaration.
-        // If there is only one word, assume a record declaration.
-        auto decl = (countWordsInString(decl_str) == 1)
-                     ? chimera::util::resolveRecord(ci, decl_str)
-                     : chimera::util::resolveDeclaration(ci, decl_str);
+    // Resolve function configuration entries within provided AST.
+    for(const auto &it : configNode["functions"])
+    {
+        std::string decl_str = it.first.as<std::string>();
+        auto decl = chimera::util::resolveDeclaration(ci, decl_str);
         if (decl)
         {
             declarations_[decl] = it.second;
