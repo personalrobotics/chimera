@@ -6,7 +6,10 @@
 #include "chimera/boost_python_mstch.h"
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+#include <map>
 
 using namespace clang;
 
@@ -23,6 +26,46 @@ unsigned countWordsInString(const std::string & str)
     std::stringstream stream(str);
     return std::distance(std::istream_iterator<std::string>(stream),
                          std::istream_iterator<std::string>());
+}
+
+/**
+ * Map of counts of each long prefix encountered.
+ *
+ * This allows the generation of safe incrementing filenames in the case
+ * that many long paths with the same prefix are encountered.
+ */
+std::map<std::string, int> large_filename_prefixes;
+
+constexpr int MAX_PATH_LENGTH = 255;
+constexpr int MAX_COUNTER_LENGTH = 4;
+
+/**
+ * De-conflicts paths that are longer than 255 characters.
+ * (This is the maximum path length on many operating systems.)
+ */
+std::string sanitizePath(const std::string &path)
+{
+    // If the path length is short, just return it.
+    if (path.size() < MAX_PATH_LENGTH)
+        return path;
+
+    // If the path length is long, compute a safe prefix and append an
+    // incrementing counter variable to the end of the filename.
+    size_t suffix_index = path.find_last_of(".");
+    const std::string path_suffix = (suffix_index == std::string::npos) ?
+                                    "" : path.substr(suffix_index);
+    const int prefix_size = std::max(
+        0, MAX_PATH_LENGTH - MAX_COUNTER_LENGTH - (int)path_suffix.size() - 2);
+    const std::string path_prefix = path.substr(0, prefix_size);
+    const int index = large_filename_prefixes[path_prefix]++;
+
+    // Create the new filename as "prefix_{index}.suffix"
+    std::stringstream ss;
+    ss << path_prefix << "_";
+    ss << std::setfill('0') << std::setw(MAX_COUNTER_LENGTH) << index;
+    if (path_suffix.length())
+        ss << path_suffix;
+    return ss.str();
 }
 
 } // namespace
@@ -144,6 +187,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve namespace: "
                       << "'" << ns_str << "'." << std::endl;
+            exit(-1);
         }
     }
 
@@ -165,6 +209,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve declaration: "
                       << "'" << decl_str << "'" << std::endl;
+            exit(-2);
         }
     }
 
@@ -181,6 +226,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         {
             std::cerr << "Unable to resolve type: "
                       << "'" << type_str << "'" << std::endl;
+            exit(-3);
         }
     }
 }
@@ -188,8 +234,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 chimera::CompiledConfiguration::~CompiledConfiguration()
 {
     // Create the top-level binding source file.
-    std::string binding_filename =
+    const std::string binding_filename =
         parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp";
+
 
     // Create an output file depending on the provided parameters.
     auto stream = ci_->createOutputFile(
@@ -201,6 +248,15 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         false, // Use a temporary file that should be renamed
         false // Create missing directories in the output path
     );
+
+    // If file creation failed, report the error and fail immediately.
+    if (!stream)
+    {
+        std::cerr << "Failed to create top-level output file "
+                  << "'" << binding_filename << "'."
+                  << std::endl;
+        exit(-4);
+    }
 
     // Create collections for the ordered sets of bindings and namespaces.
     ::mstch::array binding_names(binding_names_.begin(),
@@ -362,7 +418,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
         {
             std::cerr << "Warning: Failed to open source '"
                       << source_path << "': " << strerror(errno) << std::endl;
-            return "";
+            exit(-5);
         }
 
         // Copy file content to the output stream.
@@ -389,8 +445,8 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     std::string mangled_name = ::mstch::render("{{mangled_name}}", context);
 
     // Create an output file depending on the provided parameters.
-    std::string binding_filename =
-        parent_.GetOutputPath() + "/" + mangled_name + ".cpp";
+    const std::string binding_filename =
+        sanitizePath(parent_.GetOutputPath() + "/" + mangled_name + ".cpp");
     auto stream = ci_->createOutputFile(
         binding_filename,
         false, // Open the file in binary mode
@@ -401,7 +457,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
         false // Create missing directories in the output path
     );
 
-    // If file creation failed, report the error and return a nullptr.
+    // If file creation failed, report the error and fail immediately.
     if (!stream)
     {
         std::cerr << "Failed to create output file "
@@ -409,7 +465,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
                   << " for "
                   << "'" << ::mstch::render("{{name}}", context) << "'."
                   << std::endl;
-        return false;
+        exit(-6);
     }
 
     // Resolve customizable snippets that will be inserted into the file.
