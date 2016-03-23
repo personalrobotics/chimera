@@ -11,4 +11,5 @@ template:
     content: '/* footer */'
 namespaces: [dart]
 types: []
-declarations: []
+classes: []
+functions: []

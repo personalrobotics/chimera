@@ -122,7 +122,7 @@ types:
     return_value_policy: boost::python::reference_existing_object
 
 # Selected function and class declarations that need custom parameters.
-declarations:
+classes:
   # TODO: Suppress AssimpInputResoruceAdaptor.
   'dart::dynamics::ZeroDofJoint':
     name: ZeroDofJoint
@@ -176,15 +176,6 @@ declarations:
   'dart::dynamics::MutexedWeakSkeletonPtr': null
   'dart::dynamics::TemplateWeakBodyNodePtr<dart::dynamics::BodyNode>': null
 
-  # Suppressed because of bugs in DART:
-  'template <> void dart::common::NameManager<dart::dynamics::Marker *>::removeEntries(const std::string&, dart::dynamics::Marker *const &)': null
-  'template <> void dart::common::NameManager<dart::dynamics::BodyNode *>::removeEntries(const std::string&, dart::dynamics::BodyNode *const &)': null
-  'template <> void dart::common::NameManager<dart::dynamics::SoftBodyNode *>::removeEntries(const std::string&, dart::dynamics::SoftBodyNode *const &)': null
-  'template <> void dart::common::NameManager<dart::dynamics::EndEffector *>::removeEntries(const std::string&, dart::dynamics::EndEffector *const &)': null
-  'template <> void dart::common::NameManager<dart::dynamics::DegreeOfFreedom*>::removeEntries(const std::string&, dart::dynamics::DegreeOfFreedom *const &)': null
-  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::SimpleFrame>>::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::SimpleFrame> const &)': null
-  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::Skeleton> >::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::Skeleton> const &)': null
-
   # Suppressed because these are optional components.
   'Assimp::IOStream': null
   'dart::dynamics::AssimpInputResourceAdaptor': null
@@ -194,6 +185,16 @@ declarations:
 
   # Suppressed because of bugs in Chimera.
   #'dart::common::Signal<void (std::shared_ptr<dart::dynamics::MetaSkeleton const>, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&), dart::common::signal::detail::DefaultCombiner>': null
+
+functions:
+  # Suppressed because of bugs in DART:
+  'template <> void dart::common::NameManager<dart::dynamics::Marker *>::removeEntries(const std::string&, dart::dynamics::Marker *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::BodyNode *>::removeEntries(const std::string&, dart::dynamics::BodyNode *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::SoftBodyNode *>::removeEntries(const std::string&, dart::dynamics::SoftBodyNode *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::EndEffector *>::removeEntries(const std::string&, dart::dynamics::EndEffector *const &)': null
+  'template <> void dart::common::NameManager<dart::dynamics::DegreeOfFreedom*>::removeEntries(const std::string&, dart::dynamics::DegreeOfFreedom *const &)': null
+  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::SimpleFrame>>::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::SimpleFrame> const &)': null
+  'template <> void dart::common::NameManager<std::shared_ptr<dart::dynamics::Skeleton> >::removeEntries(const std::string&, std::shared_ptr<dart::dynamics::Skeleton> const &)': null
 
   'dart::dynamics::Frame *dart::dynamics::Frame::World()':
     return_value_policy: boost::python::reference_existing_object
