@@ -58,6 +58,12 @@ public:
     void SetOutputModuleName(const std::string &moduleName);
 
     /**
+     * Append an enclosing namespace that should be generated as part
+     * of the top-level binding.
+     */
+    void AddInputNamespaceName(const std::string &namespaceName);
+
+    /**
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration>
@@ -76,7 +82,7 @@ public:
     /**
      * Get the desired output path for bindings.
      */
-    const std::string &GetOutputPath() const;
+    const std::string& GetOutputPath() const;
 
     /**
      * Get the desired output python module name for top-level binding.
@@ -91,6 +97,9 @@ protected:
     std::string configFilename_;
     std::string outputPath_;
     std::string outputModuleName_;
+    std::vector<std::string> inputNamespaceNames_;
+
+    friend class CompiledConfiguration;
 };
 
 class CompiledConfiguration

@@ -35,6 +35,12 @@ static cl::opt<std::string> OutputModuleName(
     cl::desc("Specify output top-level module name"),
     cl::value_desc("modulename"));
 
+// Option for specifying top-level binding namespaces.
+static cl::list<std::string> NamespaceNames(
+    "n", cl::cat(ChimeraCategory),
+    cl::desc("Specify one or more top-level namespaces that will be bound"),
+    cl::value_desc("namespace"));
+
 // Option for specifying YAML configuration filename.
 static cl::opt<std::string> ConfigFilename(
     "c", cl::cat(ChimeraCategory),
@@ -75,6 +81,11 @@ int main(int argc, const char **argv)
     // If a top-level binding file was specified, set configuration to use it.
     if (!OutputModuleName.empty())
         chimera::Configuration::GetInstance().SetOutputModuleName(OutputModuleName);
+
+    // Add top-level namespaces to the configuration.
+    if (NamespaceNames.size())
+        for (const std::string &name : NamespaceNames)
+            chimera::Configuration::GetInstance().AddInputNamespaceName(name);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
