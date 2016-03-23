@@ -1,5 +1,6 @@
-#include "chimera/visitor.h"
+#include "chimera/mstch.h"
 #include "chimera/util.h"
+#include "chimera/visitor.h"
 
 #include <algorithm>
 #include <boost/algorithm/string/join.hpp>
@@ -11,59 +12,8 @@ using namespace chimera;
 using namespace clang;
 using boost::algorithm::join;
 
-namespace {
-
-bool IsAssignable(CXXRecordDecl *decl)
+namespace
 {
-    if (decl->isAbstract())
-        return false;
-    else if (!decl->hasCopyAssignmentWithConstParam())
-        return false;
-
-    for (CXXMethodDecl *method_decl : decl->methods())
-        if (method_decl->isCopyAssignmentOperator() && !method_decl->isDeleted())
-            return true;
-
-    return false;
-}
-
-bool IsQualTypeAssignable(ASTContext &context, QualType qual_type)
-{
-    if (qual_type.isConstQualified())
-        return false;
-    else if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
-        return IsAssignable(decl);
-    else if (qual_type.getTypePtr()->isArrayType())
-        return false;
-    else
-        return qual_type.isTriviallyCopyableType(context);
-}
-
-bool IsCopyable(CXXRecordDecl *decl)
-{
-    if (!decl->hasDefinition())
-        return false;
-    else if (decl->isAbstract())
-        return false;
-    else if (!decl->hasCopyConstructorWithConstParam())
-        return false;
-
-    for (CXXConstructorDecl *ctor_decl : decl->ctors())
-        if (ctor_decl->isCopyConstructor() && !ctor_decl->isDeleted())
-            return true;
-
-    return false;
-}
-
-bool IsQualTypeCopyable(ASTContext &context, QualType qual_type)
-{
-    // TODO: Is this logic correct?
-
-    if (CXXRecordDecl *decl = qual_type.getTypePtr()->getAsCXXRecordDecl())
-        return IsCopyable(decl);
-    else
-        return qual_type.isTriviallyCopyableType(context);
-}
 
 bool IsInsideTemplateClass(DeclContext *decl_context)
 {
@@ -84,234 +34,49 @@ bool IsInsideTemplateClass(DeclContext *decl_context)
         return false;
 }
 
-// Generate a safe name to use for a CXXRecordDecl.
-//
-// This uses a combination of unqualified names, namespace mangling, and
-// config overrides to resolve the string name that a binding should use for
-// a given C++ class declaration.
-std::string ConstructBindingName(
-    CXXRecordDecl *decl, ASTContext &context,
-    const chimera::CompiledConfiguration &config)
+/**
+ * Gets a pointer to an enclosing class declaration if one exists.
+ * Returns null if there is no enclosing class.
+ */
+CXXRecordDecl *GetEnclosingClassDecl(DeclContext *decl_context)
 {
-    const YAML::Node &node = config.GetDeclaration(decl);
+    DeclContext *parent_context = decl_context->getParent();
 
-    // If a name is specified in the configuration, use that.
-    if (node.IsNull() && node["name"])
-        return node.as<std::string>();
-
-    // If this is an anonymous struct, then use the name of its typedef.
-    if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
-        return typedef_decl->getNameAsString();
-
-    // If the class is not a template class, use the unqualified string name.
-    if (!isa<ClassTemplateSpecializationDecl>(decl))
-        return decl->getNameAsString();
-
-    // If the class is a template, use the mangled string name so that it does
-    // not collide with other template instantiations.
-    std::string mangled_name;
-    llvm::raw_string_ostream mangled_name_stream(mangled_name);
-    context.createMangleContext()->mangleName(decl, mangled_name_stream);
-    mangled_name = mangled_name_stream.str();
-
-    // Throw a warning that this class name was mangled, because users will
-    // probably want to override these names with more sensible ones.
-    std::cerr << "Warning: The class '"
-              << chimera::util::getFullyQualifiedTypeName(context,
-                    QualType(decl->getTypeForDecl(), 0)) << "'"
-              << " was bound to the mangled name "
-              << "'" << mangled_name << "'"
-              << " because the unqualified class name of "
-              << "'" << decl->getNameAsString() << "'"
-              << " may be ambiguous.\n";
-
-    return mangled_name;
+    // TODO: replace this with null-ing cast operation.
+    return (isa<CXXRecordDecl>(parent_context)) ?
+        cast<CXXRecordDecl>(parent_context) : NULL;
 }
 
-bool ContainsIncompleteType(QualType qual_type)
+/**
+ * Gets a pointer to an enclosing class declaration if one exists.
+ * Returns null if there is no enclosing class.
+ */
+CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
 {
-    const Type *type = qual_type.getTypePtr();
+    decl = decl->getCanonicalDecl();
 
-    // TODO: We're probably missing a few cases here.
-
-    if (isa<PointerType>(type))
+    if (isa<DeclContext>(decl))
     {
-        const PointerType *pointer_type = cast<PointerType>(type);
-        return ContainsIncompleteType(pointer_type->getPointeeType());
+        return GetEnclosingClassDecl(cast<DeclContext>(decl));
     }
-    else if (isa<ReferenceType>(type))
+    else if (isa<VarDecl>(decl))
     {
-        const ReferenceType *reference_type = cast<ReferenceType>(type);
-        return ContainsIncompleteType(reference_type->getPointeeType());
+        return GetEnclosingClassDecl(
+            cast<VarDecl>(decl)->getDeclContext());
     }
-    else
+    else if (isa<FunctionDecl>(decl))
     {
-        return type->isIncompleteType();
+        return GetEnclosingClassDecl(
+            cast<FunctionDecl>(decl)->getEnclosingNamespaceContext());
     }
-}
-
-std::vector<std::pair<std::string, std::string>>
-GetParameterNames(ASTContext &context, const chimera::CompiledConfiguration &config,
-                  clang::FunctionDecl *decl)
-{
-    std::vector<std::pair<std::string, std::string>> params;
-
-    for (ParmVarDecl *param_decl : decl->params())
-    {
-        const std::string param_name = param_decl->getNameAsString();
-        const Type *param_type = param_decl->getType().getTypePtr();
-        std::string param_value;
-
-        if (param_decl->hasDefaultArg()
-            && !param_decl->hasUninstantiatedDefaultArg()
-            && !param_decl->hasUnparsedDefaultArg())
-        {
-            Expr *default_expr = param_decl->getDefaultArg();
-            assert(default_expr);
-
-            Expr::EvalResult result;
-            bool success;
-
-            if (param_type->isReferenceType())
-                success = default_expr->EvaluateAsLValue(result, context);
-            else
-                success = default_expr->EvaluateAsRValue(result, context);
-
-            if (success)
-            {
-                // Handle special cases for infinite and nan float values.
-                // These values resolve to internal compiler definitions, so
-                // their default string serialization won't resolve correctly.
-                if (result.Val.isFloat() && result.Val.getFloat().isInfinity())
-                {
-                    param_value = result.Val.getFloat().isNegative()
-                        ? "-INFINITY" : "INFINITY";
-                }
-                else if (result.Val.isFloat() && result.Val.getFloat().isNaN())
-                {
-                    param_value = "NAN";
-                }
-                else
-                {
-                    param_value = result.Val.getAsString(
-                        context, param_decl->getType());
-                }
-            }
-            else if (default_expr->hasNonTrivialCall(context))
-            {
-                // TODO: How do we print the decl with argument + return types?
-                std::cerr
-                  << "Warning: Unable to evaluate non-trivial call in default"
-                     " value for parameter"
-                  << " '" << param_name << "' of method"
-                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
-            }
-            else
-            {
-                // TODO: How do we print the decl with argument + return types?
-                std::cerr
-                  << "Warning: Failed to evaluate default value for parameter"
-                  << " '" << param_name << "' of method"
-                  << " '" << decl->getQualifiedNameAsString() << "'.\n";
-            }
-        }
-
-        // If a constant has been overriden, use the override instead of the
-        // original value.  Currently, this is just done via string-matching.
-        param_value = config.GetConstant(param_value);
-        params.push_back(std::make_pair(param_name, param_value));
-    }
-
-    return params;
-}
-
-void GenerateFunctionArguments(
-    ASTContext &context, const chimera::CompiledConfiguration &config,
-    FunctionDecl *decl, bool leading_comma, chimera::Stream &stream)
-{
-    // Construct a list of the arguments that are provided to this function,
-    // and define named arguments for them based on their c++ names.
-    const auto params = GetParameterNames(context, config, decl);
-
-    if (!params.empty())
-    {
-        // Find the last empty parameter, or return the beginning of the list.
-        // This gets us an iterator to parameters that can have defaults, while
-        // suppressing defaults that occurred before a default that we failed
-        // to evaluate.
-        const auto last_blank_param = find_if(params.rbegin(), params.rend(),
-            [](const std::pair<std::string, std::string> &param) {
-                return param.second.empty();
-            });
-        const auto param_defaults_begin = last_blank_param.base();
-
-        // TODO: Assign names to unnamed arguments.
-
-        std::vector<std::string> python_args;
-        bool use_param_default = false;
-
-        for (auto param_it = params.begin(); param_it != params.end(); ++param_it)
-        {
-            std::stringstream python_arg;
-
-            // Add the named argument directive.
-            python_arg << "::boost::python::arg(\"" << param_it->first << "\")";
-
-            // If this is the first default param, set flag to start serializing them.
-            if (param_defaults_begin == param_it)
-                use_param_default = true;
-
-            // If we reached the parameters with default arguments, write them.
-            if (use_param_default)
-                python_arg << " = " << param_it->second;
-
-            // Record this entry to the list of parameter declarations.
-            python_args.push_back(python_arg.str());
-        }
-
-        if (leading_comma)
-            stream << ", ";
-
-        stream << "(" << join(python_args, ", ") << ")";
-    }
-}
-
-std::string getFullyQualifiedDeclTypeAsString(
-    const ASTContext &context, const TypeDecl *decl)
-{
-    return chimera::util::getFullyQualifiedTypeName(
-        context, QualType(decl->getTypeForDecl(), 0));
-}
-
-bool needsReturnValuePolicy(NamedDecl *decl, const Type *return_type)
-{
-    if (return_type->isReferenceType())
-    {
-        std::cerr
-            << "Warning: Skipped method "
-            << decl->getQualifiedNameAsString()
-            << "' because it returns a reference and no"
-               " 'return_value_policy' was specified.\n";
-        return true;
-    }
-    else if (return_type->isPointerType())
-    {
-        std::cerr
-            << "Warning: Skipped method "
-            << decl->getQualifiedNameAsString()
-            << "' because it returns a pointer and no"
-               " 'return_value_policy' was specified.\n";
-        return true;
-    }
-    return false;
+    return NULL;
 }
 
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
-: context_(&(ci->getASTContext()))
-, printing_policy_(ci->getLangOpts())
+: printing_policy_(ci->getLangOpts())
 , config_(std::move(cc))
 {
     // Do nothing.
@@ -330,8 +95,23 @@ bool chimera::Visitor::shouldVisitImplicitCode() const
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
     // Only visit declarations in namespaces we are configured to read.
-    if (!IsEnclosed(decl))
+    if (!config_->IsEnclosed(decl))
         return true;
+
+    // Only visit declarations whose enclosing classes are generatable.
+    auto *enclosing_decl = GetEnclosingClassDecl(decl);
+    if (enclosing_decl)
+    {
+        // If the enclosing class is not yet visited, visit it.
+        // (VisitDecl checks for re-visits, so we don't need to do it here.)
+        VisitDecl(enclosing_decl);
+
+        // If after visiting, the class was still not created, then do not
+        // generate this enclosed definition.
+        if (traversed_class_decls_.find(enclosing_decl->getCanonicalDecl())
+                == traversed_class_decls_.end())
+            return true;
+    }
 
     if (isa<CXXRecordDecl>(decl))
     {
@@ -356,9 +136,27 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
             GenerateEnum(cast<EnumDecl>(decl));
     }
     else if (isa<VarDecl>(decl))
-        GenerateGlobalVar(cast<VarDecl>(decl));
+    {
+        // Variables inside a CXXRecordDecl are handled above. This check is
+        // necessary suppress namespace-scope definitions of static member
+        // variables, which are required to enable ODR-use of constexpr static
+        // member variables.
+        //
+        // See: http://stackoverflow.com/a/28446388/111426
+        if (!isa<CXXRecordDecl>(decl->getDeclContext()))
+            GenerateGlobalVar(cast<VarDecl>(decl));
+    }
     else if (isa<FunctionDecl>(decl))
+    {
         GenerateGlobalFunction(cast<FunctionDecl>(decl));
+    }
+    else if (isa<NamespaceDecl>(decl))
+    {
+        // We don't need to generate anything here, but we should
+        // tell the compiled configuration that we reached this
+        // namespace during traversal.
+        config_->AddTraversedNamespace(cast<NamespaceDecl>(decl));
+    }
 
     return true;
 }
@@ -368,11 +166,11 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // Only traverse CXX records that contain the actual class definition.
     if (!decl->hasDefinition())
         return false;
-
     decl = decl->getDefinition();
 
     // Avoid generating duplicates of the same class.
-    if (traversed_class_decls_.count(decl->getCanonicalDecl()))
+    if (traversed_class_decls_.find(decl->getCanonicalDecl())
+            != traversed_class_decls_.end())
         return false;
 
     // Ignore partial template specializations. These still have unbound
@@ -390,13 +188,13 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
     {
       if (decl2->getAccess() == AS_private
-       || decl2->getAccess() == AS_protected)
-        return false;
+            || decl2->getAccess() == AS_protected)
+          return false;
 
       if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
       {
         if (decl3->getAccess() == AS_private
-         || decl3->getAccess() == AS_protected)
+            || decl3->getAccess() == AS_protected)
           return false;
       }
     }
@@ -406,361 +204,39 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (!decl->isCompleteDefinition())
         return false;
 
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
-        return false; // Explicitly suppressed.
-
-    // Use GetBaseClassNames to traverse base classes before this class and, in
-    // the process, generate their bindings (if necessary).
-    const std::vector<std::string> default_base_names = GetBaseClassNames(decl);
-
-    // Open a stream object unique to this CXX record's mangled name.
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
+    // Ignore declarations that have been explicitly suppressed.
+    if (config_->IsSuppressed(decl))
         return false;
 
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, *stream))
-        return true;
-
-    *stream << "::boost::python::class_<"
-            << chimera::util::getFullyQualifiedTypeName(
-                *context_, QualType(decl->getTypeForDecl(), 0));
-
-    const bool is_noncopyable = !IsCopyable(decl);
-    const YAML::Node &noncopyable_node = node["noncopyable"];
-    if (noncopyable_node.as<bool>(is_noncopyable))
-        *stream << ", ::boost::noncopyable";
-
-    if (const YAML::Node &held_type_node = node["held_type"])
-        *stream << ", " << held_type_node.as<std::string>();
-
-    std::vector<std::string> base_names
-        = node["bases"].as<std::vector<std::string> >(default_base_names);
-    if (!base_names.empty())
+    // Ensure traversal of base classes before this class.
+    std::set<const CXXRecordDecl *> base_decls =
+        chimera::util::getBaseClassDecls(decl);
+    for(auto base_decl : base_decls)
     {
-        *stream << ", ::boost::python::bases<"
-                  << join(base_names, ", ") << " >";
+        if (traversed_class_decls_.find(base_decl->getCanonicalDecl())
+              == traversed_class_decls_.end())
+            VisitDecl(const_cast<CXXRecordDecl *>(base_decl));
     }
 
-    *stream << " >(\"" << ConstructBindingName(decl, *context_, *config_)
-            << "\", boost::python::no_init)\n";
-
-    // Methods
-    std::set<std::string> overloaded_method_names;
-
-    for (CXXMethodDecl *const method_decl : decl->methods())
-    {
-        if (method_decl->getAccess() != AS_public)
-            continue; // skip protected and private members
-
-        if (isa<CXXConversionDecl>(method_decl))
-            ; // do nothing
-        else if (isa<CXXDestructorDecl>(method_decl))
-            ; // do nothing
-        else if (isa<CXXConstructorDecl>(method_decl))
-        {
-            GenerateCXXConstructor(
-                *stream, decl, cast<CXXConstructorDecl>(method_decl));
-        }
-        else if (method_decl->isOverloadedOperator())
-            ; // TODO: Wrap overloaded operators.
-        else if (method_decl->isStatic())
-        {
-            // TODO: Missing the dot.
-            if (GenerateFunction(*stream, decl, method_decl))
-                overloaded_method_names.insert(method_decl->getNameAsString());
-        }
-        else
-        {
-            // TODO: Missing the dot.
-            GenerateFunction(*stream, decl, method_decl);
-        }
-    }
-
-    // Static methods MUST be declared after overloads are defined.
-    for (const std::string &method_name : overloaded_method_names)
-        *stream << ".staticmethod(\"" << method_name << "\")\n";
-
-    // Fields
-    for (FieldDecl *const field_decl : decl->fields())
-    {
-        if (field_decl->getAccess() != AS_public)
-            continue; // skip protected and private fields
-
-        GenerateField(*stream, decl, field_decl);
-    }
-
-    for (Decl *const child_decl : decl->decls())
-    {
-        if (isa<VarDecl>(child_decl))
-            GenerateStaticField(*stream, decl, cast<VarDecl>(child_decl));
-    }
-
-    *stream << ";\n";
-
-    return true;
-}
-
-bool chimera::Visitor::GenerateCXXConstructor(
-    chimera::Stream &stream,
-    CXXRecordDecl *class_decl,
-    CXXConstructorDecl *decl)
-{
-    decl = decl->getCanonicalDecl();
-
-    if (decl->isDeleted())
-        return false;
-    else if (decl->isCopyOrMoveConstructor())
-        return false;
-    else if (class_decl->isAbstract())
-        return false;
-
-    std::vector<std::string> argument_types;
-
-    for (ParmVarDecl *param_decl : decl->params())
-    {
-        if (param_decl->getType().getTypePtr()->isRValueReferenceType())
-        {
-            std::cerr
-                << "Warning: Skipped constructor of "
-                << class_decl->getNameAsString()
-                << " because parameter '" << param_decl->getNameAsString()
-                << "' is an rvalue reference.\n";
-            return false;
-        }
-
-        argument_types.push_back(
-           chimera::util::getFullyQualifiedTypeName(
-              *context_, param_decl->getType()));
-    }
-
-    stream << ".def(::boost::python::init<"
-           << join(argument_types, ", ")
-           << ">(";
-
-    GenerateFunctionArguments(*context_, *config_, decl, false, stream);
-
-    stream << "))\n";
-
-    return true;
-}
-
-bool chimera::Visitor::GenerateFunction(
-    chimera::Stream &stream,
-    CXXRecordDecl *class_decl, FunctionDecl *decl)
-{
-    decl = decl->getCanonicalDecl();
-
-    if (decl->isDeleted())
-        return false;
-
-    // Skip function template declarations.
-    if (decl->getDescribedFunctionTemplate())
-        return false;
-
-    // Skip functions that have incomplete argument types. Boost.Python
-    // requires RTTI information about all arguments, including references and
-    // pointers.
-    for (const ParmVarDecl *param : decl->params())
-    {
-        if (ContainsIncompleteType(param->getOriginalType()))
-        {
-            std::cerr
-                << "Warning: Skipped function "
-                << decl->getQualifiedNameAsString()
-                << " because argument '"
-                << param->getNameAsString()
-                << "' has an incomplete type.\n";
-            return false;
-        }
-    }
-
-    // Get configuration, and use any overrides if they exist.
-    if (config_->DumpOverride(decl, stream))
-        return true;
-
-    const YAML::Node &node = config_->GetDeclaration(decl);
-    if (node.IsNull())
-        return false; // Explicitly suppressed.
-
-    // Extract the pointer type of this function declaration.
-    QualType pointer_type;
-    if (class_decl && !cast<CXXMethodDecl>(decl)->isStatic())
-    {
-        pointer_type = context_->getMemberPointerType(
-            decl->getType(), class_decl->getTypeForDecl());
-    }
-    else
-    {
-        pointer_type = context_->getPointerType(decl->getType());
-    }
-    pointer_type = chimera::util::getFullyQualifiedType(*context_,
-                                                        pointer_type);
-
-    // Extract the return type of this function declaration.
-    const QualType return_qual_type = 
-        chimera::util::getFullyQualifiedType(*context_,
-                                             decl->getReturnType());
-    const Type *return_type = return_qual_type.getTypePtr();
-
-    // First, check if a return_value_policy was specified for this function.
-    std::string return_value_policy
-        = node["return_value_policy"].as<std::string>("");
-
-    // Next, check if a return_value_policy is defined on the return type.
-    if (return_value_policy.empty())
-    {
-        const YAML::Node &type_node = config_->GetType(return_qual_type);
-        return_value_policy
-            = type_node["return_value_policy"].as<std::string>("");
-    }
-
-    // Finally, try the default return_value_policy.
-    if (return_value_policy.empty()
-     && needsReturnValuePolicy(decl, return_type))
-        return false;
-
-    // Suppress any functions that take arguments by rvalue reference.
-    for (const ParmVarDecl *const parm_decl : decl->parameters()) {
-        if (parm_decl->getType().getTypePtr()->isRValueReferenceType()) {
-            std::cerr
-                << "Warning: Skipped method "
-                << decl->getQualifiedNameAsString()
-                << " because parameter '" << parm_decl->getNameAsString()
-                << "' is an rvalue reference.\n";
-            return false;
-        }
-    }
-
-    // If we are inside a class declaration, this is being called within a
-    // builder pattern and will start with '.' since it is a member function.
-    if (class_decl)
-        stream << ".";
-    else
-        stream << "boost::python::";
-
-    // Create the actual function declaration here using its name and its
-    // full pointer reference.
-    stream << "def(\"" << decl->getNameAsString() << "\""
-           << ", static_cast<"
-           << chimera::util::getFullyQualifiedTypeName(*context_, pointer_type)
-           << ">(&";
-
-    if (class_decl) {
-        stream << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
-               << "::" << decl->getNameAsString();
-    } else {
-        stream << decl->getQualifiedNameAsString();
-    }
-
-    stream << ")";
-
-    // If a return value policy was specified, insert it after the function.
-    if (!return_value_policy.empty())
-    {
-        stream << ", ::boost::python::return_value_policy<"
-               << return_value_policy << " >()";
-    }
-
-    // Generate named arguments.
-    GenerateFunctionArguments(*context_, *config_, decl, true, stream);
-
-    stream << ")\n";
-
-    if (!class_decl)
-        stream << ";";
-
-    return true;
-}
-
-bool chimera::Visitor::GenerateField(
-    chimera::Stream &stream,
-    clang::CXXRecordDecl *class_decl,
-    clang::FieldDecl *decl)
-{
-    // TODO: Add support for YAML overrides.
-
-    // TODO: Add support for return_value_policy if set in the YAML override,
-    // even if this is false. If a return_value_policy is specified we'll have
-    // to use add_property() with make_getter and/or make_setter instead of
-    // def_readonly or def_readwrite.
-    if (!IsQualTypeCopyable(*context_, decl->getType()))
-        return false;
-
-    if (IsQualTypeAssignable(*context_, decl->getType()))
-        stream << ".def_readwrite";
-    else
-        stream << ".def_readonly";
-
-    stream << "(\"" << decl->getNameAsString() << "\","
-           << " &" << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
-           << "::" << decl->getNameAsString()
-           << ")\n";
-    return true;
-}
-
-bool chimera::Visitor::GenerateStaticField(
-    chimera::Stream &stream,
-    clang::CXXRecordDecl *class_decl,
-    clang::VarDecl *decl)
-{
-    // TODO: How should we handle AS_none here.
-    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
-        return false;
-    if (!decl->isStaticDataMember())
-        return false;
-
-    // TODO: Add support for YAML overrides, including return_value_policy.
-
-    // Finally, try the default return_value_policy.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
-        return false;
-
-    stream << ".add_static_property(\"" << decl->getNameAsString()
-           << "\", ::boost::python::make_getter("
-           << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
-           << "::" << decl->getNameAsString()
-           << ")";
-
-    if (IsQualTypeAssignable(*context_, decl->getType()))
-    {
-        stream << ", ::boost::python::make_setter("
-          << getFullyQualifiedDeclTypeAsString(*context_, class_decl)
-          << "::" << decl->getNameAsString()
-          << ")";
-    }
-
-    stream << ")\n";
-
-    return true;
+    // Serialize using a mstch template.
+    auto context = std::make_shared<chimera::mstch::CXXRecord>(
+        *config_, decl, &traversed_class_decls_);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 {
     // Skip protected and private enums.
-    if ((decl->getAccess() == AS_private) || (decl->getAccess() == AS_protected))
+    if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
+    // Ignore declarations that have been explicitly suppressed.
+    if (config_->IsSuppressed(decl))
         return false;
 
-    *stream << "::boost::python::enum_<"
-            << getFullyQualifiedDeclTypeAsString(*context_, decl)
-            << ">(\"" << decl->getNameAsString() << "\")\n";
-
-    for (EnumConstantDecl *constant_decl : decl->enumerators())
-    {
-        *stream << ".value(\"" << constant_decl->getNameAsString() << "\", "
-                << getFullyQualifiedDeclTypeAsString(*context_, decl)
-                << "::" << constant_decl->getNameAsString()
-                << ")\n";
-    }
-
-    *stream << ";\n";
-
-    return true;
+    // Serialize using a mstch template.
+    auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
@@ -770,92 +246,49 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     else if (!decl->isThisDeclarationADefinition())
         return false;
 
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
+    // Ignore declarations that have been explicitly suppressed.
+    if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global variables.
-    if (needsReturnValuePolicy(decl, decl->getType().getTypePtr()))
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
         return false;
 
-    *stream << "::boost::python::scope().attr(\"" << decl->getNameAsString()
-            << "\") = " << decl->getQualifiedNameAsString() << ";\n";
-    return true;
+    // Serialize using a mstch template.
+	auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
+    return config_->Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 {
-    if (isa<clang::CXXMethodDecl>(decl))
+    // Only generate functions when we reach their actual definition.
+    if (!decl->isThisDeclarationADefinition())
         return false;
+    // Ignore functions that are actually methods of CXXRecords.
+    else if (isa<clang::CXXMethodDecl>(decl))
+        return false;
+    // Ignore overloaded operators (we can't currently wrap them).
     else if (decl->isOverloadedOperator())
         return false; // TODO: Wrap overloaded operators.
-
-    auto stream = config_->GetOutputFile(decl);
-    if (!stream)
+    // Ignore unspecialized template functions.
+    else if (decl->getDescribedFunctionTemplate())
         return false;
 
-    return GenerateFunction(*stream, nullptr, decl);
-}
+    // Skip functions that have incomplete argument types. Boost.Python
+    // requires RTTI information about all arguments, including references and
+    // pointers.
+    if (chimera::util::containsIncompleteType(decl))
+        return false;
 
-std::vector<std::string> chimera::Visitor::GetBaseClassNames(
-    CXXRecordDecl *decl)
-{
-    std::vector<std::string> base_names;
+    // Ignore declarations that have been explicitly suppressed.
+    if (config_->IsSuppressed(decl))
+        return false;
 
-    for (CXXBaseSpecifier &base_decl : decl->bases())
-    {
-        if (base_decl.getAccessSpecifier() != AS_public)
-            continue;
+    // TODO: Support return_value_policy for global functions.
+    if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
+        return false;
 
-        // TODO: Filter out transitive base classes.
-
-        CXXRecordDecl *const base_record_decl
-            = base_decl.getType()->getAsCXXRecordDecl();
-        if (!base_record_decl)
-        {
-            std::cerr << "Warning: Omitted base class of class "
-                      << chimera::util::getFullyQualifiedTypeName(*context_,
-                            QualType(decl->getTypeForDecl(), 0))
-                      << "' because it is not a CXXRecordDecl.\n";
-            continue;
-        }
-
-        const QualType base_record_type(base_record_decl->getTypeForDecl(), 0);
-
-        // Generate the base class, if necessary.
-        VisitDecl(base_record_decl);
-
-        const bool base_exists
-            = traversed_class_decls_.count(base_record_decl->getCanonicalDecl());
-        const std::string base_name
-            = chimera::util::getFullyQualifiedTypeName(*context_, base_record_type);
-
-        if (base_exists)
-            base_names.push_back(base_name);
-        else
-        {
-            std::cerr << "Warning: Omitted base class '" << base_name
-                      << "' of class '"
-                      << chimera::util::getFullyQualifiedTypeName(*context_,
-                            QualType(decl->getTypeForDecl(), 0))
-                      << "' because it could not be wrapped.\n";
-        }
-    }
-
-    return base_names;
-}
-
-
-bool chimera::Visitor::IsEnclosed(Decl *decl) const
-{
-    // Filter over the namespaces and only traverse ones that are enclosed
-    // by one of the configuration namespaces.
-    for (const auto &it : config_->GetNamespaces())
-    {
-        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
-        {
-            return true;
-        }
-    }
-    return false;
+    // Serialize using a mstch template.
+    auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
+    return config_->Render(context);
 }

@@ -1,15 +1,28 @@
 #ifndef __CHIMERA_CONFIGURATION_H__
 #define __CHIMERA_CONFIGURATION_H__
 
-#include "chimera/stream.h"
-
 #include <clang/AST/DeclBase.h>
 #include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <map>
 #include <memory>
+#include <mstch/mstch.hpp>
 #include <set>
 #include <yaml-cpp/yaml.h>
+
+namespace chimera
+{
+namespace mstch
+{
+
+class CXXRecord;
+class Enum;
+class Function;
+class Variable;
+
+} // mstch
+} // chimera
+
 
 namespace chimera
 {
@@ -45,6 +58,12 @@ public:
     void SetOutputModuleName(const std::string &moduleName);
 
     /**
+     * Append an enclosing namespace that should be generated as part
+     * of the top-level binding.
+     */
+    void AddInputNamespaceName(const std::string &namespaceName);
+
+    /**
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration>
@@ -63,7 +82,7 @@ public:
     /**
      * Get the desired output path for bindings.
      */
-    const std::string &GetOutputPath() const;
+    const std::string& GetOutputPath() const;
 
     /**
      * Get the desired output python module name for top-level binding.
@@ -78,16 +97,30 @@ protected:
     std::string configFilename_;
     std::string outputPath_;
     std::string outputModuleName_;
+    std::vector<std::string> inputNamespaceNames_;
+
+    friend class CompiledConfiguration;
 };
 
 class CompiledConfiguration
 {
 public:
+    virtual ~CompiledConfiguration();
     CompiledConfiguration(const CompiledConfiguration&) = delete;
     CompiledConfiguration &operator=(const CompiledConfiguration&) = delete;
 
     /**
+     * Adds a namespace to an ordered set of traversed namespaces.
+     * This set can later be rendered in a template.
+     */
+    void AddTraversedNamespace(const clang::NamespaceDecl* decl);
+
+    /**
      * Return list of namespace declarations that should be included.
+     *
+     * Note: these declarations will be lexically ordered.  Normally this
+     * is desirable since parent namespaces will naturally be lexically
+     * ordered before their children.
      */
     const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
 
@@ -104,44 +137,67 @@ public:
     const YAML::Node& GetType(const clang::QualType type) const;
 
     /**
-     * Get the string constant overriding with a specific constexpr value,
-     * or return the original value if no override is found.
+     * Gets the compiler instance used by this configuration.
      */
-    std::string GetConstant(const std::string &value) const;
+    clang::CompilerInstance *GetCompilerInstance() const;
 
     /**
-     * Get a file pointer used for the output a given decl.
-     *
-     * This output path is an individual `.cpp` file created according to the
-     * mangled name of the decl.
-     *
-     * The file pointer should be closed after the output has been written.
+     * Gets the AST context used by this configuration.
      */
-    std::unique_ptr<Stream>GetOutputFile(const clang::Decl *decl) const;
+    clang::ASTContext &GetContext() const;
 
     /**
-     * Dump any hard-coded overrides in place of this declaration, if they
-     * are defined in the `content` (for strings) or `source` (for files)
-     * fields of the YAML configuration for this declaration.
-     *
-     * Returns `true` if an override was found and dumped, `false` otherwise.
+     * Return if a declaration is enclosed by one of the configured namespaces.
      */
-    bool DumpOverride(const clang::Decl *decl, chimera::Stream &stream) const;
+    bool IsEnclosed(const clang::Decl *decl) const;
+
+    /**
+     * Return if a declaration should not be generated.
+     *
+     * This can happen because it is marked as suppressed in the configuration,
+     * or because it depends on a type that is marked as suppressed.
+     */
+    bool IsSuppressed(const clang::Decl *decl) const;
+
+    /**
+     * Return if a type should not be generated.
+     *
+     * This can happen because it is marked as suppressed in the configuration.
+     */
+    bool IsSuppressed(const clang::QualType type) const;
+
+    /**
+     * Checks if a particular node is a string or contains a "source" entry to load.
+     * This is useful for resolving entries that might be pulled in from files.
+     */
+    std::string Lookup(const YAML::Node &node) const;
+
+    /**
+     * Render a particular mstch template based on some declaration.
+     * This context must contain a "mangled_name" from which to create the filename.
+     */
+    bool Render(const std::shared_ptr<chimera::mstch::CXXRecord> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Enum> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Function> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
 
 private:
     CompiledConfiguration(const Configuration &parent,
                           clang::CompilerInstance *ci);
 
+    bool Render(std::string view, std::string key,
+                const std::shared_ptr<::mstch::object> &template_context);
+
 protected:
     static const YAML::Node emptyNode_;
     const Configuration &parent_;
     clang::CompilerInstance *ci_;
-    std::vector<std::string> includes_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
-    std::unique_ptr<clang::MangleContext> mangler_;
-    std::unique_ptr<chimera::Stream> binding_;
+
+    std::vector<std::string> binding_names_;
+    std::set<const clang::NamespaceDecl*> binding_namespaces_;
 
     friend class Configuration;
 };

@@ -58,21 +58,34 @@ llvm_map_components_to_libnames(llvm_libs
   option
 )
 
+# Build the external tools: Mustache and Cling.
+add_subdirectory(external/mstch)
+include_directories(${mstch_INCLUDE_DIR})
+
+add_subdirectory(external/cling)
+include_directories(${cling_utils_INCLUDE_DIR})
+
+# Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
+  src/boost_python_mstch.cpp
   src/chimera.cpp
   src/configuration.cpp
   src/consumer.cpp
   src/frontend_action.cpp
-  src/stream.cpp
   src/visitor.cpp
   src/util.cpp
-  src/external/cling_utils_AST.cpp
+  src/mstch.cpp
 )
 
 target_link_libraries("${PROJECT_NAME}"
   ${YAMLCPP_LIBRARIES}
   ${CLANG_LIBS}
   ${llvm_libs}
+)
+
+target_link_libraries("${PROJECT_NAME}"
+  mstch
+  cling_utils
 )
 
 #############

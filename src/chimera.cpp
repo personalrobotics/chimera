@@ -9,7 +9,6 @@
 #include <clang/Tooling/ArgumentsAdjusters.h>
 #include <llvm/Config/config.h>
 #include <llvm/Support/CommandLine.h>
-
 #include <memory>
 #include <string>
 
@@ -36,6 +35,12 @@ static cl::opt<std::string> OutputModuleName(
     cl::desc("Specify output top-level module name"),
     cl::value_desc("modulename"));
 
+// Option for specifying top-level binding namespaces.
+static cl::list<std::string> NamespaceNames(
+    "n", cl::cat(ChimeraCategory),
+    cl::desc("Specify one or more top-level namespaces that will be bound"),
+    cl::value_desc("namespace"));
+
 // Option for specifying YAML configuration filename.
 static cl::opt<std::string> ConfigFilename(
     "c", cl::cat(ChimeraCategory),
@@ -46,6 +51,11 @@ static cl::opt<std::string> ConfigFilename(
 static cl::opt<bool> UseCMode(
     "use-c", cl::cat(ChimeraCategory),
     cl::desc("Parse input files as C instead of C++"));
+
+// Option for switching from C++ to C source.
+static cl::opt<bool> SuppressDocs(
+    "no-docs", cl::cat(ChimeraCategory),
+    cl::desc("Suppress the extraction of documentation from C++ comments"));
 
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
@@ -72,9 +82,19 @@ int main(int argc, const char **argv)
     if (!OutputModuleName.empty())
         chimera::Configuration::GetInstance().SetOutputModuleName(OutputModuleName);
 
+    // Add top-level namespaces to the configuration.
+    if (NamespaceNames.size())
+        for (const std::string &name : NamespaceNames)
+            chimera::Configuration::GetInstance().AddInputNamespaceName(name);
+
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
+
+    // Add or suppress clang documentation flag as specified.
+    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
+        SuppressDocs ? "-Wno-documentation" : "-Wdocumentation",
+        ArgumentInsertPosition::BEGIN));
 
     // Add the appropriate C/C++ language flag.
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(

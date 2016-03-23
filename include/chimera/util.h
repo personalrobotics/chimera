@@ -70,17 +70,116 @@ const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
  *
  * Internally uses cling::utils::getFullyQualifiedType().
  */
-clang::QualType getFullyQualifiedType(const clang::ASTContext &context,
+clang::QualType getFullyQualifiedType(clang::ASTContext &context,
                                       clang::QualType qt);
 
 /**
- * Get the fully qualified name for a type. This includes full
- * qualification of all template parameters etc.
+ * Get the fully qualified name for a type.
+ * This includes full qualification of all template parameters, etc.
  *
  * Internally uses cling::utils::getFullyQualifiedName().
  */
-std::string getFullyQualifiedTypeName(const clang::ASTContext &context,
+std::string getFullyQualifiedTypeName(clang::ASTContext &context,
                                       clang::QualType qt);
+
+/**
+ * Get the fully qualified name for the type used in a type declaration.
+ * This includes full qualification of all template parameters, etc.
+ */
+std::string getFullyQualifiedDeclTypeAsString(const clang::TypeDecl *decl);
+
+/**
+ * Get the base CXX record declarations for a CXXRecordDecl.
+ *
+ * This filters over all the base record entries for the given declaration
+ * and returns the public entries. A set of 'available' decls can be
+ * provided, in which case only base decls that exist in this set will be
+ * returned.
+ */
+std::set<const clang::CXXRecordDecl *> getBaseClassDecls(
+    const clang::CXXRecordDecl *decl);
+std::set<const clang::CXXRecordDecl *> getBaseClassDecls(
+    const clang::CXXRecordDecl *decl,
+    std::set<const clang::CXXRecordDecl *> available_decls);
+
+/**
+ * Generate a safe name to use for a CXXRecordDecl.
+ *
+ * This uses a combination of unqualified names, namespace mangling, and
+ * config overrides to resolve the string name that a binding should use for
+ * a given C++ class declaration.
+ */
+std::string constructBindingName(const clang::CXXRecordDecl *decl);
+
+/**
+ * Generate the C++ mangled name for a class.
+ *
+ * This name is generated from the Clang compiler name mangler.
+ */
+std::string constructMangledName(const clang::NamedDecl *decl);
+
+/**
+ * Returns whether a type contains incomplete argument types.
+ *
+ * This is useful in cases where we need RTTI information about all arguments,
+ * including references and pointers.
+ */
+bool containsIncompleteType(clang::QualType qual_type);
+
+/**
+ * Returns whether any function parameters contain incomplete argument types.
+ *
+ * This is useful in cases where we need RTTI information about all arguments,
+ * including references and pointers.
+ */
+bool containsIncompleteType(const clang::FunctionDecl *decl);
+
+/**
+ * Returns whether any function parameters contain RValue references.
+ */
+bool containsRValueReference(const clang::FunctionDecl *decl);
+
+/**
+ * Determine if a CXXRecordDecl is referring to a type that could be assigned.
+ */
+bool isAssignable(const clang::CXXRecordDecl *decl);
+
+/**
+ * Determine if a QualType is referring to a type that could be assigned.
+ */
+bool isAssignable(clang::ASTContext &context, clang::QualType qual_type);
+
+/**
+ * Determine if a CXXRecordDecl is referring to a class that is copyable.
+ */
+bool isCopyable(const clang::CXXRecordDecl *decl);
+
+/**
+ * Determine if a QualType is referring to a type that is copyable.
+ */
+bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
+
+/**
+ * Determine if a declaration is within the context of a template class.
+ */
+bool isInsideTemplateClass(const clang::DeclContext *decl_context);
+
+/**
+ * Return whether a return value policy needs to be specfied for a declaration.
+ *
+ * In certain cases, it is possible to deduce the return value policy that
+ * should be used for a given declaration and return type.  This function
+ * checks and returns false if the return value policy can be deduced.
+ */
+bool needsReturnValuePolicy(const clang::NamedDecl *decl,
+                            clang::QualType return_type);
+
+/**
+ * Returns the minimum and maximum number of arguments that a function can take.
+ *
+ * This is possible when the function takes some number of default arguments.
+ */
+std::pair<unsigned, unsigned> getFunctionArgumentRange(const clang::FunctionDecl *decl);
 
 } // namespace util
 } // namespace chimera
