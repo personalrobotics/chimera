@@ -336,8 +336,7 @@ bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
     }
     else
     {
-        return sema.RequireCompleteType({}, qual_type,
-                                        diag::err_incomplete_type);
+        return sema.RequireCompleteType({}, qual_type, 0);
     }
 }
 
