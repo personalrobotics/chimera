@@ -348,11 +348,18 @@ bool chimera::util::containsIncompleteType(Sema &sema, const FunctionDecl *decl)
         if (containsIncompleteType(sema, param_decl->getOriginalType()))
         {
             std::cerr
-                << "Warning: Skipped function "
+                << "Warning: Skipped function '"
                 << decl->getQualifiedNameAsString()
-                << " because argument '"
-                << param_decl->getNameAsString()
-                << "' has an incomplete type '"
+                << "' because";
+
+            if (param_decl->getNameAsString().empty())
+                std::cerr << " the parameter at index " << iparam;
+            else
+                std::cerr
+                    << " parameter '" << param_decl->getNameAsString() << "'";
+
+            std::cerr
+                << " has an incomplete type '"
                 << chimera::util::getFullyQualifiedTypeName(
                     decl->getASTContext(), param_decl->getType())
                 <<  "'.\n";
@@ -370,7 +377,7 @@ bool chimera::util::containsRValueReference(const FunctionDecl *decl)
         if (param_decl->getType().getTypePtr()->isRValueReferenceType())
         {
             std::cerr
-                << "Warning: Skipped method '"
+                << "Warning: Skipped function '"
                 << decl->getQualifiedNameAsString()
                 << "' because";
 
@@ -385,6 +392,40 @@ bool chimera::util::containsRValueReference(const FunctionDecl *decl)
                 << chimera::util::getFullyQualifiedTypeName(
                     decl->getASTContext(), param_decl->getType())
                 << "'.\n";
+
+            return true;
+        }
+    }
+    return false;
+}
+
+bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
+{
+    for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
+    {
+        const ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
+        const clang::Type *const param_type = param_decl->getType().getTypePtr();
+
+        if (!param_type->isReferenceType() && !param_type->isPointerType()
+            && !chimera::util::isCopyable(decl->getASTContext(),
+                                          param_decl->getType()))
+        {
+            std::cerr
+                << "Warning: Skipped function '"
+                << decl->getQualifiedNameAsString()
+                << "' because";
+
+            if (param_decl->getNameAsString().empty())
+                std::cerr << " the parameter at index " << iparam;
+            else
+                std::cerr
+                    << " parameter '" << param_decl->getNameAsString() << "'";
+
+            std::cerr
+                << " has a non-copyable type '"
+                << chimera::util::getFullyQualifiedTypeName(
+                    decl->getASTContext(), param_decl->getType())
+                <<  "'.\n";
 
             return true;
         }

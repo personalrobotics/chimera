@@ -317,6 +317,12 @@ CXXRecord::CXXRecord(
                 config_.GetCompilerInstance()->getSema(), method_decl))
             continue;
 
+        // Skip functions that have non-copyable argument types.
+        // Using these functions requires std::move()-ing their arguments, which
+        // we generally cannot do.
+        if (chimera::util::containsNonCopyableType(method_decl))
+            continue;
+
         // Generate the method wrapper (but don't add it just yet).
         auto method = std::make_shared<Method>(config_, method_decl, decl_);
 
@@ -368,8 +374,8 @@ CXXRecord::CXXRecord(
         {
             std::cerr
                 << "Warning: Method '" << name << "' has ambiguous static and"
-                << "non-static declarations. This may cause errors because"
-                << "this binding is using a list of named static methods."
+                << " non-static declarations. This may cause errors because"
+                << " this binding is using a list of named static methods."
                 << " Consider renaming one of the conflicting functions in the"
                 << " configuration YAML.\n";
 
