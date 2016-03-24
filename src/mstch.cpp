@@ -317,6 +317,12 @@ CXXRecord::CXXRecord(
                 config_.GetCompilerInstance()->getSema(), method_decl))
             continue;
 
+        // Skip functions that have non-copyable argument types.
+        // Using these functions requires std::move()-ing their arguments, which
+        // we generally cannot do.
+        if (chimera::util::containsNonCopyableType(method_decl))
+            return false;
+
         // Generate the method wrapper (but don't add it just yet).
         auto method = std::make_shared<Method>(config_, method_decl, decl_);
 

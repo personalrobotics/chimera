@@ -140,6 +140,11 @@ bool containsIncompleteType(clang::Sema &sema, const clang::FunctionDecl *decl);
 bool containsRValueReference(const clang::FunctionDecl *decl);
 
 /**
+ * Returns whether any function parameters contain a non-copyable type.
+ */
+bool containsNonCopyableType(const clang::FunctionDecl *decl);
+
+/**
  * Determine if a CXXRecordDecl is referring to a type that could be assigned.
  */
 bool isAssignable(const clang::CXXRecordDecl *decl);
