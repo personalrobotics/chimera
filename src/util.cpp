@@ -404,8 +404,11 @@ bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
         const ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
-        if (!chimera::util::isCopyable(decl->getASTContext(),
-                                       param_decl->getType()))
+        const clang::Type *const param_type = param_decl->getType().getTypePtr();
+
+        if (!param_type->isReferenceType() && !param_type->isPointerType()
+            && !chimera::util::isCopyable(decl->getASTContext(),
+                                          param_decl->getType()))
         {
             std::cerr
                 << "Warning: Skipped function '"
