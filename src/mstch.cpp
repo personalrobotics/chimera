@@ -321,7 +321,7 @@ CXXRecord::CXXRecord(
         // Using these functions requires std::move()-ing their arguments, which
         // we generally cannot do.
         if (chimera::util::containsNonCopyableType(method_decl))
-            return false;
+            continue;
 
         // Generate the method wrapper (but don't add it just yet).
         auto method = std::make_shared<Method>(config_, method_decl, decl_);
