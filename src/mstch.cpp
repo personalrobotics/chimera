@@ -313,7 +313,8 @@ CXXRecord::CXXRecord(
         // Skip functions that have incomplete argument types. Boost.Python
         // requires RTTI information about all arguments, including references
         // and pointers.
-        if (chimera::util::containsIncompleteType(method_decl))
+        if (chimera::util::containsIncompleteType(
+                config_.GetCompilerInstance()->getSema(), method_decl))
             continue;
 
         // Generate the method wrapper (but don't add it just yet).

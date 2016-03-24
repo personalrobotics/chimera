@@ -6,6 +6,7 @@
 #include <clang/AST/Mangle.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Sema/Sema.h>
+#include <clang/Sema/SemaDiagnostic.h>
 #include <iostream>
 #include <sstream>
 
@@ -317,7 +318,7 @@ chimera::util::getBaseClassDecls(
     return base_decls;
 }
 
-bool chimera::util::containsIncompleteType(QualType qual_type)
+bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
 {
     const Type *type = qual_type.getTypePtr();
 
@@ -326,25 +327,25 @@ bool chimera::util::containsIncompleteType(QualType qual_type)
     if (isa<PointerType>(type))
     {
         const PointerType *pointer_type = cast<PointerType>(type);
-        return containsIncompleteType(pointer_type->getPointeeType());
+        return containsIncompleteType(sema, pointer_type->getPointeeType());
     }
     else if (isa<ReferenceType>(type))
     {
         const ReferenceType *reference_type = cast<ReferenceType>(type);
-        return containsIncompleteType(reference_type->getPointeeType());
+        return containsIncompleteType(sema, reference_type->getPointeeType());
     }
     else
     {
-        return type->isIncompleteType();
+        return sema.RequireCompleteType({}, qual_type, 0);
     }
 }
 
-bool chimera::util::containsIncompleteType(const FunctionDecl *decl)
+bool chimera::util::containsIncompleteType(Sema &sema, const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
         const ParmVarDecl *const param_decl = decl->getParamDecl(iparam);
-        if (containsIncompleteType(param_decl->getOriginalType()))
+        if (containsIncompleteType(sema, param_decl->getOriginalType()))
         {
             std::cerr
                 << "Warning: Skipped function "
