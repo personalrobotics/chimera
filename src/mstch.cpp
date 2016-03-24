@@ -374,8 +374,8 @@ CXXRecord::CXXRecord(
         {
             std::cerr
                 << "Warning: Method '" << name << "' has ambiguous static and"
-                << "non-static declarations. This may cause errors because"
-                << "this binding is using a list of named static methods."
+                << " non-static declarations. This may cause errors because"
+                << " this binding is using a list of named static methods."
                 << " Consider renaming one of the conflicting functions in the"
                 << " configuration YAML.\n";
 
