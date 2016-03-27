@@ -269,6 +269,60 @@ bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
         return false;
 }
 
+bool chimera::util::getTemplateParameterStrings(ASTContext &context,
+  const ArrayRef<TemplateArgument> &params, std::vector<std::string> *output)
+{
+    for (const TemplateArgument &param : params)
+    {
+        switch (param.getKind())
+        {
+        case TemplateArgument::Type:
+            if (output)
+                output->push_back(util::getFullyQualifiedTypeName(
+                    context, param.getAsType()));
+            break;
+
+        case TemplateArgument::NullPtr:
+            if (output)
+                output->push_back("nullptr");
+            break;
+
+        case TemplateArgument::Integral:
+            if (output)
+                output->push_back(param.getAsIntegral().toString(10));
+            break;
+
+        case TemplateArgument::Pack:
+#if 0
+            if (!getTemplateParams(context, param.getPackAsArray(), output))
+              return false;
+            break;
+#else
+            std::cerr << "Template argument is a parameter pack; this is not"
+                      << " supported.\n";
+            return false;
+#endif
+
+        case TemplateArgument::Template:
+        case TemplateArgument::TemplateExpansion:
+            std::cerr << "Template argument is a template-template argument;"
+                      << " this is not supported.\n";
+            return false;
+
+        case TemplateArgument::Declaration:
+        case TemplateArgument::Expression:
+        case TemplateArgument::Null:
+            std::cerr << "Template argument is not fully resolved.\n";
+            return false;
+
+        default:
+            std::cerr << "Unknown kind of template argument.\n";
+            return false;
+        }
+    }
+    return true;
+}
+
 std::set<const CXXRecordDecl *>
 chimera::util::getBaseClassDecls(const CXXRecordDecl *decl)
 {

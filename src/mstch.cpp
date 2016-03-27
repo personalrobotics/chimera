@@ -781,79 +781,28 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     return decl_->isFunctionTemplateSpecialization();
 }
 
-bool getTemplateParams(
-  ASTContext &context, const ArrayRef<TemplateArgument> &params,
-  std::vector<std::string> *output)
-{
-  for (const TemplateArgument &param : params)
-  {
-    switch (param.getKind())
-    {
-    case TemplateArgument::Type:
-      output->push_back(util::getFullyQualifiedTypeName(
-        context, param.getAsType()));
-      break;
-
-    case TemplateArgument::NullPtr:
-      output->push_back("nullptr");
-      break;
-
-    case TemplateArgument::Integral:
-      output->push_back(param.getAsIntegral().toString(10));
-      break;
-
-    case TemplateArgument::Pack:
-#if 0
-      if (!getTemplateParams(context, param.getPackAsArray(), output))
-        return false;
-      break;
-#else
-      std::cerr << "Template argument is a parameter pack. This is not yet"
-                << " supported.\n";
-      return false;
-#endif
-
-    case TemplateArgument::Template:
-    case TemplateArgument::TemplateExpansion:
-      std::cerr << "Template argument is a template-template argument. This "
-                << " is not yet supported.\n";
-      return false;
-
-    case TemplateArgument::Declaration:
-    case TemplateArgument::Expression:
-    case TemplateArgument::Null:
-      std::cerr << "Template argument is not fully resolved.\n";
-      return false;
-
-    default:
-      std::cerr << "Template argument has unknown type.\n";
-      return false;
-    }
-  }
-  return true;
-}
-
 ::mstch::node Function::templateParams()
 {
-  ::mstch::array params_mstch;
+    ::mstch::array params_mstch;
 
-  if (const TemplateArgumentList *const params
+    if (const TemplateArgumentList *const params
         = decl_->getTemplateSpecializationArgs())
-  {
-    std::vector<std::string> params_str;
-    if (!getTemplateParams(config_.GetContext(), params->asArray(), &params_str))
-      return ::mstch::array();
-
-    for (size_t iparam = 0; iparam < params_str.size(); ++iparam)
     {
-      params_mstch.push_back(::mstch::map {
-        {"type", params_str[iparam]},
-        {"last", iparam == params_str.size() - 1},
-      });
-    }
-  }
+      std::vector<std::string> params_str;
+      const bool success = util::getTemplateParameterStrings(
+          config_.GetContext(), params->asArray(), &params_str);
+      assert(success); // We already filtered these out in the visitor.
 
-  return params_mstch;
+      for (size_t iparam = 0; iparam < params_str.size(); ++iparam)
+      {
+          params_mstch.push_back(::mstch::map {
+              {"type", params_str[iparam]},
+              {"last", iparam == params_str.size() - 1},
+          });
+      }
+    }
+
+    return params_mstch;
 }
 
 Method::Method(const ::chimera::CompiledConfiguration &config,

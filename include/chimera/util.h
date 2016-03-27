@@ -169,6 +169,11 @@ bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
  */
 bool isInsideTemplateClass(const clang::DeclContext *decl_context);
 
+
+bool getTemplateParameterStrings(clang::ASTContext &context,
+  const clang::ArrayRef<clang::TemplateArgument> &params,
+  std::vector<std::string> *output);
+
 /**
  * Return whether a return value policy needs to be specfied for a declaration.
  *

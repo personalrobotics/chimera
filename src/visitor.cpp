@@ -281,10 +281,17 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
             config_->GetCompilerInstance()->getSema(), decl))
         return false;
 
-    // Skip functions that have non-copyable argument types.
+    // Skip functions that have non-copyable argument types passed by value.
     // Using these functions requires std::move()-ing their arguments, which
     // we generally cannot do.
     if (chimera::util::containsNonCopyableType(decl))
+        return false;
+
+    // Skip template functions that we don't support.
+    const TemplateArgumentList *const params
+        = decl->getTemplateSpecializationArgs();
+    if (params && !util::getTemplateParameterStrings(
+          config_->GetContext(), params->asArray(), nullptr))
         return false;
 
     // Ignore declarations that have been explicitly suppressed.
