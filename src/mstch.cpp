@@ -27,10 +27,7 @@ namespace mstch
             for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
             {
                 const YAML::Node &value = *it;
-
-                context.push_back(::mstch::lambda {[value]() -> ::mstch::node {
-                    return wrapYAMLNode(value);
-                }});
+                context.push_back(wrapYAMLNode(value));
             }
             return context;
         }
@@ -41,10 +38,7 @@ namespace mstch
             {
                 const std::string name = it->first.as<std::string>();
                 const YAML::Node &value = it->second;
-
-                context[name] = ::mstch::lambda {[value]() -> ::mstch::node {
-                    return wrapYAMLNode(value);
-                }};
+                context[name] = wrapYAMLNode(value);
             }
             return context;
         }
@@ -150,7 +144,8 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::bases()
 {
-    ::mstch::array base_templates;
+    if (const YAML::Node &node = decl_config_["bases"])
+        return wrapYAMLNode(node);
 
     // Get all bases of this class.
     std::set<const CXXRecordDecl *> base_decls =
@@ -188,6 +183,7 @@ CXXRecord::CXXRecord(
         base_vector.back()->setLast(true);
 
     // Copy each template into the mstch template array.
+    ::mstch::array base_templates;
     for (auto base_template : base_vector)
         base_templates.push_back(base_template);
     return base_templates;
