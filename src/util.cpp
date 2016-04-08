@@ -344,6 +344,35 @@ chimera::util::getTemplateParameterStrings(
     return outputs;
 }
 
+std::string
+chimera::util::getTemplateParameterString(const FunctionDecl *decl)
+{
+    std::stringstream ss;
+
+    // If this is a template, add the template arguments to the end.
+    if (decl->isFunctionTemplateSpecialization())
+    {
+        if (const TemplateArgumentList *const params
+            = decl->getTemplateSpecializationArgs())
+        {
+            ss << "<";
+            const auto param_strs =
+                chimera::util::getTemplateParameterStrings(
+                    decl->getASTContext(), params->asArray());
+
+            for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
+            {
+                ss << param_strs[iparam];
+                if (iparam < param_strs.size() - 1)
+                    ss << ", ";
+            }
+            ss << ">";
+        }
+    }
+
+    return ss.str();
+}
+
 std::set<const CXXRecordDecl *>
 chimera::util::getBaseClassDecls(const CXXRecordDecl *decl)
 {

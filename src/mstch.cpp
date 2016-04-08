@@ -764,39 +764,35 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
-    // Construct the basic qualified name.
-    std::stringstream ss;
     if (!class_decl_)
-    {
-        ss << decl_->getQualifiedNameAsString();
-    }
-    else
-    {
-        ss << chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_);
-        ss << "::" << decl_->getNameAsString();
-    }
+        return decl_->getQualifiedNameAsString();
 
-    // If this is a template, add the template arguments to the end.
-    if (decl_->isFunctionTemplateSpecialization())
-    {
-        if (const TemplateArgumentList *const params
-            = decl_->getTemplateSpecializationArgs())
-        {
-            ss << "<";
-            const auto param_strs =
-                chimera::util::getTemplateParameterStrings(
-                    config_.GetContext(), params->asArray());
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+        + "::" + decl_->getNameAsString();
+}
 
-            for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
-            {
-                ss << param_strs[iparam];
-                if (iparam < param_strs.size() - 1)
-                    ss << ", ";
-            }
-            ss << ">";
-        }
-    }
-    return ss.str();
+::mstch::node Function::qualifiedCall()
+{
+    if (const YAML::Node &node = decl_config_["qualified_call"])
+        return node.as<std::string>();
+
+    const auto template_str = chimera::util::getTemplateParameterString(decl_);
+
+    // Construct the basic qualified name.
+    if (!class_decl_)
+        return decl_->getQualifiedNameAsString() + template_str;
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+        + "::" + decl_->getNameAsString() + template_str;
+}
+
+::mstch::node Function::call()
+{
+    if (const YAML::Node &node = decl_config_["call"])
+        return node.as<std::string>();
+
+    return decl_->getNameAsString() +
+        chimera::util::getTemplateParameterString(decl_);
 }
 
 ::mstch::node Function::isTemplate()

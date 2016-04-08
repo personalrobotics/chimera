@@ -185,6 +185,14 @@ std::vector<std::string> getTemplateParameterStrings(
     const clang::ArrayRef<clang::TemplateArgument> &params);
 
 /**
+ * Convert a list of template arguments to a single <T0, T1, ...> string.
+ *
+ * This formats and concatenates the result of getTemplateParameterStrings()
+ * for a given function declaration.
+ */
+std::string getTemplateParameterString(const clang::FunctionDecl *decl);
+
+/**
  * Return whether a return value policy needs to be specfied for a declaration.
  *
  * In certain cases, it is possible to deduce the return value policy that
