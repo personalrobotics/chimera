@@ -287,13 +287,6 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     if (chimera::util::containsNonCopyableType(decl))
         return false;
 
-    // Skip template functions that we don't support.
-    const TemplateArgumentList *const params
-        = decl->getTemplateSpecializationArgs();
-    if (params && !util::getTemplateParameterStrings(
-          config_->GetContext(), params->asArray(), nullptr))
-        return false;
-
     // Ignore declarations that have been explicitly suppressed.
     if (config_->IsSuppressed(decl))
         return false;

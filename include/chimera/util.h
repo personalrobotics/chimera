@@ -169,10 +169,20 @@ bool isCopyable(clang::ASTContext &context, clang::QualType qual_type);
  */
 bool isInsideTemplateClass(const clang::DeclContext *decl_context);
 
+/**
+ * Determines if a function template declaration is variadic.
+ */
+bool isVariadicFunctionTemplate(const clang::FunctionTemplateDecl *decl);
 
-bool getTemplateParameterStrings(clang::ASTContext &context,
-  const clang::ArrayRef<clang::TemplateArgument> &params,
-  std::vector<std::string> *output);
+/**
+ * Convert a list of template arguments to a vector of std::strings.
+ *
+ * Returns an empty list and prints a warning if the list contains an
+ * unserializable template argument such as a template-template.
+ */
+std::vector<std::string> getTemplateParameterStrings(
+    clang::ASTContext &context,
+    const clang::ArrayRef<clang::TemplateArgument> &params);
 
 /**
  * Return whether a return value policy needs to be specfied for a declaration.

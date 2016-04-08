@@ -635,7 +635,6 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"return_value_policy", &Function::returnValuePolicy},
         {"uses_defaults", &Function::usesDefaults},
         {"is_template", &Function::isTemplate},
-        {"template_params", &Function::templateParams},
     });
 }
 
@@ -765,40 +764,44 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
+    // Construct the basic qualified name.
+    std::stringstream ss;
     if (!class_decl_)
-        return decl_->getQualifiedNameAsString();
+    {
+        ss << decl_->getQualifiedNameAsString();
+    }
+    else
+    {
+        ss << chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_);
+        ss << "::" << decl_->getNameAsString();
+    }
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
-        + "::" + decl_->getNameAsString();
+    // If this is a template, add the template arguments to the end.
+    if (decl_->isFunctionTemplateSpecialization())
+    {
+        if (const TemplateArgumentList *const params
+            = decl_->getTemplateSpecializationArgs())
+        {
+            ss << "<";
+            const auto param_strs =
+                chimera::util::getTemplateParameterStrings(
+                    config_.GetContext(), params->asArray());
+
+            for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
+            {
+                ss << param_strs[iparam];
+                if (iparam < param_strs.size() - 1)
+                    ss << ", ";
+            }
+            ss << ">";
+        }
+    }
+    return ss.str();
 }
 
 ::mstch::node Function::isTemplate()
 {
     return decl_->isFunctionTemplateSpecialization();
-}
-
-::mstch::node Function::templateParams()
-{
-    ::mstch::array params_mstch;
-
-    if (const TemplateArgumentList *const params
-        = decl_->getTemplateSpecializationArgs())
-    {
-      std::vector<std::string> params_str;
-      const bool success = util::getTemplateParameterStrings(
-          config_.GetContext(), params->asArray(), &params_str);
-      assert(success); // We already filtered these out in the visitor.
-
-      for (size_t iparam = 0; iparam < params_str.size(); ++iparam)
-      {
-          params_mstch.push_back(::mstch::map {
-              {"type", params_str[iparam]},
-              {"last", iparam == params_str.size() - 1},
-          });
-      }
-    }
-
-    return params_mstch;
 }
 
 Method::Method(const ::chimera::CompiledConfiguration &config,
@@ -860,7 +863,14 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
-    // Use the "default_name" if the name would otherwise be empty.
+    // Ignore argument is part of a variadic function
+    // (since it could be non-unique).
+    if (const auto template_decl = 
+            method_decl_->getPrimaryTemplate())
+        if (chimera::util::isVariadicFunctionTemplate(template_decl))
+            return default_name_;
+
+    // Use the "default_name" if the name would otherwise be empty
     std::string name = decl_->getNameAsString();
     return (name.empty()) ? default_name_: name;
 }

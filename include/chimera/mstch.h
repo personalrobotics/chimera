@@ -252,7 +252,6 @@ public:
     ::mstch::node usesDefaults();
     ::mstch::node qualifiedName();
     ::mstch::node isTemplate();
-    ::mstch::node templateParams();
 
 private:
     const clang::CXXRecordDecl *class_decl_;

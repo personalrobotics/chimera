@@ -269,58 +269,79 @@ bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
         return false;
 }
 
-bool chimera::util::getTemplateParameterStrings(ASTContext &context,
-  const ArrayRef<TemplateArgument> &params, std::vector<std::string> *output)
+bool
+chimera::util::isVariadicFunctionTemplate(const FunctionTemplateDecl *decl)
 {
+    // Based on SemaTemplateDeduction.cpp
+    // http://clang.llvm.org/doxygen/SemaTemplateDeduction_8cpp_source.html
+    FunctionDecl *function_decl = decl->getTemplatedDecl();
+
+    unsigned param_idx = function_decl->getNumParams();
+    if (param_idx == 0)
+        return false;
+
+    ParmVarDecl *last = function_decl->getParamDecl(param_idx - 1);
+    if (!last->isParameterPack())
+        return false;
+    
+    // Make sure that no previous parameter is a parameter pack.
+    while (--param_idx > 0)
+    {
+        if (function_decl->getParamDecl(param_idx - 1)->isParameterPack())
+            return false;
+    }
+
+    return true;
+}
+
+std::vector<std::string>
+chimera::util::getTemplateParameterStrings(
+    ASTContext &context, const ArrayRef<TemplateArgument> &params)
+{
+    std::vector<std::string> outputs;
+
     for (const TemplateArgument &param : params)
     {
         switch (param.getKind())
         {
         case TemplateArgument::Type:
-            if (output)
-                output->push_back(util::getFullyQualifiedTypeName(
-                    context, param.getAsType()));
+            outputs.push_back(util::getFullyQualifiedTypeName(
+                context, param.getAsType()));
             break;
 
         case TemplateArgument::NullPtr:
-            if (output)
-                output->push_back("nullptr");
+            outputs.push_back("nullptr");
             break;
 
         case TemplateArgument::Integral:
-            if (output)
-                output->push_back(param.getAsIntegral().toString(10));
+            outputs.push_back(param.getAsIntegral().toString(10));
             break;
 
         case TemplateArgument::Pack:
-#if 0
-            if (!getTemplateParams(context, param.getPackAsArray(), output))
-              return false;
+        {
+            const auto pack_strs = getTemplateParameterStrings(
+                context, param.getPackAsArray());
+            outputs.insert(outputs.end(), pack_strs.begin(), pack_strs.end());
             break;
-#else
-            std::cerr << "Template argument is a parameter pack; this is not"
-                      << " supported.\n";
-            return false;
-#endif
-
+        }
         case TemplateArgument::Template:
         case TemplateArgument::TemplateExpansion:
             std::cerr << "Template argument is a template-template argument;"
                       << " this is not supported.\n";
-            return false;
+            return std::vector<std::string>();
 
         case TemplateArgument::Declaration:
         case TemplateArgument::Expression:
         case TemplateArgument::Null:
             std::cerr << "Template argument is not fully resolved.\n";
-            return false;
+            return std::vector<std::string>();
 
         default:
             std::cerr << "Unknown kind of template argument.\n";
-            return false;
+            return std::vector<std::string>();
         }
     }
-    return true;
+    return outputs;
 }
 
 std::set<const CXXRecordDecl *>
