@@ -635,6 +635,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"return_value_policy", &Function::returnValuePolicy},
         {"uses_defaults", &Function::usesDefaults},
         {"is_template", &Function::isTemplate},
+        {"call", &Function::call},
+        {"qualified_call", &Function::qualifiedCall},
     });
 }
 
