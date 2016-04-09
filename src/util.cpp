@@ -269,6 +269,110 @@ bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
         return false;
 }
 
+bool
+chimera::util::isVariadicFunctionTemplate(const FunctionTemplateDecl *decl)
+{
+    // Based on SemaTemplateDeduction.cpp
+    // http://clang.llvm.org/doxygen/SemaTemplateDeduction_8cpp_source.html
+    FunctionDecl *function_decl = decl->getTemplatedDecl();
+
+    unsigned param_idx = function_decl->getNumParams();
+    if (param_idx == 0)
+        return false;
+
+    ParmVarDecl *last = function_decl->getParamDecl(param_idx - 1);
+    if (!last->isParameterPack())
+        return false;
+    
+    // Make sure that no previous parameter is a parameter pack.
+    while (--param_idx > 0)
+    {
+        if (function_decl->getParamDecl(param_idx - 1)->isParameterPack())
+            return false;
+    }
+
+    return true;
+}
+
+std::vector<std::string>
+chimera::util::getTemplateParameterStrings(
+    ASTContext &context, const ArrayRef<TemplateArgument> &params)
+{
+    std::vector<std::string> outputs;
+
+    for (const TemplateArgument &param : params)
+    {
+        switch (param.getKind())
+        {
+        case TemplateArgument::Type:
+            outputs.push_back(util::getFullyQualifiedTypeName(
+                context, param.getAsType()));
+            break;
+
+        case TemplateArgument::NullPtr:
+            outputs.push_back("nullptr");
+            break;
+
+        case TemplateArgument::Integral:
+            outputs.push_back(param.getAsIntegral().toString(10));
+            break;
+
+        case TemplateArgument::Pack:
+        {
+            const auto pack_strs = getTemplateParameterStrings(
+                context, param.getPackAsArray());
+            outputs.insert(outputs.end(), pack_strs.begin(), pack_strs.end());
+            break;
+        }
+        case TemplateArgument::Template:
+        case TemplateArgument::TemplateExpansion:
+            std::cerr << "Template argument is a template-template argument;"
+                      << " this is not supported.\n";
+            return std::vector<std::string>();
+
+        case TemplateArgument::Declaration:
+        case TemplateArgument::Expression:
+        case TemplateArgument::Null:
+            std::cerr << "Template argument is not fully resolved.\n";
+            return std::vector<std::string>();
+
+        default:
+            std::cerr << "Unknown kind of template argument.\n";
+            return std::vector<std::string>();
+        }
+    }
+    return outputs;
+}
+
+std::string
+chimera::util::getTemplateParameterString(const FunctionDecl *decl)
+{
+    std::stringstream ss;
+
+    // If this is a template, add the template arguments to the end.
+    if (decl->isFunctionTemplateSpecialization())
+    {
+        if (const TemplateArgumentList *const params
+            = decl->getTemplateSpecializationArgs())
+        {
+            ss << "<";
+            const auto param_strs =
+                chimera::util::getTemplateParameterStrings(
+                    decl->getASTContext(), params->asArray());
+
+            for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
+            {
+                ss << param_strs[iparam];
+                if (iparam < param_strs.size() - 1)
+                    ss << ", ";
+            }
+            ss << ">";
+        }
+    }
+
+    return ss.str();
+}
+
 std::set<const CXXRecordDecl *>
 chimera::util::getBaseClassDecls(const CXXRecordDecl *decl)
 {

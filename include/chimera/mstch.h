@@ -62,7 +62,7 @@ public:
             {"qualified_name", &ClangWrapper::qualifiedName},
             {"scope", &ClangWrapper::scope},
             {"comment", &ClangWrapper::comment},
-            {"?comment", &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::comment>},
+            {"comment?", &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::comment>},
         });
     }
 
@@ -251,6 +251,9 @@ public:
     ::mstch::node scope();
     ::mstch::node usesDefaults();
     ::mstch::node qualifiedName();
+    ::mstch::node isTemplate();
+    ::mstch::node call();
+    ::mstch::node qualifiedCall();
 
 private:
     const clang::CXXRecordDecl *class_decl_;

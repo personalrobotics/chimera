@@ -634,6 +634,9 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"return_type", &Function::returnType},
         {"return_value_policy", &Function::returnValuePolicy},
         {"uses_defaults", &Function::usesDefaults},
+        {"is_template", &Function::isTemplate},
+        {"call", &Function::call},
+        {"qualified_call", &Function::qualifiedCall},
     });
 }
 
@@ -770,6 +773,35 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         + "::" + decl_->getNameAsString();
 }
 
+::mstch::node Function::qualifiedCall()
+{
+    if (const YAML::Node &node = decl_config_["qualified_call"])
+        return node.as<std::string>();
+
+    const auto template_str = chimera::util::getTemplateParameterString(decl_);
+
+    // Construct the basic qualified name.
+    if (!class_decl_)
+        return decl_->getQualifiedNameAsString() + template_str;
+
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+        + "::" + decl_->getNameAsString() + template_str;
+}
+
+::mstch::node Function::call()
+{
+    if (const YAML::Node &node = decl_config_["call"])
+        return node.as<std::string>();
+
+    return decl_->getNameAsString() +
+        chimera::util::getTemplateParameterString(decl_);
+}
+
+::mstch::node Function::isTemplate()
+{
+    return decl_->isFunctionTemplateSpecialization();
+}
+
 Method::Method(const ::chimera::CompiledConfiguration &config,
                const CXXMethodDecl *decl,
                const CXXRecordDecl *class_decl)
@@ -829,7 +861,14 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
-    // Use the "default_name" if the name would otherwise be empty.
+    // Ignore argument is part of a variadic function
+    // (since it could be non-unique).
+    if (const auto template_decl = 
+            method_decl_->getPrimaryTemplate())
+        if (chimera::util::isVariadicFunctionTemplate(template_decl))
+            return default_name_;
+
+    // Use the "default_name" if the name would otherwise be empty
     std::string name = decl_->getNameAsString();
     return (name.empty()) ? default_name_: name;
 }

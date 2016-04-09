@@ -281,7 +281,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
             config_->GetCompilerInstance()->getSema(), decl))
         return false;
 
-    // Skip functions that have non-copyable argument types.
+    // Skip functions that have non-copyable argument types passed by value.
     // Using these functions requires std::move()-ing their arguments, which
     // we generally cannot do.
     if (chimera::util::containsNonCopyableType(decl))
