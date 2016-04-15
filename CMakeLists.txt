@@ -113,3 +113,6 @@ configure_package_config_file("cmake/${PROJECT_NAME}Config.cmake.in"
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
   DESTINATION "${SHARE_INSTALL_DIR}/cmake"
 )
+
+# Enable unit testing by including the `test` subdirectory.
+add_subdirectory(test)
