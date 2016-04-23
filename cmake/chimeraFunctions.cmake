@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [MODULE module]  # Defaults to `target`
 #                     [CONFIGURATION config_file]
 #                     [NAMESPACE namespace1 namespace2 namespace3])
-#                     [SOURCES source1_file source2_file ...]
+#                     SOURCES source1_file [source2_file ...]
 function(add_chimera_binding)
     find_package(chimera REQUIRED)
     include(ExternalProject)
@@ -49,15 +49,16 @@ function(add_chimera_binding)
     # If the debug flag is specified, dump all the chimera settings.
     if(binding_DEBUG)
         message(STATUS "Chimera binding: ${binding_TARGET}")
-        message(STATUS "  Configuration:")
-        message(STATUS "  Sources:")
-        foreach(src ${binding_SOURCES})
-            message(STATUS "  - ${src}")
-        endforeach(src)
+        message(STATUS "  Module: ${binding_MODULE}")
+        message(STATUS "  Configuration: ${binding_CONFIGURATION}")
         message(STATUS "  Namespaces:")
-        foreach(src ${binding_SOURCES})
-            message(STATUS "  - ${src}")
-        endforeach(src)
+        foreach(namespace ${binding_NAMESPACES})
+            message(STATUS "  - ${namespace}")
+        endforeach()
+        message(STATUS "  Sources:")
+        foreach(source ${binding_SOURCES})
+            message(STATUS "  - ${source}")
+        endforeach()
     endif()
 
     # Create a placeholder for the list of generated sources.
