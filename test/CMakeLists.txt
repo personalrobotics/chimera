@@ -4,7 +4,7 @@ include(chimeraFunctions)
 enable_testing()
 
 add_chimera_binding(
-  DEBUG
+  EXCLUDE_FROM_ALL
   TARGET bindingTest0
   SOURCES dart-example.cpp
   NAMESPACES test

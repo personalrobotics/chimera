@@ -14,6 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [CONFIGURATION config_file]
 #                     [NAMESPACE namespace1 namespace2 namespace3])
 #                     SOURCES source1_file [source2_file ...]
+#                     [DEBUG] [EXCLUDE_FROM_ALL]
 function(add_chimera_binding)
     find_package(chimera REQUIRED)
     include(ExternalProject)
@@ -21,7 +22,7 @@ function(add_chimera_binding)
     # Parse boolean, unary, and list arguments from input.
     # Unparsed arguments can be found in variable ARG_UNPARSED_ARGUMENTS.
     set(prefix binding)
-    set(options DEBUG)
+    set(options DEBUG EXCLUDE_FROM_ALL)
     set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
     set(multiValueArgs SOURCES NAMESPACES)
     cmake_parse_arguments("${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -43,9 +44,17 @@ function(add_chimera_binding)
         set(binding_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${binding_TARGET}")
     endif()
 
+    # Set EXCLUDE_FROM_ALL flag if provided.
+    if(binding_EXCLUDE_FROM_ALL)
+        set(binding_EXCLUDE_FROM_ALL_FLAG "EXCLUDE_FROM_ALL")
+    else()
+        set(binding_EXCLUDE_FROM_ALL_FLAG "")
+    endif()
+
     # If the debug flag is specified, dump all the chimera settings.
     if(binding_DEBUG)
         message(STATUS "Chimera binding: ${binding_TARGET}")
+        message(STATUS "  Exclude from ALL: ${binding_EXCLUDE_FROM_ALL}")
         message(STATUS "  Module: ${binding_MODULE}")
         message(STATUS "  Configuration: ${binding_CONFIGURATION}")
         message(STATUS "  Namespaces:")
@@ -86,19 +95,21 @@ function(add_chimera_binding)
 
     # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
+        ${binding_EXCLUDE_FROM_ALL_FLAG}
         ${binding_SOURCES}
         ${binding_GENERATED}
     )
-    add_dependencies("${binding_TARGET}" "${binding_TARGET}_SOURCES")
 
     # Trigger the rebuild of the library target after new sources have been generated.
     ExternalProject_Add("${binding_TARGET}_REBUILD"
         DOWNLOAD_COMMAND ""
         INSTALL_COMMAND ""
-        BUILD_COMMAND make "${binding_TARGET}"
+        BUILD_COMMAND make "${binding_TARGET}_SOURCES"
         DEPENDS "${binding_TARGET}_SOURCES"
         SOURCE_DIR "${PROJECT_SOURCE_DIR}"
         BINARY_DIR "${PROJECT_BINARY_DIR}"
     )
+    set_target_properties("${binding_TARGET}_REBUILD" PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    add_dependencies("${binding_TARGET}" "${binding_TARGET}_REBUILD")
 
 endfunction(add_chimera_binding)
