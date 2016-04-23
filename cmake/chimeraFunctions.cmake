@@ -70,6 +70,21 @@ function(add_chimera_binding)
     # Ensure that the output destination directory is created.
     file(MAKE_DIRECTORY "${binding_DESTINATION}")
 
+    # Construct the list of chimera arguments.
+    list(APPEND binding_ARGS -m "${binding_MODULE}")
+    list(APPEND binding_ARGS -o "${binding_DESTINATION}")
+    list(APPEND binding_ARGS -p "${PROJECT_BINARY_DIR}")
+    if(binding_CONFIGURATION)
+        list(APPEND binding_ARGS -c "${binding_CONFIGURATION}")
+    endif()
+    if(binding_NAMESPACES)
+        foreach(namespace ${binding_NAMESPACES})
+            list(APPEND binding_ARGS -n "${namespace}")
+        endforeach()
+    endif()
+    list(APPEND binding_ARGS ${binding_SOURCES})
+    list(APPEND binding_ARGS > "${binding_DESTINATION}/sources.txt")
+
     # Create an external target that re-runs chimera when any of the sources have changed.
     # This will necessarily invalidate a placeholder dependency that causes CMake to
     # rerun the compilation of the library if sources are regenerated.
@@ -77,13 +92,9 @@ function(add_chimera_binding)
     add_custom_command(
         OUTPUT "${binding_DESTINATION}/sources.txt"
         COMMAND "${chimera_EXECUTABLE}"
-        ARGS -m "${binding_MODULE}"
-             -o "${binding_DESTINATION}"
-             -p "${PROJECT_BINARY_DIR}"
-             ${binding_SOURCES}
-             > "${binding_DESTINATION}/sources.txt"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        ARGS ${binding_ARGS}
         DEPENDS ${binding_SOURCES}
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMENT "Generating bindings for ${binding_TARGET}."
         VERBATIM
     )

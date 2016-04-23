@@ -7,6 +7,6 @@ add_chimera_binding(
   EXCLUDE_FROM_ALL
   TARGET bindingTest0
   SOURCES dart-example.cpp
-  NAMESPACES test
+  NAMESPACES dart
 )
 add_test(ChimeraBindingTest bindingTest0)
