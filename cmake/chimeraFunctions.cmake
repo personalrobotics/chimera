@@ -2,9 +2,6 @@
 # Contains helper functions for running Chimera in other CMake projects.
 #
 
-# TODO: DO NOT COMMIT THIS!
-cmake_policy(SET CMP0026 OLD)
-
 # Chimera requires the generation of a compilation database.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -61,16 +58,15 @@ function(add_chimera_binding)
         endforeach()
     endif()
 
-    # Create a placeholder for the list of generated sources.
-    file(APPEND "${binding_DESTINATION}/sources.txt" "")
+    # Ensure that the output destination directory is created.
+    file(MAKE_DIRECTORY "${binding_DESTINATION}")
 
     # Create an external target that re-runs chimera when any of the sources have changed.
     # This will necessarily invalidate a placeholder dependency that causes CMake to
     # rerun the compilation of the library if sources are regenerated.
     add_custom_target("${binding_TARGET}_SOURCES" DEPENDS "${binding_DESTINATION}/sources.txt")
     add_custom_command(
-        TARGET "${binding_TARGET}_SOURCES" PRE_BUILD
-        # OUTPUT "${binding_DESTINATION}/sources.txt"
+        OUTPUT "${binding_DESTINATION}/sources.txt"
         COMMAND "${chimera_EXECUTABLE}"
         ARGS -m "${binding_MODULE}"
              -o "${binding_DESTINATION}"
@@ -82,10 +78,13 @@ function(add_chimera_binding)
         COMMENT "Generating bindings for ${binding_TARGET}."
         VERBATIM
     )
-    configure_file("${binding_DESTINATION}/sources.txt" "${binding_DESTINATION}/sources.txt" COPYONLY)
 
-    # Get the current list of generated sources and create a library target.
-    file(STRINGS "${binding_DESTINATION}/sources.txt" binding_GENERATED NO_HEX_CONVERSION)
+    # Get the current list of generated sources if already generated.
+    if(EXISTS "${binding_DESTINATION}/sources.txt")
+        file(STRINGS "${binding_DESTINATION}/sources.txt" binding_GENERATED NO_HEX_CONVERSION)
+    endif()
+
+    # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
         ${binding_SOURCES}
         ${binding_GENERATED}
@@ -93,7 +92,7 @@ function(add_chimera_binding)
     add_dependencies("${binding_TARGET}" "${binding_TARGET}_SOURCES")
 
     # Trigger the rebuild of the library target after new sources have been generated.
-    ExternalProject_Add("${binding_TARGET}_postbuild"
+    ExternalProject_Add("${binding_TARGET}_REBUILD"
         DOWNLOAD_COMMAND ""
         INSTALL_COMMAND ""
         BUILD_COMMAND make "${binding_TARGET}"
