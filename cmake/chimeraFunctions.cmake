@@ -119,6 +119,9 @@ function(add_chimera_binding)
     add_library("${binding_TARGET}_placeholder" EXCLUDE_FROM_ALL
         ${binding_SOURCES}
     )
+    set_target_properties("${binding_TARGET}_placeholder" PROPERTIES
+        LINKER_LANGUAGE CXX
+    )
 
     # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
