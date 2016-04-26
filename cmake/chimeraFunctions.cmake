@@ -115,10 +115,14 @@ function(add_chimera_binding)
         endforeach()
     endif()
 
+    # Placeholder target to generate compilation database.
+    add_library("${binding_TARGET}_placeholder" EXCLUDE_FROM_ALL
+        ${binding_SOURCES}
+    )
+
     # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
         ${binding_EXCLUDE_FROM_ALL_FLAG}
-        ${binding_SOURCES}
         ${binding_GENERATED}
         ${binding_EXTRA_SOURCES}
     )
