@@ -99,7 +99,7 @@ function(add_chimera_binding)
         OUTPUT "${binding_DESTINATION}/sources.txt"
         COMMAND "${chimera_EXECUTABLE}"
         ARGS ${binding_ARGS}
-        DEPENDS ${binding_SOURCES}
+        DEPENDS "${binding_CONFIGURATION}" ${binding_SOURCES}
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMENT "Generating bindings for ${binding_TARGET}."
         VERBATIM
