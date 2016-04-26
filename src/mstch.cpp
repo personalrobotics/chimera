@@ -259,6 +259,19 @@ CXXRecord::CXXRecord(
         if (chimera::util::containsRValueReference(method_decl))
             continue;
 
+        // Skip functions that have incomplete argument types. Boost.Python
+        // requires RTTI information about all arguments, including references
+        // and pointers.
+        if (chimera::util::containsIncompleteType(
+                config_.GetCompilerInstance()->getSema(), method_decl))
+            continue;
+
+        // Skip functions that have non-copyable argument types.
+        // Using these functions requires std::move()-ing their arguments, which
+        // we generally cannot do.
+        if (chimera::util::containsNonCopyableType(method_decl))
+            continue;
+
         const CXXConstructorDecl *constructor_decl =
             cast<CXXConstructorDecl>(method_decl);
         if (constructor_decl->isCopyOrMoveConstructor())
@@ -305,6 +318,8 @@ CXXRecord::CXXRecord(
             continue;
         if (method_decl->getDescribedFunctionTemplate())
             continue;
+        if (chimera::util::containsRValueReference(method_decl))
+            continue;
 
         // Skip functions that have incomplete argument types. Boost.Python
         // requires RTTI information about all arguments, including references
@@ -331,10 +346,6 @@ CXXRecord::CXXRecord(
             // so just continue to the next method if we got here.
             continue;
         }
-
-        // Suppress any functions that take arguments by rvalue reference.
-        if (chimera::util::containsRValueReference(method_decl))
-            continue;
 
         // Now that we know it can be generated, add the method.
         method_vector.push_back(method);
