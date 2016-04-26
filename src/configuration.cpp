@@ -233,14 +233,20 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 
 chimera::CompiledConfiguration::~CompiledConfiguration()
 {
-    // Create the top-level binding source file.
+    // Create and sanitize path and filename of top-level source file.
+    // Because we may compress the filename to fit OS character limits,
+    // we generate the full path, then split the filename from it.
+    const std::string binding_path =
+        sanitizePath(parent_.GetOutputPath() + "/" +
+                     parent_.GetOutputModuleName() + ".cpp");
+    size_t path_index = binding_path.find_last_of("/");
     const std::string binding_filename =
-        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp";
-
+        (path_index == std::string::npos) ?
+            "" : binding_path.substr(path_index + 1);
 
     // Create an output file depending on the provided parameters.
     auto stream = ci_->createOutputFile(
-        binding_filename,
+        binding_path,
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
         "", // The derived basename (shouldn't be used)
@@ -253,7 +259,7 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     if (!stream)
     {
         std::cerr << "Failed to create top-level output file "
-                  << "'" << binding_filename << "'."
+                  << "'" << binding_path << "'."
                   << std::endl;
         exit(-4);
     }
@@ -444,11 +450,19 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     }
     std::string mangled_name = ::mstch::render("{{mangled_name}}", context);
 
-    // Create an output file depending on the provided parameters.
-    const std::string binding_filename =
+    // Create and sanitize path and filename of top-level source file.
+    // Because we may compress the filename to fit OS character limits,
+    // we generate the full path, then split the filename from it.
+    const std::string binding_path =
         sanitizePath(parent_.GetOutputPath() + "/" + mangled_name + ".cpp");
+    size_t path_index = binding_path.find_last_of("/");
+    const std::string binding_filename =
+        (path_index == std::string::npos) ?
+            "" : binding_path.substr(path_index + 1);
+
+    // Create an output file depending on the provided parameters.
     auto stream = ci_->createOutputFile(
-        binding_filename,
+        binding_path,
         false, // Open the file in binary mode
         false, // Register with llvm::sys::RemoveFileOnSignal
         "", // The derived basename (shouldn't be used)
@@ -461,7 +475,7 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
     if (!stream)
     {
         std::cerr << "Failed to create output file "
-                  << "'" << binding_filename << "'"
+                  << "'" << binding_path << "'"
                   << " for "
                   << "'" << ::mstch::render("{{name}}", context) << "'."
                   << std::endl;
