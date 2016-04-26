@@ -74,6 +74,7 @@ function(add_chimera_binding)
 
     # Ensure that the output destination directory is created.
     file(MAKE_DIRECTORY "${binding_DESTINATION}")
+    file(WRITE "${binding_DESTINATION}/empty.cpp" "")
 
     # Construct the list of chimera arguments.
     set(binding_ARGS)
@@ -125,12 +126,10 @@ function(add_chimera_binding)
 
     # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
-        ${binding_EXCLUDE_FROM_ALL_FLAG}
+        "${binding_EXCLUDE_FROM_ALL_FLAG}"
+        "${binding_DESTINATION}/empty.cpp"
         ${binding_GENERATED}
         ${binding_EXTRA_SOURCES}
-    )
-    set_target_properties("${binding_TARGET}" PROPERTIES
-        LINKER_LANGUAGE CXX
     )
 
     # Trigger the rebuild of the library target after new sources have been generated.
