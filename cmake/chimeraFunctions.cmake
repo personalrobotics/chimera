@@ -9,11 +9,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # The result of this operation is a CMake library target.
 #
 # add_chimera_binding(TARGET target
-#                     DESTINATION destination_dir
+#                     [DESTINATION destination_dir] # Defaults to `target`
 #                     [MODULE module]  # Defaults to `target`
 #                     [CONFIGURATION config_file]
-#                     [NAMESPACE namespace1 namespace2 namespace3])
+#                     [NAMESPACES namespace1 namespace2 ...])
 #                     SOURCES source1_file [source2_file ...]
+#                     [EXTRA_SOURCES source1_file ...]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
 function(add_chimera_binding)
     find_package(chimera REQUIRED)
@@ -24,7 +25,7 @@ function(add_chimera_binding)
     set(prefix binding)
     set(options DEBUG EXCLUDE_FROM_ALL)
     set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
-    set(multiValueArgs SOURCES NAMESPACES)
+    set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES)
     cmake_parse_arguments("${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Print errors if arguments are missing.
@@ -65,12 +66,17 @@ function(add_chimera_binding)
         foreach(source ${binding_SOURCES})
             message(STATUS "  - ${source}")
         endforeach()
+        message(STATUS "  Extra Sources:")
+        foreach(source ${binding_EXTRA_SOURCES})
+            message(STATUS "  - ${source}")
+        endforeach()
     endif()
 
     # Ensure that the output destination directory is created.
     file(MAKE_DIRECTORY "${binding_DESTINATION}")
 
     # Construct the list of chimera arguments.
+    set(binding_ARGS)
     list(APPEND binding_ARGS -m "${binding_MODULE}")
     list(APPEND binding_ARGS -o "${binding_DESTINATION}")
     list(APPEND binding_ARGS -p "${PROJECT_BINARY_DIR}")
@@ -101,7 +107,12 @@ function(add_chimera_binding)
 
     # Get the current list of generated sources if already generated.
     if(EXISTS "${binding_DESTINATION}/sources.txt")
-        file(STRINGS "${binding_DESTINATION}/sources.txt" binding_GENERATED NO_HEX_CONVERSION)
+        file(STRINGS "${binding_DESTINATION}/sources.txt" binding_GENERATED_RELATIVE NO_HEX_CONVERSION)
+
+        set(binding_GENERATED)
+        foreach(relative_path ${binding_GENERATED_RELATIVE})
+            list(APPEND binding_GENERATED "${binding_DESTINATION}/${relative_path}")
+        endforeach()
     endif()
 
     # Create a library target to build the binding as a module.
@@ -109,6 +120,10 @@ function(add_chimera_binding)
         ${binding_EXCLUDE_FROM_ALL_FLAG}
         ${binding_SOURCES}
         ${binding_GENERATED}
+        ${binding_EXTRA_SOURCES}
+    )
+    set_target_properties("${binding_TARGET}" PROPERTIES
+        LINKER_LANGUAGE CXX
     )
 
     # Trigger the rebuild of the library target after new sources have been generated.

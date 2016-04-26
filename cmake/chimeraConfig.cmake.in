@@ -9,4 +9,4 @@ get_target_property(chimera_EXECUTABLE chimera LOCATION)
 set_and_check(chimera_C_COMPILER "@CMAKE_C_COMPILER@")
 set_and_check(chimera_CXX_COMPILER "@CMAKE_CXX_COMPILER@")
 
-include(chimeraFunctions)
+include("${CMAKE_CURRENT_LIST_DIR}/chimeraFunctions.cmake")
