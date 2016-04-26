@@ -1,36 +1,12 @@
-cmake_minimum_required(VERSION 2.8.8)
-project(dartpy)
+include(CTest)
+include(chimeraFunctions)
 
-find_package(Boost REQUIRED COMPONENTS python)
-find_package(BoostNumpy REQUIRED)
-find_package(BoostNumpyEigen REQUIRED)
-find_package(DART REQUIRED)
-find_package(PythonLibs REQUIRED)
+enable_testing()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-deprecated-declarations")
-
-include_directories(SYSTEM
-  ${Boost_INCLUDE_DIRS}
-  ${DART_INCLUDE_DIRS}
-  ${PYTHON_INCLUDE_DIRS}
-  /opt/ros/indigo/include
+add_chimera_binding(
+  EXCLUDE_FROM_ALL
+  TARGET bindingTest0
+  SOURCES dart-example.cpp
+  NAMESPACES dart
 )
-
-file(GLOB dartpy_SOURCES *.cpp)
-
-add_library(${PROJECT_NAME} SHARED ${dartpy_SOURCES})
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  PREFIX ""
-)
-target_link_libraries(${PROJECT_NAME}
-  boost_numpy
-  boost_numpy_eigen
-  ${Boost_LIBRARIES}
-  ${BoostNumpy_LIBRARIES}
-  ${BoostNumpyEigen_LIBRARIES}
-  ${DART_LIBRARIES}
-  ${PYTHON_LIBRARIES}
-)
-
-# These files need to be deleted to work around bugs:
-#rm -f /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics6EntityEPKNS3_5FrameES9_ENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics8BodyNodeEENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart8dynamics10ArrowShape10PropertiesE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics8BodyNodeESt10shared_ptrIKNS3_5ShapeEEENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart6common11NameManagerIPNS_8dynamics6MarkerEEE.cpp /tmp/chimera_output/_ZN4dart3gui6JitterE.cpp /tmp/chimera_output/_ZN4dart8dynamics14SingleDofJoint16UniquePropertiesE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvRKSsS4_ENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart6common11NameManagerIPNS_8dynamics5JointEEE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics6EntityERKSsS8_ENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart3gui12jitter_pointE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvSt10shared_ptrIKNS_8dynamics12MetaSkeletonEERKSsS9_ENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart5utils10c3d_head_tE.cpp /tmp/chimera_output/_ZN4dart9optimizer6Solver10PropertiesE.cpp /tmp/chimera_output/_ZN4dart9optimizer8DartTNLPE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics6EntityESt10shared_ptrIKNS3_5ShapeEEENS0_6signal6detail15DefaultCombinerEEEEE.cpp /tmp/chimera_output/_ZN4dart5utils11c3d_param_tE.cpp /tmp/chimera_output/_ZN4dart8planning3RRT10StepResultE.cpp:10 /tmp/chimera_output/_ZN4dart8planning3RRT10StepResultE.cpp /tmp/chimera_output/_ZN4dart6common12SlotRegisterINS0_6SignalIFvPKNS_8dynamics6EntityEENS0_6signal6detail15DefaultCombinerEEEEE.cpp
+add_test(ChimeraBindingTest bindingTest0)
