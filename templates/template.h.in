@@ -1,0 +1,16 @@
+#ifndef __CHIMERA_@BINDING_NAME@_MSTCH_H__
+#define __CHIMERA_@BINDING_NAME@_MSTCH_H__
+
+#include <string>
+
+/**
+ * Chimera templates to generate boost::python bindings.
+ */
+
+extern const std::string @BINDING_NAME@_CLASS_BINDING_CPP;
+extern const std::string @BINDING_NAME@_ENUM_BINDING_CPP;
+extern const std::string @BINDING_NAME@_VAR_BINDING_CPP;
+extern const std::string @BINDING_NAME@_FUNCTION_BINDING_CPP;
+extern const std::string @BINDING_NAME@_MODULE_CPP;
+
+#endif // __CHIMERA_@BINDING_NAME@_MSTCH_H__
