@@ -84,5 +84,8 @@ classes:
     noncopyable: true
 ```
 
+## Authors ##
+Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
+
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg
