@@ -34,7 +34,7 @@ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
 ```
 
-**On Mac OS X** Build with:
+**On Mac OS X**
 
 ```bash
 brew install yaml-cpp --with-static-lib
