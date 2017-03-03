@@ -33,13 +33,21 @@ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3
 wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
+cd [PATH TO CHIMERA]
+mkdir build && cd build
+cmake ..
+make
 ```
 
 **On Mac OS X**
 
 ```bash
 brew install yaml-cpp --with-static-lib
-PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
+PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig 
+cd [PATH TO CHIMERA]
+mkdir build && cd build
+cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
+make
 ```
 
 ## Example ##
