@@ -32,8 +32,8 @@ install:
 script:
   - mkdir build
   - cd build
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 'cmake -DLLVM_DIR=/usr/share/llvm-3.6/cmake/ ..'; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then 'cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..'; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DLLVM_DIR="/usr/share/llvm-3.6/cmake/" ..; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then cmake -DLLVM_DIR="/usr/local/opt/llvm/share/llvm/cmake" ..; fi
   - make -j4
 
 after_failure: 
