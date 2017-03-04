@@ -24,6 +24,9 @@ find_package(YamlCpp REQUIRED)
 include_directories(${YAMLCPP_INCLUDE_DIRS})
 add_definitions(${YAMLCPP_DEFINITIONS})
 
+find_package(Boost REQUIRED)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
 ## Set up glorious compiler options.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebugInfo)
