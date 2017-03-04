@@ -25,6 +25,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 - llvm 3.6 or above (+ tools)
 - libedit
 - yaml-cpp
+- boost
 
 **On Ubuntu**
 
@@ -32,7 +33,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
 wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-get update
-sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
+sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
 cd [PATH TO CHIMERA]
 mkdir build && cd build
 cmake ..
@@ -43,6 +44,7 @@ make
 
 ```bash
 brew install yaml-cpp --with-static-lib
+brew install boost
 export PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig 
 cd [PATH TO CHIMERA]
 mkdir build && cd build
