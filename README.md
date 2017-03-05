@@ -43,13 +43,14 @@ make
 **On Mac OS X**
 
 ```bash
-brew install yaml-cpp --with-static-lib
-brew install boost
-export PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig 
-cd [PATH TO CHIMERA]
-mkdir build && cd build
-cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
-make
+$ brew install boost llvm
+$ brew install yaml-cpp --with-static-lib 
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ rm -rf build && mkdir -p build && cd build
+$ PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_DIR=/usr/local/Cellar/llvm/3.9.1/lib/cmake/llvm/ ..
+$ make
 ```
 
 ## Example ##
@@ -58,7 +59,7 @@ Let's try running chimera on itself!
 ```bash
 $ cd [PATH TO CHIMERA]
 $ rm -rf build && mkdir -p build && cd build
-$ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+$ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 $ make
 $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
