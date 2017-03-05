@@ -30,14 +30,15 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 **On Ubuntu**
 
 ```bash
-sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
-wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
-cd [PATH TO CHIMERA]
-mkdir build && cd build
-cmake ..
-make
+$ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
+$ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+$ sudo apt-get update
+$ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ mkdir build && cd build
+$ cmake ..
+$ make
 ```
 
 **On Mac OS X**
@@ -47,7 +48,7 @@ $ brew install boost llvm
 $ brew install yaml-cpp --with-static-lib 
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
-$ rm -rf build && mkdir -p build && cd build
+$ mkdir build && cd build
 $ PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_DIR=/usr/local/Cellar/llvm/3.9.1/lib/cmake/llvm/ ..
 $ make
