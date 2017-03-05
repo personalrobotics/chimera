@@ -34,9 +34,10 @@ script:
   - cd build
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/share/llvm-3.6/cmake/" ..; fi
   - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/local/Cellar/llvm/3.9.1/lib/cmake/llvm/" ..; fi
-    # macOS tests are disabled because of the build errors due to a breaking change 
-    # in the Clang API.
+    # macOS tests are disabled because of the build errors due to a breaking 
+    # change in the Clang API.
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make -j4; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make test; fi
 
 after_failure: 
   - cat Testing/Temporary/LastTest.log
