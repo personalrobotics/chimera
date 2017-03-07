@@ -31,10 +31,11 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 ```bash
 sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
 wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo apt-get update
 sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
 ```
 
-**On Mac OS X** Build with:
+**On Mac OS X**
 
 ```bash
 brew install yaml-cpp --with-static-lib
@@ -83,6 +84,9 @@ classes:
     bases: []
     noncopyable: true
 ```
+
+## Authors ##
+Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
 
 [1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg
