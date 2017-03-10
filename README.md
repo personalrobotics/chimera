@@ -85,6 +85,10 @@ classes:
     noncopyable: true
 ```
 
+## License ##
+Chimera is licensed under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
+information.
+
 ## Authors ##
 Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
 
