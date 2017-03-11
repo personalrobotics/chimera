@@ -5,6 +5,20 @@
 # Chimera requires the generation of a compilation database.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Function to replace &lt; and &gt; to < and >, respectively.
+# This function is used to rectify unintended conversions of the angle brackets
+# to &lt; and &gt;.
+#
+# rectify_angle_brackets(file1 [file2 [...]])
+function(rectify_angle_brackets)
+    foreach(file ${ARGN})
+        file(STRINGS "${file}" file_string NO_HEX_CONVERSION)
+        string(REPLACE "&lt;" "<" file_string ${file_string})
+        string(REPLACE "&gt;" ">" file_string ${file_string})
+        file(WRITE "${file}" ${file_string})
+    endforeach()
+endfunction()
+
 # Function to create a build target for a Chimera binding.
 # The result of this operation is a CMake library target.
 #
@@ -118,6 +132,8 @@ function(add_chimera_binding)
         foreach(relative_path ${binding_GENERATED_RELATIVE})
             list(APPEND binding_GENERATED "${binding_DESTINATION}/${relative_path}")
         endforeach()
+
+        rectify_angle_brackets(${binding_GENERATED})
     endif()
 
     # Placeholder target to generate compilation database.
