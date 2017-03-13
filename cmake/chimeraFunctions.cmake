@@ -5,12 +5,13 @@
 # Chimera requires the generation of a compilation database.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Function to replace &lt; and &gt; to < and >, respectively.
-# This function is used to rectify unintended conversions of the angle brackets
-# to &lt; and &gt;.
+# Function to convert the HTML special entities accordingly (e.g., &lt; &gt;
+# &amp; to <, >, &, respectively).
+# This function is a workaround to rectify unintended conversions by one of the
+# dependencies of Chimera.
 #
-# rectify_angle_brackets(file1 [file2 [...]])
-function(rectify_angle_brackets)
+# rectify_html_special_entities(file1 [file2 [...]])
+function(rectify_html_special_entities)
     foreach(file ${ARGN})
         file(READ "${file}" file_string)
         string(REPLACE "&lt;" "<" file_string "${file_string}")
@@ -134,7 +135,7 @@ function(add_chimera_binding)
             list(APPEND binding_GENERATED "${binding_DESTINATION}/${relative_path}")
         endforeach()
 
-        rectify_angle_brackets(${binding_GENERATED})
+        rectify_html_special_entities(${binding_GENERATED})
     endif()
 
     # Placeholder target to generate compilation database.
