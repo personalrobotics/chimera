@@ -1,4 +1,4 @@
-# chimera #
+# chimera [![Build Status](https://travis-ci.com/personalrobotics/chimera.svg?token=1MmAniN9fkMcwpRUTdFq&branch=master)](https://travis-ci.com/personalrobotics/chimera) #
 
 > ##### chi·me·ra #####
 > ##### /kīˈmirə,kəˈmirə/ [![speaker][2]][1] #####

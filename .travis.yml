@@ -1,0 +1,42 @@
+language: cpp
+
+sudo: required
+
+dist: trusty
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: BUILD_TYPE=Debug COVERALLS=ON COMPILER=GCC
+    - os: linux
+      compiler: gcc
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=GCC
+    - os: linux
+      compiler: clang
+      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG
+    - os: linux
+      compiler: clang
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG
+
+install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 'ci/install_linux.sh'; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then 'ci/install_macos.sh'; fi
+
+script:
+  - mkdir build
+  - cd build
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/share/llvm-3.6/cmake/" ..; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/local/Cellar/llvm@3.7/3.7.1/lib/llvm-3.7/share/llvm/cmake/" ..; fi
+  - make -j4
+  - make test
+
+after_failure: 
+  - cat Testing/Temporary/LastTest.log
+  - cat Testing/Temporary/LastTestsFailed.log

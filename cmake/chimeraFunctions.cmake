@@ -17,7 +17,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [EXTRA_SOURCES source1_file ...]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
 function(add_chimera_binding)
-    find_package(chimera REQUIRED)
     include(ExternalProject)
 
     # Parse boolean, unary, and list arguments from input.
