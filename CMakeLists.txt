@@ -119,4 +119,5 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-#add_subdirectory(test)
+enable_testing()
+add_subdirectory(test)
