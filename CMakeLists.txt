@@ -116,11 +116,12 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-#add_subdirectory(test)
+enable_testing()
+add_subdirectory(test)
 
-#############
+###############
 ## UNINSTALL ##
-#############
+###############
 
 # Add uninstall target
 configure_file(
@@ -130,4 +131,3 @@ configure_file(
 add_custom_target(uninstall
   "${CMAKE_COMMAND}" -P
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake")
-
