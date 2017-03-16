@@ -1,12 +1,17 @@
 include(CTest)
-include(chimeraFunctions)
 
-enable_testing()
+set(chimera_DIR "${PROJECT_BINARY_DIR}")
+include(chimeraFunctions)
 
 add_chimera_binding(
   EXCLUDE_FROM_ALL
-  TARGET bindingTest0
+  TARGET test_binding
   SOURCES dart-example.cpp
   NAMESPACES dart
 )
-add_test(ChimeraBindingTest bindingTest0)
+add_test(
+    NAME ctest_build_binding
+    COMMAND "${CMAKE_COMMAND}"
+        --build ${CMAKE_BINARY_DIR}
+        --target test_binding
+)
