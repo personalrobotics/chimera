@@ -49,7 +49,7 @@ $ brew install yaml-cpp --with-static-lib
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
-$ PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
+$ PKG_CONFIG_PATH=$(brew --prefix yaml-cpp)/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm ..
 $ make
 ```
