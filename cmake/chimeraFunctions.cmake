@@ -135,7 +135,7 @@ function(add_chimera_binding)
     ExternalProject_Add("${binding_TARGET}_REBUILD"
         DOWNLOAD_COMMAND ""
         INSTALL_COMMAND ""
-        BUILD_COMMAND make "${binding_TARGET}_SOURCES"
+        BUILD_COMMAND $(MAKE) "${binding_TARGET}_SOURCES"
         DEPENDS "${binding_TARGET}_SOURCES"
         SOURCE_DIR "${PROJECT_SOURCE_DIR}"
         BINARY_DIR "${PROJECT_BINARY_DIR}"
