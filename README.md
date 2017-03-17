@@ -37,11 +37,11 @@ $ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev 
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
-$ cmake ..
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ make
 ```
 
-**On Mac OS X**
+**On macOS**
 
 ```bash
 $ brew install boost llvm
@@ -50,7 +50,7 @@ $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
 $ PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_DIR=/usr/local/Cellar/llvm/3.9.1/lib/cmake/llvm/ ..
+    -DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm ..
 $ make
 ```
 
