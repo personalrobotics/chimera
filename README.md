@@ -86,7 +86,7 @@ classes:
 ```
 
 ## License ##
-Chimera is licensed under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
+Chimera is released under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
 information.
 
 ## Authors ##
