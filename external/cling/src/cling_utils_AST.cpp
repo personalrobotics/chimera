@@ -18,10 +18,21 @@
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Config/llvm-config.h"
 #include "clang/AST/Mangle.h"
 
 #include <memory>
 #include <stdio.h>
+
+// LLVM 3.8 introduced the llvm::ArrayRef class to wrap several functions that
+// previously accepted a start pointer and length to specify an array.
+#if LLVM_VERSION_MAJOR > 3 || (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 8)
+#define CREATE_ARRAYREF(_begin_, _length_)\
+  ::llvm::ArrayRef<std::remove_reference<decltype(*_begin_)>::type>(_begin_, _length_)
+#else
+#define CREATE_ARRAYREF(_begin_, _length_) _begin_, _length_
+#endif
+
 
 using namespace clang;
 
@@ -145,7 +156,8 @@ namespace utils {
               newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
 
               // Attach the new body (note: it does dealloc/alloc of all nodes)
-              CS->setStmts(S->getASTContext(), &newBody.front(),newBody.size());
+              CS->setStmts(S->getASTContext(),
+                  CREATE_ARRAYREF(&newBody.front(), newBody.size()));
               if (FoundAt)
                 *FoundAt = indexOfLastExpr;
               return DRE;
@@ -248,9 +260,9 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(mutableCtx,
+        arg =TemplateArgument(TemplateArgument::CreatePackCopy(mutableCtx, CREATE_ARRAYREF(
                                                                desArgs.data(),
-                                                               desArgs.size()));
+                                                               desArgs.size())));
       }
     }
     return changed;
@@ -282,7 +294,7 @@ namespace utils {
       if (mightHaveChanged) {
         QualType QT
           = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                              desArgs.data(), desArgs.size(),
+                                              CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
                                               TST->getCanonicalTypeInternal());
         return QT.getTypePtr();
       }
@@ -315,10 +327,9 @@ namespace utils {
           if (mightHaveChanged) {
             TemplateName TN(TSTdecl->getSpecializedTemplate());
             QualType QT
-              = Ctx.getTemplateSpecializationType(TN,
-                                                  desArgs.data(),
-                                                  desArgs.size(),
-                                         TSTRecord->getCanonicalTypeInternal());
+              = Ctx.getTemplateSpecializationType(
+                  TN, CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
+                  TSTRecord->getCanonicalTypeInternal());
             return QT.getTypePtr();
           }
         }
@@ -877,9 +888,8 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(mutableCtx,
-                                                               desArgs.data(),
-                                                               desArgs.size()));
+        arg =TemplateArgument(TemplateArgument::CreatePackCopy(
+              mutableCtx, CREATE_ARRAYREF(desArgs.data(), desArgs.size())));
       }
     }
     return changed;
@@ -1272,8 +1282,8 @@ namespace utils {
       if (mightHaveChanged) {
         Qualifiers qualifiers = QT.getLocalQualifiers();
         QT = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                               desArgs.data(),
-                                               desArgs.size(),
+                                               CREATE_ARRAYREF(desArgs.data(),
+                                                               desArgs.size()),
                                                TST->getCanonicalTypeInternal());
         QT = Ctx.getQualifiedType(QT, qualifiers);
       }
@@ -1345,8 +1355,8 @@ namespace utils {
           if (mightHaveChanged) {
             Qualifiers qualifiers = QT.getLocalQualifiers();
             TemplateName TN(TSTdecl->getSpecializedTemplate());
-            QT = Ctx.getTemplateSpecializationType(TN, desArgs.data(),
-                                                   desArgs.size(),
+            QT = Ctx.getTemplateSpecializationType(TN, CREATE_ARRAYREF(desArgs.data(),
+                                                                       desArgs.size()),
                                          TSTRecord->getCanonicalTypeInternal());
             QT = Ctx.getQualifiedType(QT, qualifiers);
           }
