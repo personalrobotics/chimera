@@ -132,6 +132,10 @@ function(add_chimera_binding)
     )
 
     # Trigger the rebuild of the library target after new sources have been generated.
+    #
+    # For BUILD_COMMAND, '$(MAKE)' is used intead of 'make' to propagate the
+    # make commands of the parent project to the child process.
+    # (see: http://stackoverflow.com/a/33171336)
     ExternalProject_Add("${binding_TARGET}_REBUILD"
         DOWNLOAD_COMMAND ""
         INSTALL_COMMAND ""
