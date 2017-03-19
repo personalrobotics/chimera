@@ -26,12 +26,6 @@ matrix:
       env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.7
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.8
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.8
-    - os: osx
-      compiler: clang
       env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=4.0
     - os: osx
       compiler: clang
