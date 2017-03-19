@@ -59,6 +59,9 @@ if [ -z "${LLVM_VERSION}" ]; then
   exit 1
 fi
 
+# Make sure homebrew has been initialized before trying to query it.
+brew update
+
 # Homebrew packages the latest version of LLVM as a package named "llvm". If
 # LLVM_VERSION matches that version, then install that package. Otherwise,
 # install a "llvm@MAJOR.MINOR" version package.
