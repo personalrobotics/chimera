@@ -87,8 +87,6 @@ else
 fi
 export LLVM_DIR
 
-set +ex
 brew install boost
 brew install "${LLVM_PACKAGE}"
 brew install yaml-cpp --with-static-lib
-set -ex
