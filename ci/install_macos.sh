@@ -1,5 +1,6 @@
 # Compare two semantic version numbers A and B. Return code is 0 if A == B, 1
 # if A > B, and 2 if A < B.
+# Usage: compare_versions 3.9.0 4.0.0
 # Source: http://stackoverflow.com/a/4025065/111426
 function compare_versions () {
   if [[ $1 == $2 ]]
@@ -33,6 +34,7 @@ function compare_versions () {
 }
 
 # Check a relationship (=, >, >=, <, <=) between two semantic version numbers.
+# Usage: check_version 3.9.0 '<' 4.0.0
 function check_version () {
   compare_versions "$1" "$3"
   result="$?"
@@ -47,36 +49,41 @@ function check_version () {
   esac
 }
 
+if [ -z "${LLVM_VERSION}" ]; then
+  echo "error: LLVM_VERSION is not defined" 1>&2
+  exit 1
+fi
 
-# Homebrew packages the latest version of LLVM as a package named "llvm" and
-# old versions as "llvm@MAJOR.MINOR".
-LLVM_VERSION=${LLVM_VERSION:-latest}
-if [ "${LLVM_VERSION}" = 'latest' ]; then
+# Homebrew packages the latest version of LLVM as a package named "llvm". If
+# LLVM_VERSION matches that version, then install that package. Otherwise,
+# install a "llvm@MAJOR.MINOR" version package.
+LLVM_VERSION_LATEST=$(brew list --versions \
+  | sed -n "s/llvm \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)/\1.\2/p")
+if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
   LLVM_PACKAGE='llvm'
+  LLVM_INSTALL_PREFIX='llvm'
 else
   LLVM_PACKAGE="llvm@${LLVM_VERSION}"
+  LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
+
+  if ! brew info "${LLVM_PACKAGE}" > /dev/null 2> /dev/null; then
+    echo "error: There is no package Homebrew package named '${LLVM_PACKAGE}'"\
+         "for LLVM version ${LLVM_VERSION}" 1>&2
+    exit 1
+  fi
 fi
 
-# Extract the version of the specified LLVM package. This is only strictly
-# necessary in the case where LLVM_VERSION=latest.
-LLVM_VERSION=$(brew list --versions \
-  | sed -n "s/${LLVM_PACKAGE} \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)/\1.\2/p")
-
-# Find the CMAKE_PREFIX_PATH for the installed version of LLVM. This directory
-# was changed in the LLVM 3.9 release.
+# Infer the correct value of CMAKE_PREFIX_PATH for this version of LLVM. This
+# directory was changed between LLVM versions 3.8 and 3.9.
 if check_version "${LLVM_VERSION}" '>=' '3.9'; then
-  # TODO: This may break when a more recent version (>= 3.9) of LLVM is
-  # distributed in a named package. Only LLVM 3.7 and 3.8 are currently
-  # available, so it is not possible to test this.
-  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/cmake/llvm"
+  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/cmake/${LLVM_INSTALL_PREFIX}"
 else
-  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/llvm-${LLVM_VERSION}/share/llvm/cmake"
+  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/${LLVM_INSTALL_PREFIX}/share/llvm/cmake"
 fi
+export LLVM_DIR
 
 set +ex
 brew install boost
 brew install "${LLVM_PACKAGE}"
 brew install yaml-cpp --with-static-lib
 set -ex
-
-export LLVM_DIR LLVM_PACKAGE LLVM_VERSION
