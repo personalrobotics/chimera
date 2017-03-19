@@ -49,6 +49,11 @@ function check_version () {
   esac
 }
 
+function get_homebrew_version () {
+  brew info --json=v1 "$1" |\
+    python -c 'import json, sys;print json.load(sys.stdin)[0]["versions"]["stable"]'
+}
+
 if [ -z "${LLVM_VERSION}" ]; then
   echo "error: LLVM_VERSION is not defined" 1>&2
   exit 1
@@ -57,10 +62,10 @@ fi
 # Homebrew packages the latest version of LLVM as a package named "llvm". If
 # LLVM_VERSION matches that version, then install that package. Otherwise,
 # install a "llvm@MAJOR.MINOR" version package.
-LLVM_VERSION_LATEST=$(brew list --versions \
-  | sed -n "s/llvm \([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)/\1.\2/p")
+LLVM_PACKAGE_LATEST='llvm'
+LLVM_VERSION_LATEST=$(get_homebrew_version "${LLVM_PACKAGE_LATEST}")
 if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
-  LLVM_PACKAGE='llvm'
+  LLVM_PACKAGE="${LLVM_PACKAGE_LATEST}"
   LLVM_INSTALL_PREFIX='llvm'
 else
   LLVM_PACKAGE="llvm@${LLVM_VERSION}"
