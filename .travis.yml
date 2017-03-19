@@ -39,7 +39,7 @@ script:
   - mkdir build
   - cd build
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DLLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/" ..; fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DLLVM_DIR="$(brew --prefix llvm@${LLVM_VERSION})/lib/llvm-${LLVM_VERSION}/share/llvm/cmake/" ..; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DLLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/llvm-${LLVM_VERSION}/share/llvm/cmake/" ..; fi
   - make -j4
   - make test
 
