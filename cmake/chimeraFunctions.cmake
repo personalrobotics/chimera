@@ -5,6 +5,22 @@
 # Chimera requires the generation of a compilation database.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Function to convert the HTML special entities accordingly (e.g., &lt; &gt;
+# &amp; to <, >, &, respectively).
+# This function is a workaround to rectify unintended conversions by one of the
+# dependencies of Chimera.
+#
+# rectify_html_special_entities(file1 [file2 [...]])
+function(rectify_html_special_entities)
+    foreach(file ${ARGN})
+        file(READ "${file}" file_string)
+        string(REPLACE "&lt;" "<" file_string "${file_string}")
+        string(REPLACE "&gt;" ">" file_string "${file_string}")
+        string(REPLACE "&amp;" "&" file_string "${file_string}")
+        file(WRITE "${file}" "${file_string}")
+    endforeach()
+endfunction()
+
 # Function to create a build target for a Chimera binding.
 # The result of this operation is a CMake library target.
 #
@@ -15,6 +31,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [NAMESPACES namespace1 namespace2 ...])
 #                     SOURCES source1_file [source2_file ...]
 #                     [EXTRA_SOURCES source1_file ...]
+#                     [LINK_LIBRARIES item1 [item2 [...]]]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
 function(add_chimera_binding)
     include(ExternalProject)
@@ -24,7 +41,7 @@ function(add_chimera_binding)
     set(prefix binding)
     set(options DEBUG EXCLUDE_FROM_ALL)
     set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
-    set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES)
+    set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES LINK_LIBRARIES)
     cmake_parse_arguments("${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Print errors if arguments are missing.
@@ -68,6 +85,10 @@ function(add_chimera_binding)
         message(STATUS "  Extra Sources:")
         foreach(source ${binding_EXTRA_SOURCES})
             message(STATUS "  - ${source}")
+        endforeach()
+        message(STATUS "  Link Libraries:")
+        foreach(library ${binding_LINK_LIBRARIES})
+            message(STATUS "  - ${library}")
         endforeach()
     endif()
 
@@ -113,11 +134,16 @@ function(add_chimera_binding)
         foreach(relative_path ${binding_GENERATED_RELATIVE})
             list(APPEND binding_GENERATED "${binding_DESTINATION}/${relative_path}")
         endforeach()
+
+        rectify_html_special_entities(${binding_GENERATED})
     endif()
 
     # Placeholder target to generate compilation database.
     add_library("${binding_TARGET}_placeholder" EXCLUDE_FROM_ALL
         ${binding_SOURCES}
+    )
+    target_link_libraries("${binding_TARGET}_placeholder"
+        ${binding_LINK_LIBRARIES}
     )
     set_target_properties("${binding_TARGET}_placeholder" PROPERTIES
         LINKER_LANGUAGE CXX
