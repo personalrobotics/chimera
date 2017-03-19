@@ -1,6 +1,7 @@
 #ifndef __CHIMERA_UTIL_H__
 #define __CHIMERA_UTIL_H__
 
+#include <set>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Type.h>
 #include <clang/Frontend/CompilerInstance.h>
