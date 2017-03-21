@@ -93,3 +93,4 @@ export LLVM_DIR
 brew install boost
 brew install "${LLVM_PACKAGE}"
 brew install yaml-cpp --with-static-lib
+brew install mstch

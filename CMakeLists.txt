@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
 option(CHIMERA_BUILD_MSTCH
-    "Build external/mstch instead of using installed mstch" TRUE)
+    "Build external/mstch instead of using installed mstch" ON)
 
 set(RUNTIME_INSTALL_DIR "bin")
 set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
