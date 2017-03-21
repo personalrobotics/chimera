@@ -8,32 +8,37 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug COVERALLS=ON COMPILER=GCC
+      env: BUILD_TYPE=Debug COVERALLS=ON COMPILER=GCC LLVM_VERSION=3.6
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=GCC
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=GCC LLVM_VERSION=3.6
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG
+      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.6
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.6
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG
+      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.7
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=3.7
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Debug COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=4.0
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Release COVERALLS=OFF COMPILER=CLANG LLVM_VERSION=4.0
 
 install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then 'ci/install_linux.sh'; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then 'ci/install_macos.sh'; fi
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then . ci/install_macos.sh; fi
 
 script:
   - mkdir build
   - cd build
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/share/llvm-3.6/cmake/" ..; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx"   ]; then cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DLLVM_DIR="/usr/local/Cellar/llvm@3.7/3.7.1/lib/llvm-3.7/share/llvm/cmake/" ..; fi
+  - cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" ..
   - make -j4
   - make test
 

@@ -25,21 +25,33 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 - llvm 3.6 or above (+ tools)
 - libedit
 - yaml-cpp
+- boost
 
 **On Ubuntu**
 
 ```bash
-sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
-wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-get update
-sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev
+$ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
+$ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+$ sudo apt-get update
+$ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make
 ```
 
-**On Mac OS X**
+**On macOS**
 
 ```bash
-brew install yaml-cpp --with-static-lib
-PKG_CONFIG_PATH=/usr/local/Cellar/yaml-cpp/0.5.2/lib/pkgconfig cmake -DLLVM_DIR=/usr/local/opt/llvm/share/llvm/cmake ..
+$ brew install boost llvm
+$ brew install yaml-cpp --with-static-lib 
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ mkdir build && cd build
+$ PKG_CONFIG_PATH=$(brew --prefix yaml-cpp)/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm ..
+$ make
 ```
 
 ## Example ##
@@ -48,7 +60,7 @@ Let's try running chimera on itself!
 ```bash
 $ cd [PATH TO CHIMERA]
 $ rm -rf build && mkdir -p build && cd build
-$ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+$ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 $ make
 $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
@@ -84,6 +96,10 @@ classes:
     bases: []
     noncopyable: true
 ```
+
+## License ##
+Chimera is released under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
+information.
 
 ## Authors ##
 Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
