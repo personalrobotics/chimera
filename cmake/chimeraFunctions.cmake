@@ -17,6 +17,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [EXTRA_SOURCES source1_file ...]
 #                     [LINK_LIBRARIES item1 [item2 [...]]]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
+#
+# Warning: LINK_LIBRARIES option is a temporary feature and can be removed any 
+# soon. See #113 for further information.
 function(add_chimera_binding)
     include(ExternalProject)
 
