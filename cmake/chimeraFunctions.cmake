@@ -15,7 +15,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [NAMESPACES namespace1 namespace2 ...])
 #                     SOURCES source1_file [source2_file ...]
 #                     [EXTRA_SOURCES source1_file ...]
+#                     [LINK_LIBRARIES item1 [item2 [...]]]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
+#
+# Warning: LINK_LIBRARIES option is a temporary feature and can be removed any 
+# soon. See #113 for further information.
 function(add_chimera_binding)
     include(ExternalProject)
 
@@ -24,7 +28,7 @@ function(add_chimera_binding)
     set(prefix binding)
     set(options DEBUG EXCLUDE_FROM_ALL)
     set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
-    set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES)
+    set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES LINK_LIBRARIES)
     cmake_parse_arguments("${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Print errors if arguments are missing.
@@ -68,6 +72,10 @@ function(add_chimera_binding)
         message(STATUS "  Extra Sources:")
         foreach(source ${binding_EXTRA_SOURCES})
             message(STATUS "  - ${source}")
+        endforeach()
+        message(STATUS "  Link Libraries:")
+        foreach(library ${binding_LINK_LIBRARIES})
+            message(STATUS "  - ${library}")
         endforeach()
     endif()
 
@@ -118,6 +126,9 @@ function(add_chimera_binding)
     # Placeholder target to generate compilation database.
     add_library("${binding_TARGET}_placeholder" EXCLUDE_FROM_ALL
         ${binding_SOURCES}
+    )
+    target_link_libraries("${binding_TARGET}_placeholder"
+        ${binding_LINK_LIBRARIES}
     )
     set_target_properties("${binding_TARGET}_placeholder" PROPERTIES
         LINKER_LANGUAGE CXX
