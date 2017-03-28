@@ -2,6 +2,9 @@ project(chimera)
 cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
+option(CHIMERA_BUILD_MSTCH
+    "Build external/mstch instead of using installed mstch" ON)
+
 set(RUNTIME_INSTALL_DIR "bin")
 set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
 
@@ -26,6 +29,10 @@ add_definitions(${YAMLCPP_DEFINITIONS})
 
 find_package(Boost REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
+if(NOT CHIMERA_BUILD_MSTCH)
+    find_package(mstch REQUIRED)
+endif()
 
 ## Set up glorious compiler options.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
@@ -63,7 +70,9 @@ llvm_map_components_to_libnames(llvm_libs
 )
 
 # Build the external tools: Mustache and Cling.
-add_subdirectory(external/mstch)
+if(CHIMERA_BUILD_MSTCH)
+    add_subdirectory(external/mstch)
+endif()
 include_directories(${mstch_INCLUDE_DIR})
 
 add_subdirectory(external/cling)
