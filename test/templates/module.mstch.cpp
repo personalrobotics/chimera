@@ -7,21 +7,21 @@
  * >>> import {{module.name}}
  *
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 BOOST_PYTHON({{module.name}})
 {
-  {{{prebody}}}
+  {{prebody}}
   {{#module.bindings}}
   void {{.}}();
   {{.}}();
 
   {{/module.bindings}}
-  {{{postbody}}}
+  {{postbody}}
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}

@@ -31,6 +31,18 @@ namespace mstch
 ::mstch::node wrapYAMLNode(const YAML::Node &node);
 
 /**
+ * Custom escape function that disables HTML escaping on mstch output.
+ *
+ * This is not desirable in chimera because many C++ types include characters
+ * that can be accidentally escaped, such as `<>` and `&`.
+ *
+ * See: https://github.com/no1msd/mstch#custom-escape-function
+ */
+::mstch::config::escape = [](const std::string& str) -> std::string {
+  return str;
+};
+
+/**
  * Base mstch wrapper for Clang declarations.
  */
 template<typename T>
@@ -184,7 +196,7 @@ public:
     ::mstch::node constructors();
     ::mstch::node methods();
     ::mstch::node staticMethods();
-    
+
     ::mstch::node fields();
     ::mstch::node staticFields();
 

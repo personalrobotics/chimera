@@ -1,18 +1,18 @@
 /**
  * Automatically generated Boost.Python enum binding for '{{enum.name}}'.
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 void {{enum.mangled_name}}()
 {
-    {{{prebody}}}
+    {{prebody}}
     ::boost::python::enum_<{{enum.qualified_name}}>("{{enum.name}}"){{#enum.values}}
         .value("{{name}}", {{qualified_name}}){{/enum.values}}
-    {{{postbody}}};
+    {{postbody}};
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}
