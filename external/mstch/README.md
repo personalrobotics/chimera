@@ -6,6 +6,7 @@ mstch is a complete implementation of [{{mustache}}](http://mustache.github.io/)
 templates using modern C++. It's compliant with [specifications](https://github.com/mustache/spec)
 v1.1.3, including the lambda module.
 
+[![Try it online](https://img.shields.io/badge/try%20it-online-blue.svg)](http://melpon.org/wandbox/permlink/EqyOe7IBRYPGVk5f)
 [![GitHub version](https://badge.fury.io/gh/no1msd%2Fmstch.svg)](http://badge.fury.io/gh/no1msd%2Fmstch)
 [![Build Status](https://travis-ci.org/no1msd/mstch.svg?branch=master)](https://travis-ci.org/no1msd/mstch)
 [![Build status](https://ci.appveyor.com/api/projects/status/d6mxp0uba5646x16?svg=true)](https://ci.appveyor.com/project/no1msd/mstch)
@@ -191,6 +192,22 @@ Output:
 <b>1</b>: Chris
 <b>2</b>: Mark
 <b>3</b>: Scott
+```
+
+### Custom escape function
+
+By default, mstch uses HTML escaping on the output, as per specification. This
+is not useful if your output is not HTML, so mstch provides a way to supply
+your own escape implementation. Just assign any callable object to the static
+`mstch::config::escape`, which is an initially empty
+`std::function<std::string(const std::string&)>`. 
+
+For example you can turn off escaping entirely with a lambda:
+
+```c++
+mstch::config::escape = [](const std::string& str) -> std::string {
+  return str;
+};
 ```
 
 ## Requirements
