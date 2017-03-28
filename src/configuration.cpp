@@ -82,7 +82,7 @@ void chimera::Configuration::LoadFile(const std::string &filename)
         configNode_ = YAML::LoadFile(filename);
         configFilename_ = filename;
     }
-    catch(YAML::Exception& e) 
+    catch(YAML::Exception& e)
     {
         // If unable to read the configuration YAML, terminate with an error.
         std::cerr << "Unable to read configuration '" << filename << "'."
@@ -143,7 +143,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     const chimera::Configuration &parent, CompilerInstance *ci)
 : parent_(parent)
 , ci_(ci)
-{   
+{
     // Get a reference to the configuration YAML structure.
     const YAML::Node &configNode = parent.configNode_;
 
@@ -229,6 +229,17 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             exit(-3);
         }
     }
+
+    // Set custom escape function that disables HTML escaping on mstch output.
+    //
+    // This is not desirable in chimera because many C++ types include characters
+    // that can be accidentally escaped, such as `<>` and `&`.
+    //
+    // See: https://github.com/no1msd/mstch#custom-escape-function
+    //
+    ::mstch::config::escape = [](const std::string& str) -> std::string {
+        return str;
+    };
 }
 
 chimera::CompiledConfiguration::~CompiledConfiguration()
@@ -397,7 +408,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
     // If the node simply contains a string, return it.
     if (node.Type() == YAML::NodeType::Scalar)
         return node.as<std::string>();
-    
+
     // If the node contains a "source:" entry, load from that.
     if (const YAML::Node &source_node = node["source"])
     {

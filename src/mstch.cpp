@@ -160,7 +160,7 @@ CXXRecord::CXXRecord(
             std::inserter(available_base_decls, available_base_decls.end()),
             [this](const CXXRecordDecl* base_decl)
             {
-                return (available_decls_->find(base_decl->getCanonicalDecl()) 
+                return (available_decls_->find(base_decl->getCanonicalDecl())
                             != available_decls_->end());
             }
         );
@@ -874,7 +874,7 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 
     // Ignore argument is part of a variadic function
     // (since it could be non-unique).
-    if (const auto template_decl = 
+    if (const auto template_decl =
             method_decl_->getPrimaryTemplate())
         if (chimera::util::isVariadicFunctionTemplate(template_decl))
             return default_name_;
