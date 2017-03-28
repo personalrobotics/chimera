@@ -1,6 +1,6 @@
 include(CTest)
 
-set(chimera_DIR "${PROJECT_BINARY_DIR}")
+set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
 include(chimeraFunctions)
 
 add_chimera_binding(

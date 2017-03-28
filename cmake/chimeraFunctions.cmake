@@ -18,8 +18,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #                     [LINK_LIBRARIES item1 [item2 [...]]]
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
 #
-# Warning: LINK_LIBRARIES option is a temporary feature and can be removed any 
-# soon. See #113 for further information.
+# Warning: LINK_LIBRARIES option is a temporary feature and can be removed any
+# time. See #113 for further information.
 function(add_chimera_binding)
     include(ExternalProject)
 
@@ -81,7 +81,9 @@ function(add_chimera_binding)
 
     # Ensure that the output destination directory is created.
     file(MAKE_DIRECTORY "${binding_DESTINATION}")
-    file(WRITE "${binding_DESTINATION}/empty.cpp" "")
+    set(binding_SOURCES_TXT "${binding_DESTINATION}/sources.txt")
+    set(binding_EMPTY_CPP "${binding_DESTINATION}/empty.cpp")
+    file(WRITE "${binding_EMPTY_CPP}" "")
 
     # Construct the list of chimera arguments.
     set(binding_ARGS)
@@ -97,16 +99,16 @@ function(add_chimera_binding)
         endforeach()
     endif()
     list(APPEND binding_ARGS ${binding_SOURCES})
-    list(APPEND binding_ARGS > "${binding_DESTINATION}/sources.txt")
+    list(APPEND binding_ARGS > "${binding_SOURCES_TXT}.staging")
 
     # Create an external target that re-runs chimera when any of the sources have changed.
     # This will necessarily invalidate a placeholder dependency that causes CMake to
     # rerun the compilation of the library if sources are regenerated.
-    add_custom_target("${binding_TARGET}_SOURCES" DEPENDS "${binding_DESTINATION}/sources.txt")
+    add_custom_target("${binding_TARGET}_SOURCES" DEPENDS "${binding_SOURCES_TXT}")
     add_custom_command(
         OUTPUT "${binding_DESTINATION}/sources.txt"
-        COMMAND "${chimera_EXECUTABLE}"
-        ARGS ${binding_ARGS}
+        COMMAND "${chimera_EXECUTABLE}" ARGS ${binding_ARGS}
+        COMMAND ${CMAKE_COMMAND} ARGS -E rename "${binding_SOURCES_TXT}.staging" "${binding_SOURCES_TXT}"
         DEPENDS "${binding_CONFIGURATION}" ${binding_SOURCES}
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMENT "Generating bindings for ${binding_TARGET}."
@@ -114,8 +116,8 @@ function(add_chimera_binding)
     )
 
     # Get the current list of generated sources if already generated.
-    if(EXISTS "${binding_DESTINATION}/sources.txt")
-        file(STRINGS "${binding_DESTINATION}/sources.txt" binding_GENERATED_RELATIVE NO_HEX_CONVERSION)
+    if(EXISTS "${binding_SOURCES_TXT}")
+        file(STRINGS "${binding_SOURCES_TXT}" binding_GENERATED_RELATIVE NO_HEX_CONVERSION)
 
         set(binding_GENERATED)
         foreach(relative_path ${binding_GENERATED_RELATIVE})
@@ -137,7 +139,7 @@ function(add_chimera_binding)
     # Create a library target to build the binding as a module.
     add_library("${binding_TARGET}" MODULE
         "${binding_EXCLUDE_FROM_ALL_FLAG}"
-        "${binding_DESTINATION}/empty.cpp"
+        "${binding_EMPTY_CPP}"
         ${binding_GENERATED}
         ${binding_EXTRA_SOURCES}
     )
