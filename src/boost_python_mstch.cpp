@@ -6,23 +6,23 @@ const std::string CLASS_BINDING_CPP = R"(
  * Automatically generated class binding for '{{class.name}}'.
  * Generated on {{date}}.
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 class {{class.mangled_name}}
 {
-    {{{prebody}}}
+    {{prebody}}
     /* constructors */
     /* methods */
     /* static methods */
     /* fields */
-    {{{postbody}}}
+    {{postbody}}
 };
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}
 )";
 
 const std::string ENUM_BINDING_CPP = R"(
@@ -57,22 +57,37 @@ const std::string MODULE_CPP = R"(
  * >>> import {{module.name}}
  *
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
 
-BOOST_PYTHON({{module.name}})
+#include <boost/python.hpp>
+#include <cmath>
+
+/* main postinclude */
+
+BOOST_PYTHON_MODULE({{module.name}})
 {
-  {{{prebody}}}
-  {{#module.bindings}}
+::boost::python::docstring_options options(true, true, false);
+
+{{precontent}}
+{{#module.namespaces}}{{#name}}
+  ::boost::python::scope(){{!
+    }}{{#scope}}{{#name}}.attr("{{name}}"){{/name}}{{/scope}}.attr("{{name}}") = {{!
+    }}::boost::python::object(::boost::python::handle<>({{!
+        }}::boost::python::borrowed(::PyImport_AddModule({{!
+            }}"{{module.name}}{{#scope}}{{#name}}.{{name}}{{/name}}{{/scope}}.{{name}}"))));
+{{/name}}{{/module.namespaces}}
+
+{{#module.bindings}}
+  void {{.}}();
   {{.}}();
-  {{/module.bindings}}
-  {{{postbody}}}
+
+{{/module.bindings}}
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}
 
 )";
 
