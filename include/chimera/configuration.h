@@ -1,6 +1,8 @@
 #ifndef __CHIMERA_CONFIGURATION_H__
 #define __CHIMERA_CONFIGURATION_H__
 
+#include "chimera/binding.h"
+
 #include <clang/AST/DeclBase.h>
 #include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -167,8 +169,10 @@ public:
     bool IsSuppressed(const clang::QualType type) const;
 
     /**
-     * Checks if a particular node is a string or contains a "source" entry to load.
+     * Checks if a particular node is a string or refers to a file to load.
      * This is useful for resolving entries that might be pulled in from files.
+     *
+     * Files are represented by string scalars that have a type tag of "!file".
      */
     std::string Lookup(const YAML::Node &node) const;
 
@@ -191,6 +195,9 @@ private:
 protected:
     static const YAML::Node emptyNode_;
     const Configuration &parent_;
+    const YAML::Node configNode_;
+    const YAML::Node templateNode_;
+    chimera::Binding templateBinding_;
     clang::CompilerInstance *ci_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;

@@ -38,12 +38,13 @@ std::string generateUniqueName()
 } // namespace
 
 ::mstch::node
-chimera::util::wrapYAMLNode(const YAML::Node &node)
+chimera::util::wrapYAMLNode(const YAML::Node &node,
+                            chimera::util::ScalarConversionFn fn)
 {
     switch (node.Type())
     {
     case YAML::NodeType::Scalar:
-        return node.as<std::string>();
+        return fn ? fn(node) : node.as<std::string>();
     case YAML::NodeType::Sequence:
         {
             ::mstch::array context;
@@ -74,7 +75,8 @@ chimera::util::wrapYAMLNode(const YAML::Node &node)
 
 void
 chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
-                                  bool overwrite)
+                                  bool overwrite,
+                                  chimera::util::ScalarConversionFn fn)
 {
     // Ignore non-map types of YAML::Node.
     if (!node.IsMap())
@@ -86,7 +88,12 @@ chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
     {
         const std::string name = it->first.as<std::string>();
         const YAML::Node &value = it->second;
-        map[name] = chimera::util::wrapYAMLNode(value);
+
+        // Insert the key if overwriting or if the key does not exist.
+        if (overwrite || map.find(name) == map.end())
+        {
+            map[name] = chimera::util::wrapYAMLNode(value, fn);
+        }
     }
 }
 

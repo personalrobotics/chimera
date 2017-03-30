@@ -75,3 +75,11 @@ BOOST_PYTHON({{module.name}})
 {{{footer}}}
 
 )";
+
+const chimera::Binding PYTHON_BINDING {
+  CLASS_BINDING_CPP,
+  ENUM_BINDING_CPP,
+  FUNCTION_BINDING_CPP,
+  MODULE_CPP,
+  VAR_BINDING_CPP,
+};
