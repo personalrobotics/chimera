@@ -20,7 +20,7 @@ class {{class.mangled_name}}
     /* static methods */
     /* fields */
     {{{postbody}}}
-}
+};
 {{{postcontent}}}
 {{{footer}}}
 )";
