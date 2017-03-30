@@ -37,6 +37,59 @@ std::string generateUniqueName()
 
 } // namespace
 
+::mstch::node
+chimera::util::wrapYAMLNode(const YAML::Node &node)
+{
+    switch (node.Type())
+    {
+    case YAML::NodeType::Scalar:
+        return node.as<std::string>();
+    case YAML::NodeType::Sequence:
+        {
+            ::mstch::array context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                const YAML::Node &value = *it;
+                context.push_back(wrapYAMLNode(value));
+            }
+            return context;
+        }
+    case YAML::NodeType::Map:
+        {
+            ::mstch::map context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                const std::string name = it->first.as<std::string>();
+                const YAML::Node &value = it->second;
+                context[name] = wrapYAMLNode(value);
+            }
+            return context;
+        }
+    case YAML::NodeType::Undefined:
+    case YAML::NodeType::Null:
+    default:
+        return nullptr;
+    }
+}
+
+void
+chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
+                                  bool overwrite)
+{
+    // Ignore non-map types of YAML::Node.
+    if (!node.IsMap())
+        return;
+
+    // Add entries from the YAML configuration directly into the object.
+    // This wraps each YAML node in a recursive conversion wrapper.
+    for(YAML::const_iterator it=node.begin(); it!=node.end(); ++it)
+    {
+        const std::string name = it->first.as<std::string>();
+        const YAML::Node &value = it->second;
+        map[name] = chimera::util::wrapYAMLNode(value);
+    }
+}
+
 const NamedDecl*
 chimera::util::resolveDeclaration(CompilerInstance *ci,
                                   const llvm::StringRef declStr)

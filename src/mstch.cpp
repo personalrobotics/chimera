@@ -15,40 +15,6 @@ namespace chimera
 namespace mstch
 {
 
-::mstch::node wrapYAMLNode(const YAML::Node &node)
-{
-    switch (node.Type())
-    {
-    case YAML::NodeType::Scalar:
-        return node.as<std::string>();
-    case YAML::NodeType::Sequence:
-        {
-            ::mstch::array context;
-            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-            {
-                const YAML::Node &value = *it;
-                context.push_back(wrapYAMLNode(value));
-            }
-            return context;
-        }
-    case YAML::NodeType::Map:
-        {
-            ::mstch::map context;
-            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-            {
-                const std::string name = it->first.as<std::string>();
-                const YAML::Node &value = it->second;
-                context[name] = wrapYAMLNode(value);
-            }
-            return context;
-        }
-    case YAML::NodeType::Undefined:
-    case YAML::NodeType::Null:
-    default:
-        return nullptr;
-    }
-}
-
 ::mstch::node generateScope(const ::chimera::CompiledConfiguration &config,
                             const NestedNameSpecifier *nns)
 {
@@ -145,7 +111,7 @@ CXXRecord::CXXRecord(
 ::mstch::node CXXRecord::bases()
 {
     if (const YAML::Node &node = decl_config_["bases"])
-        return wrapYAMLNode(node);
+        return chimera::util::wrapYAMLNode(node);
 
     // Get all bases of this class.
     std::set<const CXXRecordDecl *> base_decls =

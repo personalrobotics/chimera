@@ -5,11 +5,35 @@
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Type.h>
 #include <clang/Frontend/CompilerInstance.h>
+#include <mstch/mstch.hpp>
+#include <yaml-cpp/yaml.h>
 
 namespace chimera
 {
 namespace util
 {
+
+/**
+ * Wrapper that generates context for a YAML node.
+ *
+ * This function automatically converts known datatypes from YAML::Node entries
+ * to `mstch` context entries.
+ */
+::mstch::node wrapYAMLNode(const YAML::Node &node);
+
+/**
+ * Adds entries from a YAML::Node to an existing mstch::map.
+ *
+ * This function takes an existing mstch::map and inserts entries from a
+ * YAML::Node node if it is a map.  It can be used to create a mstch::node
+ * combining auto-generated properties with ones from a configuration file.
+ *
+ * When `overwrite` is true, entries that already exist in the mstch::map
+ * will be replaced by entries in the YAML::Node if it contains them.  If
+ * false, existing properties will not be modified.
+ */
+void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
+                        bool overwrite=false);
 
 /**
  * Resolve a declaration string within the scope of a compiler instance.

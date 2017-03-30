@@ -23,14 +23,6 @@ namespace mstch
 {
 
 /**
- * Wrapper that generates context for a YAML node.
- *
- * This function automatically converts known datatypes from YAML::Node entries
- * to `mstch` context entries.
- */
-::mstch::node wrapYAMLNode(const YAML::Node &node);
-
-/**
  * Base mstch wrapper for Clang declarations.
  */
 template<typename T>
@@ -51,7 +43,7 @@ public:
         {
             const std::string name = it->first.as<std::string>();
             const YAML::Node &value = it->second;
-            register_lambda(name, [value]() { return wrapYAMLNode(value); });
+            register_lambda(name, [value]() { return chimera::util::wrapYAMLNode(value); });
         }
 
         // Override certain entries with our clang-generated information.
