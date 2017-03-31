@@ -104,5 +104,5 @@ information.
 ## Authors ##
 Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
 
-[1]: http://www.oxforddictionaries.com/us/media/american_english/us_pron_ogg/c/chi/chime/chimera__us_1_rr.ogg
+[1]: http://audio.oxforddictionaries.com/en/mp3/chimera_gb_1.mp3
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg
