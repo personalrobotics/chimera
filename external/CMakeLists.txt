@@ -26,4 +26,3 @@ set_target_properties(mstch PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${mstch_INCLUDE_DIR}"
     IMPORTED_LOCATION "${mstch_LIBRARY}"
 )
-message("JUST ADDED TARGET MSTCH")
