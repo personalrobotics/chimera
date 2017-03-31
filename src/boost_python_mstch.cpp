@@ -20,7 +20,7 @@ class {{class.mangled_name}}
     /* static methods */
     /* fields */
     {{postbody}}
-}
+};
 {{postcontent}}
 {{footer}}
 )";
@@ -61,17 +61,40 @@ const std::string MODULE_CPP = R"(
 {{#includes}}
 #include <{{.}}>
 {{/includes}}
-{{precontent}}
 
-BOOST_PYTHON({{module.name}})
+#include <boost/python.hpp>
+#include <cmath>
+
+/* main postinclude */
+
+BOOST_PYTHON_MODULE({{module.name}})
 {
-  {{prebody}}
-  {{#module.bindings}}
+::boost::python::docstring_options options(true, true, false);
+
+{{precontent}}
+{{#module.namespaces}}{{#name}}
+  ::boost::python::scope(){{!
+    }}{{#scope}}{{#name}}.attr("{{name}}"){{/name}}{{/scope}}.attr("{{name}}") = {{!
+    }}::boost::python::object(::boost::python::handle<>({{!
+        }}::boost::python::borrowed(::PyImport_AddModule({{!
+            }}"{{module.name}}{{#scope}}{{#name}}.{{name}}{{/name}}{{/scope}}.{{name}}"))));
+{{/name}}{{/module.namespaces}}
+
+{{#module.bindings}}
+  void {{.}}();
   {{.}}();
-  {{/module.bindings}}
-  {{postbody}}
+
+{{/module.bindings}}
 }
 {{postcontent}}
 {{footer}}
 
 )";
+
+const chimera::Binding PYTHON_BINDING {
+  CLASS_BINDING_CPP,
+  ENUM_BINDING_CPP,
+  FUNCTION_BINDING_CPP,
+  MODULE_CPP,
+  VAR_BINDING_CPP,
+};

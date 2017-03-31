@@ -93,3 +93,6 @@ export LLVM_DIR
 brew install boost
 brew install "${LLVM_PACKAGE}"
 brew install yaml-cpp --with-static-lib
+
+# Install test dependencies.
+brew install boost-python

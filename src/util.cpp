@@ -37,6 +37,70 @@ std::string generateUniqueName()
 
 } // namespace
 
+::mstch::node
+chimera::util::wrapYAMLNode(const YAML::Node &node,
+                            chimera::util::ScalarConversionFn fn)
+{
+    switch (node.Type())
+    {
+    case YAML::NodeType::Scalar:
+        return fn ? fn(node) : node.as<std::string>();
+    case YAML::NodeType::Sequence:
+        {
+            ::mstch::array context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                const YAML::Node &value = *it;
+                context.emplace_back(wrapYAMLNode(value));
+            }
+            return context;
+        }
+    case YAML::NodeType::Map:
+        {
+            ::mstch::map context;
+            for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+            {
+                const std::string name = it->first.as<std::string>();
+                const YAML::Node &value = it->second;
+                context[name] = wrapYAMLNode(value);
+            }
+            return context;
+        }
+    case YAML::NodeType::Undefined:
+    case YAML::NodeType::Null:
+    default:
+        return nullptr;
+    }
+}
+
+void
+chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
+                                  bool overwrite,
+                                  chimera::util::ScalarConversionFn fn)
+{
+    // Ignore non-map types of YAML::Node.
+    if (!node.IsMap())
+        return;
+
+    // Add entries from the YAML configuration directly into the object.
+    // This wraps each YAML node in a recursive conversion wrapper.
+    for(YAML::const_iterator it=node.begin(); it!=node.end(); ++it)
+    {
+        const std::string name = it->first.as<std::string>();
+        const YAML::Node &value = it->second;
+
+        // Insert the key if overwriting or if the key does not exist.
+        // (This uses emplace's behavior of returning a std::pair of which
+        //  the second element indicates whether an insertion was done or
+        //  if the element already existed to avoid two lookups.)
+        auto result = map.emplace(std::make_pair(name, ::mstch::node{}));
+        if (result.second || overwrite)
+        {
+            result.first->second = chimera::util::wrapYAMLNode(value, fn);
+        }
+    }
+}
+
 const NamedDecl*
 chimera::util::resolveDeclaration(CompilerInstance *ci,
                                   const llvm::StringRef declStr)

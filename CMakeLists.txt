@@ -21,7 +21,7 @@ add_definitions(${CLANG_DEFINITIONS})
 set(YAMLCPP_STATIC_LIBRARY ON CACHE BOOL
     "If true, try to find static yaml-cpp library first instead of dynamic.")
 find_package(YamlCpp REQUIRED)
-include_directories(${YAMLCPP_INCLUDE_DIRS})
+include_directories(SYSTEM ${YAMLCPP_INCLUDE_DIRS})
 add_definitions(${YAMLCPP_DEFINITIONS})
 
 find_package(Boost REQUIRED)
