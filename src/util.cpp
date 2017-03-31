@@ -51,7 +51,7 @@ chimera::util::wrapYAMLNode(const YAML::Node &node,
             for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
             {
                 const YAML::Node &value = *it;
-                context.push_back(wrapYAMLNode(value));
+                context.emplace_back(wrapYAMLNode(value));
             }
             return context;
         }
@@ -90,9 +90,13 @@ chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
         const YAML::Node &value = it->second;
 
         // Insert the key if overwriting or if the key does not exist.
-        if (overwrite || map.find(name) == map.end())
+        // (This uses emplace's behavior of returning a std::pair of which
+        //  the second element indicates whether an insertion was done or
+        //  if the element already existed to avoid two lookups.)
+        auto result = map.emplace(std::make_pair(name, ::mstch::node{}));
+        if (result.second || overwrite)
         {
-            map[name] = chimera::util::wrapYAMLNode(value, fn);
+            result.first->second = chimera::util::wrapYAMLNode(value, fn);
         }
     }
 }

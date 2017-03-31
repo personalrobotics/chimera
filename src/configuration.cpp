@@ -275,7 +275,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             auto type = chimera::util::resolveType(ci, type_str);
             if (type.getTypePtrOrNull())
             {
-                types_.push_back(std::make_pair(type, it.second));
+                types_.emplace_back(std::make_pair(type, it.second));
             }
             else
             {
