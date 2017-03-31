@@ -107,6 +107,15 @@ classes:
     noncopyable: true
 ```
 
+## Troubleshooting ##
+
+### Is there a length limit for the keys in the configuration file of Chimera? ###
+
+Yes. [`yaml-cpp` support more than 1024 characters for a single line
+key](https://github.com/jbeder/yaml-cpp/blob/release-0.5.3/src/simplekey.cpp#L111).
+If you want to use a longer key, then you should use [multi-line
+key](http://stackoverflow.com/a/36295084).
+
 ## License ##
 Chimera is released under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
 information.
