@@ -63,11 +63,12 @@ llvm_map_components_to_libnames(llvm_libs
 )
 
 # Build the external tools: Mustache and Cling.
-add_subdirectory(external/mstch)
-include_directories(${mstch_INCLUDE_DIR})
-
-add_subdirectory(external/cling)
+add_subdirectory(external)
+# TODO: The following directives are no longer necessary in CMake 3.0+
+get_target_property(cling_utils_INCLUDE_DIR cling_utils INTERFACE_INCLUDE_DIRECTORIES)
 include_directories(${cling_utils_INCLUDE_DIR})
+get_target_property(mstch_INCLUDE_DIR mstch INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${mstch_INCLUDE_DIR})
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"

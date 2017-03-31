@@ -1,23 +1,23 @@
 /**
  * Automatically generated Boost.Python class binding for '{{class.name}}'.
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 void {{class.mangled_name}}
 {
-    {{{prebody}}}
-    ::boost::python::class_<{{{class.qualified_name}}}{{^class.is_copyable}},
+    {{prebody}}
+    ::boost::python::class_<{{class.qualified_name}}{{^class.is_copyable}},
         ::boost::noncopyable{{/class.is_copyable}}{{#class.bases?}},
-        ::boost::python::bases<{{#class.bases}}{{{qualified_name}}}{{^last}},
+        ::boost::python::bases<{{#class.bases}}{{qualified_name}}{{^last}},
                                {{/last}}{{/class.bases}}>{{/class.bases?}}>("{{class.name}}", boost::python::no_init)
 
     /* constructors */
     {{#class.constructors}}
-    .def(::boost::python::init<{{#params}}{{{type}}}{{^last}},
+    .def(::boost::python::init<{{#params}}{{type}}{{^last}},
                                {{/last}}{{/params}}>
             ({{#params?}}({{#params}}::boost::python::arg("{{name}}"){{^last}},
               {{/last}}{{/params}}){{/params?}}))
@@ -26,10 +26,10 @@ void {{class.mangled_name}}
     /* methods */
     {{#class.methods}}
     .def("{{name}}",
-        static_cast<{{{type}}}>(&{{qualified_name}}){{#params?}},
+        static_cast<{{type}}>(&{{qualified_name}}){{#params?}},
             ({{#params}}::boost::python::arg("{{name}}"){{^last}},
              {{/last}}{{/params}}){{/params?}}{{#return_value_policy}},
-            ::boost::python::return_value_policy<{{{.}}}>(){{/return_value_policy}}){{#is_static}}
+            ::boost::python::return_value_policy<{{.}}>(){{/return_value_policy}}){{#is_static}}
     .staticmethod("{{name}}"){{/is_static}}
     {{/class.methods}}
 
@@ -39,7 +39,7 @@ void {{class.mangled_name}}
         &{{qualified_name}})
     {{/class.fields}}
 
-    {{{postbody}}};
+    {{postbody}};
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}

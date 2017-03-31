@@ -1,8 +1,6 @@
 # Compile a small subset of cling::utils.
 set(cling_utils_INCLUDE_DIR
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  CACHE STRING
-  "cling utils include directory"
 )
 
 include_directories(
@@ -16,4 +14,8 @@ add_library(cling_utils STATIC
 target_link_libraries(cling_utils
   ${CLANG_LIBS}
   ${llvm_libs}
+)
+
+set_target_properties(cling_utils PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${cling_utils_INCLUDE_DIR}"
 )

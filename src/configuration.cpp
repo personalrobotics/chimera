@@ -82,7 +82,7 @@ void chimera::Configuration::LoadFile(const std::string &filename)
         configNode_ = YAML::LoadFile(filename);
         configFilename_ = filename;
     }
-    catch(YAML::Exception& e) 
+    catch(YAML::Exception& e)
     {
         // If unable to read the configuration YAML, terminate with an error.
         std::cerr << "Unable to read configuration '" << filename << "'."
@@ -145,7 +145,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 , configNode_(parent.GetRoot()) // TODO: do we need this reference?
 , templateNode_(configNode_["template"]) // TODO: is this always ok?
 , ci_(ci)
-{   
+{
     // Resolve command-line namespaces.  Since these cannot include
     // configuration information, they are simpler to handle.
     for (const std::string &ns_str : parent.inputNamespaceNames_)
@@ -308,6 +308,17 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         if (const YAML::Node &variableTemplateNode = templateNode_["variable"])
             templateBinding_.variable_cpp = Lookup(variableTemplateNode);
     }
+
+    // Set custom escape function that disables HTML escaping on mstch output.
+    //
+    // This is not desirable in chimera because many C++ types include characters
+    // that can be accidentally escaped, such as `<>` and `&`.
+    //
+    // See: https://github.com/no1msd/mstch#custom-escape-function
+    //
+    ::mstch::config::escape = [](const std::string& str) -> std::string {
+        return str;
+    };
 }
 
 chimera::CompiledConfiguration::~CompiledConfiguration()

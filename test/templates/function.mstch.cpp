@@ -1,20 +1,20 @@
 /**
  * Automatically generated Boost.Python function binding for '{{function.name}}'.
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 void {{function.mangled_name}}()
 {
-    {{{prebody}}}
+    {{prebody}}
     boost::python::def("{{function.name}}",
-        static_cast<{{{function.type}}}>(&{{function.qualified_name}}),
+        static_cast<{{function.type}}>(&{{function.qualified_name}}),
             ({{#function.params}}::boost::python::arg("{{name}}"){{^last}},
              {{last}}{{/function.params}}));
-    {{{postbody}}}
+    {{postbody}}
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}

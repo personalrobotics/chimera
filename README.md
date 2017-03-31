@@ -27,7 +27,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 - yaml-cpp
 - boost
 
-**On Ubuntu**
+**On Ubuntu from source**
 
 ```bash
 $ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
@@ -39,9 +39,18 @@ $ cd chimera
 $ mkdir build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ make
+$ sudo make install
 ```
 
-**On macOS**
+**On macOS using Homebrew**
+```bash
+# install Homebrew if not installed
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+$ brew tap personalrobotics/tap
+$ brew install chimera
+```
+
+**On macOS from source**
 
 ```bash
 $ brew install boost llvm
@@ -52,6 +61,7 @@ $ mkdir build && cd build
 $ PKG_CONFIG_PATH=$(brew --prefix yaml-cpp)/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm ..
 $ make
+$ sudo make install
 ```
 
 ## Example ##
