@@ -6,23 +6,23 @@ const std::string CLASS_BINDING_CPP = R"(
  * Automatically generated class binding for '{{class.name}}'.
  * Generated on {{date}}.
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 class {{class.mangled_name}}
 {
-    {{{prebody}}}
+    {{prebody}}
     /* constructors */
     /* methods */
     /* static methods */
     /* fields */
-    {{{postbody}}}
+    {{postbody}}
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}
 )";
 
 const std::string ENUM_BINDING_CPP = R"(
@@ -57,21 +57,21 @@ const std::string MODULE_CPP = R"(
  * >>> import {{module.name}}
  *
  */
-{{{header}}}
+{{header}}
 {{#includes}}
-#include <{{{.}}}>
+#include <{{.}}>
 {{/includes}}
-{{{precontent}}}
+{{precontent}}
 
 BOOST_PYTHON({{module.name}})
 {
-  {{{prebody}}}
+  {{prebody}}
   {{#module.bindings}}
   {{.}}();
   {{/module.bindings}}
-  {{{postbody}}}
+  {{postbody}}
 }
-{{{postcontent}}}
-{{{footer}}}
+{{postcontent}}
+{{footer}}
 
 )";

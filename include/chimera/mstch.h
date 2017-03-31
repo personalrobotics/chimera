@@ -184,7 +184,7 @@ public:
     ::mstch::node constructors();
     ::mstch::node methods();
     ::mstch::node staticMethods();
-    
+
     ::mstch::node fields();
     ::mstch::node staticFields();
 
