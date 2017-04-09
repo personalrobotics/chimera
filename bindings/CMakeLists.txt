@@ -4,7 +4,7 @@ set(binding_LIST "boost_python")
 
 # Iterate over each available language binding and generate a C++ source file.
 # Note: BINDING_NAME has non-standard capitalization because it is directly
-# used in some of the template substitions, which are generally ALL-CAPS.
+# used in some of the template substitutions, which are generally ALL-CAPS.
 foreach(BINDING_NAME IN LISTS binding_LIST)
     set(binding_IMPL "${BINDING_NAME}_binding-impl.h")
 
