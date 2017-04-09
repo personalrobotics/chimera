@@ -42,4 +42,5 @@ configure_file(binding.cpp.tmpl binding.cpp
     @ONLY NEWLINE_STYLE UNIX
 )
 add_library(chimera_bindings STATIC binding.cpp ${binding_IMPLS})
+target_compile_options(chimera_bindings PUBLIC "-std=c++11")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
