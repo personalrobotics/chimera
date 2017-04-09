@@ -4,7 +4,7 @@ add_library(cling_utils STATIC
 )
 
 target_compile_options(cling_utils
-  PUBLIC "--std=c++11"
+  PUBLIC "-std=c++11"
 )
 
 target_link_libraries(cling_utils

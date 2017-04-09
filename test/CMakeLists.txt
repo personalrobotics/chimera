@@ -14,18 +14,20 @@ add_chimera_binding(
 )
 
 target_include_directories(test_binding SYSTEM
-  PRIVATE ${Boost_INCLUDE_DIRS}
-  PRIVATE ${PYTHON_INCLUDE_DIRS}
+  PRIVATE
+    ${Boost_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
 )
 
 target_link_libraries(test_binding
-  ${Boost_PYTHON_LIBRARIES}
-  ${PYTHON_LIBRARIES}
+  PRIVATE
+    ${Boost_PYTHON_LIBRARY}
+    ${PYTHON_LIBRARIES}
 )
 
 add_test(
-    NAME ctest_build_binding
-    COMMAND "${CMAKE_COMMAND}"
-        --build ${CMAKE_BINARY_DIR}
-        --target test_binding
+  NAME ctest_build_binding
+  COMMAND "${CMAKE_COMMAND}"
+    --build ${CMAKE_BINARY_DIR}
+    --target test_binding
 )

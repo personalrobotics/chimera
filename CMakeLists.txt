@@ -19,7 +19,7 @@ include_directories(SYSTEM ${CLANG_INCLUDE_DIRS})
 add_definitions(${CLANG_DEFINITIONS})
 
 set(YAMLCPP_STATIC_LIBRARY ON CACHE BOOL
-    "If true, try to find static yaml-cpp library first instead of dynamic.")
+  "If true, try to find static yaml-cpp library first instead of dynamic.")
 find_package(YamlCpp REQUIRED)
 include_directories(SYSTEM ${YAMLCPP_INCLUDE_DIRS})
 add_definitions(${YAMLCPP_DEFINITIONS})
@@ -29,22 +29,23 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 ## Set up default compiler options.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebugInfo)
+  set(CMAKE_BUILD_TYPE RelWithDebugInfo)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_COMPILER_IS_CLANGCXX TRUE)
+  set(CMAKE_COMPILER_IS_CLANGCXX TRUE)
 endif()
 
 if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
-    if (CMAKE_COMPILER_IS_CLANGCXX)
-        add_definitions("-fcolor-diagnostics")
-    endif()
+  if (CMAKE_COMPILER_IS_CLANGCXX)
+    add_definitions("-fcolor-diagnostics")
+  endif()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Wall -Wstrict-aliasing=2")
+  add_compile_options("-Wextra" "-Wall" "-Wstrict-aliasing=2")
 endif()
+add_compile_options("-Wno-unused-parameter")
 
 ###########
 ## BUILD ##
@@ -75,8 +76,7 @@ add_executable("${PROJECT_NAME}"
 )
 
 target_compile_options("${PROJECT_NAME}"
-  PUBLIC "--std=c++11"
-  PRIVATE "-Wno-unused-parameter"
+  PUBLIC "-std=c++11"
 )
 
 target_include_directories("${PROJECT_NAME}"
