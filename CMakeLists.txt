@@ -1,5 +1,5 @@
 project(chimera)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
 set(RUNTIME_INSTALL_DIR "bin")
@@ -19,7 +19,7 @@ include_directories(SYSTEM ${CLANG_INCLUDE_DIRS})
 add_definitions(${CLANG_DEFINITIONS})
 
 set(YAMLCPP_STATIC_LIBRARY ON CACHE BOOL
-    "If true, try to find static yaml-cpp library first instead of dynamic.")
+  "If true, try to find static yaml-cpp library first instead of dynamic.")
 find_package(YamlCpp REQUIRED)
 include_directories(SYSTEM ${YAMLCPP_INCLUDE_DIRS})
 add_definitions(${YAMLCPP_DEFINITIONS})
@@ -27,31 +27,29 @@ add_definitions(${YAMLCPP_DEFINITIONS})
 find_package(Boost REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-## Set up glorious compiler options.
+## Set up default compiler options.
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE RelWithDebugInfo)
+  set(CMAKE_BUILD_TYPE RelWithDebugInfo)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    set(CMAKE_COMPILER_IS_CLANGCXX TRUE)
+  set(CMAKE_COMPILER_IS_CLANGCXX TRUE)
 endif()
 
 if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
-    if (CMAKE_COMPILER_IS_CLANGCXX)
-        add_definitions("-fcolor-diagnostics")
-    endif()
+  if (CMAKE_COMPILER_IS_CLANGCXX)
+    add_definitions("-fcolor-diagnostics")
+  endif()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Wall -Wstrict-aliasing=2")
-    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fno-rtti -fno-exceptions")
+  add_compile_options("-Wextra" "-Wall" "-Wstrict-aliasing=2")
 endif()
+add_compile_options("-Wno-unused-parameter")
 
 ###########
 ## BUILD ##
 ###########
-include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-unused-parameter")
 
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
@@ -64,11 +62,6 @@ llvm_map_components_to_libnames(llvm_libs
 
 # Build the external tools: Mustache and Cling.
 add_subdirectory(external)
-# TODO: The following directives are no longer necessary in CMake 3.0+
-get_target_property(cling_utils_INCLUDE_DIR cling_utils INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${cling_utils_INCLUDE_DIR})
-get_target_property(mstch_INCLUDE_DIR mstch INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${mstch_INCLUDE_DIR})
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
@@ -79,6 +72,14 @@ add_executable("${PROJECT_NAME}"
   src/visitor.cpp
   src/util.cpp
   src/mstch.cpp
+)
+
+target_compile_options("${PROJECT_NAME}"
+  PUBLIC "-std=c++11"
+)
+
+target_include_directories("${PROJECT_NAME}"
+  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include"
 )
 
 target_link_libraries("${PROJECT_NAME}"
