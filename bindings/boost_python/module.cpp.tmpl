@@ -2,10 +2,9 @@
 {{#includes}}
 #include <{{.}}>
 {{/includes}}
-
+{{precontent}}
 #include <boost/python.hpp>
-
-/* main postinclude */
+{{postinclude}}
 
 BOOST_PYTHON_MODULE({{module.name}})
 {
