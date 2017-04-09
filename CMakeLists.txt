@@ -1,6 +1,6 @@
 project(chimera)
 cmake_minimum_required(VERSION 2.8.12)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
 
 set(RUNTIME_INSTALL_DIR "bin")
 set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
@@ -51,6 +51,10 @@ add_compile_options("-Wno-unused-parameter")
 ## BUILD ##
 ###########
 
+# Globally inherit the top-level include directory because it is difficult to
+# locate from CMakeLists.txt in source subdirectories.
+include_directories("${PROJECT_SOURCE_DIR}/include")
+
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
   core
@@ -76,10 +80,6 @@ add_executable("${PROJECT_NAME}"
 
 target_compile_options("${PROJECT_NAME}"
   PUBLIC "-std=c++11"
-)
-
-target_include_directories("${PROJECT_NAME}"
-  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include"
 )
 
 target_link_libraries("${PROJECT_NAME}"
