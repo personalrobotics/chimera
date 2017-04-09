@@ -72,7 +72,6 @@ include_directories(${mstch_INCLUDE_DIR})
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
-  src/boost_python_mstch.cpp
   src/chimera.cpp
   src/configuration.cpp
   src/consumer.cpp
@@ -92,6 +91,10 @@ target_link_libraries("${PROJECT_NAME}"
   mstch
   cling_utils
 )
+
+# Generate built-in template bindings for supported languages.
+add_subdirectory(bindings)
+target_link_libraries(chimera chimera_bindings)
 
 #############
 ## INSTALL ##
