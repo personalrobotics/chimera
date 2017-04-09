@@ -3,29 +3,36 @@
 set(binding_LIST "boost_python")
 
 # Iterate over each available language binding and generate a C++ source file.
-# Note: BINDING_NAME has non-standard capitalization because it is directly
-# used in some of the template substitutions, which are generally ALL-CAPS.
-foreach(BINDING_NAME IN LISTS binding_LIST)
-    set(binding_IMPL "${BINDING_NAME}_binding-impl.h")
-
-    # Set variables which will be used in binding template.
-    file(READ "${BINDING_NAME}/class.cpp.tmpl" BINDING_CLASS_CPP)
-    file(READ "${BINDING_NAME}/enum.cpp.tmpl" BINDING_ENUM_CPP)
-    file(READ "${BINDING_NAME}/function.cpp.tmpl" BINDING_FUNCTION_CPP)
-    file(READ "${BINDING_NAME}/variable.cpp.tmpl" BINDING_VARIABLE_CPP)
-    file(READ "${BINDING_NAME}/module.cpp.tmpl" BINDING_MODULE_CPP)
+foreach(binding_NAME IN LISTS binding_LIST)
+    set(binding_IMPL "${binding_NAME}_binding-impl.h")
+    set(binding_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${binding_NAME}")
 
     # Generate a binding from file template and add to implementation list,
     # then append the implementation to variables that are used to create a
     # single binding library.
-    configure_file(binding-impl.h.tmpl "${binding_IMPL}"
-        @ONLY NEWLINE_STYLE UNIX
+    add_custom_command(OUTPUT "${binding_IMPL}"
+      COMMAND ${CMAKE_COMMAND}
+        "-DBINDING_PATH=${binding_PATH}"
+        "-DBINDING_OUTPUT=${binding_IMPL}"
+        "-DBINDING_NAME=${binding_NAME}"
+        "-DBINDING_TEMPLATE=${CMAKE_CURRENT_SOURCE_DIR}/binding-impl.h.tmpl"
+        -P "${PROJECT_SOURCE_DIR}/cmake/generateChimeraBinding.cmake"
+      DEPENDS
+        "${binding_PATH}/class.cpp.tmpl"
+        "${binding_PATH}/enum.cpp.tmpl"
+        "${binding_PATH}/function.cpp.tmpl"
+        "${binding_PATH}/variable.cpp.tmpl"
+        "${binding_PATH}/module.cpp.tmpl"
+      COMMENT "Importing binding definition for '${binding_NAME}'."
+      VERBATIM
     )
+
+    # Add generated implementation header to list of dependencies.
     list(APPEND binding_IMPLS "${binding_IMPL}")
     list(APPEND BINDING_INCLUDES_LIST
         "#include <${binding_IMPL}>")
     list(APPEND BINDING_REGISTRATIONS_LIST
-        "DEFINITIONS[\"${BINDING_NAME}\"] = ${BINDING_NAME}_DEFINITION;")
+        "DEFINITIONS[\"${binding_NAME}\"] = ${binding_NAME}_DEFINITION;")
 endforeach()
 
 # Create a binding library which contains all built-in bindings.
