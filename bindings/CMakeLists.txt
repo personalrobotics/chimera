@@ -34,7 +34,7 @@ foreach(binding_NAME IN LISTS binding_LIST)
     list(APPEND BINDING_INCLUDES_LIST
         "#include <${binding_IMPL_OUTPUT}>")
     list(APPEND BINDING_REGISTRATIONS_LIST
-        "DEFINITIONS[\"${binding_NAME}\"] = ${binding_NAME}_DEFINITION;")
+        "{ \"${binding_NAME}\", ${binding_NAME}_DEFINITION },")
 endforeach()
 
 # Create a binding library which contains all built-in bindings.

@@ -6,11 +6,7 @@
 // Set the default binding.
 std::string chimera::binding::DEFAULT_NAME = "boost_python";
 
-// Create the built-in definitions map.
-std::map<std::string, chimera::binding::Definition> chimera::binding::DEFINITIONS;
-
-// Define loader function for all bindings.
-void chimera::binding::initializeBuiltinBindings()
-{
+// Create initialized map for all built-in bindings.
+std::map<std::string, chimera::binding::Definition> chimera::binding::DEFINITIONS {
     @BINDING_REGISTRATIONS_LIST@
-}
+};

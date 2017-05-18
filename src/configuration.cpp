@@ -63,9 +63,7 @@ chimera::Configuration::Configuration()
 : outputPath_(".")
 , outputModuleName_("chimera_binding")
 {
-    // Instantiate all bindings.
-    // TODO: is there a better place to be doing this?
-    chimera::binding::initializeBuiltinBindings();
+    // Do nothing.
 }
 
 chimera::Configuration& chimera::Configuration::GetInstance()
