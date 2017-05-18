@@ -52,7 +52,7 @@ public:
      * If unspecified, the default is the current working directory.
      */
     void SetOutputPath(const std::string &path);
-    
+
     /**
      * Set the desired output python module for the top-level binding.
      * If unspecified, the default is "chimera_binding".
@@ -196,8 +196,8 @@ protected:
     static const YAML::Node emptyNode_;
     const Configuration &parent_;
     const YAML::Node configNode_;
-    const YAML::Node templateNode_;
-    chimera::Binding templateBinding_;
+    const YAML::Node bindingNode_;
+    chimera::binding::Definition bindingDefinition_;
     clang::CompilerInstance *ci_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
