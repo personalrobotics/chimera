@@ -109,6 +109,11 @@ void chimera::Configuration::AddInputNamespaceName(const std::string &namespaceN
     inputNamespaceNames_.push_back(namespaceName);
 }
 
+void chimera::Configuration::AddSourcePath(const std::string &sourcePath)
+{
+    inputSourcePaths_.push_back(sourcePath);
+}
+
 std::unique_ptr<chimera::CompiledConfiguration>
 chimera::Configuration::Process(CompilerInstance *ci) const
 {
@@ -374,9 +379,12 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         exit(-4);
     }
 
-    // Create collections for the ordered sets of bindings and namespaces.
+    // Create collections for the ordered sets of bindings, sources,
+    // and namespaces.
     ::mstch::array binding_names(binding_names_.begin(),
                                  binding_names_.end());
+    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
+                                   parent_.inputSourcePaths_.end());
     ::mstch::array binding_namespaces;
     for (const clang::NamespaceDecl *namespace_decl : binding_namespaces_)
     {
@@ -391,6 +399,7 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
         {"module", ::mstch::map {
             {"name", parent_.GetOutputModuleName()},
             {"bindings", binding_names},
+            {"sources", binding_sources},
             // Note: binding namespaces will be lexically ordered.
             {"namespaces", binding_namespaces}
         }}
@@ -596,10 +605,15 @@ chimera::CompiledConfiguration::Render(std::string view, std::string key,
         exit(-6);
     }
 
+    // Create collections for the ordered sets of sources.
+    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
+                                   parent_.inputSourcePaths_.end());
+
     // Create a top-level context that contains the extracted information
     // about this particular binding component.
     ::mstch::map full_context {
-        {key, context}
+        {key, context},
+        {"sources", binding_sources}
     };
 
     // Resolve customizable snippets that will be inserted into the file

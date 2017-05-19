@@ -51,10 +51,15 @@ static cl::opt<bool> UseCMode(
     "use-c", cl::cat(ChimeraCategory),
     cl::desc("Parse input files as C instead of C++"));
 
-// Option for switching from C++ to C source.
+// Option for preventing auto-extraction of comments from source files.
 static cl::opt<bool> SuppressDocs(
     "no-docs", cl::cat(ChimeraCategory),
     cl::desc("Suppress the extraction of documentation from C++ comments"));
+
+// Option for preventing binding sources from being auto-forwarded in generated bindings.
+static cl::opt<bool> SuppressSources(
+    "no-default-sources", cl::cat(ChimeraCategory),
+    cl::desc("Suppress the forwarding of source file paths to binding"));
 
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
@@ -86,6 +91,12 @@ int main(int argc, const char **argv)
         for (const std::string &name : NamespaceNames)
             chimera::Configuration::GetInstance().AddInputNamespaceName(name);
 
+    // Add compilation source paths to the configuration.
+    // These will be made available to templates.
+    if (!SuppressSources)
+        for (const std::string &path : OptionsParser.getSourcePathList())
+            chimera::Configuration::GetInstance().AddSourcePath(path);
+
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
@@ -104,7 +115,7 @@ int main(int argc, const char **argv)
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
         "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(LLVM_VERSION_MINOR)
         "/lib/clang/" LLVM_VERSION_STRING "/include", ArgumentInsertPosition::END));
-    
+
 
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());

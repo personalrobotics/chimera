@@ -2,6 +2,9 @@
 {{#includes}}
 #include <{{.}}>
 {{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
 {{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}

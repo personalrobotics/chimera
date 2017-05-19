@@ -66,6 +66,12 @@ public:
     void AddInputNamespaceName(const std::string &namespaceName);
 
     /**
+     * Append the path to a source file that will be processed as part
+     * of the binding generation.
+     */
+    void AddSourcePath(const std::string &sourcePath);
+
+    /**
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration>
@@ -100,6 +106,7 @@ protected:
     std::string outputPath_;
     std::string outputModuleName_;
     std::vector<std::string> inputNamespaceNames_;
+    std::vector<std::string> inputSourcePaths_;
 
     friend class CompiledConfiguration;
 };
