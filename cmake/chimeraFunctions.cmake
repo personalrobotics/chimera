@@ -128,7 +128,7 @@ function(add_chimera_binding)
     # Placeholder target to generate compilation database.
     #
     # (We force all SOURCES to be treated as CXX so that we can generate bindings
-    # from header files that lack a main function, a common use-case.)
+    # from only header files, a very common use-case.)
     set_source_files_properties(${binding_SOURCES}
         PROPERTIES LANGUAGE CXX
     )

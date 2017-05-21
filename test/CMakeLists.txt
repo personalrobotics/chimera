@@ -9,8 +9,12 @@ find_package(PythonLibs REQUIRED)
 add_chimera_binding(
   EXCLUDE_FROM_ALL
   TARGET test_binding
-  SOURCES dart-example.cpp
+  SOURCES dart-example.h
   NAMESPACES dart
+)
+
+target_compile_options(test_binding
+  PUBLIC "-std=c++11"
 )
 
 target_include_directories(test_binding SYSTEM

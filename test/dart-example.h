@@ -1,3 +1,6 @@
+#ifndef __DART_EXAMPLE_H__
+#define __DART_EXAMPLE_H__
+
 namespace dart {
 namespace common {
 
@@ -21,7 +24,7 @@ template <typename... _ArgTypes>
 class Signal<void(_ArgTypes...)>
 {
 public:
-  void f();
+  void f() { /* do nothing */ };
 };
 
 template <typename T>
@@ -50,8 +53,4 @@ class Entity
 }  // namespace dynamics
 }  // namespace dart
 
-int main(int argc, char **argv)
-{
-  using namespace dart::dynamics;
-
-}
+#endif // __DART_EXAMPLE_H__
