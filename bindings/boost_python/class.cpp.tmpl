@@ -2,6 +2,9 @@
 {{#includes}}
 #include <{{.}}>
 {{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
 {{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
@@ -48,7 +51,7 @@ void {{class.mangled_name}}()
 {{#class.constructors}}{{!
 }}{{#overloads}}{{!
     }}.def("__init__", ::boost::python::make_constructor({{!
-        }}[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
+        }}+[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
         }} -> {{class.type}} * { {{!
         }}return new {{class.type}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
         }}, ::boost::python::default_call_policies(){{!
@@ -60,7 +63,7 @@ void {{class.mangled_name}}()
 {{#class.methods}}{{!
 }}{{^is_static}}{{!
 }}{{#overloads}}{{!
-    }}.def("{{name}}", []({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}) -> {{return_type}} { {{!
+    }}.def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}) -> {{return_type}} { {{!
     }}return self->{{call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<{{.}} >(){{/return_value_policy}}{{!
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
@@ -73,7 +76,7 @@ void {{class.mangled_name}}()
 {{#class.methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
-    }}.def("{{name}}", []({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
+    }}.def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
     }}return {{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<{{.}} >(){{/return_value_policy}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}})
