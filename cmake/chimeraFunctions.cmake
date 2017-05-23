@@ -126,6 +126,12 @@ function(add_chimera_binding)
     endif()
 
     # Placeholder target to generate compilation database.
+    #
+    # (We force all SOURCES to be treated as CXX so that we can generate bindings
+    # from only header files, a very common use-case.)
+    set_source_files_properties(${binding_SOURCES}
+        PROPERTIES LANGUAGE CXX
+    )
     add_library("${binding_TARGET}_placeholder" EXCLUDE_FROM_ALL
         ${binding_SOURCES}
     )

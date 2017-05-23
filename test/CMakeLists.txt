@@ -3,14 +3,21 @@ include(CTest)
 set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
 include(chimeraFunctions)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(PythonLibs REQUIRED)
 
 add_chimera_binding(
   EXCLUDE_FROM_ALL
   TARGET test_binding
-  SOURCES dart-example.cpp
+  SOURCES dart-example.h
   NAMESPACES dart
+)
+
+set_target_properties(test_binding PROPERTIES PREFIX "")
+
+target_compile_options(test_binding
+  PUBLIC "-std=c++11"
 )
 
 target_include_directories(test_binding SYSTEM
