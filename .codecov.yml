@@ -1,0 +1,8 @@
+# Reference: https://github.com/codecov/support/wiki/Codecov-Yaml
+
+coverage:
+  ignore:
+    - "external"
+comment:
+  layout: "diff, flags, files"
+

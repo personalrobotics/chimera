@@ -47,6 +47,18 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGCXX)
 endif()
 add_compile_options("-Wno-unused-parameter")
 
+###################
+## CodeCov SETUP ##
+###################
+option(CODECOV "Enable CodeCov support" OFF)
+if(CODECOV)
+  include(CodeCoverage)
+  setup_target_for_coverage(${PROJECT_NAME}_coverage ctest coverage)
+  set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage"
+  )
+endif()
+
 ###########
 ## BUILD ##
 ###########
