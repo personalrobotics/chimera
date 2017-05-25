@@ -1,4 +1,4 @@
-# chimera [![Build Status](https://travis-ci.com/personalrobotics/chimera.svg?token=1MmAniN9fkMcwpRUTdFq&branch=master)](https://travis-ci.com/personalrobotics/chimera) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera) #
+# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera) #
 
 > ##### chi·me·ra #####
 > ##### /kīˈmirə,kəˈmirə/ [![speaker][2]][1] #####
