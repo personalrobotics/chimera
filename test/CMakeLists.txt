@@ -16,6 +16,8 @@ add_chimera_binding(
 
 set_target_properties(test_binding PROPERTIES PREFIX "")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 target_compile_options(test_binding
   PUBLIC "-std=c++11"
 )

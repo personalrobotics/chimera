@@ -1,6 +1,8 @@
 #ifndef __DART_EXAMPLE_H__
 #define __DART_EXAMPLE_H__
 
+#include <functional>
+
 namespace dart {
 namespace common {
 
@@ -36,18 +38,33 @@ class SlotRegister
 
 namespace dynamics {
 
+template <typename... Args>
 class Frame
 {
+public:
+  using Creator = std::function<void(Args...)>;
+
+  void setCreator(Creator fn)
+  {
+  }
+
+  void setDefaultCreator()
+  {
+    return setCreator([](Args&&... args){ });
+  }
 };
 
 class Entity
 {
+public:
   using FrameChangedSignal
         = common::Signal<void(const Entity*,
-                         const Frame* _oldFrame,
-                         const Frame* _newFrame)>;
+                         const Frame<>* _oldFrame,
+                         const Frame<>* _newFrame)>;
 
   FrameChangedSignal mFrameChangedSignal;
+
+  Frame<> mFrame;
 };
 
 }  // namespace dynamics
