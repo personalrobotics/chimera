@@ -27,10 +27,10 @@ matrix:
 #      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.7
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
+      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
 
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
