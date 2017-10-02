@@ -73,7 +73,10 @@ if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
 else
   if check_version "${LLVM_VERSION}" '=' "4.0"; then
     LLVM_PACKAGE="llvm@4"
-    LLVM_INSTALL_PREFIX="llvm@4"
+    LLVM_INSTALL_PREFIX="llvm"
+  elif check_version "${LLVM_VERSION}" '=' "3.9"; then
+    LLVM_PACKAGE="llvm@${LLVM_VERSION}"
+    LLVM_INSTALL_PREFIX='llvm'
   else
     LLVM_PACKAGE="llvm@${LLVM_VERSION}"
     LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
