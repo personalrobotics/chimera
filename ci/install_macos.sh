@@ -73,10 +73,11 @@ if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
 else
   if check_version "${LLVM_VERSION}" '=' "4.0"; then
     LLVM_PACKAGE="llvm@4"
+    LLVM_INSTALL_PREFIX="llvm@4"
   else
     LLVM_PACKAGE="llvm@${LLVM_VERSION}"
+    LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
   fi
-  LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
 
   if ! brew info "${LLVM_PACKAGE}" > /dev/null 2> /dev/null; then
     echo "error: There is no package Homebrew package named '${LLVM_PACKAGE}'"\
