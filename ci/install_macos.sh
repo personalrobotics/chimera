@@ -71,7 +71,11 @@ if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
   LLVM_PACKAGE="${LLVM_PACKAGE_LATEST}"
   LLVM_INSTALL_PREFIX='llvm'
 else
-  LLVM_PACKAGE="llvm@${LLVM_VERSION}"
+  if check_version "${LLVM_VERSION}" '=' "4.0"; then
+    LLVM_PACKAGE="llvm@4"
+  else
+    LLVM_PACKAGE="llvm@${LLVM_VERSION}"
+  fi
   LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
 
   if ! brew info "${LLVM_PACKAGE}" > /dev/null 2> /dev/null; then
