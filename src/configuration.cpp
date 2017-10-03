@@ -518,8 +518,8 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
     if (!node.IsScalar())
         return "";
 
-    // If the node type tag is "file" then load the contents of a file.
-    if (node.Tag() == "file")
+    // If the node type tag is "!file" then load the contents of a file.
+    if (node.Tag() == "!file")
     {
         // Get reference to path to configuration file itself.
         const std::string &config_path = parent_.GetConfigFilename();
