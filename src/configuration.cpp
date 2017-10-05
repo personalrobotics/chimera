@@ -516,7 +516,11 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 {
     // If the node is not scalar, we cannot load it, so return the default.
     if (!node.IsScalar())
-        return "";
+    {
+        std::cerr << "Unable to parse expected scalar or file source."
+                  << std::endl;
+        exit(-2);
+    }
 
     // If the node type tag is "!file" then load the contents of a file.
     if (node.Tag() == "!file")
@@ -545,7 +549,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
         std::ifstream source(source_path);
         if (source.fail())
         {
-            std::cerr << "Warning: Failed to open source '"
+            std::cerr << "Failed to open source '"
                       << source_path << "': " << strerror(errno) << std::endl;
             exit(-5);
         }
