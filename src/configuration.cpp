@@ -424,6 +424,16 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
+    // If there is an enclosing namespace, ensure that it will be traversed
+    // before the child namespace when the binding is generated.
+    const auto *enclosing_ns_context = decl->getEnclosingNamespaceContext();
+    const auto *enclosing_ns_decl = llvm::dyn_cast_or_null<NamespaceDecl>(enclosing_ns_context);
+    if (enclosing_ns_decl)
+    {
+        AddTraversedNamespace(enclosing_ns_decl);
+    }
+
+    // Add the canonical declaration of this namespace to the traversed set.
     binding_namespaces_.insert(decl->getCanonicalDecl());
 }
 

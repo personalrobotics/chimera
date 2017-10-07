@@ -116,7 +116,6 @@ int main(int argc, const char **argv)
         "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(LLVM_VERSION_MINOR)
         "/lib/clang/" LLVM_VERSION_STRING "/include", ArgumentInsertPosition::END));
 
-
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());
 }
