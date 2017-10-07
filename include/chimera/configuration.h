@@ -21,6 +21,7 @@ class CXXRecord;
 class Enum;
 class Function;
 class Variable;
+class Namespace;
 
 } // mstch
 } // chimera
@@ -211,7 +212,8 @@ protected:
     std::set<const clang::NamespaceDecl*> namespaces_;
 
     std::vector<std::string> binding_names_;
-    std::set<const clang::NamespaceDecl*> binding_namespaces_;
+    std::vector<std::shared_ptr<chimera::mstch::Namespace>> binding_namespaces_;
+    std::set<const clang::NamespaceDecl*> binding_namespace_decls_;
 
     friend class Configuration;
 };

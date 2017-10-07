@@ -383,15 +383,10 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     // and namespaces.
     ::mstch::array binding_names(binding_names_.begin(),
                                  binding_names_.end());
+    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
+                                      binding_namespaces_.end());
     ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
                                    parent_.inputSourcePaths_.end());
-    ::mstch::array binding_namespaces;
-    for (const clang::NamespaceDecl *namespace_decl : binding_namespaces_)
-    {
-        binding_namespaces.push_back(
-            std::make_shared<chimera::mstch::Namespace>(
-                *this, namespace_decl));
-    }
 
     // Create a top-level context that contains the extracted information
     // about the module.
@@ -424,17 +419,17 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
-    // If there is an enclosing namespace, ensure that it will be traversed
-    // before the child namespace when the binding is generated.
-    const auto *enclosing_ns_context = decl->getEnclosingNamespaceContext();
-    const auto *enclosing_ns_decl = llvm::dyn_cast_or_null<NamespaceDecl>(enclosing_ns_context);
-    if (enclosing_ns_decl)
+    // We need to preserve the order of the traversed namespace declarations,
+    // because the consumer will traverse them in a hierarchical order.  So we
+    // use a set to de-duplicate the namespaces using their canonical decl
+    // pointers, then insert their renderable proxy into a vector which will
+    // preserve their insertion order.
+    const auto result = binding_namespace_decls_.insert(decl->getCanonicalDecl());
+    if (result.second)
     {
-        AddTraversedNamespace(enclosing_ns_decl);
+        binding_namespaces_.push_back(
+            std::make_shared<chimera::mstch::Namespace>(*this, decl));
     }
-
-    // Add the canonical declaration of this namespace to the traversed set.
-    binding_namespaces_.insert(decl->getCanonicalDecl());
 }
 
 const std::set<const clang::NamespaceDecl*>&
