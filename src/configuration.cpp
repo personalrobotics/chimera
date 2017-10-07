@@ -420,10 +420,11 @@ void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
     // We need to preserve the order of the traversed namespace declarations,
-    // because the consumer will traverse them in a hierarchical order.  So we
-    // use a set to de-duplicate the namespaces using their canonical decl
-    // pointers, then insert their renderable proxy into a vector which will
-    // preserve their insertion order.
+    // as the ASTConsumer traverses them in a hierarchical order.
+    //
+    // We first use a set to de-duplicate the namespaces using their canonical
+    // decl pointers, then insert the renderable proxy of new namespaces into
+    // a vector which will preserve their order during Render().
     const auto result = binding_namespace_decls_.insert(decl->getCanonicalDecl());
     if (result.second)
     {
