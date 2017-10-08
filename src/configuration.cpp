@@ -383,15 +383,10 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     // and namespaces.
     ::mstch::array binding_names(binding_names_.begin(),
                                  binding_names_.end());
+    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
+                                      binding_namespaces_.end());
     ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
                                    parent_.inputSourcePaths_.end());
-    ::mstch::array binding_namespaces;
-    for (const clang::NamespaceDecl *namespace_decl : binding_namespaces_)
-    {
-        binding_namespaces.push_back(
-            std::make_shared<chimera::mstch::Namespace>(
-                *this, namespace_decl));
-    }
 
     // Create a top-level context that contains the extracted information
     // about the module.
@@ -424,7 +419,18 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
-    binding_namespaces_.insert(decl->getCanonicalDecl());
+    // We need to preserve the order of the traversed namespace declarations,
+    // as the ASTConsumer traverses them in a hierarchical order.
+    //
+    // We first use a set to de-duplicate the namespaces using their canonical
+    // decl pointers, then insert the renderable proxy of new namespaces into
+    // a vector which will preserve their order during Render().
+    const auto result = binding_namespace_decls_.insert(decl->getCanonicalDecl());
+    if (result.second)
+    {
+        binding_namespaces_.push_back(
+            std::make_shared<chimera::mstch::Namespace>(*this, decl));
+    }
 }
 
 const std::set<const clang::NamespaceDecl*>&
