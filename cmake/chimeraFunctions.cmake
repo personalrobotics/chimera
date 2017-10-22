@@ -105,7 +105,7 @@ function(add_chimera_binding)
     # rerun the compilation of the library if sources are regenerated.
     add_custom_target("${binding_TARGET}_SOURCES" DEPENDS "${binding_SOURCES_TXT}")
     add_custom_command(
-        OUTPUT "${binding_DESTINATION}/sources.txt"
+        OUTPUT "${binding_SOURCES_TXT}"
         COMMAND "${chimera_EXECUTABLE}" ARGS ${binding_ARGS}
         COMMAND ${CMAKE_COMMAND} ARGS -E rename "${binding_SOURCES_TXT}.staging" "${binding_SOURCES_TXT}"
         DEPENDS "${binding_CONFIGURATION}" ${binding_SOURCES}
