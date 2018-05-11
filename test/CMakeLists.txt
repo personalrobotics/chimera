@@ -98,8 +98,4 @@ function(chimera_add_binding_test test_name)
   )
 endfunction()
 
-chimera_add_binding_test(test_dart_example
-  EXCLUDE_FROM_ALL
-  SOURCES dart-example.h
-  NAMESPACES dart
-)
+add_subdirectory(dart_example)
