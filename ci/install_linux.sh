@@ -6,6 +6,6 @@ sudo apt-get -q update
 sudo apt-get -y install "llvm-${LLVM_VERSION}-dev" "llvm-${LLVM_VERSION}-tools" "libclang-${LLVM_VERSION}-dev" libedit-dev libyaml-cpp-dev libboost-dev
 
 # Install test dependencies.
-sudo apt-get -y install libboost-python-dev
+sudo apt-get -y install libboost-python-dev libboost-thread-dev
 sudo apt-get -y install lcov
 sudo apt-get install python-dev python3-dev
