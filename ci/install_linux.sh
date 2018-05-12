@@ -8,3 +8,4 @@ sudo apt-get -y install "llvm-${LLVM_VERSION}-dev" "llvm-${LLVM_VERSION}-tools" 
 # Install test dependencies.
 sudo apt-get -y install libboost-python-dev
 sudo apt-get -y install lcov
+sudo apt-get install python-dev python3-dev
