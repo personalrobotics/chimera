@@ -11,13 +11,36 @@ Chimera is a tool for generating Boost.Python bindings from C/C++ header files.
 It uses the Clang/LLVM toolchain, making it capable of automatically handling
 fairly complex source files.
 
-## Usage ##
+## Usage
 
 ```bash
 $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_header2.h -- [compiler args]
 ```
 
-## Installation ##
+## Installation
+
+### On Ubuntu using `apt`
+
+Chimera provides Ubuntu packages for Xenial (16.04) and Bionic (18.04).
+
+```shell
+$ sudo add-apt-repository ppa:personalrobotics/ppa
+$ sudo apt update
+$ sudo apt install chimera
+```
+
+### On macOS using Homebrew
+
+```shell
+# Install the Homebrew package manager
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+# Add Homebrew tap for Personal Robotics Lab software
+$ brew tap personalrobotics/tap
+# Install Chimera
+$ brew install chimera
+```
+
+## Build from Source
 
 **Requirements**
 
