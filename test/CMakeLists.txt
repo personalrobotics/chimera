@@ -67,3 +67,4 @@ endif()
 
 add_subdirectory(dart_example)
 add_subdirectory(01_function)
+add_subdirectory(02_class)
