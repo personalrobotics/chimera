@@ -295,9 +295,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         if (bindingNode)
         {
             // Check that 'binding' node in configuration YAML is a scalar.
-            if (!typesNode.IsScalar())
+            if (!bindingNode.IsScalar())
             {
-                std::cerr << "'binding' in configuration YAML must be a map."
+                std::cerr << "'binding' in configuration YAML must be a scalar."
                           << std::endl;
                 exit(-2);
             }
