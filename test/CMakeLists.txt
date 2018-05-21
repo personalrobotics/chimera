@@ -3,38 +3,55 @@ include(CTest)
 set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
 include(chimeraFunctions)
 
+# Set python version to be used to build bindings for.
+if(NOT CHIMERA_TEST_PYTHON_VERSION)
+  set(CHIMERA_TEST_PYTHON_VERSION 3.4 CACHE STRING
+    "Choose the target Python version (e.g., 3.4, 2.7)" FORCE
+  )
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Boost REQUIRED COMPONENTS python)
-find_package(PythonLibs REQUIRED)
 
-add_chimera_binding(
-  EXCLUDE_FROM_ALL
-  TARGET test_binding
-  SOURCES dart-example.h
-  NAMESPACES dart
+# Find PythonInter
+find_package(PythonInterp ${CHIMERA_TEST_PYTHON_VERSION} REQUIRED)
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+  "from distutils.sysconfig import get_python_lib;\
+  print(get_python_lib(plat_specific=True, prefix=''))"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set_target_properties(test_binding PROPERTIES PREFIX "")
+# Find boost with python components. The name of python component varies
+# depending on the platform, boost version, and python version.
+# TODO(JS): Check if thread component is really neccessary
+if(APPLE)
+  find_package(Boost REQUIRED
+    COMPONENTS
+      python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
+  )
+  set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
+    ${Boost_PYTHON${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
+  )
+else() # LINUX assumed
+  if(${PYTHON_VERSION_MAJOR} EQUAL 3)
+    find_package(Boost
+      COMPONENTS
+        python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
+    )
+    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
+      ${Boost_PYTHON-PY${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
+    )
+    if(NOT Boost_FOUND)
+      find_package(Boost REQUIRED COMPONENTS python3 thread)
+      set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON3_LIBRARIES})
+    endif()
+  else() # Python 2 assumed
+    find_package(Boost REQUIRED COMPONENTS python thread)
+    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARIES})
+  endif()
+endif()
 
-target_compile_options(test_binding
-  PUBLIC "-std=c++11"
-)
+# Find PythonLibs version that is the same with the version of PythonInterp.
+find_package(PythonLibs ${CHIMERA_TEST_PYTHON_VERSION} REQUIRED)
 
-target_include_directories(test_binding SYSTEM
-  PRIVATE
-    ${Boost_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_DIRS}
-)
-
-target_link_libraries(test_binding
-  PRIVATE
-    ${Boost_PYTHON_LIBRARY}
-    ${PYTHON_LIBRARIES}
-)
-
-add_test(
-  NAME ctest_build_binding
-  COMMAND "${CMAKE_COMMAND}"
-    --build ${CMAKE_BINARY_DIR}
-    --target test_binding
-)
+add_subdirectory(dart_example)
