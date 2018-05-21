@@ -15,19 +15,10 @@ matrix:
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
-    - os: linux
-      compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
-    - os: osx
-      compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
