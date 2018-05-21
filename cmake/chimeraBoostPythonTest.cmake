@@ -42,7 +42,7 @@ function(chimera_add_test_boost_python test_name)
 
   target_link_libraries(${test_name}
     PRIVATE
-      ${Boost_PYTHON_LIBRARY}
+      ${Boost_LIBRARIES}
       ${PYTHON_LIBRARIES}
   )
 
