@@ -8,35 +8,20 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug CODECOV=ON COMPILER=GCC LLVM_VERSION=3.6
+      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6
+      # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
-    - os: linux
-      compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
-# Disabled for macOS + llvm-3.7 (see https://github.com/personalrobotics/chimera/issues/153)
-    # - os: osx
-    #   compiler: clang
-    #   env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.7
-    # - os: osx
-    #   compiler: clang
-    #   env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.7
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5.0
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5.0
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
 
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
