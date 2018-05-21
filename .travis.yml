@@ -18,25 +18,18 @@ matrix:
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
-# Disabled for macOS + llvm-3.7 (see https://github.com/personalrobotics/chimera/issues/153)
-    # - os: osx
-    #   compiler: clang
-    #   env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.7
-    # - os: osx
-    #   compiler: clang
-    #   env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.7
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
+      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4.0
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5.0
+      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=CLANG LLVM_VERSION=6
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5.0
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=6
 
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi

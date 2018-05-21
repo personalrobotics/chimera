@@ -22,21 +22,33 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
 )
 
 # Find boost with python components. The name of python component varies
-# depending on the boost version and python version.
-if(${PYTHON_VERSION_MAJOR} EQUAL 3)
-  find_package(Boost COMPONENTS
-    python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
+# depending on the platform, boost version, and python version.
+# TODO(JS): Check if thread component is really neccessary
+if(APPLE)
+  find_package(Boost REQUIRED
+    COMPONENTS
+      python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
   )
   set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
-    ${Boost_PYTHON-PY${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
+    ${Boost_PYTHON${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
   )
-  if (NOT Boost_FOUND)
-    find_package(Boost REQUIRED COMPONENTS python3 thread)
-    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON3_LIBRARIES})
+else() # LINUX assumed
+  if(${PYTHON_VERSION_MAJOR} EQUAL 3)
+    find_package(Boost
+      COMPONENTS
+        python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
+    )
+    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
+      ${Boost_PYTHON-PY${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
+    )
+    if(NOT Boost_FOUND)
+      find_package(Boost REQUIRED COMPONENTS python3 thread)
+      set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON3_LIBRARIES})
+    endif()
+  else() # Python 2 assumed
+    find_package(Boost REQUIRED COMPONENTS python thread)
+    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARIES})
   endif()
-else()
-  find_package(Boost REQUIRED COMPONENTS python thread)
-  set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARIES})
 endif()
 
 # Find PythonLibs version that is the same with the version of PythonInterp.
