@@ -1,6 +1,6 @@
 # List of language bindings that are assumed to be in corresponding
 # subdirectories of this folder.
-set(binding_LIST "boost_python")
+set(binding_LIST "boost_python" "pybind11")
 set(binding_IMPL_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/binding-impl.h.tmpl")
 
 # Iterate over each available language binding and generate a C++ source file.
@@ -36,6 +36,9 @@ foreach(binding_NAME IN LISTS binding_LIST)
     list(APPEND BINDING_REGISTRATIONS_LIST
         "{ \"${binding_NAME}\", ${binding_NAME}_DEFINITION },")
 endforeach()
+
+string (REPLACE ";" "\n" BINDING_INCLUDES_LIST "${BINDING_INCLUDES_LIST}")
+string (REPLACE ";" " " BINDING_REGISTRATIONS_LIST "${BINDING_REGISTRATIONS_LIST}")
 
 # Create a binding library which contains all built-in bindings.
 configure_file(binding.cpp.tmpl binding.cpp

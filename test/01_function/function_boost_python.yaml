@@ -1,0 +1,8 @@
+# Arguments that will be appended in-order before command line arguments.
+arguments:
+  - "-extra-arg"
+  - "-I/usr/lib/clang/3.6/include"
+binding: "boost_python"
+namespaces:
+  'function':
+    name: null # TODO: otherwise, import error
