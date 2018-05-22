@@ -6,3 +6,6 @@ binding: "pybind11"
 namespaces:
   'test_class':
     name: null # TODO: otherwise, import error
+types:
+  'const std::string&':
+    return_value_policy: reference

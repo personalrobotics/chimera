@@ -6,3 +6,6 @@ binding: "boost_python"
 namespaces:
   'test_class':
     name: null # TODO: otherwise, import error
+types:
+  'const std::string&':
+    return_value_policy: boost::python::copy_const_reference
