@@ -1,11 +1,13 @@
-# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera) #
+# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera)
 
-> ##### chi·me·ra #####
-> ##### /kīˈmirə,kəˈmirə/ [![speaker][2]][1] #####
+> ##### chi·me·ra
+>
+> ##### /kīˈmirə,kəˈmirə/ [![speaker][2]][1]
+>
 > _*informal*, noun_
 >
-> 1. a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
-> 2. a utility to generate Boost.Python bindings for C++ code.
+> 1.  a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
+> 2.  a utility to generate Boost.Python bindings for C++ code.
 
 Chimera is a tool for generating Boost.Python bindings from C/C++ header files.
 It uses the Clang/LLVM toolchain, making it capable of automatically handling
@@ -44,11 +46,11 @@ $ brew install chimera
 
 **Requirements**
 
-- libclang 3.6 or above
-- llvm 3.6 or above (+ tools)
-- libedit
-- yaml-cpp
-- boost
+* libclang 3.6 or above
+* llvm 3.6 or above (+ tools)
+* libedit
+* yaml-cpp
+* boost
 
 **On Ubuntu from source**
 
@@ -66,6 +68,7 @@ $ sudo make install
 ```
 
 **On macOS using Homebrew**
+
 ```bash
 # install Homebrew if not installed
 $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -77,7 +80,7 @@ $ brew install chimera
 
 ```bash
 $ brew install boost llvm
-$ brew install yaml-cpp --with-static-lib 
+$ brew install yaml-cpp --with-static-lib
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
@@ -87,7 +90,8 @@ $ make
 $ sudo make install
 ```
 
-## Example ##
+## Example
+
 Let's try running chimera on itself!
 
 ```bash
@@ -98,7 +102,7 @@ $ make
 $ chimera -p . -o chimera_py_binding.cpp ../src/chimera.cpp
 ```
 
-## Configuration ##
+## Configuration
 
 ```yaml
 # The C++ namespaces that will be extracted by Chimera
@@ -115,7 +119,7 @@ types:
 # Selected function and class declarations that need custom parameters.
 functions:
   'const Eigen::Vector4d & ::dart::dynamics::Shape::getRGBA() const':
-    return_value_policy: ::boost::python::copy_const_reference
+    return_value_policy: copy_const_reference
   'bool ::dart::dynamics::Skeleton::isImpulseApplied() const':
     source: 'test.cpp.in'
   'const Eigen::Vector3d & ::dart::dynamics::Shape::getBoundingBoxDim() const':
@@ -130,20 +134,22 @@ classes:
     noncopyable: true
 ```
 
-## Troubleshooting ##
+## Troubleshooting
 
-### Is there a length limit for the keys in the configuration file of Chimera? ###
+### Is there a length limit for the keys in the configuration file of Chimera?
 
 Yes. [`yaml-cpp` does not support more than 1024 characters for a single line
 key](https://github.com/jbeder/yaml-cpp/blob/release-0.5.3/src/simplekey.cpp#L111).
 If you want to use a longer key, then you should use [multi-line
 key](http://stackoverflow.com/a/36295084).
 
-## License ##
+## License
+
 Chimera is released under the 3-clause BSD license. See [LICENSE](./LICENSE) for more
 information.
 
-## Authors ##
+## Authors
+
 Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
 
 [1]: http://audio.oxforddictionaries.com/en/mp3/chimera_gb_1.mp3
