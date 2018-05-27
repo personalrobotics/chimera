@@ -2,7 +2,6 @@
 arguments:
   - "-extra-arg"
   - "-I/usr/lib/clang/3.6/include"
-binding: "boost_python"
 namespaces:
   'dart':
     name: null # TODO: otherwise, import error
