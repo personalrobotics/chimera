@@ -1,7 +1,10 @@
 include(CTest)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
 include(chimeraFunctions)
+include(chimeraTest)
 
 # Set python version to be used to build bindings for.
 if(NOT CHIMERA_TEST_PYTHON_VERSION)
@@ -10,9 +13,7 @@ if(NOT CHIMERA_TEST_PYTHON_VERSION)
   )
 endif()
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-# Find PythonInter
+# Find PythonInterp
 find_package(PythonInterp ${CHIMERA_TEST_PYTHON_VERSION} REQUIRED)
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   "from distutils.sysconfig import get_python_lib;\
@@ -54,7 +55,7 @@ else() # LINUX assumed
   endif()
 endif()
 if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)
-  message(STATUS "Boost.Python is not found. Please install it to build Boost.Python binding tests.")
+  message(WARNING "Boost.Python is not found. Omitting from unit tests.")
 endif()
 
 # Find pybind11
@@ -62,8 +63,9 @@ endif()
 set(PYBIND11_PYTHON_VERSION ${PYTHON_VERSION_STRING})
 find_package(pybind11 2.2.0 QUIET)
 if(NOT pybind11_FOUND)
-  message(STATUS "pybind11 (>=2.2.0) is not found. Please install it to build pybind11 binding tests.")
+  message(WARNING "pybind11 (>=2.2.0) is not found. Omitting from unit tests.")
 endif()
 
-add_subdirectory(dart_example)
+# Add unit tests from subdirectories (roughly in order of complexity).
 add_subdirectory(01_function)
+add_subdirectory(02_dart_example)

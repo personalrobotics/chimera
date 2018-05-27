@@ -22,6 +22,12 @@ using namespace llvm;
 // only ones displayed.
 static cl::OptionCategory ChimeraCategory("Chimera options");
 
+// Option for specifying binding type by name.
+static cl::opt<std::string> BindingName(
+    "b", cl::cat(ChimeraCategory),
+    cl::desc("Specify binding definition name"),
+    cl::value_desc("binding"));
+
 // Option for specifying output binding filename.
 static cl::opt<std::string> OutputPath(
     "o", cl::cat(ChimeraCategory),
@@ -77,6 +83,10 @@ int main(int argc, const char **argv)
     // to an empty node.
     if (!ConfigFilename.empty())
         chimera::Configuration::GetInstance().LoadFile(ConfigFilename);
+
+    // If a binding definition was specified, set configuration to use it.
+    if (!BindingName.empty())
+        chimera::Configuration::GetInstance().SetBindingName(BindingName);
 
     // If an output path was specified, set configuration to use it.
     if (!OutputPath.empty())
