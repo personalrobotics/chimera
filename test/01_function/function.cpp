@@ -1,10 +1,8 @@
-namespace function {
-namespace nested_function {
+#include "function.h"
 
-int add(int i = 1, int j = 2)
+using namespace function::nested_function;
+
+int add(int i, int j)
 {
     return i + j;
 }
-
-} // namespace nested_function
-} // namespace function
