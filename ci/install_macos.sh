@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+set -x
+# Add e option once we move to using Brewfile for installing packages.
+
 # Compare two semantic version numbers A and B. Return code is 0 if A == B, 1
 # if A > B, and 2 if A < B.
 # Usage: compare_versions 3.9.0 4.0.0
@@ -101,3 +105,4 @@ brew install yaml-cpp --with-static-lib
 # Install test dependencies.
 brew install boost-python
 brew install boost-python3
+brew install pybind11

@@ -88,20 +88,43 @@ void chimera::Configuration::LoadFile(const std::string &filename)
     }
 }
 
+void chimera::Configuration::SetBindingName(const std::string &name)
+{
+    // Setting the name to the empty string makes no sense and will fail the
+    // definition lookup, so we simply fail here to try to alert the user as
+    // soon as possible to a possible parsing issue.
+    if (name.empty())
+    {
+        std::cerr << "Binding name cannot be set to empty string." << std::endl;
+        exit(-1);
+    }
+    bindingName_ = name;
+}
+
 void chimera::Configuration::SetOutputPath(const std::string &path)
 {
     // Setting the path to the empty string makes no sense and will break the
-    // binding path concatenation, so if an empty string is passed, assume the
-    // caller wanted to reset back to the default.
-    outputPath_ = path.empty() ? "." : path;
+    // binding path concatenation, so we simply fail here to try to alert the
+    // user as soon as possible to a possible parsing issue.
+    if (path.empty())
+    {
+        std::cerr << "Output path cannot be set to empty string." << std::endl;
+        exit(-1);
+    }
+    outputPath_ = path;
 }
 
 void chimera::Configuration::SetOutputModuleName(const std::string &moduleName)
 {
     // Setting the module name to the empty string makes no sense and will
-    // break the binding, so if an empty string is passed, assume the caller
-    // wanted to reset back to the default.
-    outputModuleName_ = moduleName.empty() ? "chimera_binding" : moduleName;
+    // break the binding, so we simply fail here to try to alert the
+    // user as soon as possible to a possible parsing issue.
+    if (moduleName.empty())
+    {
+        std::cerr << "Module name cannot be set to empty string." << std::endl;
+        exit(-1);
+    }
+    outputModuleName_ = moduleName;
 }
 
 void chimera::Configuration::AddInputNamespaceName(const std::string &namespaceName)
@@ -148,8 +171,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 , bindingNode_(configNode_["template"]) // TODO: is this always ok?
 , ci_(ci)
 {
-    // Start out by setting the binding name to the default.
-    std::string binding_name = chimera::binding::DEFAULT_NAME;
+    // This placeholder will be filled in by the binding name specified
+    // in the configuration YAML if it exists, or remain empty otherwise.
+    std::string config_binding_name;
 
     // Resolve command-line namespaces.  Since these cannot include
     // configuration information, they are simpler to handle.
@@ -301,8 +325,26 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                           << std::endl;
                 exit(-2);
             }
-            binding_name = bindingNode.as<std::string>();
+            config_binding_name = bindingNode.as<std::string>();
         }
+    }
+
+    // Set the binding name from one of the following sources in order of priority:
+    // 1) CLI '--binding' setting
+    // 2) YAML configuration setting
+    // 3) chimera::binding::DEFAULT_NAME
+    std::string binding_name;
+    if (!parent_.bindingName_.empty())
+    {
+        binding_name = parent_.bindingName_;
+    }
+    else if (!config_binding_name.empty())
+    {
+        binding_name = config_binding_name;
+    }
+    else
+    {
+        binding_name = chimera::binding::DEFAULT_NAME;
     }
 
     // Resolve the base binding definition from the specified binding name.
