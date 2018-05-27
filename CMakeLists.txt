@@ -137,5 +137,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-enable_testing()
-add_subdirectory(test)
+# The BUILD_TESTING flag is recognized by CTest and it automatically adds
+# the `enable_testing()` macro when it is present.
+option(BUILD_TESTING "Enable generation of Chimera build tests." ON)
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()

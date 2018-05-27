@@ -1,0 +1,9 @@
+build/
+ci/
+test/
+.codecov.yml
+.gitignore
+.travis.yml
+Dockerfile
+LICENSE
+README.md
