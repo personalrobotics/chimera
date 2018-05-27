@@ -171,7 +171,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 , bindingNode_(configNode_["template"]) // TODO: is this always ok?
 , ci_(ci)
 {
-    // Start out by setting the binding name to the default.
+    // This placeholder will be filled in by the binding name specified
+    // in the configuration YAML if it exists, or remain empty otherwise.
     std::string config_binding_name;
 
     // Resolve command-line namespaces.  Since these cannot include
