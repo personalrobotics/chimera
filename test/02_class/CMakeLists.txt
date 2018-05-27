@@ -1,5 +1,3 @@
-include(chimeraBindingTest)
-
 chimera_add_binding_test_boost_python(test_class_boost_python
   SOURCES test_class.cpp
   NAMESPACES test_class
