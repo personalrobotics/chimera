@@ -61,7 +61,7 @@ endif()
 # Find pybind11
 # Needs to set PYBIND11_PYTHON_VERSION before finding pybind11
 set(PYBIND11_PYTHON_VERSION ${PYTHON_VERSION_STRING})
-find_package(pybind11 2.2.0)
+find_package(pybind11 2.2.0 QUIET)
 if(NOT pybind11_FOUND)
   message(WARNING "pybind11 (>=2.2.0) is not found. Omitting from unit tests.")
 endif()
