@@ -13,7 +13,7 @@
 #
 # Note: Specifying different binding other than pybind11 will results in
 # undefined behavior. It'd be great if we can prevent this situation.
-function(chimera_add_test_pybind11 test_name)
+function(chimera_add_binding_test_pybind11 test_name)
   if(NOT pybind11_FOUND)
     message(WARNING "Skipping '${test_name}' test because pybind11 is not found")
     return()
@@ -102,4 +102,4 @@ function(chimera_add_test_pybind11 test_name)
       COMMAND ${CMAKE_COMMAND} -E copy ${test_name}*.so ${CMAKE_CURRENT_SOURCE_DIR}
     )
   endif()
-endfunction(chimera_add_test_pybind11)
+endfunction(chimera_add_binding_test_pybind11)

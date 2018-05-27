@@ -11,7 +11,7 @@
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
 #
-function(chimera_add_test_boost_python test_name)
+function(chimera_add_binding_test_boost_python test_name)
   if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)
     message(WARNING "Skipping '${test_name}' test because Boost.Python is not found")
     return()
@@ -103,4 +103,4 @@ function(chimera_add_test_boost_python test_name)
       COMMAND ${CMAKE_COMMAND} -E copy ${test_name}*.so ${CMAKE_CURRENT_SOURCE_DIR}
     )
   endif()
-endfunction(chimera_add_test_boost_python)
+endfunction(chimera_add_binding_test_boost_python)
