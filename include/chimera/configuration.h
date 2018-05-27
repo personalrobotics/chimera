@@ -49,6 +49,12 @@ public:
     void LoadFile(const std::string &filename);
 
     /**
+     * Set the desired binding definition by name.
+     * If unspecified, the default is "boost_python".
+     */
+    void SetBindingName(const std::string &name);
+
+    /**
      * Set the desired output path to be prepended to every binding.
      * If unspecified, the default is the current working directory.
      */
@@ -103,6 +109,7 @@ private:
 
 protected:
     YAML::Node configNode_;
+    std::string bindingName_;
     std::string configFilename_;
     std::string outputPath_;
     std::string outputModuleName_;
