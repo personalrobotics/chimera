@@ -611,7 +611,7 @@ chimera::util::needsReturnValuePolicy(const NamedDecl *decl, QualType return_typ
             << decl->getQualifiedNameAsString()
             << "' because it returns the reference type '"
             << getFullyQualifiedTypeName(decl->getASTContext(), return_type)
-            << "'and no 'return_value_policy' was specified.\n";
+            << "' and no 'return_value_policy' was specified.\n";
         return true;
     }
     else if (return_type.getTypePtr()->isPointerType())
