@@ -8,14 +8,14 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6
+      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
       # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6 PYTHON_VERSION=3.4
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
@@ -28,12 +28,7 @@ install:
   - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then . ci/install_macos.sh; fi
 
 script:
-  - mkdir build
-  - cd build
-  - cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=${CODECOV}" ..
-  - make -j4
-  - if [ $CODECOV = ON ]; then make chimera_coverage; else make test; fi
-  - if [ $CODECOV = ON ]; then bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports."; fi
+  - . ci/script.sh
 
 after_failure: 
   - cat Testing/Temporary/LastTest.log
