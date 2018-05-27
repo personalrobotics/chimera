@@ -62,6 +62,7 @@ function(chimera_add_test_pybind11 test_name)
   add_chimera_binding(
     TARGET ${test_name}
     SOURCES ${chimera_test_SOURCES}
+    BINDING pybind11
     ${chimera_binding_EXTRA_SOURCES}
     ${chimera_binding_DESTINATION}
     ${chimera_binding_MODULE}

@@ -17,7 +17,7 @@ include(chimeraTestPybind11)
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
 #
-function(chimera_add_test test_name)
+function(chimera_add_test_all test_name)
   chimera_add_test_boost_python(${test_name}_boost_python ${ARGN})
   chimera_add_test_pybind11(${test_name}_pybind11 ${ARGN})
-endfunction(chimera_add_test)
+endfunction(chimera_add_test_all)

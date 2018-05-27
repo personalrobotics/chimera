@@ -11,8 +11,6 @@
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
 #
-# Note: Specifying different binding other than pybind11 will results in
-# undefined behavior. It'd be great if we can prevent this situation.
 function(chimera_add_test_boost_python test_name)
   if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)
     message(WARNING "Skipping '${test_name}' test because Boost.Python is not found")
@@ -62,6 +60,7 @@ function(chimera_add_test_boost_python test_name)
   add_chimera_binding(
     TARGET ${test_name}
     SOURCES ${chimera_test_SOURCES}
+    BINDING boost_python
     ${chimera_binding_EXTRA_SOURCES}
     ${chimera_binding_DESTINATION}
     ${chimera_binding_MODULE}
