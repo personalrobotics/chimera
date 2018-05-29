@@ -23,7 +23,18 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Xenial (16.04) and Bionic (18.04).
+Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), and Bionic (18.04).
+
+**Trusty**
+
+```shell
+$ sudo add-apt-repository ppa:personalrobotics/ppa
+$ sudo add-apt-repository ppa:renemilk/llvm
+$ sudo apt update
+$ sudo apt install chimera
+```
+
+**Xenial/Bionic**
 
 ```shell
 $ sudo add-apt-repository ppa:personalrobotics/ppa
