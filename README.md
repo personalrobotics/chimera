@@ -44,7 +44,7 @@ $ brew install chimera
 
 ## Build from Source
 
-**Requirements**
+### Requirements
 
 * libclang 3.6 or above
 * llvm 3.6 or above (+ tools)
@@ -52,13 +52,15 @@ $ brew install chimera
 * yaml-cpp
 * boost
 
-**On Ubuntu from source**
+### On Ubuntu from source
+
+**Trusty**
 
 ```bash
-$ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
-$ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+$ sudo apt-add-repository ppa:george-edison55/cmake-3.x
 $ sudo apt-get update
-$ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
+$ sudo apt-get install cmake
+$ sudo apt-get install llvm-3.7-dev llvm-3.7-tools libclang-3.7-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
@@ -67,7 +69,19 @@ $ make
 $ sudo make install
 ```
 
-**On macOS using Homebrew**
+**Xenial/Bionic**
+
+```bash
+$ sudo apt-get install llvm-4.0-dev llvm-4.0-tools libclang-4.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make
+$ sudo make install
+```
+
+### On macOS using Homebrew
 
 ```bash
 # install Homebrew if not installed
@@ -76,7 +90,7 @@ $ brew tap personalrobotics/tap
 $ brew install chimera
 ```
 
-**On macOS from source**
+### On macOS from source
 
 ```bash
 $ brew install boost llvm
