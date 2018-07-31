@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -ex
+set -x
+# Disable e option for now
 
 mkdir build
 cd build
