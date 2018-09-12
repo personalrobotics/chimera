@@ -22,6 +22,9 @@ matrix:
     - os: osx
       compiler: clang
       env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
+    - os: osx
+      compiler: clang
+      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=6
 
 install:
   - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
