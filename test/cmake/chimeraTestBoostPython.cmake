@@ -90,7 +90,7 @@ function(chimera_add_binding_test_boost_python test_name)
   )
 
   add_test(
-    NAME ctest_${test_name}
+    NAME ${test_name}
     COMMAND "${CMAKE_COMMAND}"
       --build ${CMAKE_BINARY_DIR}
       --target ${test_name}

@@ -261,8 +261,9 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 {
-    // Only generate functions when we reach their actual definition.
-    if (!decl->isThisDeclarationADefinition())
+    // Only generate functions when we reach their "canonical" definition.
+    // This prevents functions from being generated multiple times.
+    if (decl != decl->getCanonicalDecl())
         return false;
     // Ignore functions that are actually methods of CXXRecords.
     else if (isa<clang::CXXMethodDecl>(decl))
