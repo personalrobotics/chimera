@@ -29,6 +29,12 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(strong_husky.type(), 'StrongHusky')
         self.assertEqual(strong_husky.pure_virtual_type(), 'StrongHusky')
 
+        default_args = py11.DefaultArguments()
+
+        self.assertEqual(default_args.add(), 3)
+        self.assertEqual(default_args.add(2), 4)
+        self.assertEqual(default_args.add(2, 3), 5)
+
     def test_function_bp(self):
         dog = boost.Dog()
         husky = boost.Husky()
@@ -43,6 +49,12 @@ class TestFunction(unittest.TestCase):
 
         self.assertEqual(strong_husky.type(), 'StrongHusky')
         self.assertEqual(strong_husky.pure_virtual_type(), 'StrongHusky')
+
+        default_args = boost.DefaultArguments()
+
+        self.assertEqual(default_args.add(), 3)
+        self.assertEqual(default_args.add(2), 4)
+        self.assertEqual(default_args.add(2, 3), 5)
 
 
 if __name__ == '__main__':

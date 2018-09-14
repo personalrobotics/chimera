@@ -44,5 +44,12 @@ public:
   std::string pure_virtual_type() const override;
 };
 
+class DefaultArguments
+{
+public:
+  DefaultArguments() = default;
+  int add(int i = 1, int j = 2) const;
+};
+
 } // namespace nested_namespace
 } // namespace chimera_test

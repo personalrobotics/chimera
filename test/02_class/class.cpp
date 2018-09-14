@@ -82,5 +82,11 @@ std::string StrongHusky::pure_virtual_type() const
   return "StrongHusky";
 }
 
+//==============================================================================
+int DefaultArguments::add(int i, int j) const
+{
+  return i + j;
+}
+
 } // namespace nested_namespace
 } // namespace chimera_test
