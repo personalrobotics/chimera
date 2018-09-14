@@ -66,6 +66,7 @@ endif()
 # Globally inherit the top-level include directory because it is difficult to
 # locate from CMakeLists.txt in source subdirectories.
 include_directories("${PROJECT_SOURCE_DIR}/include")
+file(GLOB_RECURSE chimera_headers "${PROJECT_SOURCE_DIR}/include/*.h")
 
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
@@ -81,6 +82,7 @@ add_subdirectory(external)
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
+  ${chimera_headers}
   src/chimera.cpp
   src/configuration.cpp
   src/consumer.cpp

@@ -40,9 +40,9 @@ void {{class.mangled_name}}(pybind11::module& m)
     ::pybind11::class_<{{class.type}}{{!
         }}{{#class.held_type}}, {{!
         }}{{.}}{{/class.held_type}}{{#class.bases?}}, {{!
-        }}::pybind11::bases<{{!
+        }}{{!
             }}{{#class.bases}}{{qualified_name}}{{^last}}, {{/last}}{{/class.bases}}{{!
-        }} >{{/class.bases?}} >(sm, "{{class.name}}"{{!
+        }}{{/class.bases?}} >(sm, "{{class.name}}"{{!
         }}{{#class.comment?}}, {{class.mangled_name}}_docstring{{/class.comment?}}{{!
         }}){{!
 
