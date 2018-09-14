@@ -63,7 +63,7 @@ $ brew install chimera
 * yaml-cpp
 * boost
 
-### On Ubuntu from source
+### On Ubuntu from Source
 
 **Trusty**
 
@@ -92,16 +92,7 @@ $ make
 $ sudo make install
 ```
 
-### On macOS using Homebrew
-
-```bash
-# install Homebrew if not installed
-$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-$ brew tap personalrobotics/tap
-$ brew install chimera
-```
-
-### On macOS from source
+### On macOS from Source
 
 ```bash
 $ brew install boost llvm
