@@ -78,10 +78,7 @@ void {{class.mangled_name}}(pybind11::module& m)
     }}{{#params?}}, ({{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
-}}{{/class.methods}}
-{{#class.static_methods}}{{!
-    }}.staticmethod("{{.}}")
-{{/class.static_methods}}{{!
+}}{{/class.methods}}{{!
 
 /* fields */}}
 {{#class.fields}}{{!
