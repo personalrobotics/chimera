@@ -1,12 +1,20 @@
 import unittest
 
-from test_class_pybind11.test_nested_class import Pet as Pet_py11
+try:
+    from test_class_pybind11.test_nested_class import Pet as Pet_py11
+    has_pybind11 = True
+except:
+    has_pybind11 = False
+
 from test_class_boost_python.test_nested_class import Pet as Pet_bp
 
 
 class TestClass(unittest.TestCase):
 
     def test_name_py11(self):
+        if not has_pybind11:
+            return
+
         p = Pet_py11('Molly')
         self.assertEqual(p.name, 'Molly')
         self.assertEqual(p.getName(), 'Molly')
