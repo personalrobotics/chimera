@@ -28,48 +28,50 @@ matrix:
     - os: linux
       compiler: clang
       env:
-        - BUILD_NAME=TRUSTY_CLANG_DEBUG
+        - BUILD_NAME=TRUSTY_CLANG_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=CLANG
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
         - SUDO=sudo
     - os: linux
-      compiler: clang
-      env:
-        - BUILD_NAME=TRUSTY_CLANG_RELEASE
-        - BUILD_TYPE=Release
-        - COMPILER=CLANG
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
-        - DOCKER_FILE="ubuntu-xenial"
-      services: docker
-    - os: linux
       compiler: gcc
       env:
         - BUILD_NAME=XENIAL_GCC_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=GCC
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
+        - LLVM_VERSION=3.8
+        - PYTHON_VERSION=3.5
+        - DOCKER_FILE="ubuntu-xenial"
+      services: docker
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=BIONIC_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=6.0
+        - PYTHON_VERSION=3.6
         - DOCKER_FILE="ubuntu-bionic"
       services: docker
     - os: osx
       compiler: gcc
       env:
-        - BUILD_NAME=BIONIC_GCC_RELEASE
+        - BUILD_NAME=MACOS_CLANG_LLVM_4_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=GCC
         - LLVM_VERSION=4
     - os: osx
       compiler: clang
       env:
+        - BUILD_NAME=MACOS_CLANG_LLVM_5_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=CLANG
         - LLVM_VERSION=5
     - os: osx
       compiler: clang
       env:
+        - BUILD_NAME=MACOS_CLANG_LLVM_6_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=CLANG
         - LLVM_VERSION=6
