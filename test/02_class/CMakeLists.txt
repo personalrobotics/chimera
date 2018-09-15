@@ -7,4 +7,4 @@ chimera_add_binding_tests(class
   COPY_MODULE
 )
 
-chimera_add_python_test(class_python_tests test_class.py)
+chimera_add_python_test(class_python_tests class.py)
