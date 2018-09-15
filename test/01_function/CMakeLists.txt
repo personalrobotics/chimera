@@ -7,8 +7,4 @@ chimera_add_binding_tests(function
   COPY_MODULE
 )
 
-add_test(
-  NAME function_python_tests
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/function.py
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+chimera_add_python_test(function_python_tests function.py)
