@@ -19,3 +19,5 @@ if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
 else
   make test
 fi
+
+$SUDO make install
