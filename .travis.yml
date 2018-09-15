@@ -9,8 +9,8 @@ matrix:
     - os: linux
       compiler: gcc
       env:
+        - BUILD_NAME=TRUSTY_GCC_DEBUG
         - BUILD_TYPE=Debug
-        - CODECOV=OFF
         - COMPILER=GCC
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
@@ -19,8 +19,8 @@ matrix:
     - os: linux
       compiler: gcc
       env:
+        - BUILD_NAME=TRUSTY_GCC_RELEASE
         - BUILD_TYPE=Release
-        - CODECOV=OFF
         - COMPILER=GCC
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
@@ -28,8 +28,8 @@ matrix:
     - os: linux
       compiler: clang
       env:
+        - BUILD_NAME=TRUSTY_CLANG_DEBUG
         - BUILD_TYPE=Release
-        - CODECOV=OFF
         - COMPILER=CLANG
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
@@ -37,42 +37,40 @@ matrix:
     - os: linux
       compiler: clang
       env:
+        - BUILD_NAME=TRUSTY_CLANG_RELEASE
         - BUILD_TYPE=Release
-        - CODECOV=OFF
         - COMPILER=CLANG
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
         - DOCKER_FILE="ubuntu-xenial"
       services: docker
     - os: linux
-      compiler: clang
+      compiler: gcc
       env:
+        - BUILD_NAME=XENIAL_GCC_RELEASE
         - BUILD_TYPE=Release
-        - CODECOV=OFF
-        - COMPILER=CLANG
+        - COMPILER=GCC
         - LLVM_VERSION=3.6
         - PYTHON_VERSION=3.4
         - DOCKER_FILE="ubuntu-bionic"
       services: docker
     - os: osx
-      compiler: clang
+      compiler: gcc
       env:
+        - BUILD_NAME=BIONIC_GCC_RELEASE
         - BUILD_TYPE=Release
-        - CODECOV=OFF
-        - COMPILER=CLANG
+        - COMPILER=GCC
         - LLVM_VERSION=4
     - os: osx
       compiler: clang
       env:
         - BUILD_TYPE=Release
-        - CODECOV=OFF
         - COMPILER=CLANG
         - LLVM_VERSION=5
     - os: osx
       compiler: clang
       env:
         - BUILD_TYPE=Release
-        - CODECOV=OFF
         - COMPILER=CLANG
         - LLVM_VERSION=6
 

@@ -4,7 +4,18 @@ set -x
 
 mkdir build
 cd build
-cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=${CODECOV}" ..
+
+if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
+  cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=ON" ..
+else
+  cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
+fi
+
 make -j4
-if [ $CODECOV = ON ]; then make chimera_coverage; else make test; fi
-if [ $CODECOV = ON ]; then bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports."; fi
+
+if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
+  make chimera_coverage
+  bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports."
+else
+  make test
+fi
