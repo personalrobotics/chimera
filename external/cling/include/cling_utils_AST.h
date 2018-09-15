@@ -75,10 +75,11 @@ namespace utils {
     ///                           synthesis of the DeclRefExpr.
     ///\returns 0 if the operation wasn't successful.
     ///
-    clang::Expr* GetOrCreateLastExpr(clang::FunctionDecl* FD,
-                                     int* FoundAt = 0,
-                                     bool omitDeclStmts = true,
-                                     clang::Sema* S = 0);
+    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
+    // clang::Expr* GetOrCreateLastExpr(clang::FunctionDecl* FD,
+    //                                  int* FoundAt = 0,
+    //                                  bool omitDeclStmts = true,
+    //                                  clang::Sema* S = 0);
 
     ///\brief Return true if the class or template is declared directly in the
     /// std namespace (modulo inline namespace).
