@@ -1411,48 +1411,48 @@ namespace utils {
     return dyn_cast<NamespaceDecl>(R.getFoundDecl());
   }
 
-  NamedDecl* Lookup::Named(Sema* S, llvm::StringRef Name,
-                           const DeclContext* Within) {
-    DeclarationName DName = &S->Context.Idents.get(Name);
-    return Lookup::Named(S, DName, Within);
-  }
+  // NamedDecl* Lookup::Named(Sema* S, llvm::StringRef Name,
+  //                          const DeclContext* Within) {
+  //   DeclarationName DName = &S->Context.Idents.get(Name);
+  //   return Lookup::Named(S, DName, Within);
+  // }
 
-  NamedDecl* Lookup::Named(Sema* S, const char* Name,
-                           const DeclContext* Within) {
-    DeclarationName DName = &S->Context.Idents.get(Name);
-    return Lookup::Named(S, DName, Within);
-  }
+  // NamedDecl* Lookup::Named(Sema* S, const char* Name,
+  //                          const DeclContext* Within) {
+  //   DeclarationName DName = &S->Context.Idents.get(Name);
+  //   return Lookup::Named(S, DName, Within);
+  // }
 
-  NamedDecl* Lookup::Named(Sema* S, const DeclarationName& Name,
-                           const DeclContext* Within) {
-    LookupResult R(*S, Name, SourceLocation(), Sema::LookupOrdinaryName,
-                   Sema::ForRedeclaration);
-    R.suppressDiagnostics();
-    if (!Within)
-      S->LookupName(R, S->TUScope);
-    else {
-      const DeclContext* primaryWithin = nullptr;
-      if (const clang::TagDecl *TD = dyn_cast<clang::TagDecl>(Within)) {
-        primaryWithin = dyn_cast_or_null<DeclContext>(TD->getDefinition());
-      } else {
-        primaryWithin = Within->getPrimaryContext();
-      }
-      if (!primaryWithin) {
-        // No definition, no lookup result.
-        return 0;
-      }
-      S->LookupQualifiedName(R, const_cast<DeclContext*>(primaryWithin));
-    }
+  // NamedDecl* Lookup::Named(Sema* S, const DeclarationName& Name,
+  //                          const DeclContext* Within) {
+  //   LookupResult R(*S, Name, SourceLocation(), Sema::LookupOrdinaryName,
+  //                  Sema::ForRedeclaration);
+  //   R.suppressDiagnostics();
+  //   if (!Within)
+  //     S->LookupName(R, S->TUScope);
+  //   else {
+  //     const DeclContext* primaryWithin = nullptr;
+  //     if (const clang::TagDecl *TD = dyn_cast<clang::TagDecl>(Within)) {
+  //       primaryWithin = dyn_cast_or_null<DeclContext>(TD->getDefinition());
+  //     } else {
+  //       primaryWithin = Within->getPrimaryContext();
+  //     }
+  //     if (!primaryWithin) {
+  //       // No definition, no lookup result.
+  //       return 0;
+  //     }
+  //     S->LookupQualifiedName(R, const_cast<DeclContext*>(primaryWithin));
+  //   }
 
-    if (R.empty())
-      return 0;
+  //   if (R.empty())
+  //     return 0;
 
-    R.resolveKind();
+  //   R.resolveKind();
 
-    if (R.isSingleResult())
-      return R.getFoundDecl();
-    return (clang::NamedDecl*)-1;
-  }
+  //   if (R.isSingleResult())
+  //     return R.getFoundDecl();
+  //   return (clang::NamedDecl*)-1;
+  // }
 
   static NestedNameSpecifier*
   CreateNestedNameSpecifierForScopeOf(const ASTContext& Ctx,

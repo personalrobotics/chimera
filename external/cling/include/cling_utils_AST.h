@@ -207,9 +207,10 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    clang::NamedDecl* Named(clang::Sema* S,
-                            llvm::StringRef Name,
-                            const clang::DeclContext* Within = 0);
+    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
+    // clang::NamedDecl* Named(clang::Sema* S,
+    //                         llvm::StringRef Name,
+    //                         const clang::DeclContext* Within = 0);
 
     ///\brief Quick lookup for a single named declaration in a given
     /// declaration context.
@@ -220,9 +221,10 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    clang::NamedDecl* Named(clang::Sema* S,
-                            const char* Name,
-                            const clang::DeclContext* Within = 0);
+    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
+    // clang::NamedDecl* Named(clang::Sema* S,
+    //                         const char* Name,
+    //                         const clang::DeclContext* Within = 0);
 
     ///\brief Quick lookup for a single namespace declaration in a given
     /// declaration context.
@@ -234,9 +236,10 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    clang::NamedDecl* Named(clang::Sema* S,
-                            const clang::DeclarationName& Name,
-                            const clang::DeclContext* Within = 0);
+    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
+    // clang::NamedDecl* Named(clang::Sema* S,
+    //                         const clang::DeclarationName& Name,
+    //                         const clang::DeclContext* Within = 0);
 
   }
 
