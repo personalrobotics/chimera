@@ -67,15 +67,24 @@ endif()
 # locate from CMakeLists.txt in source subdirectories.
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
-# Set headers
-set(chimera_headers
-  ${PROJECT_SOURCE_DIR}/include/binding.h
-  ${PROJECT_SOURCE_DIR}/include/configuration.h
-  ${PROJECT_SOURCE_DIR}/include/consumer.h
-  ${PROJECT_SOURCE_DIR}/include/frontend_action.h
-  ${PROJECT_SOURCE_DIR}/include/mstch.h
-  ${PROJECT_SOURCE_DIR}/include/util.h
-  ${PROJECT_SOURCE_DIR}/include/visitor.h
+# Set headers and sources
+set(${PROJECT_NAME}_HEADERS
+  include/chimera/binding.h
+  include/chimera/configuration.h
+  include/chimera/consumer.h
+  include/chimera/frontend_action.h
+  include/chimera/mstch.h
+  include/chimera/util.h
+  include/chimera/visitor.h
+)
+set(${PROJECT_NAME}_SOURCES
+  src/chimera.cpp
+  src/configuration.cpp
+  src/consumer.cpp
+  src/frontend_action.cpp
+  src/visitor.cpp
+  src/util.cpp
+  src/mstch.cpp
 )
 
 ## Use LLVM CMake macro to collate and order link libraries.
@@ -92,14 +101,8 @@ add_subdirectory(external)
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
-  ${chimera_headers}  # not required, but helpful for some IDEs
-  src/chimera.cpp
-  src/configuration.cpp
-  src/consumer.cpp
-  src/frontend_action.cpp
-  src/visitor.cpp
-  src/util.cpp
-  src/mstch.cpp
+  ${${PROJECT_NAME}_HEADERS}  # not required, but helpful for some IDEs
+  ${${PROJECT_NAME}_SOURCES}
 )
 
 target_compile_options("${PROJECT_NAME}"
