@@ -51,5 +51,13 @@ public:
   int add(int i = 1, int j = 2) const;
 };
 
+class StaticFields
+{
+public:
+  static std::string m_static_readwrite_type;
+  static const std::string m_static_readonly_type;
+  static std::string static_type();
+};
+
 } // namespace nested_namespace
 } // namespace chimera_test

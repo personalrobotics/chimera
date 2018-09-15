@@ -16,45 +16,51 @@ class TestFunction(unittest.TestCase):
             return
 
         dog = py11.Dog()
-        husky = py11.Husky()
-        strong_husky = py11.StrongHusky()
-
         self.assertEqual(dog.type(), 'Dog')
         self.assertEqual(dog.pure_virtual_type(), 'Dog')
         self.assertEqual(py11.Dog.static_type(), 'Dog')
 
+        husky = py11.Husky()
         self.assertEqual(husky.type(), 'Husky')
         self.assertEqual(husky.pure_virtual_type(), 'Husky')
 
+        strong_husky = py11.StrongHusky()
         self.assertEqual(strong_husky.type(), 'StrongHusky')
         self.assertEqual(strong_husky.pure_virtual_type(), 'StrongHusky')
 
         default_args = py11.DefaultArguments()
-
         self.assertEqual(default_args.add(), 3)
         self.assertEqual(default_args.add(2), 4)
         self.assertEqual(default_args.add(2, 3), 5)
 
+        self.assertEqual(py11.StaticFields.m_static_readonly_type, 'static readonly type')
+        self.assertEqual(py11.StaticFields.m_static_readwrite_type, 'static readwrite type')
+        py11.StaticFields.m_static_readwrite_type = 'new type'
+        self.assertEqual(py11.StaticFields.m_static_readwrite_type, 'new type')
+
     def test_function_bp(self):
         dog = boost.Dog()
-        husky = boost.Husky()
-        strong_husky = boost.StrongHusky()
-
         self.assertEqual(dog.type(), 'Dog')
         self.assertEqual(dog.pure_virtual_type(), 'Dog')
         self.assertEqual(boost.Dog.static_type(), 'Dog')
 
+        husky = boost.Husky()
         self.assertEqual(husky.type(), 'Husky')
         self.assertEqual(husky.pure_virtual_type(), 'Husky')
 
+        strong_husky = boost.StrongHusky()
         self.assertEqual(strong_husky.type(), 'StrongHusky')
         self.assertEqual(strong_husky.pure_virtual_type(), 'StrongHusky')
 
         default_args = boost.DefaultArguments()
-
         self.assertEqual(default_args.add(), 3)
         self.assertEqual(default_args.add(2), 4)
         self.assertEqual(default_args.add(2, 3), 5)
+
+        self.assertEqual(boost.StaticFields.m_static_readonly_type, 'static readonly type')
+        self.assertEqual(boost.StaticFields.m_static_readwrite_type, 'static readwrite type')
+        boost.StaticFields.m_static_readwrite_type = 'new type'
+        self.assertEqual(boost.StaticFields.m_static_readwrite_type, 'new type')
 
 
 if __name__ == '__main__':
