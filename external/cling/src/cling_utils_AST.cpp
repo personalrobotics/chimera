@@ -108,68 +108,68 @@ namespace utils {
     RawStr.flush();
   }
 
-  Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
-                                     int* FoundAt /*=0*/,
-                                     bool omitDeclStmts /*=true*/,
-                                     Sema* S /*=0*/) {
-    assert(FD && "We need a function declaration!");
-    assert((omitDeclStmts || S)
-           && "Sema needs to be set when omitDeclStmts is false");
-    if (FoundAt)
-      *FoundAt = -1;
+  // Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
+  //                                    int* FoundAt /*=0*/,
+  //                                    bool omitDeclStmts /*=true*/,
+  //                                    Sema* S /*=0*/) {
+  //   assert(FD && "We need a function declaration!");
+  //   assert((omitDeclStmts || S)
+  //          && "Sema needs to be set when omitDeclStmts is false");
+  //   if (FoundAt)
+  //     *FoundAt = -1;
 
-    Expr* result = 0;
-    if (CompoundStmt* CS = dyn_cast<CompoundStmt>(FD->getBody())) {
-      ArrayRef<Stmt*> Stmts
-        = llvm::makeArrayRef(CS->body_begin(), CS->size());
-      int indexOfLastExpr = Stmts.size();
-      while(indexOfLastExpr--) {
-        if (!isa<NullStmt>(Stmts[indexOfLastExpr]))
-          break;
-      }
+  //   Expr* result = 0;
+  //   if (CompoundStmt* CS = dyn_cast<CompoundStmt>(FD->getBody())) {
+  //     ArrayRef<Stmt*> Stmts
+  //       = llvm::makeArrayRef(CS->body_begin(), CS->size());
+  //     int indexOfLastExpr = Stmts.size();
+  //     while(indexOfLastExpr--) {
+  //       if (!isa<NullStmt>(Stmts[indexOfLastExpr]))
+  //         break;
+  //     }
 
-      if (FoundAt)
-        *FoundAt = indexOfLastExpr;
+  //     if (FoundAt)
+  //       *FoundAt = indexOfLastExpr;
 
-      if (indexOfLastExpr < 0)
-        return 0;
+  //     if (indexOfLastExpr < 0)
+  //       return 0;
 
-      if ( (result = dyn_cast<Expr>(Stmts[indexOfLastExpr])) )
-        return result;
-      if (!omitDeclStmts)
-        if (DeclStmt* DS = dyn_cast<DeclStmt>(Stmts[indexOfLastExpr])) {
-          std::vector<Stmt*> newBody = Stmts.vec();
-          for (DeclStmt::reverse_decl_iterator I = DS->decl_rbegin(),
-                 E = DS->decl_rend(); I != E; ++I) {
-            if (VarDecl* VD = dyn_cast<VarDecl>(*I)) {
-              // Change the void function's return type
-              // We can't PushDeclContext, because we don't have scope.
-              Sema::ContextRAII pushedDC(*S, FD);
+  //     if ( (result = dyn_cast<Expr>(Stmts[indexOfLastExpr])) )
+  //       return result;
+  //     if (!omitDeclStmts)
+  //       if (DeclStmt* DS = dyn_cast<DeclStmt>(Stmts[indexOfLastExpr])) {
+  //         std::vector<Stmt*> newBody = Stmts.vec();
+  //         for (DeclStmt::reverse_decl_iterator I = DS->decl_rbegin(),
+  //                E = DS->decl_rend(); I != E; ++I) {
+  //           if (VarDecl* VD = dyn_cast<VarDecl>(*I)) {
+  //             // Change the void function's return type
+  //             // We can't PushDeclContext, because we don't have scope.
+  //             Sema::ContextRAII pushedDC(*S, FD);
 
-              QualType VDTy = VD->getType().getNonReferenceType();
-              // Get the location of the place we will insert.
-              SourceLocation Loc
-                = newBody[indexOfLastExpr]->getLocEnd().getLocWithOffset(1);
-              Expr* DRE = S->BuildDeclRefExpr(VD, VDTy,VK_LValue, Loc).get();
-              assert(DRE && "Cannot be null");
-              indexOfLastExpr++;
-              newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
+  //             QualType VDTy = VD->getType().getNonReferenceType();
+  //             // Get the location of the place we will insert.
+  //             SourceLocation Loc
+  //               = newBody[indexOfLastExpr]->getLocEnd().getLocWithOffset(1);
+  //             Expr* DRE = S->BuildDeclRefExpr(VD, VDTy,VK_LValue, Loc).get();
+  //             assert(DRE && "Cannot be null");
+  //             indexOfLastExpr++;
+  //             newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
 
-              // Attach the new body (note: it does dealloc/alloc of all nodes)
-              CS->setStmts(S->getASTContext(),
-                  CREATE_ARRAYREF(&newBody.front(), newBody.size()));
-              if (FoundAt)
-                *FoundAt = indexOfLastExpr;
-              return DRE;
-            }
-          }
-        }
+  //             // Attach the new body (note: it does dealloc/alloc of all nodes)
+  //             CS->setStmts(S->getASTContext(),
+  //                 CREATE_ARRAYREF(&newBody.front(), newBody.size()));
+  //             if (FoundAt)
+  //               *FoundAt = indexOfLastExpr;
+  //             return DRE;
+  //           }
+  //         }
+  //       }
 
-      return result;
-    }
+  //     return result;
+  //   }
 
-    return result;
-  }
+  //   return result;
+  // }
 
   const char* const Synthesize::UniquePrefix = "__cling_Un1Qu3";
 
