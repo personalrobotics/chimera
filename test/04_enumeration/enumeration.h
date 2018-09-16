@@ -3,14 +3,14 @@
 namespace chimera_test {
 namespace nested_namespace {
 
-enum Type
-{
-  Dog = 0,
-  Cat
-};
-
 struct Animal
 {
+  enum Type
+  {
+    Dog = 0,
+    Cat
+  };
+
   Animal(Type type) : type(type) { }
 
   Type type;

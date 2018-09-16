@@ -12,7 +12,7 @@
 void {{function.mangled_name}}(pybind11::module& m)
 {
     auto sm = m{{!
-        }}{{#function.scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/function.scope}};
+        }}{{#function.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/function.scope}};
 
 {{#function.overloads}}{{!
     }}    sm.def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
