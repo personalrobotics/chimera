@@ -219,7 +219,7 @@ CXXRecord::CXXRecord(
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
         if (chimera::util::hasNonPublicParam(method_decl))
-          continue;
+            continue;
         if (method_decl->isDeleted())
             continue;
         if (!isa<CXXConstructorDecl>(method_decl))

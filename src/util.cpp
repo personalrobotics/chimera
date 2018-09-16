@@ -644,10 +644,10 @@ chimera::util::getFunctionArgumentRange(const clang::FunctionDecl *decl)
 
 bool chimera::util::hasNonPublicParam(const CXXMethodDecl* decl)
 {
-  for (const auto* param : decl->parameters())
-  {
-    if (param->getAccess() != AS_public)
-      return true;
-  }
-  return false;
+    for (const auto* param : decl->parameters())
+    {
+        if (param->getAccess() != AS_public)
+            return true;
+    }
+    return false;
 }
