@@ -15,12 +15,10 @@ class TestFunction(unittest.TestCase):
         if not has_pybind11:
             return
 
-        self.assertEqual(py11.val, 10)
+        self.assertEqual(py11.const_int_val, 10)
 
     def test_function_bp(self):
-        pass
-        # dog = boost.Dog()
-        # self.assertEqual(boost.StaticFields.static_type(), 'static type')
+        self.assertEqual(boost.const_int_val, 10)
 
 
 if __name__ == '__main__':
