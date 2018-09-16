@@ -289,7 +289,6 @@ public:
 
 private:
     const clang::FunctionDecl *method_decl_;
-    const clang::CXXRecordDecl *class_decl_;
     const std::string default_name_;
 };
 

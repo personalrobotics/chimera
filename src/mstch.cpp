@@ -820,11 +820,10 @@ Namespace::Namespace(const ::chimera::CompiledConfiguration &config,
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
                      const ParmVarDecl *decl,
                      const FunctionDecl *method_decl,
-                     const CXXRecordDecl *class_decl,
+                     const CXXRecordDecl */*class_decl*/,
                      const std::string default_name)
 : ClangWrapper(config, decl)
 , method_decl_(method_decl)
-, class_decl_(class_decl)
 , default_name_(default_name)
 {
     register_methods(this, {
