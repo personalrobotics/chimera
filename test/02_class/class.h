@@ -51,5 +51,16 @@ public:
   int add(int i = 1, int j = 2) const;
 };
 
+class NonPublicParamInConstructor
+{
+protected:
+  struct ProtectedData{};
+
+public:
+  NonPublicParamInConstructor(const ProtectedData&) {}
+  NonPublicParamInConstructor(const std::string& name) : m_name(name) {}
+  std::string m_name;
+};
+
 } // namespace nested_namespace
 } // namespace chimera_test
