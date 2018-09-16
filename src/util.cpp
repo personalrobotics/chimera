@@ -641,3 +641,13 @@ chimera::util::getFunctionArgumentRange(const clang::FunctionDecl *decl)
 
     return std::pair<unsigned, unsigned>(min_arguments, max_arguments);
 }
+
+bool chimera::util::hasNonPublicParam(const CXXMethodDecl* decl)
+{
+  for (const auto* param : decl->parameters())
+  {
+    if (param->getAccess() != AS_public)
+      return true;
+  }
+  return false;
+}
