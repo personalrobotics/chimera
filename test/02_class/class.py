@@ -39,6 +39,9 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(py11.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(py11.StaticFields.static_type(), 'static type')
 
+        non_pub_param_in_ctr = py11.NonPublicParamInConstructor('Herb')
+        self.assertEqual(non_pub_param_in_ctr.m_name, 'Herb')
+
     def test_function_bp(self):
         dog = boost.Dog()
         self.assertEqual(dog.type(), 'Dog')
@@ -64,6 +67,9 @@ class TestFunction(unittest.TestCase):
         # boost.StaticFields.m_static_readwrite_type = 'new type'
         # self.assertEqual(boost.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(boost.StaticFields.static_type(), 'static type')
+
+        non_pub_param_in_ctr = boost.NonPublicParamInConstructor('Herb')
+        self.assertEqual(non_pub_param_in_ctr.m_name, 'Herb')
 
 
 if __name__ == '__main__':
