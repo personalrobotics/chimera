@@ -69,4 +69,5 @@ endif()
 # Add unit tests from subdirectories (roughly in order of complexity).
 add_subdirectory(01_function)
 add_subdirectory(02_class)
+add_subdirectory(05_variable)
 add_subdirectory(99_dart_example)
