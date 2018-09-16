@@ -88,5 +88,16 @@ int DefaultArguments::add(int i, int j) const
   return i + j;
 }
 
+//==============================================================================
+std::string StaticFields::m_static_readwrite_type = "static readwrite type";
+const std::string StaticFields::m_static_readonly_type = "static readonly type";
+
+//==============================================================================
+std::string StaticFields::static_type()
+{
+  static std::string type = "static type";
+  return type;
+}
+
 } // namespace nested_namespace
 } // namespace chimera_test

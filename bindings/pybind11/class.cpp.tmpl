@@ -72,7 +72,7 @@ void {{class.mangled_name}}(pybind11::module& m)
 {{#class.methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
-    }}        .def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
+    }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
     }}return {{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
     }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
@@ -87,11 +87,11 @@ void {{class.mangled_name}}(pybind11::module& m)
     }}("{{name}}", &{{qualified_name}})
 {{/class.fields}}{{!
 
-/* static fields */
-/* TODO: Add make_setter if this property is assignable */}}
+/* static fields */}}
 {{#class.static_fields}}{{!
-    }}        .add_static_property("{{name}}", {{!
-    }}::pybind11::make_getter({{qualified_name}}))
+    }}{{#is_assignable}}        .def_readwrite_static{{/is_assignable}}{{!
+    }}{{^is_assignable}}        .def_readonly_static{{/is_assignable}}{{!
+    }}("{{name}}", &{{qualified_name}})
 {{/class.static_fields}}
     ;
 }
