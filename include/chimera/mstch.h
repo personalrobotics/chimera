@@ -166,11 +166,11 @@ public:
 
     ::mstch::node bases();
     ::mstch::node type();
-    ::mstch::node scope();
+    ::mstch::node scope() override;
     ::mstch::node isCopyable();
 
-    ::mstch::node name();
-    ::mstch::node qualifiedName();
+    ::mstch::node name() override;
+    ::mstch::node qualifiedName() override;
     ::mstch::node heldType();
 
     ::mstch::node constructors();
@@ -190,8 +190,8 @@ public:
     Enum(const ::chimera::CompiledConfiguration &config,
          const clang::EnumDecl *decl);
 
-    ::mstch::node qualifiedName();
-    ::mstch::node scope();
+    ::mstch::node qualifiedName() override;
+    ::mstch::node scope() override;
     ::mstch::node type();
     ::mstch::node values();
 };
@@ -203,7 +203,7 @@ public:
                  const clang::EnumConstantDecl *decl,
                  const clang::EnumDecl *enum_decl);
 
-    ::mstch::node qualifiedName();
+    ::mstch::node qualifiedName() override;
 
 private:
     const clang::EnumDecl *enum_decl_;
@@ -219,7 +219,7 @@ public:
     ::mstch::node isAssignable();
     ::mstch::node isCopyable();
     ::mstch::node returnValuePolicy();
-    ::mstch::node qualifiedName();
+    ::mstch::node qualifiedName() override;
 
 private:
     const clang::CXXRecordDecl *class_decl_;
@@ -240,9 +240,9 @@ public:
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
-    ::mstch::node scope();
+    ::mstch::node scope() override;
     ::mstch::node usesDefaults();
-    ::mstch::node qualifiedName();
+    ::mstch::node qualifiedName() override;
     ::mstch::node isTemplate();
     ::mstch::node call();
     ::mstch::node qualifiedCall();
@@ -284,7 +284,7 @@ public:
               const clang::CXXRecordDecl *class_decl,
               const std::string default_name = "");
 
-    ::mstch::node name();
+    ::mstch::node name() override;
     ::mstch::node type();
 
 private:
@@ -301,8 +301,8 @@ public:
              const clang::CXXRecordDecl *class_decl=NULL);
 
     ::mstch::node isAssignable();
-    ::mstch::node qualifiedName();
-    ::mstch::node scope();
+    ::mstch::node qualifiedName() override;
+    ::mstch::node scope() override;
 
 private:
     const clang::CXXRecordDecl *class_decl_;
