@@ -52,6 +52,8 @@ public:
             {"name", &ClangWrapper::name},
             {"mangled_name", &ClangWrapper::mangledName},
             {"qualified_name", &ClangWrapper::qualifiedName},
+            {"namespace", &ClangWrapper::namespace_},
+            {"scope_without_namespace", &ClangWrapper::scopeWithoutNamespace},
             {"scope", &ClangWrapper::scope},
             {"comment", &ClangWrapper::comment},
             {"comment?", &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::comment>},
@@ -87,6 +89,18 @@ public:
             return node.as<std::string>();
 
         return chimera::util::constructMangledName(decl_);
+    }
+
+    virtual ::mstch::node namespace_()
+    {
+        // Default is empty, overriden in subclasses.
+        return std::string{""};
+    }
+
+    virtual ::mstch::node scopeWithoutNamespace()
+    {
+        // Default is empty, overriden in subclasses.
+        return std::string{""};
     }
 
     virtual ::mstch::node scope()
@@ -301,8 +315,10 @@ public:
              const clang::CXXRecordDecl *class_decl=NULL);
 
     ::mstch::node isAssignable();
-    ::mstch::node qualifiedName();
-    ::mstch::node scope();
+    ::mstch::node qualifiedName() override;
+    ::mstch::node namespace_() override;
+    ::mstch::node scopeWithoutNamespace() override;
+    ::mstch::node scope() override;
 
 private:
     const clang::CXXRecordDecl *class_decl_;
