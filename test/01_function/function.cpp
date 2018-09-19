@@ -15,5 +15,11 @@ void void_pointer_param(void*)
   // Do nothing
 }
 
+//==============================================================================
+void void_return()
+{
+  // Do nothing
+}
+
 } // namespace nested_function
 } // namespace function

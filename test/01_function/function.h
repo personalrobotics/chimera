@@ -10,5 +10,7 @@ inline int inline_add(int i = 1, int j = 2)
 
 void void_pointer_param(void*);
 
+void void_return();
+
 } // namespace nested_function
 } // namespace function
