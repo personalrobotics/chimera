@@ -5,6 +5,7 @@ chimera_add_binding_tests(class
   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/class.yaml
   DEBUG
   COPY_MODULE
+  QUIET
 )
 
 chimera_add_python_test(class_python_tests class.py)

@@ -7,6 +7,7 @@ chimera_add_binding_test_pybind11(${test_name}_pybind11
   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}_pybind11.yaml
   DEBUG
   COPY_MODULE
+  QUIET
 )
 
 # TODO(JS): Disabled Boost.Python test until resolving issue of returning unique_ptr
@@ -17,6 +18,7 @@ chimera_add_binding_test_pybind11(${test_name}_pybind11
 #   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}_boost_python.yaml
 #   DEBUG
 #   COPY_MODULE
+#   QUIET
 # )
 
 add_test(
