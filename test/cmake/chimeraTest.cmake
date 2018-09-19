@@ -16,6 +16,7 @@ include(chimeraTestPybind11)
 #   [DEBUG]
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
+#   [QUEIT]
 #
 function(chimera_add_binding_tests test_name)
   chimera_add_binding_test_boost_python(${test_name}_boost_python ${ARGN})

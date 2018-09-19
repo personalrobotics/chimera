@@ -10,6 +10,7 @@
 #   [DEBUG]
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
+#   [QUIET]
 #
 # Note: Specifying different binding other than pybind11 will results in
 # undefined behavior. It'd be great if we can prevent this situation.
@@ -24,7 +25,7 @@ function(chimera_add_binding_test_pybind11 test_name)
   # Parse boolean, unary, and list arguments from input.
   # Unparsed arguments can be found in variable ARG_UNPARSED_ARGUMENTS.
   set(prefix chimera_test)
-  set(options DEBUG EXCLUDE_FROM_ALL COPY_MODULE)
+  set(options DEBUG EXCLUDE_FROM_ALL COPY_MODULE QUIET)
   set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
   set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES LINK_LIBRARIES)
   cmake_parse_arguments(
@@ -59,6 +60,10 @@ function(chimera_add_binding_test_pybind11 test_name)
     set(chimera_binding_EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
   endif()
 
+  if(chimera_test_QUIET)
+    set(chimera_binding_QUIET QUIET)
+  endif()
+
   add_chimera_binding(
     TARGET ${test_name}
     SOURCES ${chimera_test_SOURCES}
@@ -70,6 +75,7 @@ function(chimera_add_binding_test_pybind11 test_name)
     ${chimera_binding_NAMESPACES}
     ${chimera_binding_DEBUG}
     ${chimera_binding_EXCLUDE_FROM_ALL}
+    ${chimera_binding_QUIET}
   )
 
   set_target_properties(${test_name} PROPERTIES PREFIX "")
