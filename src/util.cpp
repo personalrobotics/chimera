@@ -502,6 +502,14 @@ bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
         const ReferenceType *reference_type = cast<ReferenceType>(type);
         return containsIncompleteType(sema, reference_type->getPointeeType());
     }
+    else if (type->isVoidPointerType())
+    {
+      return true;
+    }
+    else if (type->isVoidType())
+    {
+      return true;
+    }
     else
     {
         return sema.RequireCompleteType({}, qual_type, 0);
