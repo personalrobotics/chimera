@@ -299,12 +299,20 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::namespace_()
 {
-    return generateNamespace(config_, decl_->getDeclContext());
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateNamespace(config_, nns->getPrefix());
 }
 
 ::mstch::node CXXRecord::scopeWithoutNamespace()
 {
-    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateScopeWithoutNamespace(config_, nns->getPrefix());
 }
 
 ::mstch::node CXXRecord::isCopyable()
@@ -605,12 +613,20 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Enum::namespace_()
 {
-    return generateNamespace(config_, decl_->getDeclContext());
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateNamespace(config_, nns->getPrefix());
 }
 
 ::mstch::node Enum::scopeWithoutNamespace()
 {
-    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateScopeWithoutNamespace(config_, nns->getPrefix());
 }
 
 ::mstch::node Enum::scope()
@@ -879,12 +895,13 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Function::namespace_()
 {
-    return generateNamespace(config_, decl_->getDeclContext());
+    return generateNamespace(config_, decl_->getEnclosingNamespaceContext());
 }
 
 ::mstch::node Function::scopeWithoutNamespace()
 {
-    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+    return generateScopeWithoutNamespace(
+        config_, decl_->getEnclosingNamespaceContext());
 }
 
 ::mstch::node Function::usesDefaults()
