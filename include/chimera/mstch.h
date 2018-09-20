@@ -180,6 +180,8 @@ public:
 
     ::mstch::node bases();
     ::mstch::node type();
+    ::mstch::node namespace_() override;
+    ::mstch::node scopeWithoutNamespace() override;
     ::mstch::node scope() override;
     ::mstch::node isCopyable();
 
@@ -205,6 +207,8 @@ public:
          const clang::EnumDecl *decl);
 
     ::mstch::node qualifiedName() override;
+    ::mstch::node namespace_() override;
+    ::mstch::node scopeWithoutNamespace() override;
     ::mstch::node scope() override;
     ::mstch::node type();
     ::mstch::node values();
@@ -254,6 +258,8 @@ public:
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
+    ::mstch::node namespace_() override;
+    ::mstch::node scopeWithoutNamespace() override;
     ::mstch::node scope() override;
     ::mstch::node usesDefaults();
     ::mstch::node qualifiedName() override;
