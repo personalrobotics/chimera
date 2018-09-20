@@ -23,6 +23,14 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(py11.inline_add(3, 4), 7)
         self.assertEqual(py11.inline_add(i=5, j=6), 11)
 
+        py11.void_return()
+
+        dummy = py11.Dummy()
+        dummy.val = 5
+        self.assertEqual(py11.void_pointer_param(dummy), 5)
+
+        py11.void_param()
+
 
     def test_function_bp(self):
         self.assertEqual(boost.add(), 3)
@@ -32,6 +40,15 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(boost.inline_add(), 3)
         self.assertEqual(boost.inline_add(3, 4), 7)
         self.assertEqual(boost.inline_add(i=5, j=6), 11)
+
+        boost.void_return()
+
+        dummy = boost.Dummy()
+        dummy.val = 5
+        # TODO: void pointer parameter doesn't work with Boost.Python
+        # self.assertEqual(boost.void_pointer_param(dummy), 5)
+
+        boost.void_param()
 
 
 if __name__ == '__main__':

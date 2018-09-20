@@ -18,27 +18,13 @@ class TestFunction(unittest.TestCase):
         if not has_pybind11:
             return
 
-        py11.void_return()
-
-        dummy = py11.Dummy()
-        dummy.val = 5
-        self.assertEqual(py11.void_pointer_param(dummy), 5)
-
-        py11.void_param()
-
         example_unique_ptr = py11.create_example()
         example_shared_ptr = py11.create_example_shared()
 
     def test_function_bp(self):
         if not has_boost_python:
             return
-
-        dummy = boost.Dummy()
-        dummy.val = 5
-        self.assertEqual(boost.void_pointer_param(dummy), 5)
-
-        boost.void_param()
-
+            
         # TODO(JS): Boost.Python requires to specify held_type for smart pointers
         # Following test is disabled for now
         # example_unique_ptr = boost.create_example()
