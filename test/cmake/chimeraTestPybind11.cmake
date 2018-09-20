@@ -10,6 +10,8 @@
 #   [DEBUG]
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
+#   [INCLUDE_DIRS dir1 [dir2 ...]]
+#   [LINK_LIBRARIES lib1 [lib2 ...]]
 #
 # Note: Specifying different binding other than pybind11 will results in
 # undefined behavior. It'd be great if we can prevent this situation.
@@ -51,6 +53,14 @@ function(chimera_add_binding_test_pybind11 test_name)
     set(chimera_binding_NAMESPACES NAMESPACES ${chimera_test_NAMESPACES})
   endif()
 
+  if(chimera_test_INCLUDE_DIRS)
+    set(chimera_binding_INCLUDE_DIRS INCLUDE_DIRS ${chimera_test_INCLUDE_DIRS})
+  endif()
+
+  if(chimera_test_LINK_LIBRARIES)
+    set(chimera_binding_LINK_LIBRARIES LINK_LIBRARIES ${chimera_test_LINK_LIBRARIES})
+  endif()
+
   if(chimera_test_DEBUG)
     set(chimera_binding_DEBUG DEBUG)
   endif()
@@ -81,11 +91,13 @@ function(chimera_add_binding_test_pybind11 test_name)
   target_include_directories(${test_name}
     PUBLIC
       ${PYTHON_INCLUDE_DIRS}
+      ${chimera_test_INCLUDE_DIRS}
   )
 
   target_link_libraries(${test_name}
     PUBLIC
       ${PYTHON_LIBRARIES}
+      ${chimera_test_LINK_LIBRARIES}
   )
 
   add_test(
