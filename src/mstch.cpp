@@ -770,6 +770,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         {"params?", &Function::isNonFalse<Function, &Function::params>},
         {"return_type", &Function::returnType},
         {"return_value_policy", &Function::returnValuePolicy},
+        {"is_return_type_void", &Function::isReturnTypeVoid},
         {"uses_defaults", &Function::usesDefaults},
         {"is_template", &Function::isTemplate},
         {"call", &Function::call},
@@ -891,6 +892,17 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
     // Return an empty string if no return value policy exists.
     return std::string{""};
+}
+
+::mstch::node Function::isReturnTypeVoid()
+{
+    // First, check if a return_value_policy was specified for this function.
+    if (const YAML::Node &node = decl_config_["return_type"])
+        return (node.as<std::string>() == "void");
+
+    // Extract the return type of this function declaration.
+    return (chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), decl_->getReturnType()) == "void");
 }
 
 ::mstch::node Function::namespace_()
