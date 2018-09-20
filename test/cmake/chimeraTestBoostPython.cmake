@@ -11,7 +11,7 @@
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
 #   [INCLUDE_DIRS dir1 [dir2 ...]]
-#   [LINK_LIBRARIES lib1 [lib1 ...]]
+#   [LINK_LIBRARIES lib1 [lib2 ...]]
 #
 function(chimera_add_binding_test_boost_python test_name)
   if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)

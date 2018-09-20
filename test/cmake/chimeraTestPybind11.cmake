@@ -11,7 +11,7 @@
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
 #   [INCLUDE_DIRS dir1 [dir2 ...]]
-#   [LINK_LIBRARIES lib1 [lib1 ...]]
+#   [LINK_LIBRARIES lib1 [lib2 ...]]
 #
 # Note: Specifying different binding other than pybind11 will results in
 # undefined behavior. It'd be great if we can prevent this situation.
