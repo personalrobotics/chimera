@@ -15,6 +15,130 @@ namespace chimera
 namespace mstch
 {
 
+::mstch::node generateNamespace(const ::chimera::CompiledConfiguration &config,
+                                const NestedNameSpecifier *nns)
+{
+    ::mstch::array scope_templates;
+    while (nns)
+    {
+        switch (nns->getKind())
+        {
+        case NestedNameSpecifier::Namespace:
+        {
+            NamespaceDecl *parent_decl =
+                nns->getAsNamespace()->getCanonicalDecl();
+            scope_templates.push_back(
+                std::make_shared<Namespace>(config, parent_decl));
+            break;
+        }
+        case NestedNameSpecifier::TypeSpec:
+            break;
+        case NestedNameSpecifier::Global:
+        case NestedNameSpecifier::Identifier:
+        case NestedNameSpecifier::NamespaceAlias:
+        case NestedNameSpecifier::Super:
+        case NestedNameSpecifier::TypeSpecWithTemplate:
+            throw std::runtime_error(
+                "Unsupported type of NestedNameSpecifier.");
+        default:
+            throw std::runtime_error(
+                "Unknown type of NestedNameSpecifier.");
+        }
+
+        nns = nns->getPrefix();
+    }
+
+    std::reverse(scope_templates.begin(), scope_templates.end());
+    return scope_templates;
+}
+
+::mstch::node generateNamespace(
+    const ::chimera::CompiledConfiguration &config,
+    const clang::DeclContext *decl_context)
+{
+    if (!decl_context)
+        throw std::runtime_error("Decl was not enclosed by a context.");
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
+    if (!namespace_decl)
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
+
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config.GetContext(), namespace_decl->getCanonicalDecl());
+
+    return generateNamespace(config, nns);
+}
+
+::mstch::node generateScopeWithoutNamespace(
+    const ::chimera::CompiledConfiguration &config,
+    const NestedNameSpecifier *nns)
+{
+    ::mstch::array scope_templates;
+    while (nns)
+    {
+        switch (nns->getKind())
+        {
+        case NestedNameSpecifier::TypeSpec:
+        {
+            CXXRecordDecl *parent_decl =
+                nns->getAsType()->getAsCXXRecordDecl();
+            if (!parent_decl)
+                throw std::runtime_error(
+                    "TypeSpec was not a CXXRecordDecl.");
+            scope_templates.push_back(
+                std::make_shared<CXXRecord>(config, parent_decl));
+            break;
+        }
+        case NestedNameSpecifier::Namespace:
+            break;
+        case NestedNameSpecifier::Global:
+        case NestedNameSpecifier::Identifier:
+        case NestedNameSpecifier::NamespaceAlias:
+        case NestedNameSpecifier::Super:
+        case NestedNameSpecifier::TypeSpecWithTemplate:
+            throw std::runtime_error(
+                "Unsupported type of NestedNameSpecifier.");
+        default:
+            throw std::runtime_error(
+                "Unknown type of NestedNameSpecifier.");
+        }
+
+        nns = nns->getPrefix();
+    }
+
+    std::reverse(scope_templates.begin(), scope_templates.end());
+    return scope_templates;
+}
+
+::mstch::node generateScopeWithoutNamespace(
+    const ::chimera::CompiledConfiguration &config,
+    const clang::DeclContext *decl_context)
+{
+    if (!decl_context)
+        throw std::runtime_error("Decl was not enclosed by a context.");
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
+    if (!namespace_decl)
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
+
+    const NestedNameSpecifier *nns =
+        cling::utils::TypeName::CreateNestedNameSpecifier(
+            config.GetContext(), namespace_decl->getCanonicalDecl());
+
+    return generateScopeWithoutNamespace(config, nns);
+}
+
 ::mstch::node generateScope(const ::chimera::CompiledConfiguration &config,
                             const NestedNameSpecifier *nns)
 {
@@ -880,6 +1004,16 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
         + "::" + decl_->getNameAsString();
+}
+
+::mstch::node Variable::namespace_()
+{
+  return generateNamespace(config_, decl_->getDeclContext());
+}
+
+::mstch::node Variable::scopeWithoutNamespace()
+{
+  return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
 }
 
 ::mstch::node Variable::scope()
