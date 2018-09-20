@@ -6,6 +6,5 @@ namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
 classes:
-  'chimera_test::nested_namespace::Example':
-    held_type: 'std::unique_ptr<chimera_test::nested_namespace::Example>'
-    is_copyable: true
+  'chimera_test::nested_namespace::ExampleShared':
+    held_type: 'std::shared_ptr<chimera_test::nested_namespace::ExampleShared>'

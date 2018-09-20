@@ -7,6 +7,15 @@
 namespace chimera_test {
 namespace nested_namespace {
 
+struct Dummy {
+  int val;
+  Dummy() = default;
+};
+
+int void_pointer_param(void* dummy);
+
+void void_return();
+
 class Example {};
 
 std::unique_ptr<Example> create_example();

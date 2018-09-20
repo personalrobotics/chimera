@@ -23,8 +23,6 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(py11.inline_add(3, 4), 7)
         self.assertEqual(py11.inline_add(i=5, j=6), 11)
 
-        py11.void_return()
-
 
     def test_function_bp(self):
         self.assertEqual(boost.add(), 3)
@@ -34,8 +32,6 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(boost.inline_add(), 3)
         self.assertEqual(boost.inline_add(3, 4), 7)
         self.assertEqual(boost.inline_add(i=5, j=6), 11)
-
-        boost.void_return()
 
 
 if __name__ == '__main__':
