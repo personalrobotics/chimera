@@ -297,6 +297,16 @@ CXXRecord::CXXRecord(
         config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
 }
 
+::mstch::node CXXRecord::namespace_()
+{
+    return generateNamespace(config_, decl_->getDeclContext());
+}
+
+::mstch::node CXXRecord::scopeWithoutNamespace()
+{
+    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+}
+
 ::mstch::node CXXRecord::isCopyable()
 {
     if (const YAML::Node &node = decl_config_["is_copyable"])
@@ -593,6 +603,16 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     return type();
 }
 
+::mstch::node Enum::namespace_()
+{
+    return generateNamespace(config_, decl_->getDeclContext());
+}
+
+::mstch::node Enum::scopeWithoutNamespace()
+{
+    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+}
+
 ::mstch::node Enum::scope()
 {
     const NestedNameSpecifier *nns =
@@ -857,6 +877,16 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     return std::string{""};
 }
 
+::mstch::node Function::namespace_()
+{
+    return generateNamespace(config_, decl_->getDeclContext());
+}
+
+::mstch::node Function::scopeWithoutNamespace()
+{
+    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+}
+
 ::mstch::node Function::usesDefaults()
 {
     return argument_limit_ >= 0;
@@ -1008,12 +1038,12 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node Variable::namespace_()
 {
-  return generateNamespace(config_, decl_->getDeclContext());
+    return generateNamespace(config_, decl_->getDeclContext());
 }
 
 ::mstch::node Variable::scopeWithoutNamespace()
 {
-  return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
+    return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
 }
 
 ::mstch::node Variable::scope()
