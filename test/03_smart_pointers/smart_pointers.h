@@ -14,6 +14,8 @@ struct Dummy {
 
 int void_pointer_param(void* dummy);
 
+void void_param(void);
+
 void void_return();
 
 class Example {};
