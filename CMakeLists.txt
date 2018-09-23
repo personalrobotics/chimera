@@ -67,6 +67,26 @@ endif()
 # locate from CMakeLists.txt in source subdirectories.
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
+# Set headers and sources
+set(${PROJECT_NAME}_HEADERS
+  include/chimera/binding.h
+  include/chimera/configuration.h
+  include/chimera/consumer.h
+  include/chimera/frontend_action.h
+  include/chimera/mstch.h
+  include/chimera/util.h
+  include/chimera/visitor.h
+)
+set(${PROJECT_NAME}_SOURCES
+  src/chimera.cpp
+  src/configuration.cpp
+  src/consumer.cpp
+  src/frontend_action.cpp
+  src/visitor.cpp
+  src/util.cpp
+  src/mstch.cpp
+)
+
 ## Use LLVM CMake macro to collate and order link libraries.
 llvm_map_components_to_libnames(llvm_libs
   core
@@ -81,13 +101,8 @@ add_subdirectory(external)
 
 # Build the main chimera executable.
 add_executable("${PROJECT_NAME}"
-  src/chimera.cpp
-  src/configuration.cpp
-  src/consumer.cpp
-  src/frontend_action.cpp
-  src/visitor.cpp
-  src/util.cpp
-  src/mstch.cpp
+  ${${PROJECT_NAME}_HEADERS}  # not required, but helpful for some IDEs
+  ${${PROJECT_NAME}_SOURCES}
 )
 
 target_compile_options("${PROJECT_NAME}"
@@ -137,9 +152,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-# The BUILD_TESTING flag is recognized by CTest and it automatically adds
-# the `enable_testing()` macro when it is present.
 option(BUILD_TESTING "Enable generation of Chimera build tests." ON)
 if(BUILD_TESTING)
+  enable_testing()
   add_subdirectory(test)
 endif()

@@ -607,7 +607,7 @@ chimera::util::needsReturnValuePolicy(const NamedDecl *decl, QualType return_typ
     if (return_type.getTypePtr()->isReferenceType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
             << "' because it returns the reference type '"
             << getFullyQualifiedTypeName(decl->getASTContext(), return_type)
@@ -617,7 +617,7 @@ chimera::util::needsReturnValuePolicy(const NamedDecl *decl, QualType return_typ
     else if (return_type.getTypePtr()->isPointerType())
     {
         std::cerr
-            << "Warning: Skipped method "
+            << "Warning: Skipped method '"
             << decl->getQualifiedNameAsString()
             << "' because it returns the pointer type '"
             << getFullyQualifiedTypeName(decl->getASTContext(), return_type)

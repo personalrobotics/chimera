@@ -35,14 +35,14 @@ namespace {
 void {{class.mangled_name}}(pybind11::module& m)
 {
     auto sm = m{{!
-        }}{{#class.scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class.scope}};
+        }}{{#class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/class.scope}};
 
     ::pybind11::class_<{{class.type}}{{!
         }}{{#class.held_type}}, {{!
         }}{{.}}{{/class.held_type}}{{#class.bases?}}, {{!
-        }}::pybind11::bases<{{!
+        }}{{!
             }}{{#class.bases}}{{qualified_name}}{{^last}}, {{/last}}{{/class.bases}}{{!
-        }} >{{/class.bases?}} >(sm, "{{class.name}}"{{!
+        }}{{/class.bases?}} >(sm, "{{class.name}}"{{!
         }}{{#class.comment?}}, {{class.mangled_name}}_docstring{{/class.comment?}}{{!
         }}){{!
 
@@ -63,7 +63,7 @@ void {{class.mangled_name}}(pybind11::module& m)
     }}return self->{{call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
-    }}{{#params?}}, ({{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}})
+    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
 }}{{/class.methods}}{{!
@@ -72,16 +72,13 @@ void {{class.mangled_name}}(pybind11::module& m)
 {{#class.methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
-    }}        .def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
+    }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
     }}return {{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
-    }}{{#params?}}, ({{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}})
+    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
-}}{{/class.methods}}
-{{#class.static_methods}}{{!
-    }}.staticmethod("{{.}}")
-{{/class.static_methods}}{{!
+}}{{/class.methods}}{{!
 
 /* fields */}}
 {{#class.fields}}{{!
@@ -90,11 +87,11 @@ void {{class.mangled_name}}(pybind11::module& m)
     }}("{{name}}", &{{qualified_name}})
 {{/class.fields}}{{!
 
-/* static fields */
-/* TODO: Add make_setter if this property is assignable */}}
+/* static fields */}}
 {{#class.static_fields}}{{!
-    }}        .add_static_property("{{name}}", {{!
-    }}::pybind11::make_getter({{qualified_name}}))
+    }}{{#is_assignable}}        .def_readwrite_static{{/is_assignable}}{{!
+    }}{{^is_assignable}}        .def_readonly_static{{/is_assignable}}{{!
+    }}("{{name}}", &{{qualified_name}})
 {{/class.static_fields}}
     ;
 }

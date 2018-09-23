@@ -1,0 +1,11 @@
+# Arguments that will be appended in-order before command line arguments.
+arguments:
+  - "-extra-arg"
+  - "-I/usr/lib/clang/3.6/include"
+namespaces:
+  'chimera_test':
+    name: null # TODO: otherwise, import error
+classes:
+  'chimera_test::nested_namespace::Example':
+    held_type: 'std::unique_ptr<chimera_test::nested_namespace::Example>'
+    is_copyable: true

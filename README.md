@@ -23,7 +23,18 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Xenial (16.04) and Bionic (18.04).
+Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), and Bionic (18.04).
+
+**Trusty**
+
+```shell
+$ sudo add-apt-repository ppa:personalrobotics/ppa
+$ sudo add-apt-repository ppa:renemilk/llvm
+$ sudo apt update
+$ sudo apt install chimera
+```
+
+**Xenial/Bionic**
 
 ```shell
 $ sudo add-apt-repository ppa:personalrobotics/ppa
@@ -44,7 +55,7 @@ $ brew install chimera
 
 ## Build from Source
 
-**Requirements**
+### Requirements
 
 * libclang 3.6 or above
 * llvm 3.6 or above (+ tools)
@@ -52,13 +63,15 @@ $ brew install chimera
 * yaml-cpp
 * boost
 
-**On Ubuntu from source**
+### On Ubuntu from Source
+
+**Trusty**
 
 ```bash
-$ sudo add-apt-repository 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main'
-$ wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+$ sudo apt-add-repository ppa:george-edison55/cmake-3.x
 $ sudo apt-get update
-$ sudo apt-get install llvm-3.6-dev llvm-3.6-tools libclang-3.6-dev libedit-dev libyaml-cpp-dev libboost-dev
+$ sudo apt-get install cmake
+$ sudo apt-get install llvm-3.7-dev llvm-3.7-tools libclang-3.7-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
@@ -67,16 +80,19 @@ $ make
 $ sudo make install
 ```
 
-**On macOS using Homebrew**
+**Xenial/Bionic**
 
 ```bash
-# install Homebrew if not installed
-$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-$ brew tap personalrobotics/tap
-$ brew install chimera
+$ sudo apt-get install llvm-4.0-dev llvm-4.0-tools libclang-4.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+$ git clone https://github.com/personalrobotics/chimera.git
+$ cd chimera
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ make
+$ sudo make install
 ```
 
-**On macOS from source**
+### On macOS from Source
 
 ```bash
 $ brew install boost llvm
