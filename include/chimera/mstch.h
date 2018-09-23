@@ -240,6 +240,7 @@ public:
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
+    ::mstch::node isReturnTypeVoid();
     ::mstch::node scope() override;
     ::mstch::node usesDefaults();
     ::mstch::node qualifiedName() override;
