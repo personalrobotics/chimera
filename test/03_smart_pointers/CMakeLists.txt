@@ -5,7 +5,6 @@ chimera_add_binding_test_pybind11(${test_name}_pybind11
   EXTRA_SOURCES ${test_name}.cpp
   NAMESPACES chimera_test
   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}_pybind11.yaml
-  DEBUG
   COPY_MODULE
 )
 
@@ -15,7 +14,6 @@ chimera_add_binding_test_pybind11(${test_name}_pybind11
 #   EXTRA_SOURCES ${test_name}.cpp
 #   NAMESPACES chimera_test
 #   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}_boost_python.yaml
-#   DEBUG
 #   COPY_MODULE
 # )
 
