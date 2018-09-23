@@ -900,9 +900,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["return_type"])
         return (node.as<std::string>() == "void");
 
-    // Extract the return type of this function declaration.
-    return (chimera::util::getFullyQualifiedTypeName(
-        config_.GetContext(), decl_->getReturnType()) == "void");
+    return decl_->getReturnType()->isVoidType();
 }
 
 ::mstch::node Function::namespace_()
