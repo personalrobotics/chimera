@@ -1,19 +1,24 @@
 #pragma once
 
 #include <array>
+#include <set>
 #include <vector>
+#include <boost/python.hpp>
 
 namespace chimera_test {
 namespace nested_namespace {
 
 template <typename T>
-inline void val_param(T /*val*/) { }
+void val_param(T /*val*/) { }
 
 template <typename T>
-inline void vec_param(const std::vector<T>& /*vec*/) { }
+void vec_param(const std::vector<T>& /*vec*/) { }
 
 template <typename T>
-inline void arr_param(const std::array<T, 1>& /*arr*/) { }
+void arr_param(const std::array<T, 1>& /*arr*/) { }
+
+template <typename T>
+void set_param(const std::set<T>& /*set*/) { }
 
 class Node
 {
@@ -33,19 +38,24 @@ public:
 
     auto vec = std::vector<Node>();
     auto ptrVec = std::vector<Node*>();
-    vec_param(vec);  // ok
+    vec_param(vec);       // ok
+    vec_param(ptrVec);  // error!
     // error: ‘Node’ was not declared in this scope
     // sm.def(
     //     "vector_param",
     //     +[](const std::vector<Node *> & vec) -> void
     //         { return chimera_test::common::vector_param<chimera_test::common::Node *>(vec); },
     //     ::pybind11::arg("vec"));
-    //vec_param(ptrVec);
 
     auto arr = std::array<Node, 1>();
     auto ptrArr = std::array<Node*, 1>();
-    arr_param(arr);
-    //arr_param(ptrArr);
+    arr_param(arr);     // ok
+    // arr_param(ptrArr);  // same error!
+
+    auto set = std::set<Node>();
+    auto ptrSet = std::set<Node*>();
+    set_param(set);     // ok
+    // set_param(ptrSet);  // same error!
   }
 };
 
