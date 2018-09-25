@@ -35,10 +35,10 @@ namespace {
 void {{class.mangled_name}}(pybind11::module& m)
 {
     auto sm = m{{!
-        }}{{#class.namespace}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class.namespace}};
+        }}{{#class.namespace_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class.namespace_scope}};
 
     auto attr = sm{{!
-        }}{{#class.scope_without_namespace}}{{#name}}.attr("{{name}}"){{/name}}{{/class.scope_without_namespace}};
+        }}{{#class.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/class.class_scope}};
 
     ::pybind11::class_<{{class.type}}{{!
         }}{{#class.held_type}}, {{!

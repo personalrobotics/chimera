@@ -12,10 +12,10 @@
 void {{enum.mangled_name}}(pybind11::module& m)
 {
     auto sm = m{{!
-        }}{{#enum.namespace}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/enum.namespace}};
+        }}{{#enum.namespace_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/enum.namespace_scope}};
 
     auto attr = sm{{!
-        }}{{#enum.scope_without_namespace}}{{#name}}.attr("{{name}}"){{/name}}{{/enum.scope_without_namespace}};
+        }}{{#enum.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/enum.class_scope}};
 
     ::pybind11::enum_<{{{enum.type}}}>(attr, "{{enum.name}}"){{#enum.values}}
         .value("{{name}}", {{{qualified_name}}}){{/enum.values}}

@@ -297,7 +297,7 @@ CXXRecord::CXXRecord(
         config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
 }
 
-::mstch::node CXXRecord::namespace_()
+::mstch::node CXXRecord::namespaceScope()
 {
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(
@@ -306,7 +306,7 @@ CXXRecord::CXXRecord(
     return generateNamespace(config_, nns->getPrefix());
 }
 
-::mstch::node CXXRecord::scopeWithoutNamespace()
+::mstch::node CXXRecord::classScope()
 {
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(
@@ -611,7 +611,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     return type();
 }
 
-::mstch::node Enum::namespace_()
+::mstch::node Enum::namespaceScope()
 {
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(
@@ -620,7 +620,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     return generateNamespace(config_, nns->getPrefix());
 }
 
-::mstch::node Enum::scopeWithoutNamespace()
+::mstch::node Enum::classScope()
 {
     const NestedNameSpecifier *nns =
         cling::utils::TypeName::CreateNestedNameSpecifier(
@@ -893,12 +893,12 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     return std::string{""};
 }
 
-::mstch::node Function::namespace_()
+::mstch::node Function::namespaceScope()
 {
     return generateNamespace(config_, decl_->getEnclosingNamespaceContext());
 }
 
-::mstch::node Function::scopeWithoutNamespace()
+::mstch::node Function::classScope()
 {
     return generateScopeWithoutNamespace(
         config_, decl_->getEnclosingNamespaceContext());
@@ -1053,12 +1053,12 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
         + "::" + decl_->getNameAsString();
 }
 
-::mstch::node Variable::namespace_()
+::mstch::node Variable::namespaceScope()
 {
     return generateNamespace(config_, decl_->getDeclContext());
 }
 
-::mstch::node Variable::scopeWithoutNamespace()
+::mstch::node Variable::classScope()
 {
     return generateScopeWithoutNamespace(config_, decl_->getDeclContext());
 }

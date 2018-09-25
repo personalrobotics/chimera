@@ -52,9 +52,9 @@ public:
             {"name", &ClangWrapper::name},
             {"mangled_name", &ClangWrapper::mangledName},
             {"qualified_name", &ClangWrapper::qualifiedName},
-            {"namespace", &ClangWrapper::namespace_},
-            {"scope_without_namespace", &ClangWrapper::scopeWithoutNamespace},
-            {"scope", &ClangWrapper::scope},
+            {"namespace_scope", &ClangWrapper::namespaceScope},
+            {"class_scope", &ClangWrapper::classScope},
+            {"scope", &ClangWrapper::scope},  // namespace_scope + class_scope
             {"comment", &ClangWrapper::comment},
             {"comment?", &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::comment>},
         });
@@ -91,18 +91,21 @@ public:
         return chimera::util::constructMangledName(decl_);
     }
 
-    virtual ::mstch::node namespace_()
+    virtual ::mstch::node namespaceScope()
     {
         // Default is empty, overriden in subclasses.
         return std::string{""};
     }
 
-    virtual ::mstch::node scopeWithoutNamespace()
+    virtual ::mstch::node classScope()
     {
         // Default is empty, overriden in subclasses.
         return std::string{""};
     }
 
+    /**
+     * namespaceScope + classScope
+     */
     virtual ::mstch::node scope()
     {
         // Default is empty, overriden in subclasses.
@@ -180,8 +183,8 @@ public:
 
     ::mstch::node bases();
     ::mstch::node type();
-    ::mstch::node namespace_() override;
-    ::mstch::node scopeWithoutNamespace() override;
+    ::mstch::node namespaceScope() override;
+    ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node isCopyable();
 
@@ -207,8 +210,8 @@ public:
          const clang::EnumDecl *decl);
 
     ::mstch::node qualifiedName() override;
-    ::mstch::node namespace_() override;
-    ::mstch::node scopeWithoutNamespace() override;
+    ::mstch::node namespaceScope() override;
+    ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node type();
     ::mstch::node values();
@@ -258,8 +261,8 @@ public:
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
-    ::mstch::node namespace_() override;
-    ::mstch::node scopeWithoutNamespace() override;
+    ::mstch::node namespaceScope() override;
+    ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node usesDefaults();
     ::mstch::node qualifiedName() override;
@@ -322,8 +325,8 @@ public:
 
     ::mstch::node isAssignable();
     ::mstch::node qualifiedName() override;
-    ::mstch::node namespace_() override;
-    ::mstch::node scopeWithoutNamespace() override;
+    ::mstch::node namespaceScope() override;
+    ::mstch::node classScope() override;
     ::mstch::node scope() override;
 
 private:
