@@ -24,7 +24,7 @@ class TestFunction(unittest.TestCase):
     def test_function_bp(self):
         if not has_boost_python:
             return
-            
+
         # TODO(JS): Boost.Python requires to specify held_type for smart pointers
         # Following test is disabled for now
         # example_unique_ptr = boost.create_example()

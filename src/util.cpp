@@ -508,11 +508,11 @@ bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
     }
     else if (type->isVoidPointerType())
     {
-      return false;
+        return false;
     }
     else if (type->isVoidType())
     {
-      return false;
+        return false;
     }
     else
     {
