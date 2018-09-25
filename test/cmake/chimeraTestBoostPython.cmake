@@ -10,6 +10,8 @@
 #   [DEBUG]
 #   [EXCLUDE_FROM_ALL]
 #   [COPY_MODULE]
+#   [INCLUDE_DIRS dir1 [dir2 ...]]
+#   [LINK_LIBRARIES lib1 [lib2 ...]]
 #
 function(chimera_add_binding_test_boost_python test_name)
   if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)
@@ -49,6 +51,14 @@ function(chimera_add_binding_test_boost_python test_name)
     set(chimera_binding_NAMESPACES NAMESPACES ${chimera_test_NAMESPACES})
   endif()
 
+  if(chimera_test_INCLUDE_DIRS)
+    set(chimera_binding_INCLUDE_DIRS INCLUDE_DIRS ${chimera_test_INCLUDE_DIRS})
+  endif()
+
+  if(chimera_test_LINK_LIBRARIES)
+    set(chimera_binding_LINK_LIBRARIES LINK_LIBRARIES ${chimera_test_LINK_LIBRARIES})
+  endif()
+
   if(chimera_test_DEBUG)
     set(chimera_binding_DEBUG DEBUG)
   endif()
@@ -80,6 +90,7 @@ function(chimera_add_binding_test_boost_python test_name)
     PUBLIC
       ${Boost_INCLUDE_DIRS}
       ${PYTHON_INCLUDE_DIRS}
+      ${chimera_test_INCLUDE_DIRS}
   )
 
   target_link_libraries(${test_name}
@@ -87,6 +98,7 @@ function(chimera_add_binding_test_boost_python test_name)
       ${Boost_LIBRARIES}
       ${CHIMERA_TEST_Boost_PYTHON_LIBRARIES}
       ${PYTHON_LIBRARIES}
+      ${chimera_test_LINK_LIBRARIES}
   )
 
   add_test(

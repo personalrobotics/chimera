@@ -78,6 +78,10 @@ chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
                                   bool overwrite,
                                   chimera::util::ScalarConversionFn fn)
 {
+    // Ignore invalid node.
+    if (!node)
+        return;
+
     // Ignore non-map types of YAML::Node.
     if (!node.IsMap())
         return;
@@ -501,6 +505,14 @@ bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
     {
         const ReferenceType *reference_type = cast<ReferenceType>(type);
         return containsIncompleteType(sema, reference_type->getPointeeType());
+    }
+    else if (type->isVoidPointerType())
+    {
+        return false;
+    }
+    else if (type->isVoidType())
+    {
+        return false;
     }
     else
     {
