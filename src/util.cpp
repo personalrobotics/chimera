@@ -78,6 +78,10 @@ chimera::util::extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
                                   bool overwrite,
                                   chimera::util::ScalarConversionFn fn)
 {
+    // Ignore invalid node.
+    if (!node)
+        return;
+
     // Ignore non-map types of YAML::Node.
     if (!node.IsMap())
         return;
