@@ -3,8 +3,5 @@ arguments:
   - "-extra-arg"
   - "-I/usr/lib/clang/3.6/include"
 namespaces:
-  'chimera_test':
+  'function':
     name: null # TODO: otherwise, import error
-classes:
-  'chimera_test::nested_namespace::ExampleShared':
-    held_type: 'std::shared_ptr<chimera_test::nested_namespace::ExampleShared>'
