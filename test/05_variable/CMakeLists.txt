@@ -5,7 +5,6 @@ chimera_add_binding_tests(${test_name}
   EXTRA_SOURCES ${test_name}.cpp
   NAMESPACES chimera_test
   CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}.yaml
-  DEBUG
   COPY_MODULE
 )
 
