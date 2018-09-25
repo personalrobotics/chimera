@@ -59,5 +59,17 @@ public:
   static std::string static_type();
 };
 
+class MainClass
+{
+public:
+  MainClass() = default;
+
+  class NestedClass
+  {
+  public:
+    NestedClass() = default;
+  };
+};
+
 } // namespace nested_namespace
 } // namespace chimera_test
