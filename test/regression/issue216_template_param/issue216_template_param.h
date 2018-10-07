@@ -38,7 +38,7 @@ public:
 
     auto vec = std::vector<Node>();
     auto ptrVec = std::vector<Node*>();
-    auto constPtrVec = std::vector<const Node*>();
+    // auto constPtrVec = std::vector<const Node*>();
     vec_param(vec);       // ok
     vec_param(ptrVec);    // now ok!
     // vec_param(constPtrVec);  // error!
