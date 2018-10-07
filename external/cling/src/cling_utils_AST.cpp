@@ -1515,6 +1515,8 @@ namespace utils {
       // There are probably other cases ...
       if (const TagType* tagdecltype = llvm::dyn_cast_or_null<TagType>(TypePtr))
         decl = tagdecltype->getDecl();
+      if (const PointerType* pointertype = llvm::dyn_cast_or_null<PointerType>(TypePtr))
+        return CreateNestedNameSpecifierForScopeOf(Ctx, pointertype->getPointeeType().getTypePtr(), FullyQualified);
       else
         decl = TypePtr->getAsCXXRecordDecl();
     }
