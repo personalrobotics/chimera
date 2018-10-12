@@ -1,3 +1,4 @@
+import inspect
 import unittest
 
 try:
@@ -39,6 +40,15 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(py11.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(py11.StaticFields.static_type(), 'static type')
 
+        # Check if the main class and the nested class can be created w/o errors
+        mc = py11.MainClass()
+        nc = py11.MainClass.NestedClass()
+
+        # MainClass shouldn't be a module
+        self.assertFalse(inspect.ismodule(py11.MainClass))
+        self.assertTrue(inspect.isclass(py11.MainClass))
+        self.assertTrue(inspect.isclass(py11.MainClass.NestedClass))
+
     def test_function_bp(self):
         dog = boost.Dog()
         self.assertEqual(dog.type(), 'Dog')
@@ -64,6 +74,15 @@ class TestFunction(unittest.TestCase):
         # boost.StaticFields.m_static_readwrite_type = 'new type'
         # self.assertEqual(boost.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(boost.StaticFields.static_type(), 'static type')
+
+        # Check if the main class and the nested class can be created w/o errors
+        mc = boost.MainClass()
+        nc = boost.MainClass.NestedClass()
+
+        # MainClass shouldn't be a module
+        self.assertFalse(inspect.ismodule(boost.MainClass))
+        self.assertTrue(inspect.isclass(boost.MainClass))
+        self.assertTrue(inspect.isclass(boost.MainClass.NestedClass))
 
 
 if __name__ == '__main__':
