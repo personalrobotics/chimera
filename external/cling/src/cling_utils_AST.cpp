@@ -18,23 +18,35 @@
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
 #include "clang/AST/Mangle.h"
 
 #include <memory>
 #include <stdio.h>
 
-// LLVM 3.8 introduced the llvm::ArrayRef class to wrap several functions that
-// previously accepted a start pointer and length to specify an array.
+// LLVM <3.8 require separate arguments for data and length, while later versions
+// can directly take an array reference (e.g. implicitly casting from std::vector).
 #if LLVM_VERSION_MAJOR > 3 || (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 8)
-#define CREATE_ARRAYREF(_begin_, _length_)\
-  ::llvm::ArrayRef<std::remove_reference<decltype(*_begin_)>::type>(_begin_, _length_)
+#define ARRAY_COMPAT(_container_) _container_
 #else
-#define CREATE_ARRAYREF(_begin_, _length_) _begin_, _length_
+#define ARRAY_COMPAT(_container_) _container_.data(), _container_.size()
 #endif
 
-
 using namespace clang;
+
+namespace {
+  template<typename D>
+  static D* LookupResult2Decl(clang::LookupResult& R)
+  {
+    if (R.empty())
+      return 0;
+
+    R.resolveKind();
+
+    if (R.isSingleResult())
+      return dyn_cast<D>(R.getFoundDecl());
+    return (D*)-1;
+  }
+}
 
 namespace cling {
 namespace utils {
@@ -42,7 +54,7 @@ namespace utils {
   static
   QualType GetPartiallyDesugaredTypeImpl(const ASTContext& Ctx,
                                          QualType QT,
-                               const Transform::Config& TypeConfig,
+                                         const Transform::Config& TypeConfig,
                                          bool fullyQualifyType,
                                          bool fullyQualifyTmpltArg);
 
@@ -60,7 +72,7 @@ namespace utils {
   NestedNameSpecifier* GetFullyQualifiedNameSpecifier(const ASTContext& Ctx,
                                                       NestedNameSpecifier* scope);
 
-  bool Analyze::IsWrapper(const NamedDecl* ND) {
+  bool Analyze::IsWrapper(const FunctionDecl* ND) {
     if (!ND)
       return false;
 
@@ -97,8 +109,17 @@ namespace utils {
       //Dtor_Deleting, // Deleting dtor
       //Dtor_Complete, // Complete object dtor
       //Dtor_Base      // Base object dtor
-      mangleCtx->mangleCXXDtor(cast<CXXDestructorDecl>(D),
-                               GD.getDtorType(), RawStr);
+#if defined(LLVM_ON_WIN32)
+      // MicrosoftMangle.cpp:954 calls llvm_unreachable when mangling Dtor_Comdat
+      if (GD.getDtorType() == Dtor_Comdat) {
+        if (const IdentifierInfo* II = D->getIdentifier())
+          RawStr << II->getName();
+      } else
+#endif
+      {
+        mangleCtx->mangleCXXDtor(cast<CXXDestructorDecl>(D),
+                                 GD.getDtorType(), RawStr);
+      }
       break;
 
     default :
@@ -108,6 +129,11 @@ namespace utils {
     RawStr.flush();
   }
 
+  ////////////////////////////
+  // DISABLED FOR CHIMERA:
+  // This function disabled because it's incompatible with LLVM (>=6)
+  ////////////////////////////
+  //
   // Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
   //                                    int* FoundAt /*=0*/,
   //                                    bool omitDeclStmts /*=true*/,
@@ -117,7 +143,7 @@ namespace utils {
   //          && "Sema needs to be set when omitDeclStmts is false");
   //   if (FoundAt)
   //     *FoundAt = -1;
-
+  //
   //   Expr* result = 0;
   //   if (CompoundStmt* CS = dyn_cast<CompoundStmt>(FD->getBody())) {
   //     ArrayRef<Stmt*> Stmts
@@ -127,13 +153,13 @@ namespace utils {
   //       if (!isa<NullStmt>(Stmts[indexOfLastExpr]))
   //         break;
   //     }
-
+  //
   //     if (FoundAt)
   //       *FoundAt = indexOfLastExpr;
-
+  //
   //     if (indexOfLastExpr < 0)
   //       return 0;
-
+  //
   //     if ( (result = dyn_cast<Expr>(Stmts[indexOfLastExpr])) )
   //       return result;
   //     if (!omitDeclStmts)
@@ -145,7 +171,7 @@ namespace utils {
   //             // Change the void function's return type
   //             // We can't PushDeclContext, because we don't have scope.
   //             Sema::ContextRAII pushedDC(*S, FD);
-
+  //
   //             QualType VDTy = VD->getType().getNonReferenceType();
   //             // Get the location of the place we will insert.
   //             SourceLocation Loc
@@ -154,26 +180,31 @@ namespace utils {
   //             assert(DRE && "Cannot be null");
   //             indexOfLastExpr++;
   //             newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
-
+  //
   //             // Attach the new body (note: it does dealloc/alloc of all nodes)
-  //             CS->setStmts(S->getASTContext(),
-  //                 CREATE_ARRAYREF(&newBody.front(), newBody.size()));
+  //             CS->setStmts(S->getASTContext(), ARRAY_COMPAT(newBody));
   //             if (FoundAt)
   //               *FoundAt = indexOfLastExpr;
   //             return DRE;
   //           }
   //         }
   //       }
-
+  //
   //     return result;
   //   }
-
+  //
   //   return result;
   // }
 
   const char* const Synthesize::UniquePrefix = "__cling_Un1Qu3";
 
-  Expr* Synthesize::CStyleCastPtrExpr(Sema* S, QualType Ty, uint64_t Ptr) {
+  IntegerLiteral* Synthesize::IntegerLiteralExpr(ASTContext& C, uintptr_t Ptr) {
+    const llvm::APInt Addr(8 * sizeof(void*), Ptr);
+    return IntegerLiteral::Create(C, Addr, C.getUIntPtrType(),
+                                  SourceLocation());
+  }
+
+  Expr* Synthesize::CStyleCastPtrExpr(Sema* S, QualType Ty, uintptr_t Ptr) {
     ASTContext& Ctx = S->getASTContext();
     return CStyleCastPtrExpr(S, Ty, Synthesize::IntegerLiteralExpr(Ctx, Ptr));
   }
@@ -188,11 +219,6 @@ namespace utils {
       = S->BuildCStyleCastExpr(SourceLocation(), TSI,SourceLocation(),E).get();
     assert(Result && "Cannot create CStyleCastPtrExpr");
     return Result;
-  }
-
-  IntegerLiteral* Synthesize::IntegerLiteralExpr(ASTContext& C, uint64_t Ptr) {
-    const llvm::APInt Addr(8 * sizeof(void *), Ptr);
-    return IntegerLiteral::Create(C, Addr, C.UnsignedLongTy, SourceLocation());
   }
 
   static bool
@@ -260,9 +286,7 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(mutableCtx, CREATE_ARRAYREF(
-                                                               desArgs.data(),
-                                                               desArgs.size())));
+        arg = TemplateArgument::CreatePackCopy(mutableCtx, ARRAY_COMPAT(desArgs));
       }
     }
     return changed;
@@ -294,7 +318,7 @@ namespace utils {
       if (mightHaveChanged) {
         QualType QT
           = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                              CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
+                                              ARRAY_COMPAT(desArgs),
                                               TST->getCanonicalTypeInternal());
         return QT.getTypePtr();
       }
@@ -327,9 +351,8 @@ namespace utils {
           if (mightHaveChanged) {
             TemplateName TN(TSTdecl->getSpecializedTemplate());
             QualType QT
-              = Ctx.getTemplateSpecializationType(
-                  TN, CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
-                  TSTRecord->getCanonicalTypeInternal());
+              = Ctx.getTemplateSpecializationType(TN, ARRAY_COMPAT(desArgs),
+                                                  TSTRecord->getCanonicalTypeInternal());
             return QT.getTypePtr();
           }
         }
@@ -627,23 +650,7 @@ namespace utils {
     // Return true if the class or template is declared directly in the
     // std namespace (modulo inline namespace).
 
-    const clang::DeclContext *ctx = cl.getDeclContext();
-
-    while (ctx && ctx->isInlineNamespace()) {
-      ctx = ctx->getParent();
-    }
-
-    if (ctx && ctx->isNamespace())
-    {
-      const clang::NamedDecl *parent = llvm::dyn_cast<clang::NamedDecl> (ctx);
-      if (parent) {
-        if (parent->getDeclContext()->isTranslationUnit()
-            && parent->getQualifiedNameAsString()=="std") {
-          return true;
-        }
-      }
-    }
-    return false;
+    return cl.getDeclContext()->isStdNamespace();
   }
 
   // See Sema::PushOnScopeChains
@@ -888,14 +895,49 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(
-              mutableCtx, CREATE_ARRAYREF(desArgs.data(), desArgs.size())));
+        arg = TemplateArgument::CreatePackCopy(mutableCtx, ARRAY_COMPAT(desArgs));
       }
     }
     return changed;
   }
 
+  static const TemplateArgument*
+  GetTmpltArgDeepFirstIndexPack(size_t &cur,
+                                const TemplateArgument& arg,
+                                size_t idx) {
+    SmallVector<TemplateArgument, 2> desArgs;
+    for (auto I = arg.pack_begin(), E = arg.pack_end();
+         cur < idx && I != E; ++cur,++I) {
+      if ((*I).getKind() == TemplateArgument::Pack) {
+        auto p_arg = GetTmpltArgDeepFirstIndexPack(cur,(*I),idx);
+        if (cur == idx) return p_arg;
+      } else if (cur == idx) {
+        return I;
+      }
+    }
+    return nullptr;
+  }
 
+  // Return the template argument corresponding to the index (idx)
+  // when the composite list of arguement is seen flattened out deep
+  // first (where depth is provided by template argument packs)
+  static const TemplateArgument*
+  GetTmpltArgDeepFirstIndex(const TemplateArgumentList& templateArgs,
+                            size_t idx) {
+
+    for (size_t cur = 0, I = 0, E = templateArgs.size();
+         cur <= idx && I < E; ++I, ++cur) {
+      auto &arg = templateArgs[I];
+      if (arg.getKind() == TemplateArgument::Pack) {
+        // Need to recurse.
+        auto p_arg = GetTmpltArgDeepFirstIndexPack(cur,arg,idx);
+        if (cur == idx) return p_arg;
+     } else if (cur == idx) {
+        return &arg;
+      }
+    }
+    return nullptr;
+  }
 
   static QualType GetPartiallyDesugaredTypeImpl(const ASTContext& Ctx,
     QualType QT, const Transform::Config& TypeConfig,
@@ -1238,7 +1280,9 @@ namespace utils {
                 = TSTdecl->getTemplateArgs();
 
               mightHaveChanged = true;
-              desArgs.push_back(templateArgs[argi]);
+              const TemplateArgument *match
+                  = GetTmpltArgDeepFirstIndex(templateArgs,argi);
+              if (match) desArgs.push_back(*match);
               continue;
             }
           }
@@ -1282,8 +1326,7 @@ namespace utils {
       if (mightHaveChanged) {
         Qualifiers qualifiers = QT.getLocalQualifiers();
         QT = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                               CREATE_ARRAYREF(desArgs.data(),
-                                                               desArgs.size()),
+                                               ARRAY_COMPAT(desArgs),
                                                TST->getCanonicalTypeInternal());
         QT = Ctx.getQualifiedType(QT, qualifiers);
       }
@@ -1313,7 +1356,7 @@ namespace utils {
             TemplateArgument arg(templateArgs[I]);
             mightHaveChanged |= GetPartiallyDesugaredTypeImpl(Ctx,arg,
                                                               TypeConfig,
-                                                          fullyQualifyTmpltArg);
+                                                              fullyQualifyTmpltArg);
             desArgs.push_back(arg);
 #else
             if (templateArgs[I].getKind() == TemplateArgument::Template) {
@@ -1355,9 +1398,8 @@ namespace utils {
           if (mightHaveChanged) {
             Qualifiers qualifiers = QT.getLocalQualifiers();
             TemplateName TN(TSTdecl->getSpecializedTemplate());
-            QT = Ctx.getTemplateSpecializationType(TN, CREATE_ARRAYREF(desArgs.data(),
-                                                                       desArgs.size()),
-                                         TSTRecord->getCanonicalTypeInternal());
+            QT = Ctx.getTemplateSpecializationType(TN, ARRAY_COMPAT(desArgs),
+                                                   TSTRecord->getCanonicalTypeInternal());
             QT = Ctx.getQualifiedType(QT, qualifiers);
           }
         }
@@ -1419,40 +1461,54 @@ namespace utils {
 
   // NamedDecl* Lookup::Named(Sema* S, const char* Name,
   //                          const DeclContext* Within) {
-  //   DeclarationName DName = &S->Context.Idents.get(Name);
-  //   return Lookup::Named(S, DName, Within);
+  //   return Lookup::Named(S, llvm::StringRef(Name), Within);
   // }
 
-  // NamedDecl* Lookup::Named(Sema* S, const DeclarationName& Name,
+  // NamedDecl* Lookup::Named(Sema* S, const clang::DeclarationName& Name,
   //                          const DeclContext* Within) {
   //   LookupResult R(*S, Name, SourceLocation(), Sema::LookupOrdinaryName,
   //                  Sema::ForRedeclaration);
-  //   R.suppressDiagnostics();
-  //   if (!Within)
-  //     S->LookupName(R, S->TUScope);
-  //   else {
-  //     const DeclContext* primaryWithin = nullptr;
-  //     if (const clang::TagDecl *TD = dyn_cast<clang::TagDecl>(Within)) {
-  //       primaryWithin = dyn_cast_or_null<DeclContext>(TD->getDefinition());
-  //     } else {
-  //       primaryWithin = Within->getPrimaryContext();
-  //     }
-  //     if (!primaryWithin) {
-  //       // No definition, no lookup result.
-  //       return 0;
-  //     }
-  //     S->LookupQualifiedName(R, const_cast<DeclContext*>(primaryWithin));
-  //   }
-
-  //   if (R.empty())
-  //     return 0;
-
-  //   R.resolveKind();
-
-  //   if (R.isSingleResult())
-  //     return R.getFoundDecl();
-  //   return (clang::NamedDecl*)-1;
+  //   Lookup::Named(S, R, Within);
+  //   return LookupResult2Decl<clang::NamedDecl>(R);
   // }
+
+  // TagDecl* Lookup::Tag(Sema* S, llvm::StringRef Name,
+  //                      const DeclContext* Within) {
+  //   DeclarationName DName = &S->Context.Idents.get(Name);
+  //   return Lookup::Tag(S, DName, Within);
+  // }
+
+  // TagDecl* Lookup::Tag(Sema* S, const char* Name,
+  //                      const DeclContext* Within) {
+  //   return Lookup::Tag(S, llvm::StringRef(Name), Within);
+  // }
+
+  // TagDecl* Lookup::Tag(Sema* S, const clang::DeclarationName& Name,
+  //                      const DeclContext* Within) {
+  //   LookupResult R(*S, Name, SourceLocation(), Sema::LookupTagName,
+  //                  Sema::ForRedeclaration);
+  //   Lookup::Named(S, R, Within);
+  //   return LookupResult2Decl<clang::TagDecl>(R);
+  // }
+
+  void Lookup::Named(Sema* S, LookupResult& R, const DeclContext* Within) {
+    R.suppressDiagnostics();
+    if (!Within)
+      S->LookupName(R, S->TUScope);
+    else {
+      const DeclContext* primaryWithin = nullptr;
+      if (const clang::TagDecl *TD = dyn_cast<clang::TagDecl>(Within)) {
+        primaryWithin = dyn_cast_or_null<DeclContext>(TD->getDefinition());
+      } else {
+        primaryWithin = Within->getPrimaryContext();
+      }
+      if (!primaryWithin) {
+        // No definition, no lookup result.
+        return;
+      }
+      S->LookupQualifiedName(R, const_cast<DeclContext*>(primaryWithin));
+    }
+  }
 
   static NestedNameSpecifier*
   CreateNestedNameSpecifierForScopeOf(const ASTContext& Ctx,
@@ -1568,6 +1624,10 @@ namespace utils {
     // Return the fully qualified type, if we need to recurse through any
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
+
+    ////////////////////////////
+    // MODIFIED FOR CHIMERA
+    ////////////////////////////
 
     // Remove the part of the type related to the type being a template
     // parameter (we won't report it as part of the 'type name' and it is
@@ -1701,6 +1761,16 @@ namespace utils {
       QT = Ctx.getQualifiedType(QT, quals);
       return QT;
     }
+
+    // Strip deduced types.
+    if (const AutoType* AutoTy = dyn_cast<AutoType>(QT.getTypePtr())) {
+      if (!AutoTy->getDeducedType().isNull())
+        return GetFullyQualifiedType(AutoTy->getDeducedType(), Ctx);
+    }
+
+    ////////////////////////////
+    // END MODIFIED FOR CHIMERA
+    ////////////////////////////
 
     NestedNameSpecifier* prefix = 0;
     Qualifiers prefix_qualifiers;
