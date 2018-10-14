@@ -7,7 +7,7 @@
 // LICENSE.TXT for details.
 //------------------------------------------------------------------------------
 
-#include "cling/Utils/AST.h"
+#include "cling_utils_AST.h"
 
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/DeclarationName.h"
