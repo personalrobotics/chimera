@@ -8,30 +8,93 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
+      env:
+        - BUILD_NAME=TRUSTY_GCC_DEBUG
+        - BUILD_TYPE=Debug
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
       # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
+      env:
+        - BUILD_NAME=TRUSTY_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6 PYTHON_VERSION=3.4
+      env:
+        - BUILD_NAME=TRUSTY_CLANG_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=CLANG
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=XENIAL_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.5
+        - DOCKER_FILE="ubuntu-xenial"
+      services: docker
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=BIONIC_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.9
+        - PYTHON_VERSION=3.6
+        - DOCKER_FILE="ubuntu-bionic"
+      services: docker
+    - os: osx
+      compiler: gcc
+      env:
+        - BUILD_NAME=MACOS_CLANG_LLVM_4_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=4
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
+      env:
+        - BUILD_NAME=MACOS_CLANG_LLVM_5_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=CLANG
+        - LLVM_VERSION=5
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=6
+      env:
+        - BUILD_NAME=MACOS_CLANG_LLVM_6_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=CLANG
+        - LLVM_VERSION=6
+
+before_install:
+  - if [ -n "$DOCKER_FILE" ]; then
+      docker build -t "$DOCKER_FILE" -f ".ci/docker/$DOCKER_FILE" .;
+      docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "$DOCKER_FILE";
+    fi
 
 install:
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then . ci/install_macos.sh; fi
+  - if [ -n "$DOCKER_FILE" ]; then
+      docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+    else
+      . .ci/install.sh;
+    fi
 
 script:
-  - . ci/script.sh
+  - if [ -n "$DOCKER_FILE" ]; then
+      docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+    else
+      . .ci/script.sh;
+    fi
 
 after_failure: 
   - cat Testing/Temporary/LastTest.log

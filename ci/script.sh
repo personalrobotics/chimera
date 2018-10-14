@@ -7,7 +7,7 @@ cd build
 cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=${CODECOV}" ..
 
 # Disable building using multi-core until #212 is resolved
-# make -j4 
+# make -j4
 make
 
 if [ $CODECOV = ON ]; then make chimera_coverage; else make test; fi

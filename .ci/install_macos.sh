@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+set -e
 # Add e option once we move to using Brewfile for installing packages.
 
 # Compare two semantic version numbers A and B. Return code is 0 if A == B, 1
