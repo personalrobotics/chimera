@@ -75,11 +75,10 @@ namespace utils {
     ///                           synthesis of the DeclRefExpr.
     ///\returns 0 if the operation wasn't successful.
     ///
-    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
-    // clang::Expr* GetOrCreateLastExpr(clang::FunctionDecl* FD,
-    //                                  int* FoundAt = 0,
-    //                                  bool omitDeclStmts = true,
-    //                                  clang::Sema* S = 0);
+    clang::Expr* GetOrCreateLastExpr(clang::FunctionDecl* FD,
+                                     int* FoundAt = 0,
+                                     bool omitDeclStmts = true,
+                                     clang::Sema* S = 0);
 
     ///\brief Return true if the class or template is declared directly in the
     /// std namespace (modulo inline namespace).
@@ -207,10 +206,9 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
-    // clang::NamedDecl* Named(clang::Sema* S,
-    //                         llvm::StringRef Name,
-    //                         const clang::DeclContext* Within = 0);
+    clang::NamedDecl* Named(clang::Sema* S,
+                            llvm::StringRef Name,
+                            const clang::DeclContext* Within = 0);
 
     ///\brief Quick lookup for a single named declaration in a given
     /// declaration context.
@@ -221,10 +219,9 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
-    // clang::NamedDecl* Named(clang::Sema* S,
-    //                         const char* Name,
-    //                         const clang::DeclContext* Within = 0);
+    clang::NamedDecl* Named(clang::Sema* S,
+                            const char* Name,
+                            const clang::DeclContext* Within = 0);
 
     ///\brief Quick lookup for a single namespace declaration in a given
     /// declaration context.
@@ -236,10 +233,9 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
-    // NOTE(JS): This function disabled because it attempts to use a private member of LLVM 6
-    // clang::NamedDecl* Named(clang::Sema* S,
-    //                         const clang::DeclarationName& Name,
-    //                         const clang::DeclContext* Within = 0);
+    clang::NamedDecl* Named(clang::Sema* S,
+                            const clang::DeclarationName& Name,
+                            const clang::DeclContext* Within = 0);
 
   }
 

@@ -18,21 +18,10 @@
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/Config/llvm-config.h"
 #include "clang/AST/Mangle.h"
 
 #include <memory>
 #include <stdio.h>
-
-// LLVM 3.8 introduced the llvm::ArrayRef class to wrap several functions that
-// previously accepted a start pointer and length to specify an array.
-#if LLVM_VERSION_MAJOR > 3 || (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 8)
-#define CREATE_ARRAYREF(_begin_, _length_)\
-  ::llvm::ArrayRef<std::remove_reference<decltype(*_begin_)>::type>(_begin_, _length_)
-#else
-#define CREATE_ARRAYREF(_begin_, _length_) _begin_, _length_
-#endif
-
 
 using namespace clang;
 
@@ -108,68 +97,67 @@ namespace utils {
     RawStr.flush();
   }
 
-  // Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
-  //                                    int* FoundAt /*=0*/,
-  //                                    bool omitDeclStmts /*=true*/,
-  //                                    Sema* S /*=0*/) {
-  //   assert(FD && "We need a function declaration!");
-  //   assert((omitDeclStmts || S)
-  //          && "Sema needs to be set when omitDeclStmts is false");
-  //   if (FoundAt)
-  //     *FoundAt = -1;
+  Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
+                                     int* FoundAt /*=0*/,
+                                     bool omitDeclStmts /*=true*/,
+                                     Sema* S /*=0*/) {
+    assert(FD && "We need a function declaration!");
+    assert((omitDeclStmts || S)
+           && "Sema needs to be set when omitDeclStmts is false");
+    if (FoundAt)
+      *FoundAt = -1;
 
-  //   Expr* result = 0;
-  //   if (CompoundStmt* CS = dyn_cast<CompoundStmt>(FD->getBody())) {
-  //     ArrayRef<Stmt*> Stmts
-  //       = llvm::makeArrayRef(CS->body_begin(), CS->size());
-  //     int indexOfLastExpr = Stmts.size();
-  //     while(indexOfLastExpr--) {
-  //       if (!isa<NullStmt>(Stmts[indexOfLastExpr]))
-  //         break;
-  //     }
+    Expr* result = 0;
+    if (CompoundStmt* CS = dyn_cast<CompoundStmt>(FD->getBody())) {
+      ArrayRef<Stmt*> Stmts
+        = llvm::makeArrayRef(CS->body_begin(), CS->size());
+      int indexOfLastExpr = Stmts.size();
+      while(indexOfLastExpr--) {
+        if (!isa<NullStmt>(Stmts[indexOfLastExpr]))
+          break;
+      }
 
-  //     if (FoundAt)
-  //       *FoundAt = indexOfLastExpr;
+      if (FoundAt)
+        *FoundAt = indexOfLastExpr;
 
-  //     if (indexOfLastExpr < 0)
-  //       return 0;
+      if (indexOfLastExpr < 0)
+        return 0;
 
-  //     if ( (result = dyn_cast<Expr>(Stmts[indexOfLastExpr])) )
-  //       return result;
-  //     if (!omitDeclStmts)
-  //       if (DeclStmt* DS = dyn_cast<DeclStmt>(Stmts[indexOfLastExpr])) {
-  //         std::vector<Stmt*> newBody = Stmts.vec();
-  //         for (DeclStmt::reverse_decl_iterator I = DS->decl_rbegin(),
-  //                E = DS->decl_rend(); I != E; ++I) {
-  //           if (VarDecl* VD = dyn_cast<VarDecl>(*I)) {
-  //             // Change the void function's return type
-  //             // We can't PushDeclContext, because we don't have scope.
-  //             Sema::ContextRAII pushedDC(*S, FD);
+      if ( (result = dyn_cast<Expr>(Stmts[indexOfLastExpr])) )
+        return result;
+      if (!omitDeclStmts)
+        if (DeclStmt* DS = dyn_cast<DeclStmt>(Stmts[indexOfLastExpr])) {
+          std::vector<Stmt*> newBody = Stmts.vec();
+          for (DeclStmt::reverse_decl_iterator I = DS->decl_rbegin(),
+                 E = DS->decl_rend(); I != E; ++I) {
+            if (VarDecl* VD = dyn_cast<VarDecl>(*I)) {
+              // Change the void function's return type
+              // We can't PushDeclContext, because we don't have scope.
+              Sema::ContextRAII pushedDC(*S, FD);
 
-  //             QualType VDTy = VD->getType().getNonReferenceType();
-  //             // Get the location of the place we will insert.
-  //             SourceLocation Loc
-  //               = newBody[indexOfLastExpr]->getLocEnd().getLocWithOffset(1);
-  //             Expr* DRE = S->BuildDeclRefExpr(VD, VDTy,VK_LValue, Loc).get();
-  //             assert(DRE && "Cannot be null");
-  //             indexOfLastExpr++;
-  //             newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
+              QualType VDTy = VD->getType().getNonReferenceType();
+              // Get the location of the place we will insert.
+              SourceLocation Loc
+                = newBody[indexOfLastExpr]->getLocEnd().getLocWithOffset(1);
+              Expr* DRE = S->BuildDeclRefExpr(VD, VDTy,VK_LValue, Loc).get();
+              assert(DRE && "Cannot be null");
+              indexOfLastExpr++;
+              newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
 
-  //             // Attach the new body (note: it does dealloc/alloc of all nodes)
-  //             CS->setStmts(S->getASTContext(),
-  //                 CREATE_ARRAYREF(&newBody.front(), newBody.size()));
-  //             if (FoundAt)
-  //               *FoundAt = indexOfLastExpr;
-  //             return DRE;
-  //           }
-  //         }
-  //       }
+              // Attach the new body (note: it does dealloc/alloc of all nodes)
+              CS->setStmts(S->getASTContext(), &newBody.front(),newBody.size());
+              if (FoundAt)
+                *FoundAt = indexOfLastExpr;
+              return DRE;
+            }
+          }
+        }
 
-  //     return result;
-  //   }
+      return result;
+    }
 
-  //   return result;
-  // }
+    return result;
+  }
 
   const char* const Synthesize::UniquePrefix = "__cling_Un1Qu3";
 
@@ -226,46 +214,30 @@ namespace utils {
   }
 
   static bool
-  GetFullyQualifiedTemplateArgument(const ASTContext& Ctx,
-                                    TemplateArgument &arg) {
-    bool changed = false;
+  GetFullyQualifiedTemplateArgument(const ASTContext& Ctx, TemplateArgument &arg)
+  {
+     bool changed = false;
 
-    // Note: we do not handle TemplateArgument::Expression, to replace it
-    // we need the information for the template instance decl.
-    // See GetPartiallyDesugaredTypeImpl
+     // Note: we do not handle TemplateArgument::Expression, to replace it
+     // we need the information for the template instance decl.
+     // See GetPartiallyDesugaredTypeImpl
 
-    if (arg.getKind() == TemplateArgument::Template) {
-      TemplateName tname = arg.getAsTemplate();
-      changed = GetFullyQualifiedTemplateName(Ctx, tname);
-      if (changed) {
-        arg = TemplateArgument(tname);
-      }
-    } else if (arg.getKind() == TemplateArgument::Type) {
-      QualType SubTy = arg.getAsType();
-      // Check if the type needs more desugaring and recurse.
-      QualType QTFQ = TypeName::GetFullyQualifiedType(SubTy, Ctx);
-      if (QTFQ != SubTy) {
-        arg = TemplateArgument(QTFQ);
-        changed = true;
-      }
-    } else if (arg.getKind() == TemplateArgument::Pack) {
-      SmallVector<TemplateArgument, 2> desArgs;
-      for (auto I = arg.pack_begin(), E = arg.pack_end(); I != E; ++I) {
-        TemplateArgument pack_arg(*I);
-        changed = GetFullyQualifiedTemplateArgument(Ctx,pack_arg);
-        desArgs.push_back(pack_arg);
-      }
-      if (changed) {
-        // The allocator in ASTContext is mutable ...
-        // Keep the argument const to be inline will all the other interfaces
-        // like:  NestedNameSpecifier::Create
-        ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(mutableCtx, CREATE_ARRAYREF(
-                                                               desArgs.data(),
-                                                               desArgs.size())));
-      }
-    }
-    return changed;
+     if (arg.getKind() == TemplateArgument::Template) {
+        TemplateName tname = arg.getAsTemplate();
+        changed = GetFullyQualifiedTemplateName(Ctx, tname);
+        if (changed) {
+           arg = TemplateArgument(tname);
+        }
+     } else if (arg.getKind() == TemplateArgument::Type) {
+        QualType SubTy = arg.getAsType();
+        // Check if the type needs more desugaring and recurse.
+        QualType QTFQ = TypeName::GetFullyQualifiedType(SubTy, Ctx);
+        if (QTFQ != SubTy) {
+           arg = TemplateArgument(QTFQ);
+           changed = true;
+        }
+     }
+     return changed;
   }
 
   static const Type*
@@ -294,7 +266,7 @@ namespace utils {
       if (mightHaveChanged) {
         QualType QT
           = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                              CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
+                                              desArgs.data(), desArgs.size(),
                                               TST->getCanonicalTypeInternal());
         return QT.getTypePtr();
       }
@@ -327,9 +299,10 @@ namespace utils {
           if (mightHaveChanged) {
             TemplateName TN(TSTdecl->getSpecializedTemplate());
             QualType QT
-              = Ctx.getTemplateSpecializationType(
-                  TN, CREATE_ARRAYREF(desArgs.data(), desArgs.size()),
-                  TSTRecord->getCanonicalTypeInternal());
+              = Ctx.getTemplateSpecializationType(TN,
+                                                  desArgs.data(),
+                                                  desArgs.size(),
+                                         TSTRecord->getCanonicalTypeInternal());
             return QT.getTypePtr();
           }
         }
@@ -846,57 +819,6 @@ namespace utils {
     return desugared;
   }
 
-  static bool GetPartiallyDesugaredTypeImpl(const ASTContext& Ctx,
-                                            TemplateArgument &arg,
-                                            const Transform::Config& TypeConfig,
-                                            bool fullyQualifyTmpltArg) {
-    bool changed = false;
-
-    if (arg.getKind() == TemplateArgument::Template) {
-      TemplateName tname = arg.getAsTemplate();
-      // Note: should we not also desugar?
-      changed = GetFullyQualifiedTemplateName(Ctx, tname);
-      if (changed) {
-        arg = TemplateArgument(tname);
-      }
-    } else if (arg.getKind() == TemplateArgument::Type) {
-
-      QualType SubTy = arg.getAsType();
-      // Check if the type needs more desugaring and recurse.
-      if (isa<TypedefType>(SubTy)
-          || isa<TemplateSpecializationType>(SubTy)
-          || isa<ElaboratedType>(SubTy)
-          || fullyQualifyTmpltArg) {
-        changed = true;
-        QualType PDQT
-              = GetPartiallyDesugaredTypeImpl(Ctx, SubTy, TypeConfig,
-                    /*fullyQualifyType=*/true,
-                    /*fullyQualifyTmpltArg=*/true);
-        arg = TemplateArgument(PDQT);
-      }
-    } else if (arg.getKind() == TemplateArgument::Pack) {
-      SmallVector<TemplateArgument, 2> desArgs;
-      for (auto I = arg.pack_begin(), E = arg.pack_end(); I != E; ++I) {
-        TemplateArgument pack_arg(*I);
-        changed = GetPartiallyDesugaredTypeImpl(Ctx,pack_arg,
-                                                TypeConfig,
-                                                fullyQualifyTmpltArg);
-        desArgs.push_back(pack_arg);
-      }
-      if (changed) {
-        // The allocator in ASTContext is mutable ...
-        // Keep the argument const to be inline will all the other interfaces
-        // like:  NestedNameSpecifier::Create
-        ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg =TemplateArgument(TemplateArgument::CreatePackCopy(
-              mutableCtx, CREATE_ARRAYREF(desArgs.data(), desArgs.size())));
-      }
-    }
-    return changed;
-  }
-
-
-
   static QualType GetPartiallyDesugaredTypeImpl(const ASTContext& Ctx,
     QualType QT, const Transform::Config& TypeConfig,
     bool fullyQualifyType, bool fullyQualifyTmpltArg)
@@ -1282,8 +1204,8 @@ namespace utils {
       if (mightHaveChanged) {
         Qualifiers qualifiers = QT.getLocalQualifiers();
         QT = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                               CREATE_ARRAYREF(desArgs.data(),
-                                                               desArgs.size()),
+                                               desArgs.data(),
+                                               desArgs.size(),
                                                TST->getCanonicalTypeInternal());
         QT = Ctx.getQualifiedType(QT, qualifiers);
       }
@@ -1306,16 +1228,16 @@ namespace utils {
           for(unsigned int I = 0, E = templateArgs.size();
               I != E; ++I) {
 
-#if 1
+#if 0
+            // This alternative code is not quite right as it would
+            // not call GetPartiallyDesugaredTypeImpl on Types.
 
             // cheap to copy and potentially modified by
-            // GetPartiallyDesugaredTypeImpl
-            TemplateArgument arg(templateArgs[I]);
-            mightHaveChanged |= GetPartiallyDesugaredTypeImpl(Ctx,arg,
-                                                              TypeConfig,
-                                                          fullyQualifyTmpltArg);
+            // GetFullyQualifedTemplateArgument
+            TemplateArgument arg(*I);
+            mightHaveChanged | = GetFullyQualifiedTemplateArgument(Ctx,arg);
             desArgs.push_back(arg);
-#else
+#endif
             if (templateArgs[I].getKind() == TemplateArgument::Template) {
                TemplateName tname = templateArgs[I].getAsTemplate();
                // Note: should we not also desugar?
@@ -1348,16 +1270,15 @@ namespace utils {
             } else {
               desArgs.push_back(templateArgs[I]);
             }
-#endif
           }
 
           // If desugaring happened allocate new type in the AST.
           if (mightHaveChanged) {
             Qualifiers qualifiers = QT.getLocalQualifiers();
             TemplateName TN(TSTdecl->getSpecializedTemplate());
-            QT = Ctx.getTemplateSpecializationType(TN, CREATE_ARRAYREF(desArgs.data(),
-                                                                       desArgs.size()),
-                                         TSTRecord->getCanonicalTypeInternal());
+            QT = Ctx.getTemplateSpecializationType(TN, desArgs.data(),
+                                                   desArgs.size(),
+                                                   TSTRecord->getCanonicalTypeInternal());
             QT = Ctx.getQualifiedType(QT, qualifiers);
           }
         }
@@ -1411,48 +1332,44 @@ namespace utils {
     return dyn_cast<NamespaceDecl>(R.getFoundDecl());
   }
 
-  // NamedDecl* Lookup::Named(Sema* S, llvm::StringRef Name,
-  //                          const DeclContext* Within) {
-  //   DeclarationName DName = &S->Context.Idents.get(Name);
-  //   return Lookup::Named(S, DName, Within);
-  // }
+  NamedDecl* Lookup::Named(Sema* S, llvm::StringRef Name,
+                           const DeclContext* Within) {
+    DeclarationName DName = &S->Context.Idents.get(Name);
+    return Lookup::Named(S, DName, Within);
+  }
 
-  // NamedDecl* Lookup::Named(Sema* S, const char* Name,
-  //                          const DeclContext* Within) {
-  //   DeclarationName DName = &S->Context.Idents.get(Name);
-  //   return Lookup::Named(S, DName, Within);
-  // }
+  NamedDecl* Lookup::Named(Sema* S, const char* Name,
+                           const DeclContext* Within) {
+    DeclarationName DName = &S->Context.Idents.get(Name);
+    return Lookup::Named(S, DName, Within);
+  }
 
-  // NamedDecl* Lookup::Named(Sema* S, const DeclarationName& Name,
-  //                          const DeclContext* Within) {
-  //   LookupResult R(*S, Name, SourceLocation(), Sema::LookupOrdinaryName,
-  //                  Sema::ForRedeclaration);
-  //   R.suppressDiagnostics();
-  //   if (!Within)
-  //     S->LookupName(R, S->TUScope);
-  //   else {
-  //     const DeclContext* primaryWithin = nullptr;
-  //     if (const clang::TagDecl *TD = dyn_cast<clang::TagDecl>(Within)) {
-  //       primaryWithin = dyn_cast_or_null<DeclContext>(TD->getDefinition());
-  //     } else {
-  //       primaryWithin = Within->getPrimaryContext();
-  //     }
-  //     if (!primaryWithin) {
-  //       // No definition, no lookup result.
-  //       return 0;
-  //     }
-  //     S->LookupQualifiedName(R, const_cast<DeclContext*>(primaryWithin));
-  //   }
+  NamedDecl* Lookup::Named(Sema* S, const DeclarationName& Name,
+                           const DeclContext* Within) {
+    LookupResult R(*S, Name, SourceLocation(), Sema::LookupOrdinaryName,
+                   Sema::ForRedeclaration);
+    R.suppressDiagnostics();
+    if (!Within)
+      S->LookupName(R, S->TUScope);
+    else {
+      if (const clang::TagDecl* TD = dyn_cast<clang::TagDecl>(Within)) {
+        if (!TD->getDefinition()) {
+          // No definition, no lookup result.
+          return 0;
+        }
+      }
+      S->LookupQualifiedName(R, const_cast<DeclContext*>(Within));
+    }
 
-  //   if (R.empty())
-  //     return 0;
+    if (R.empty())
+      return 0;
 
-  //   R.resolveKind();
+    R.resolveKind();
 
-  //   if (R.isSingleResult())
-  //     return R.getFoundDecl();
-  //   return (clang::NamedDecl*)-1;
-  // }
+    if (R.isSingleResult())
+      return R.getFoundDecl();
+    return (clang::NamedDecl*)-1;
+  }
 
   static NestedNameSpecifier*
   CreateNestedNameSpecifierForScopeOf(const ASTContext& Ctx,
@@ -1568,110 +1485,6 @@ namespace utils {
     // Return the fully qualified type, if we need to recurse through any
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
-
-    // Remove the part of the type related to the type being a template
-    // parameter (we won't report it as part of the 'type name' and it is
-    // actually make the code below to be more complex (to handle those)
-    while (isa<SubstTemplateTypeParmType>(QT.getTypePtr())) {
-      // Get the qualifiers.
-      Qualifiers quals = QT.getQualifiers();
-
-      QT = dyn_cast<SubstTemplateTypeParmType>(QT.getTypePtr())->desugar();
-
-      // Add back the qualifiers.
-      QT = Ctx.getQualifiedType(QT, quals);
-    }
-
-    if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
-      Qualifiers quals = QT.getQualifiers();
-
-      const Type *class_type = llvm::cast<MemberPointerType>(QT.getTypePtr())->getClass();
-      class_type = GetFullyQualifiedType(class_type->getCanonicalTypeInternal(), Ctx).getTypePtr();
-
-      QT = GetFullyQualifiedType(QT->getPointeeType(), Ctx);
-      QT = Ctx.getMemberPointerType(QT, class_type);
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
-
-    if (llvm::isa<FunctionProtoType>(QT.getTypePtr())) {
-      const FunctionProtoType *function_type = llvm::cast<FunctionProtoType>(QT.getTypePtr());
-
-      QualType return_type = function_type->getReturnType();
-      return_type = GetFullyQualifiedType(return_type, Ctx);
-
-      std::vector<QualType> qualified_param_types;
-      qualified_param_types.reserve(function_type->getNumParams());
-
-      for (const QualType &param_type : function_type->param_types()) {
-        qualified_param_types.push_back(GetFullyQualifiedType(param_type, Ctx));
-      }
-
-      Qualifiers quals = QT.getQualifiers();
-      QT = Ctx.getFunctionType(return_type, qualified_param_types, function_type->getExtProtoInfo());
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
-
-    if (llvm::isa<ConstantArrayType>(QT.getTypePtr())) {
-      const ConstantArrayType *array_type = llvm::cast<ConstantArrayType>(QT.getTypePtr());
-
-      QualType element_type = array_type->getElementType();
-      element_type = GetFullyQualifiedType(element_type, Ctx);
-
-      Qualifiers quals = QT.getQualifiers();
-      QT = Ctx.getConstantArrayType(element_type, array_type->getSize(),
-        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
-
-    if (llvm::isa<DependentSizedArrayType>(QT.getTypePtr())) {
-      const DependentSizedArrayType *array_type = llvm::cast<DependentSizedArrayType>(QT.getTypePtr());
-
-      QualType element_type = array_type->getElementType();
-      element_type = GetFullyQualifiedType(element_type, Ctx);
-
-      Qualifiers quals = QT.getQualifiers();
-      QT = Ctx.getDependentSizedArrayType(element_type, array_type->getSizeExpr(),
-        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
-        array_type->getBracketsRange());
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
-
-    if (llvm::isa<IncompleteArrayType>(QT.getTypePtr())) {
-      const IncompleteArrayType *array_type = llvm::cast<IncompleteArrayType>(QT.getTypePtr());
-
-      QualType element_type = array_type->getElementType();
-      element_type = GetFullyQualifiedType(element_type, Ctx);
-
-      Qualifiers quals = QT.getQualifiers();
-      QT = Ctx.getIncompleteArrayType(element_type,
-        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
-
-    if (llvm::isa<VariableArrayType>(QT.getTypePtr())) {
-      const VariableArrayType *array_type = llvm::cast<VariableArrayType>(QT.getTypePtr());
-
-      QualType element_type = array_type->getElementType();
-      element_type = GetFullyQualifiedType(element_type, Ctx);
-
-      Qualifiers quals = QT.getQualifiers();
-      QT = Ctx.getVariableArrayType(element_type, array_type->getSizeExpr(),
-        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
-        array_type->getBracketsRange());
-      QT = Ctx.getQualifiedType(QT, quals);
-
-      return QT;
-    }
 
     // In case of myType* we need to strip the pointer first, fully qualifiy
     // and attach the pointer once again.
