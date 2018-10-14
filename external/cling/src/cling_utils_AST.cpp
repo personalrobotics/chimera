@@ -129,6 +129,11 @@ namespace utils {
     RawStr.flush();
   }
 
+  ////////////////////////////
+  // DISABLED FOR CHIMERA:
+  // This function disabled because it's incompatible with LLVM (>=6)
+  ////////////////////////////
+  //
   // Expr* Analyze::GetOrCreateLastExpr(FunctionDecl* FD,
   //                                    int* FoundAt /*=0*/,
   //                                    bool omitDeclStmts /*=true*/,
@@ -1620,6 +1625,10 @@ namespace utils {
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
 
+    ////////////////////////////
+    // MODIFIED FOR CHIMERA
+    ////////////////////////////
+
     // Remove the part of the type related to the type being a template
     // parameter (we won't report it as part of the 'type name' and it is
     // actually make the code below to be more complex (to handle those)
@@ -1633,9 +1642,6 @@ namespace utils {
       QT = Ctx.getQualifiedType(QT, quals);
     }
 
-    ////////////////////////////
-    // ADDED FOR CHIMERA
-    ////////////////////////////
     if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
       Qualifiers quals = QT.getQualifiers();
 
@@ -1726,9 +1732,6 @@ namespace utils {
 
       return QT;
     }
-    ////////////////////////////
-    // END ADDED FOR CHIMERA
-    ////////////////////////////
 
     // In case of myType* we need to strip the pointer first, fully qualifiy
     // and attach the pointer once again.
@@ -1764,6 +1767,10 @@ namespace utils {
       if (!AutoTy->getDeducedType().isNull())
         return GetFullyQualifiedType(AutoTy->getDeducedType(), Ctx);
     }
+
+    ////////////////////////////
+    // END MODIFIED FOR CHIMERA
+    ////////////////////////////
 
     NestedNameSpecifier* prefix = 0;
     Qualifiers prefix_qualifiers;

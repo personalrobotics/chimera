@@ -76,6 +76,8 @@ namespace utils {
     ///                           synthesis of the DeclRefExpr.
     ///\returns 0 if the operation wasn't successful.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::Expr* GetOrCreateLastExpr(clang::FunctionDecl* FD,
     //                                  int* FoundAt = 0,
     //                                  bool omitDeclStmts = true,
@@ -207,6 +209,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::NamedDecl* Named(clang::Sema* S,
     //                         llvm::StringRef Name,
     //                         const clang::DeclContext* Within = 0);
@@ -220,6 +224,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::NamedDecl* Named(clang::Sema* S,
     //                         const char* Name,
     //                         const clang::DeclContext* Within = 0);
@@ -234,6 +240,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::NamedDecl* Named(clang::Sema* S,
     //                         const clang::DeclarationName& Name,
     //                         const clang::DeclContext* Within = 0);
@@ -247,6 +255,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::TagDecl* Tag(clang::Sema* S,
     //                     llvm::StringRef Name,
     //                     const clang::DeclContext* Within = 0);
@@ -260,6 +270,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::TagDecl* Tag(clang::Sema* S,
     //                     const char* Name,
     //                     const clang::DeclContext* Within = 0);
@@ -273,6 +285,8 @@ namespace utils {
     ///                    TranslationUnitDecl is used.
     ///\returns the found result if single, -1 if multiple or 0 if not found.
     ///
+    // DISABLED FOR CHIMERA:
+    // This function disabled because it's incompatible with LLVM (>=6)
     // clang::TagDecl* Tag(clang::Sema* S,
     //                     const clang::DeclarationName& Name,
     //                     const clang::DeclContext* Within = 0);
