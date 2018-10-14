@@ -23,6 +23,14 @@
 #include <memory>
 #include <stdio.h>
 
+// LLVM <3.8 require separate arguments for data and length, while later versions
+// can directly take an array reference (e.g. implicitly casting from std::vector).
+#if LLVM_VERSION_MAJOR > 3 || (LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 8)
+#define ARRAY_COMPAT(_container_) _container_
+#else
+#define ARRAY_COMPAT(_container_) _container_.data(), _container_.size()
+#endif
+
 using namespace clang;
 
 namespace {
@@ -46,7 +54,7 @@ namespace utils {
   static
   QualType GetPartiallyDesugaredTypeImpl(const ASTContext& Ctx,
                                          QualType QT,
-                               const Transform::Config& TypeConfig,
+                                         const Transform::Config& TypeConfig,
                                          bool fullyQualifyType,
                                          bool fullyQualifyTmpltArg);
 
@@ -169,7 +177,7 @@ namespace utils {
               newBody.insert(newBody.begin() + indexOfLastExpr, DRE);
 
               // Attach the new body (note: it does dealloc/alloc of all nodes)
-              CS->setStmts(S->getASTContext(), newBody);
+              CS->setStmts(S->getASTContext(), ARRAY_COMPAT(newBody));
               if (FoundAt)
                 *FoundAt = indexOfLastExpr;
               return DRE;
@@ -273,7 +281,7 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg = TemplateArgument::CreatePackCopy(mutableCtx, desArgs);
+        arg = TemplateArgument::CreatePackCopy(mutableCtx, ARRAY_COMPAT(desArgs));
       }
     }
     return changed;
@@ -305,7 +313,7 @@ namespace utils {
       if (mightHaveChanged) {
         QualType QT
           = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                              desArgs,
+                                              ARRAY_COMPAT(desArgs),
                                               TST->getCanonicalTypeInternal());
         return QT.getTypePtr();
       }
@@ -338,8 +346,8 @@ namespace utils {
           if (mightHaveChanged) {
             TemplateName TN(TSTdecl->getSpecializedTemplate());
             QualType QT
-              = Ctx.getTemplateSpecializationType(TN, desArgs,
-                                         TSTRecord->getCanonicalTypeInternal());
+              = Ctx.getTemplateSpecializationType(TN, ARRAY_COMPAT(desArgs),
+                                                  TSTRecord->getCanonicalTypeInternal());
             return QT.getTypePtr();
           }
         }
@@ -882,7 +890,7 @@ namespace utils {
         // Keep the argument const to be inline will all the other interfaces
         // like:  NestedNameSpecifier::Create
         ASTContext &mutableCtx( const_cast<ASTContext&>(Ctx) );
-        arg = TemplateArgument::CreatePackCopy(mutableCtx, desArgs);
+        arg = TemplateArgument::CreatePackCopy(mutableCtx, ARRAY_COMPAT(desArgs));
       }
     }
     return changed;
@@ -1313,7 +1321,7 @@ namespace utils {
       if (mightHaveChanged) {
         Qualifiers qualifiers = QT.getLocalQualifiers();
         QT = Ctx.getTemplateSpecializationType(TST->getTemplateName(),
-                                               desArgs,
+                                               ARRAY_COMPAT(desArgs),
                                                TST->getCanonicalTypeInternal());
         QT = Ctx.getQualifiedType(QT, qualifiers);
       }
@@ -1343,7 +1351,7 @@ namespace utils {
             TemplateArgument arg(templateArgs[I]);
             mightHaveChanged |= GetPartiallyDesugaredTypeImpl(Ctx,arg,
                                                               TypeConfig,
-                                                          fullyQualifyTmpltArg);
+                                                              fullyQualifyTmpltArg);
             desArgs.push_back(arg);
 #else
             if (templateArgs[I].getKind() == TemplateArgument::Template) {
@@ -1385,8 +1393,8 @@ namespace utils {
           if (mightHaveChanged) {
             Qualifiers qualifiers = QT.getLocalQualifiers();
             TemplateName TN(TSTdecl->getSpecializedTemplate());
-            QT = Ctx.getTemplateSpecializationType(TN, desArgs,
-                                         TSTRecord->getCanonicalTypeInternal());
+            QT = Ctx.getTemplateSpecializationType(TN, ARRAY_COMPAT(desArgs),
+                                                   TSTRecord->getCanonicalTypeInternal());
             QT = Ctx.getQualifiedType(QT, qualifiers);
           }
         }
@@ -1612,6 +1620,116 @@ namespace utils {
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
 
+    // Remove the part of the type related to the type being a template
+    // parameter (we won't report it as part of the 'type name' and it is
+    // actually make the code below to be more complex (to handle those)
+    while (isa<SubstTemplateTypeParmType>(QT.getTypePtr())) {
+      // Get the qualifiers.
+      Qualifiers quals = QT.getQualifiers();
+
+      QT = dyn_cast<SubstTemplateTypeParmType>(QT.getTypePtr())->desugar();
+
+      // Add back the qualifiers.
+      QT = Ctx.getQualifiedType(QT, quals);
+    }
+
+    ////////////////////////////
+    // ADDED FOR CHIMERA
+    ////////////////////////////
+    if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
+      Qualifiers quals = QT.getQualifiers();
+
+      const Type *class_type = llvm::cast<MemberPointerType>(QT.getTypePtr())->getClass();
+      class_type = GetFullyQualifiedType(class_type->getCanonicalTypeInternal(), Ctx).getTypePtr();
+
+      QT = GetFullyQualifiedType(QT->getPointeeType(), Ctx);
+      QT = Ctx.getMemberPointerType(QT, class_type);
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<FunctionProtoType>(QT.getTypePtr())) {
+      const FunctionProtoType *function_type = llvm::cast<FunctionProtoType>(QT.getTypePtr());
+
+      QualType return_type = function_type->getReturnType();
+      return_type = GetFullyQualifiedType(return_type, Ctx);
+
+      std::vector<QualType> qualified_param_types;
+      qualified_param_types.reserve(function_type->getNumParams());
+
+      for (const QualType &param_type : function_type->param_types()) {
+        qualified_param_types.push_back(GetFullyQualifiedType(param_type, Ctx));
+      }
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getFunctionType(return_type, qualified_param_types, function_type->getExtProtoInfo());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<ConstantArrayType>(QT.getTypePtr())) {
+      const ConstantArrayType *array_type = llvm::cast<ConstantArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getConstantArrayType(element_type, array_type->getSize(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<DependentSizedArrayType>(QT.getTypePtr())) {
+      const DependentSizedArrayType *array_type = llvm::cast<DependentSizedArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getDependentSizedArrayType(element_type, array_type->getSizeExpr(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
+        array_type->getBracketsRange());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<IncompleteArrayType>(QT.getTypePtr())) {
+      const IncompleteArrayType *array_type = llvm::cast<IncompleteArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getIncompleteArrayType(element_type,
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+
+    if (llvm::isa<VariableArrayType>(QT.getTypePtr())) {
+      const VariableArrayType *array_type = llvm::cast<VariableArrayType>(QT.getTypePtr());
+
+      QualType element_type = array_type->getElementType();
+      element_type = GetFullyQualifiedType(element_type, Ctx);
+
+      Qualifiers quals = QT.getQualifiers();
+      QT = Ctx.getVariableArrayType(element_type, array_type->getSizeExpr(),
+        array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
+        array_type->getBracketsRange());
+      QT = Ctx.getQualifiedType(QT, quals);
+
+      return QT;
+    }
+    ////////////////////////////
+    // END ADDED FOR CHIMERA
+    ////////////////////////////
+
     // In case of myType* we need to strip the pointer first, fully qualifiy
     // and attach the pointer once again.
     if (llvm::isa<PointerType>(QT.getTypePtr())) {
@@ -1645,19 +1763,6 @@ namespace utils {
     if (const AutoType* AutoTy = dyn_cast<AutoType>(QT.getTypePtr())) {
       if (!AutoTy->getDeducedType().isNull())
         return GetFullyQualifiedType(AutoTy->getDeducedType(), Ctx);
-    }
-
-    // Remove the part of the type related to the type being a template
-    // parameter (we won't report it as part of the 'type name' and it is
-    // actually make the code below to be more complex (to handle those)
-    while (isa<SubstTemplateTypeParmType>(QT.getTypePtr())) {
-      // Get the qualifiers.
-      Qualifiers quals = QT.getQualifiers();
-
-      QT = dyn_cast<SubstTemplateTypeParmType>(QT.getTypePtr())->desugar();
-
-      // Add back the qualifiers.
-      QT = Ctx.getQualifiedType(QT, quals);
     }
 
     NestedNameSpecifier* prefix = 0;
