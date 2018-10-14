@@ -1515,8 +1515,6 @@ namespace utils {
       // There are probably other cases ...
       if (const TagType* tagdecltype = llvm::dyn_cast_or_null<TagType>(TypePtr))
         decl = tagdecltype->getDecl();
-      else if (const PointerType* pointertype = llvm::dyn_cast_or_null<PointerType>(TypePtr))
-        return CreateNestedNameSpecifierForScopeOf(Ctx, pointertype->getPointeeType().getTypePtr(), FullyQualified);
       else
         decl = TypePtr->getAsCXXRecordDecl();
     }
@@ -1570,6 +1568,19 @@ namespace utils {
     // Return the fully qualified type, if we need to recurse through any
     // template parameter, this needs to be merged somehow with
     // GetPartialDesugaredType.
+
+    // Remove the part of the type related to the type being a template
+    // parameter (we won't report it as part of the 'type name' and it is
+    // actually make the code below to be more complex (to handle those)
+    while (isa<SubstTemplateTypeParmType>(QT.getTypePtr())) {
+      // Get the qualifiers.
+      Qualifiers quals = QT.getQualifiers();
+
+      QT = dyn_cast<SubstTemplateTypeParmType>(QT.getTypePtr())->desugar();
+
+      // Add back the qualifiers.
+      QT = Ctx.getQualifiedType(QT, quals);
+    }
 
     if (llvm::isa<MemberPointerType>(QT.getTypePtr())) {
       Qualifiers quals = QT.getQualifiers();
@@ -1689,19 +1700,6 @@ namespace utils {
       // Add back the qualifiers.
       QT = Ctx.getQualifiedType(QT, quals);
       return QT;
-    }
-
-    // Remove the part of the type related to the type being a template
-    // parameter (we won't report it as part of the 'type name' and it is
-    // actually make the code below to be more complex (to handle those)
-    while (isa<SubstTemplateTypeParmType>(QT.getTypePtr())) {
-      // Get the qualifiers.
-      Qualifiers quals = QT.getQualifiers();
-
-      QT = dyn_cast<SubstTemplateTypeParmType>(QT.getTypePtr())->desugar();
-
-      // Add back the qualifiers.
-      QT = Ctx.getQualifiedType(QT, quals);
     }
 
     NestedNameSpecifier* prefix = 0;
