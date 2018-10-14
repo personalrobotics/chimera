@@ -38,32 +38,24 @@ public:
 
     auto vec = std::vector<Node>();
     auto ptrVec = std::vector<Node*>();
-    // auto constPtrVec = std::vector<const Node*>();
-    vec_param(vec);       // ok
-    vec_param(ptrVec);    // now ok!
-    // vec_param(constPtrVec);  // error!
-    // GENERATED CODE:
-    //
-    // ::boost::python::def(
-    //     "vec_param",
-    //     +[](const std::vector<chimera_test::nested_namespace::const Node *> & _arg0_)
-    //         { chimera_test::nested_namespace::vec_param<const chimera_test::nested_namespace::Node *>(_arg0_); },
-    //     (::boost::python::arg("_arg0_")));
-    //
-    // EXPECTED CODE:
-    //
-    // chimera_test::nested_namespace::const Node *  // this line should be the next code
-    // const chimera_test::nested_namespace::Node *  // note the location of 'const'
+    auto constPtrVec = std::vector<const Node*>();
+    vec_param(vec);          // ok
+    vec_param(ptrVec);       // now ok!
+    vec_param(constPtrVec);  // now ok!
 
     auto arr = std::array<Node, 1>();
     auto ptrArr = std::array<Node*, 1>();
-    arr_param(arr);     // ok
-    arr_param(ptrArr);  // now ok!
+    auto constPtrArr = std::array<const Node*, 1>();
+    arr_param(arr);          // ok
+    arr_param(ptrArr);       // now ok!
+    arr_param(constPtrArr);  // now ok!
 
     auto set = std::set<Node>();
     auto ptrSet = std::set<Node*>();
-    set_param(set);     // ok
-    set_param(ptrSet);  // now ok!
+    auto constPtrSet = std::set<const Node*>();
+    set_param(set);          // ok
+    set_param(ptrSet);       // now ok!
+    set_param(constPtrSet);  // now ok!
   }
 };
 
