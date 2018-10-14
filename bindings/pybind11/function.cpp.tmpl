@@ -12,10 +12,13 @@
 void {{function.mangled_name}}(pybind11::module& m)
 {
     auto sm = m{{!
-        }}{{#function.scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/function.scope}};
+        }}{{#function.namespace_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/function.namespace_scope}};
+
+    auto attr = sm{{!
+        }}{{#function.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/function.class_scope}};
 
 {{#function.overloads}}{{!
-    }}    sm.def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
+    }}    attr.def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
     }}{{#is_return_type_void}} { {{/is_return_type_void}}{{!
     }}{{^is_return_type_void}} -> {{return_type}} { return {{/is_return_type_void}}{{!
     }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
