@@ -261,7 +261,7 @@ public:
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
-    ::mstch::node isReturnTypeVoid();
+    ::mstch::node isVoid();
     ::mstch::node namespaceScope() override;
     ::mstch::node classScope() override;
     ::mstch::node scope() override;

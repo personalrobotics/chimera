@@ -64,8 +64,8 @@ void {{class.mangled_name}}()
 }}{{^is_static}}{{!
 }}{{#overloads}}{{!
     }}.def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
-    }}{{#is_return_type_void}} { {{/is_return_type_void}}{{!
-    }}{{^is_return_type_void}} -> {{return_type}} { return {{/is_return_type_void}}{{!
+    }}{{#is_void}} { {{/is_void}}{{!
+    }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
     }}self->{{call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
@@ -79,8 +79,8 @@ void {{class.mangled_name}}()
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
     }}.def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
-    }}{{#is_return_type_void}} { {{/is_return_type_void}}{{!
-    }}{{^is_return_type_void}} -> {{return_type}} { return {{/is_return_type_void}}{{!
+    }}{{#is_void}} { {{/is_void}}{{!
+    }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
     }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}})
