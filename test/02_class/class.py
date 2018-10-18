@@ -2,11 +2,13 @@ import inspect
 import unittest
 
 try:
+    import class_pybind11
     import class_pybind11.nested_namespace as py11
     has_pybind11 = True
 except:
     has_pybind11 = False
 
+import class_boost_python
 import class_boost_python.nested_namespace as boost
 
 

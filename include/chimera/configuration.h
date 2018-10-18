@@ -141,6 +141,8 @@ public:
      */
     const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
 
+    const std::set<const clang::NamespaceDecl*>& GetNamespaceBlacklist() const;
+
     /**
      * Get the YAML configuration associated with a specific declaration,
      * or return an empty YAML node if no configuration was found.
@@ -217,6 +219,7 @@ protected:
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
+    std::set<const clang::NamespaceDecl*> namespaceBlackList_;
 
     std::vector<std::string> binding_names_;
     std::vector<std::shared_ptr<chimera::mstch::Namespace>> binding_namespaces_;

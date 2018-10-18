@@ -206,14 +206,21 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             }
 
             // Resolve namespace configuration entries within provided AST.
-            for(const auto &it : namespacesNode)
+            for (const auto &it : namespacesNode)
             {
                 std::string ns_str = it.first.as<std::string>();
                 auto ns = chimera::util::resolveNamespace(ci, ns_str);
                 if (ns)
                 {
-                    declarations_[ns] = it.second;
-                    namespaces_.insert(ns);
+                    if (it.second.IsNull())
+                    {
+                        namespaceBlackList_.insert(ns);
+                    }
+                    else
+                    {
+                        declarations_[ns] = it.second;
+                        namespaces_.insert(ns);
+                    }
                 }
                 else
                 {
@@ -481,6 +488,12 @@ chimera::CompiledConfiguration::GetNamespaces() const
     return namespaces_;
 }
 
+const std::set<const clang::NamespaceDecl*>&
+chimera::CompiledConfiguration::GetNamespaceBlacklist() const
+{
+    return namespaceBlackList_;
+}
+
 const YAML::Node&
 chimera::CompiledConfiguration::GetDeclaration(const clang::Decl *decl) const
 {
@@ -512,6 +525,14 @@ clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 {
+    for (const auto &it : GetNamespaceBlacklist())
+    {
+        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
+        {
+            return false;
+        }
+    }
+
     // Filter over the namespaces and only traverse ones that are enclosed
     // by one of the configuration namespaces.
     for (const auto &it : GetNamespaces())

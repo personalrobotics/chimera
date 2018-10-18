@@ -72,4 +72,11 @@ public:
 };
 
 } // namespace nested_namespace
+
+namespace excluding_namespace {
+
+class ExcludedClass {};
+
+} // namespace excluding_namespace
+
 } // namespace chimera_test
