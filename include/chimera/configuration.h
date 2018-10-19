@@ -141,7 +141,10 @@ public:
      */
     const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
 
-    const std::set<const clang::NamespaceDecl*>& GetNamespaceBlacklist() const;
+    /**
+     * Returns list of namespace declarations that should be skipped.
+     */
+    const std::set<const clang::NamespaceDecl*>& GetNamespacesToSkip() const;
 
     /**
      * Get the YAML configuration associated with a specific declaration,
@@ -219,7 +222,7 @@ protected:
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
     std::set<const clang::NamespaceDecl*> namespaces_;
-    std::set<const clang::NamespaceDecl*> namespaceBlackList_;
+    std::set<const clang::NamespaceDecl*> namespacesToSkip_;
 
     std::vector<std::string> binding_names_;
     std::vector<std::shared_ptr<chimera::mstch::Namespace>> binding_namespaces_;

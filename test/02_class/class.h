@@ -73,10 +73,10 @@ public:
 
 } // namespace nested_namespace
 
-namespace excluding_namespace {
+namespace detail {
 
-class ExcludedClass {};
+class ClassInDetail {};
 
-} // namespace excluding_namespace
+} // namespace detail
 
 } // namespace chimera_test

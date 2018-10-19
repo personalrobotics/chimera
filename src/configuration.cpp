@@ -214,7 +214,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (it.second.IsNull())
                     {
-                        namespaceBlackList_.insert(ns);
+                        namespacesToSkip_.insert(ns);
                     }
                     else
                     {
@@ -468,6 +468,13 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
+    // Skip namespaces that are defined as null in the configuration.
+    for (const auto &it : GetNamespacesToSkip())
+    {
+        if (decl && it->Encloses(decl))
+            return;
+    }
+
     // We need to preserve the order of the traversed namespace declarations,
     // as the ASTConsumer traverses them in a hierarchical order.
     //
@@ -489,9 +496,9 @@ chimera::CompiledConfiguration::GetNamespaces() const
 }
 
 const std::set<const clang::NamespaceDecl*>&
-chimera::CompiledConfiguration::GetNamespaceBlacklist() const
+chimera::CompiledConfiguration::GetNamespacesToSkip() const
 {
-    return namespaceBlackList_;
+    return namespacesToSkip_;
 }
 
 const YAML::Node&
@@ -525,12 +532,11 @@ clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 {
-    for (const auto &it : GetNamespaceBlacklist())
+    // Skip namespaces that are defined as null in the configuration.
+    for (const auto &it : GetNamespacesToSkip())
     {
         if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
-        {
             return false;
-        }
     }
 
     // Filter over the namespaces and only traverse ones that are enclosed
