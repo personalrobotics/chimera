@@ -533,7 +533,7 @@ clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 {
     // Skip namespaces that are defined as null in the configuration.
-    for (const auto &it : GetNamespacesToSkip())
+    for (const auto &it : GetNamespacesSuppressed())
     {
         if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
             return false;
