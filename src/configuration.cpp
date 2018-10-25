@@ -498,7 +498,7 @@ chimera::CompiledConfiguration::GetNamespaces() const
 const std::set<const clang::NamespaceDecl*>&
 chimera::CompiledConfiguration::GetNamespacesSuppressed() const
 {
-    return namespacesToSkip_;
+    return namespacesSuppressed_;
 }
 
 const YAML::Node&
