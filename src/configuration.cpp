@@ -214,7 +214,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (it.second.IsNull())
                     {
-                        namespacesToSkip_.insert(ns);
+                        namespacesSuppressed_.insert(ns);
                     }
                     else
                     {
