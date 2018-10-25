@@ -186,7 +186,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                       << "'" << ns_str << "'." << std::endl;
             continue;
         }
-        namespaces_.insert(ns);
+        namespacesIncluded_.insert(ns);
     }
 
     // Get a reference to the configuration YAML root node.
@@ -490,7 +490,7 @@ chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl
 }
 
 const std::set<const clang::NamespaceDecl*>&
-chimera::CompiledConfiguration::GetNamespaces() const
+chimera::CompiledConfiguration::GetNamespacesIncluded() const
 {
      return namespacesIncluded_;
 }
