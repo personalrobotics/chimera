@@ -492,7 +492,7 @@ chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl
 const std::set<const clang::NamespaceDecl*>&
 chimera::CompiledConfiguration::GetNamespaces() const
 {
-    return namespaces_;
+     return namespacesIncluded_;
 }
 
 const std::set<const clang::NamespaceDecl*>&
