@@ -95,7 +95,7 @@ bool chimera::Visitor::shouldVisitImplicitCode() const
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
     // Only visit declarations in namespaces we are configured to read.
-    if (!config_->IsEnclosed(decl))
+    if (config_->IsSuppressed(decl))
         return true;
 
     // Only visit declarations whose enclosing classes are generatable.
@@ -204,10 +204,6 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (!decl->isCompleteDefinition())
         return false;
 
-    // Ignore declarations that have been explicitly suppressed.
-    if (config_->IsSuppressed(decl))
-        return false;
-
     // Ensure traversal of base classes before this class.
     std::set<const CXXRecordDecl *> base_decls =
         chimera::util::getBaseClassDecls(decl);
@@ -230,10 +226,6 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
     if (decl->getAccess() == AS_private || decl->getAccess() == AS_protected)
         return false;
 
-    // Ignore declarations that have been explicitly suppressed.
-    if (config_->IsSuppressed(decl))
-        return false;
-
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
     return config_->Render(context);
@@ -244,10 +236,6 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     if (!decl->isFileVarDecl())
         return false;
     else if (!decl->isThisDeclarationADefinition())
-        return false;
-
-    // Ignore declarations that have been explicitly suppressed.
-    if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global variables.
@@ -286,10 +274,6 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // Using these functions requires std::move()-ing their arguments, which
     // we generally cannot do.
     if (chimera::util::containsNonCopyableType(decl))
-        return false;
-
-    // Ignore declarations that have been explicitly suppressed.
-    if (config_->IsSuppressed(decl))
         return false;
 
     // TODO: Support return_value_policy for global functions.
