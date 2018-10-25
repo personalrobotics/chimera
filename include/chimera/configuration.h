@@ -222,7 +222,7 @@ protected:
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
     std::map<const clang::Decl*, YAML::Node> declarations_;
      std::set<const clang::NamespaceDecl*> namespacesIncluded_;
-    std::set<const clang::NamespaceDecl*> namespacesToSkip_;
+    std::set<const clang::NamespaceDecl*> namespacesSuppressed_;
 
     std::vector<std::string> binding_names_;
     std::vector<std::shared_ptr<chimera::mstch::Namespace>> binding_namespaces_;
