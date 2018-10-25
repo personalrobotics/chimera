@@ -492,7 +492,7 @@ chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl
 const std::set<const clang::NamespaceDecl*>&
 chimera::CompiledConfiguration::GetNamespacesIncluded() const
 {
-     return namespacesIncluded_;
+    return namespacesIncluded_;
 }
 
 const std::set<const clang::NamespaceDecl*>&
@@ -532,16 +532,9 @@ clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 {
-    // Skip namespaces that are defined as null in the configuration.
-    for (const auto &it : GetNamespacesSuppressed())
-    {
-        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
-            return false;
-    }
-
     // Filter over the namespaces and only traverse ones that are enclosed
     // by one of the configuration namespaces.
-     for (const auto &it : GetNamespacesIncluded())
+    for (const auto &it : GetNamespacesIncluded())
     {
         if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
         {
@@ -558,6 +551,13 @@ bool chimera::CompiledConfiguration::IsSuppressed(const QualType type) const
 
 bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
 {
+    // Skip namespaces that are defined as null in the configuration.
+    for (const auto &it : GetNamespacesSuppressed())
+    {
+        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
+            return true;
+    }
+
     const auto config = chimera::CompiledConfiguration::GetDeclaration(decl);
 
     // If the declaration is directly suppressed, report this.
