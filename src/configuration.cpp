@@ -469,7 +469,7 @@ void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
     // Skip namespaces that are defined as null in the configuration.
-    for (const auto &it : GetNamespacesToSkip())
+    for (const auto &it : GetNamespacesSuppressed())
     {
         if (decl && it->Encloses(decl))
             return;
