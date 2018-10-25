@@ -219,7 +219,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     else
                     {
                         declarations_[ns] = it.second;
-                        namespaces_.insert(ns);
+                        namespacesIncluded_.insert(ns);
                     }
                 }
                 else
