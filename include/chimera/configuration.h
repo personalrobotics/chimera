@@ -139,7 +139,7 @@ public:
      * is desirable since parent namespaces will naturally be lexically
      * ordered before their children.
      */
-    const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
+    const std::set<const clang::NamespaceDecl*>& GetNamespacesIncluded() const;
 
     /**
      * Returns list of namespace declarations that should be skipped.
