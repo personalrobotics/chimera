@@ -144,7 +144,7 @@ public:
     /**
      * Returns list of namespace declarations that should be skipped.
      */
-    const std::set<const clang::NamespaceDecl*>& GetNamespacesToSkip() const;
+    const std::set<const clang::NamespaceDecl*>& GetNamespacesSuppressed() const;
 
     /**
      * Get the YAML configuration associated with a specific declaration,
