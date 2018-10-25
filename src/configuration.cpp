@@ -496,7 +496,7 @@ chimera::CompiledConfiguration::GetNamespaces() const
 }
 
 const std::set<const clang::NamespaceDecl*>&
-chimera::CompiledConfiguration::GetNamespacesToSkip() const
+chimera::CompiledConfiguration::GetNamespacesSuppressed() const
 {
     return namespacesToSkip_;
 }
