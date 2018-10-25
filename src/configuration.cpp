@@ -541,7 +541,7 @@ bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 
     // Filter over the namespaces and only traverse ones that are enclosed
     // by one of the configuration namespaces.
-    for (const auto &it : GetNamespaces())
+     for (const auto &it : GetNamespacesIncluded())
     {
         if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
         {
