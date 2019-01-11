@@ -4,6 +4,12 @@ sudo: required
 
 dist: trusty
 
+env:
+  global:
+    - IS_PULL_REQUEST=$TRAVIS_PULL_REQUEST
+    - OS_NAME=$TRAVIS_OS_NAME
+    - BUILD_DIR=$TRAVIS_BUILD_DIR
+
 matrix:
   include:
     - os: linux

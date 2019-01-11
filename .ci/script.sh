@@ -2,7 +2,7 @@
 set -e
 # Disable e option for now
 
-if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+if [ "${OS_NAME}" = "linux" ]; then
   export LLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/"
 fi
 
