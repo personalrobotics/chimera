@@ -69,7 +69,7 @@ jobs:
     LLVM_VERSION: 4
   steps:
   - script: |
-      source .ci/install.sh
+      source .ci/install_macos.sh
     displayName: 'Install'
   - script: |
       . .ci/script.sh
@@ -86,7 +86,7 @@ jobs:
     LLVM_VERSION: 5
   steps:
   - script: |
-      source .ci/install.sh
+      . .ci/install_macos.sh
     displayName: 'Install'
   - script: |
       . .ci/script.sh
@@ -103,7 +103,7 @@ jobs:
     LLVM_VERSION: 6
   steps:
   - script: |
-      source .ci/install.sh
+      source .ci/install_macos.sh
     displayName: 'Install'
   - script: |
       . .ci/script.sh
