@@ -58,11 +58,29 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
+- job: macos_high_seirra_clang_llvm4_release
+  pool:
+    vmImage: 'macOS 10.13'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Debug
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 4
+  steps:
+  - script: |
+      '.ci/install.sh'
+    displayName: 'Install'
+  - script: |
+      '.ci/script.sh'
+    displayName: 'Script'
+
 - job: macos_high_seirra_clang_llvm5_release
   pool:
     vmImage: 'macOS 10.13'
   variables:
     OS_NAME: osx
+    COMPILER: clang
     BUILD_TYPE: Debug
     BUILD_DIR: $(Build.SourcesDirectory)
     LLVM_VERSION: 5
@@ -79,6 +97,7 @@ jobs:
     vmImage: 'macOS 10.13'
   variables:
     OS_NAME: osx
+    COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
     LLVM_VERSION: 6
