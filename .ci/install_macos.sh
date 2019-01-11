@@ -101,4 +101,6 @@ else
 fi
 export LLVM_DIR
 
+echo $LLVM_DIR
+
 brew install "${LLVM_PACKAGE}"
