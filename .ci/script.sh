@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -e
-# Disable e option for now
+set -ex
 
 if [ "${OS_NAME}" = "linux" ]; then
   export LLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/"
