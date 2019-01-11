@@ -100,3 +100,5 @@ else
   LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/${LLVM_INSTALL_PREFIX}/share/llvm/cmake"
 fi
 export LLVM_DIR
+
+brew install "${LLVM_PACKAGE}"
