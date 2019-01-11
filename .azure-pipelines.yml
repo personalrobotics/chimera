@@ -44,7 +44,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_cosmic_gcc_llvm_release
+- job: ubuntu_cosmic_gcc_release
   pool:
     vmImage: 'Ubuntu 16.04'
   variables:
