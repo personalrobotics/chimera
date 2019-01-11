@@ -5,3 +5,4 @@ arguments:
 namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
+  'chimera_test::nested_namespace::detail': null

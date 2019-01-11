@@ -186,7 +186,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                       << "'" << ns_str << "'." << std::endl;
             continue;
         }
-        namespaces_.insert(ns);
+        namespacesIncluded_.insert(ns);
     }
 
     // Get a reference to the configuration YAML root node.
@@ -206,14 +206,21 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             }
 
             // Resolve namespace configuration entries within provided AST.
-            for(const auto &it : namespacesNode)
+            for (const auto &it : namespacesNode)
             {
                 std::string ns_str = it.first.as<std::string>();
                 auto ns = chimera::util::resolveNamespace(ci, ns_str);
                 if (ns)
                 {
-                    declarations_[ns] = it.second;
-                    namespaces_.insert(ns);
+                    if (it.second.IsNull())
+                    {
+                        namespacesSuppressed_.insert(ns);
+                    }
+                    else
+                    {
+                        declarations_[ns] = it.second;
+                        namespacesIncluded_.insert(ns);
+                    }
                 }
                 else
                 {
@@ -461,6 +468,13 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 void
 chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl* decl)
 {
+    // Skip namespaces that are defined as null in the configuration.
+    for (const auto &it : GetNamespacesSuppressed())
+    {
+        if (decl && it->Encloses(decl))
+            return;
+    }
+
     // We need to preserve the order of the traversed namespace declarations,
     // as the ASTConsumer traverses them in a hierarchical order.
     //
@@ -476,9 +490,15 @@ chimera::CompiledConfiguration::AddTraversedNamespace(const clang::NamespaceDecl
 }
 
 const std::set<const clang::NamespaceDecl*>&
-chimera::CompiledConfiguration::GetNamespaces() const
+chimera::CompiledConfiguration::GetNamespacesIncluded() const
 {
-    return namespaces_;
+    return namespacesIncluded_;
+}
+
+const std::set<const clang::NamespaceDecl*>&
+chimera::CompiledConfiguration::GetNamespacesSuppressed() const
+{
+    return namespacesSuppressed_;
 }
 
 const YAML::Node&
@@ -512,9 +532,16 @@ clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const
 {
+    // Skip namespaces that are defined as null in the configuration.
+    for (const auto &it : GetNamespacesSuppressed())
+    {
+        if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
+            return false;
+    }
+
     // Filter over the namespaces and only traverse ones that are enclosed
     // by one of the configuration namespaces.
-    for (const auto &it : GetNamespaces())
+    for (const auto &it : GetNamespacesIncluded())
     {
         if (decl->getDeclContext() && it->Encloses(decl->getDeclContext()))
         {
@@ -531,6 +558,9 @@ bool chimera::CompiledConfiguration::IsSuppressed(const QualType type) const
 
 bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
 {
+    if (!IsEnclosed(decl))
+        return true;
+
     const auto config = chimera::CompiledConfiguration::GetDeclaration(decl);
 
     // If the declaration is directly suppressed, report this.

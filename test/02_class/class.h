@@ -71,5 +71,11 @@ public:
   };
 };
 
+namespace detail {
+
+class ClassInDetail {};
+
+} // namespace detail
+
 } // namespace nested_namespace
 } // namespace chimera_test
