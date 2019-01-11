@@ -69,10 +69,10 @@ jobs:
     LLVM_VERSION: 4
   steps:
   - script: |
-      '.ci/install.sh'
+      . .ci/install.sh
     displayName: 'Install'
   - script: |
-      '.ci/script.sh'
+      . .ci/script.sh
     displayName: 'Script'
 
 - job: macos_high_seirra_clang_llvm5_release
@@ -86,10 +86,10 @@ jobs:
     LLVM_VERSION: 5
   steps:
   - script: |
-      '.ci/install.sh'
+      . .ci/install.sh
     displayName: 'Install'
   - script: |
-      '.ci/script.sh'
+      . .ci/script.sh
     displayName: 'Script'
 
 - job: macos_high_seirra_clang_llvm6_release
@@ -103,8 +103,8 @@ jobs:
     LLVM_VERSION: 6
   steps:
   - script: |
-      '.ci/install.sh'
+      . .ci/install.sh
     displayName: 'Install'
   - script: |
-      '.ci/script.sh'
+      . .ci/script.sh
     displayName: 'Script'
