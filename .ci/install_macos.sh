@@ -100,5 +100,6 @@ else
   LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/${LLVM_INSTALL_PREFIX}/share/llvm/cmake"
 fi
 export LLVM_DIR
+echo 'export PATH="${LLVM_DIR}:$PATH"' >> ~/.bash_profile
 
 brew install "${LLVM_PACKAGE}"
