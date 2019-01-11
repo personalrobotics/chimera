@@ -10,6 +10,20 @@ if [ $(lsb_release -sc) = "trusty" ]; then
 fi
 $SUDO apt-get -y install "llvm-${LLVM_VERSION}-dev" "llvm-${LLVM_VERSION}-tools" "libclang-${LLVM_VERSION}-dev" libedit-dev libyaml-cpp-dev libboost-dev
 
+# Install build tools
+$SUDO apt-get -y install \
+  build-essential  \
+  cmake \
+  curl \
+  git \
+  lib32z1-dev \
+  lsb-release \
+  pkg-config \
+  python \
+  software-properties-common \
+  sudo \
+  wget
+
 # Install test dependencies.
 $SUDO apt-get -y install libboost-python-dev libboost-thread-dev
 $SUDO apt-get -y install lcov
