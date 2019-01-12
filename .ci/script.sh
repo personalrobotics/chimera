@@ -5,9 +5,6 @@ if [ "${OS_NAME}" = "linux" ]; then
   export LLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/"
 fi
 
-echo $LLVM_DIR
-echo $BUILD_TYPE
-
 mkdir build
 cd build
 
