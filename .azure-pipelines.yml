@@ -69,11 +69,9 @@ jobs:
     LLVM_VERSION: 4
   steps:
   - script: |
-      source .ci/install_macos.sh
-    displayName: 'Install'
-  - script: |
+      . .ci/install_macos.sh
       . .ci/script.sh
-    displayName: 'Script'
+    displayName: 'Install/Script'
 
 - job: macos_high_seirra_clang_llvm5_release
   pool:
@@ -86,11 +84,9 @@ jobs:
     LLVM_VERSION: 5
   steps:
   - script: |
-      . .ci/install_macos.sh
-    displayName: 'Install'
-  - script: |
+      source .ci/install_macos.sh
       . .ci/script.sh
-    displayName: 'Script'
+    displayName: 'Install/Script'
 
 - job: macos_high_seirra_clang_llvm6_release
   pool:
@@ -103,6 +99,6 @@ jobs:
     LLVM_VERSION: 6
   steps:
   - script: |
-      source .ci/install_macos.sh
+      . .ci/install_macos.sh
       . .ci/script.sh
     displayName: 'Install/Script'
