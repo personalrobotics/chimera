@@ -6,9 +6,8 @@
 
 using namespace clang;
 
-chimera::Consumer::Consumer(CompilerInstance *ci)
-: ci_(ci)
-{ 
+chimera::Consumer::Consumer(CompilerInstance *ci) : ci_(ci)
+{
     // Do nothing.
 }
 

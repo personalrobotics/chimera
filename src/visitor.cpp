@@ -1,12 +1,12 @@
+#include "chimera/visitor.h"
 #include "chimera/mstch.h"
 #include "chimera/util.h"
-#include "chimera/visitor.h"
 
 #include <algorithm>
-#include <boost/algorithm/string/join.hpp>
 #include <iostream>
-#include <llvm/Support/raw_ostream.h>
 #include <string>
+#include <boost/algorithm/string/join.hpp>
+#include <llvm/Support/raw_ostream.h>
 
 using namespace chimera;
 using namespace clang;
@@ -43,8 +43,9 @@ CXXRecordDecl *GetEnclosingClassDecl(DeclContext *decl_context)
     DeclContext *parent_context = decl_context->getParent();
 
     // TODO: replace this with null-ing cast operation.
-    return (isa<CXXRecordDecl>(parent_context)) ?
-        cast<CXXRecordDecl>(parent_context) : NULL;
+    return (isa<CXXRecordDecl>(parent_context))
+               ? cast<CXXRecordDecl>(parent_context)
+               : NULL;
 }
 
 /**
@@ -61,8 +62,7 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
     }
     else if (isa<VarDecl>(decl))
     {
-        return GetEnclosingClassDecl(
-            cast<VarDecl>(decl)->getDeclContext());
+        return GetEnclosingClassDecl(cast<VarDecl>(decl)->getDeclContext());
     }
     else if (isa<FunctionDecl>(decl))
     {
@@ -76,8 +76,7 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
                           std::unique_ptr<CompiledConfiguration> cc)
-: printing_policy_(ci->getLangOpts())
-, config_(std::move(cc))
+  : printing_policy_(ci->getLangOpts()), config_(std::move(cc))
 {
     // Do nothing.
 }
@@ -109,7 +108,7 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
         // If after visiting, the class was still not created, then do not
         // generate this enclosed definition.
         if (traversed_class_decls_.find(enclosing_decl->getCanonicalDecl())
-                == traversed_class_decls_.end())
+            == traversed_class_decls_.end())
             return true;
     }
 
@@ -170,7 +169,7 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
 
     // Avoid generating duplicates of the same class.
     if (traversed_class_decls_.find(decl->getCanonicalDecl())
-            != traversed_class_decls_.end())
+        != traversed_class_decls_.end())
         return false;
 
     // Ignore partial template specializations. These still have unbound
@@ -187,16 +186,17 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // See: http://stackoverflow.com/q/35376737/111426
     if (clang::CXXRecordDecl *decl2 = decl->getTemplateInstantiationPattern())
     {
-      if (decl2->getAccess() == AS_private
+        if (decl2->getAccess() == AS_private
             || decl2->getAccess() == AS_protected)
-          return false;
+            return false;
 
-      if (clang::ClassTemplateDecl *decl3 = decl2->getDescribedClassTemplate())
-      {
-        if (decl3->getAccess() == AS_private
-            || decl3->getAccess() == AS_protected)
-          return false;
-      }
+        if (clang::ClassTemplateDecl *decl3
+            = decl2->getDescribedClassTemplate())
+        {
+            if (decl3->getAccess() == AS_private
+                || decl3->getAccess() == AS_protected)
+                return false;
+        }
     }
 
     // Skip incomplete types. Boost.Python requires RTTI, which requires the
@@ -205,12 +205,12 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
         return false;
 
     // Ensure traversal of base classes before this class.
-    std::set<const CXXRecordDecl *> base_decls =
-        chimera::util::getBaseClassDecls(decl);
-    for(auto base_decl : base_decls)
+    std::set<const CXXRecordDecl *> base_decls
+        = chimera::util::getBaseClassDecls(decl);
+    for (auto base_decl : base_decls)
     {
         if (traversed_class_decls_.find(base_decl->getCanonicalDecl())
-              == traversed_class_decls_.end())
+            == traversed_class_decls_.end())
             VisitDecl(const_cast<CXXRecordDecl *>(base_decl));
     }
 
@@ -243,7 +243,7 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // Serialize using a mstch template.
-	auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
+    auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
     return config_->Render(context);
 }
 

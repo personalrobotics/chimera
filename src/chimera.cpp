@@ -4,12 +4,12 @@
 #include "chimera/configuration.h"
 #include "chimera/frontend_action.h"
 
-#include <clang/Tooling/CommonOptionsParser.h>
-#include <clang/Tooling/Tooling.h>
-#include <clang/Tooling/ArgumentsAdjusters.h>
-#include <llvm/Support/CommandLine.h>
 #include <memory>
 #include <string>
+#include <clang/Tooling/ArgumentsAdjusters.h>
+#include <clang/Tooling/CommonOptionsParser.h>
+#include <clang/Tooling/Tooling.h>
+#include <llvm/Support/CommandLine.h>
 
 #define STR_DETAIL(x) #x
 #define STR(x) STR_DETAIL(x)
@@ -24,15 +24,13 @@ static cl::OptionCategory ChimeraCategory("Chimera options");
 
 // Option for specifying binding type by name.
 static cl::opt<std::string> BindingName(
-    "b", cl::cat(ChimeraCategory),
-    cl::desc("Specify binding definition name"),
+    "b", cl::cat(ChimeraCategory), cl::desc("Specify binding definition name"),
     cl::value_desc("binding"));
 
 // Option for specifying output binding filename.
 static cl::opt<std::string> OutputPath(
     "o", cl::cat(ChimeraCategory),
-    cl::desc("Specify output bindings directory"),
-    cl::value_desc("directory"));
+    cl::desc("Specify output bindings directory"), cl::value_desc("directory"));
 
 // Option for specifying output binding filename.
 static cl::opt<std::string> OutputModuleName(
@@ -62,7 +60,8 @@ static cl::opt<bool> SuppressDocs(
     "no-docs", cl::cat(ChimeraCategory),
     cl::desc("Suppress the extraction of documentation from C++ comments"));
 
-// Option for preventing binding sources from being auto-forwarded in generated bindings.
+// Option for preventing binding sources from being auto-forwarded in generated
+// bindings.
 static cl::opt<bool> SuppressSources(
     "no-default-sources", cl::cat(ChimeraCategory),
     cl::desc("Suppress the forwarding of source file paths to binding"));
@@ -71,8 +70,7 @@ static cl::opt<bool> SuppressSources(
 static cl::extrahelp MoreHelp(
     "\n"
     "Chimera is a tool to convert C++ headers into Boost.Python bindings.\n"
-    "\n"
-);
+    "\n");
 
 int main(int argc, const char **argv)
 {
@@ -94,7 +92,8 @@ int main(int argc, const char **argv)
 
     // If a top-level binding file was specified, set configuration to use it.
     if (!OutputModuleName.empty())
-        chimera::Configuration::GetInstance().SetOutputModuleName(OutputModuleName);
+        chimera::Configuration::GetInstance().SetOutputModuleName(
+            OutputModuleName);
 
     // Add top-level namespaces to the configuration.
     if (NamespaceNames.size())
@@ -123,8 +122,9 @@ int main(int argc, const char **argv)
     // Add a workaround for the bug in clang shipped default with Ubuntu 14.04.
     // https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
-        "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(LLVM_VERSION_MINOR)
-        "/lib/clang/" LLVM_VERSION_STRING "/include", ArgumentInsertPosition::END));
+        "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(
+            LLVM_VERSION_MINOR) "/lib/clang/" LLVM_VERSION_STRING "/include",
+        ArgumentInsertPosition::END));
 
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());
