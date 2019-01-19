@@ -74,3 +74,16 @@ add_subdirectory(04_enumeration)
 add_subdirectory(05_variable)
 add_subdirectory(99_dart_example)
 add_subdirectory(regression)
+
+# Add custom target `binding_tests` to build all the tests as a single target
+get_property(chimera_pybind11_binding_tests GLOBAL
+  PROPERTY CHIMERA_PYBIND11_BINDING_TESTS
+)
+get_property(chimera_boost_python_binding_tests GLOBAL
+  PROPERTY CHIMERA_BOOST_PYTHON_BINDING_TESTS
+)
+add_custom_target(binding_tests
+  DEPENDS
+    ${chimera_pybind11_binding_tests}
+    ${chimera_boost_python_binding_tests}
+)
