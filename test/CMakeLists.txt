@@ -16,4 +16,62 @@ set_target_properties(
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
+#===============================================================================
+# This function uses following global properties:
+# - MIRAGE_UNITTESTS
+# - MIRAGE_CPP_TESTS
+#
+# Usage:
+#   chimera_add_test(test_UnitTestA) # assumed source is test_UnitTestA.cpp
+#   chimera_add_test(test_UnitTestB test_SourceB1.cpp)
+#   chimera_add_test(test_UnitTestA test_SourceC1.cpp test_SourceC2.cpp)
+#===============================================================================
+function(chimera_add_test target_name) # ARGN for source files
+
+  set_property(GLOBAL APPEND PROPERTY MIRAGE_CPP_TESTS ${target_name})
+
+  if(${ARGC} GREATER 2)
+    set(sources ${ARGN})
+  else()
+    set(sources "${target_name}.cpp")
+  endif()
+
+  add_executable(${target_name} ${sources})
+  add_test(${target_name} ${target_name})
+
+  if(MSVC)
+    target_link_libraries(${target_name}
+        chimera_cpp
+        emulator
+        optimized gtest debug gtestd
+        optimized gtest_main debug gtest_maind
+    )
+  else()
+    target_link_libraries(${target_name} libchimera gtest gtest_main)
+  endif()
+
+#  clang_format_add_sources(${sources})
+
+endfunction()
+
+#===============================================================================
+# Emulator
+#===============================================================================
+add_library(emulator emulator.h emulator.cpp)
+target_link_libraries(emulator PUBLIC libchimera)
+#clang_format_add_sources(
+#  emulator.h emulator.cpp
+#)
+target_compile_definitions(emulator
+  PUBLIC
+    SAMPLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/examples/"
+    BUILD_PATH="${CMAKE_BINARY_DIR}"
+)
+
+#===============================================================================
+# Add tests
+#===============================================================================
+chimera_add_test(test_empty)
+chimera_add_test(test_emulator)
+
 add_subdirectory(examples)
