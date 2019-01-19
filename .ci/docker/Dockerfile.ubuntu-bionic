@@ -1,0 +1,4 @@
+FROM ubuntu:bionic
+
+# Workaround to suppress "Warning: apt-key output should not be parsed (stdout is not a terminal)"
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1

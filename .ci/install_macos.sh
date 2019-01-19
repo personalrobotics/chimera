@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-set -x
-# Add e option once we move to using Brewfile for installing packages.
+set -ex
+
+# Install all the depenencies ubing Brewfile except llvm
+brew update > /dev/null
+brew bundle
 
 # Compare two semantic version numbers A and B. Return code is 0 if A == B, 1
 # if A > B, and 2 if A < B.
@@ -98,11 +101,6 @@ else
 fi
 export LLVM_DIR
 
-brew install boost
-brew install "${LLVM_PACKAGE}"
-brew install yaml-cpp --with-static-lib
+echo $LLVM_DIR
 
-# Install test dependencies.
-brew install boost-python
-brew install boost-python3
-brew install pybind11
+brew install "${LLVM_PACKAGE}"

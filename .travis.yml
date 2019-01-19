@@ -4,35 +4,83 @@ sudo: required
 
 dist: trusty
 
+env:
+  global:
+    - IS_PULL_REQUEST=$TRAVIS_PULL_REQUEST
+    - OS_NAME=$TRAVIS_OS_NAME
+    - BUILD_DIR=$TRAVIS_BUILD_DIR
+
 matrix:
   include:
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
+      env:
+        - BUILD_NAME=TRUSTY_GCC_DEBUG
+        - BUILD_TYPE=Debug
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
       # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=GCC LLVM_VERSION=3.6 PYTHON_VERSION=3.4
+      env:
+        - BUILD_NAME=TRUSTY_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=3.6 PYTHON_VERSION=3.4
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=4
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=5
-    - os: osx
-      compiler: clang
-      env: BUILD_TYPE=Release CODECOV=OFF COMPILER=CLANG LLVM_VERSION=6
+      env:
+        - BUILD_NAME=TRUSTY_CLANG_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=CLANG
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.4
+        - SUDO=sudo
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=XENIAL_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.6
+        - PYTHON_VERSION=3.5
+        - DOCKERFILE="Dockerfile.ubuntu-xenial"
+      services: docker
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=BIONIC_GCC_RELEASE
+        - BUILD_TYPE=Release
+        - COMPILER=GCC
+        - LLVM_VERSION=3.9
+        - PYTHON_VERSION=3.6
+        - DOCKERFILE="Dockerfile.ubuntu-bionic"
+      services: docker
+
+before_install:
+  - if [ -n "$DOCKERFILE" ]; then
+      docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+      docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+    fi
 
 install:
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then . ci/install_linux.sh; fi
-  - if [ "${TRAVIS_OS_NAME}" = "osx"   ]; then . ci/install_macos.sh; fi
+  - if [ -n "$DOCKERFILE" ]; then
+      docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+    else
+      . .ci/install.sh;
+    fi
 
 script:
-  - . ci/script.sh
+  - if [ -n "$DOCKERFILE" ]; then
+      docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+    else
+      . .ci/script.sh;
+    fi
 
-after_failure: 
+after_failure:
   - cat Testing/Temporary/LastTest.log
   - cat Testing/Temporary/LastTestsFailed.log

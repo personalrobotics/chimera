@@ -1,4 +1,4 @@
-# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera)
+# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![Build Status](https://dev.azure.com/personalrobotics/chimera/_apis/build/status/personalrobotics.chimera?branchName=master)](https://dev.azure.com/personalrobotics/chimera/_build/latest?definitionId=2?branchName=master) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera)
 
 > ##### chi·me·ra
 >

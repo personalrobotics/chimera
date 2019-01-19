@@ -1,0 +1,104 @@
+# Azure Pipeline settings
+# Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines
+
+jobs:
+- job: ubuntu_xenial_gcc_debug
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: gcc
+    BUILD_TYPE: Debug
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 3.6
+    PYTHON_VERSION: 3.5
+    SUDO: sudo
+  steps:
+  - template: .ci/azure-pipelines/native.yml
+
+- job: ubuntu_xenial_gcc_release
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: gcc
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 3.6
+    PYTHON_VERSION: 3.5
+    SUDO: sudo
+  steps:
+  - template: .ci/azure-pipelines/native.yml
+
+- job: ubuntu_bionic_gcc_release
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: gcc
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 3.9
+    PYTHON_VERSION: 3.6
+    DOCKERFILE: Dockerfile.ubuntu-bionic
+  steps:
+  - template: .ci/azure-pipelines/docker.yml
+
+- job: ubuntu_cosmic_gcc_release
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: gcc
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 3.9
+    PYTHON_VERSION: 3.6
+    DOCKERFILE: Dockerfile.ubuntu-cosmic
+  steps:
+  - template: .ci/azure-pipelines/docker.yml
+
+# - job: macos_high_seirra_clang_llvm4_release
+#   pool:
+#     vmImage: 'macOS 10.13'
+#   variables:
+#     OS_NAME: osx
+#     COMPILER: clang
+#     BUILD_TYPE: Debug
+#     BUILD_DIR: $(Build.SourcesDirectory)
+#     LLVM_VERSION: 4
+#   steps:
+#   - script: |
+#       . .ci/install_macos.sh
+#       . .ci/script.sh
+#     displayName: 'Install/Script'
+
+# - job: macos_high_seirra_clang_llvm5_release
+#   pool:
+#     vmImage: 'macOS 10.13'
+#   variables:
+#     OS_NAME: osx
+#     COMPILER: clang
+#     BUILD_TYPE: Debug
+#     BUILD_DIR: $(Build.SourcesDirectory)
+#     LLVM_VERSION: 5
+#   steps:
+#   - script: |
+#       source .ci/install_macos.sh
+#       . .ci/script.sh
+#     displayName: 'Install/Script'
+
+# - job: macos_high_seirra_clang_llvm6_release
+#   pool:
+#     vmImage: 'macOS 10.13'
+#   variables:
+#     OS_NAME: osx
+#     COMPILER: clang
+#     BUILD_TYPE: Release
+#     BUILD_DIR: $(Build.SourcesDirectory)
+#     LLVM_VERSION: 6
+#   steps:
+#   - script: |
+#       . .ci/install_macos.sh
+#       . .ci/script.sh
+#     displayName: 'Install/Script'
