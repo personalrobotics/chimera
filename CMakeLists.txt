@@ -162,11 +162,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-option(BUILD_TESTING "Enable generation of Chimera build tests." ON)
-if(BUILD_TESTING)
-  enable_testing()
-  add_subdirectory(test)
-endif()
+enable_testing()
+add_subdirectory(test EXCLUDE_FROM_ALL)
 
 #####################
 ## CODE FORMATTING ##

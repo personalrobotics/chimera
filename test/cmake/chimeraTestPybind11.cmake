@@ -114,4 +114,6 @@ function(chimera_add_binding_test_pybind11 test_name)
       COMMAND ${CMAKE_COMMAND} -E copy ${test_name}*.so ${CMAKE_CURRENT_SOURCE_DIR}
     )
   endif()
+
+  set_property(GLOBAL APPEND PROPERTY CHIMERA_PYBIND11_BINDING_TESTS ${test_name})
 endfunction(chimera_add_binding_test_pybind11)
