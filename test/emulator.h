@@ -1,46 +1,49 @@
-#include "chimera/chimera_lib.h"
 #include <string>
 #include <vector>
+#include "chimera/chimera.h"
 
-namespace chimera {
-namespace test {
+namespace chimera
+{
+namespace test
+{
 
-class Emulator {
+class Emulator
+{
 public:
-  Emulator();
+    Emulator();
 
-  void Run();
+    void Run();
 
-  static void Run(const std::string &args);
+    static void Run(const std::string &args);
 
-  static void RunHelp();
-  static void RunHelpList();
-  static void RunVersion();
+    static void RunHelp();
+    static void RunHelpList();
+    static void RunVersion();
 
-  void SetSource(const std::string &filename);
-  void SetSources(const std::vector<std::string> &filenames);
+    void SetSource(const std::string &filename);
+    void SetSources(const std::vector<std::string> &filenames);
 
-  void SetModuleName(const std::string &name);
+    void SetModuleName(const std::string &name);
 
-  void SetBinding(const std::string &name);
+    void SetBinding(const std::string &name);
 
-  void SetConfigurationFile(const std::string &path);
+    void SetConfigurationFile(const std::string &path);
 
-  static const std::string &GetSampleDirPath();
-  static const std::string &GetBuildPath();
+    static const std::string &GetSampleDirPath();
+    static const std::string &GetBuildPath();
 
 private:
-  /// Binding definition name (boost_python/pybind11) for option '-b'
-  std::string binding_;
+    /// Binding definition name (boost_python/pybind11) for option '-b'
+    std::string binding_;
 
-  /// YAML configuration filename for option '-c'
-  std::string config_filepath_;
+    /// YAML configuration filename for option '-c'
+    std::string config_filepath_;
 
-  /// Output top-level module name for option '-m'
-  std::string modulename_;
+    /// Output top-level module name for option '-m'
+    std::string modulename_;
 
-  /// Sources paths
-  std::vector<std::string> sources_;
+    /// Sources paths
+    std::vector<std::string> sources_;
 };
 
 } // namespace test

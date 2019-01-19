@@ -1,26 +1,28 @@
-#include "emulator.h"
-#include "chimera/frontend_action.h"
 #include <clang/Frontend/FrontendActions.h>
 #include <clang/Tooling/Tooling.h>
 #include <gtest/gtest.h>
+#include "chimera/frontend_action.h"
+#include "emulator.h"
 
 using namespace chimera;
 using namespace chimera::test;
 
 //==============================================================================
-TEST(Emulator, GeneralOptions) {
-  testing::internal::CaptureStdout();
+TEST(Emulator, GeneralOptions)
+{
+    testing::internal::CaptureStdout();
 
-  EXPECT_EXIT(Emulator::RunHelp(), ::testing::ExitedWithCode(0), ".*");
-  EXPECT_EXIT(Emulator::Run("--help"), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::RunHelp(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::Run("--help"), ::testing::ExitedWithCode(0), ".*");
 
-  EXPECT_EXIT(Emulator::RunHelpList(), ::testing::ExitedWithCode(0), ".*");
-  EXPECT_EXIT(Emulator::Run("--help-list"), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::RunHelpList(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::Run("--help-list"), ::testing::ExitedWithCode(0),
+                ".*");
 
-  EXPECT_EXIT(Emulator::RunVersion(), ::testing::ExitedWithCode(0), ".*");
-  EXPECT_EXIT(Emulator::Run("--version"), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::RunVersion(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(Emulator::Run("--version"), ::testing::ExitedWithCode(0), ".*");
 
-  std::string output = testing::internal::GetCapturedStdout();
+    std::string output = testing::internal::GetCapturedStdout();
 }
 
 //==============================================================================
@@ -37,14 +39,15 @@ TEST(Emulator, GeneralOptions) {
 //}
 
 //==============================================================================
-TEST(Emulator, 02_Class) {
-  //  testing::internal::CaptureStdout();
+TEST(Emulator, 02_Class)
+{
+    //  testing::internal::CaptureStdout();
 
-  Emulator e;
-  e.SetSource("02_class/class.h");
-  e.SetConfigurationFile("02_class/class.yaml");
-  e.SetBinding("pybind11");
-  e.Run();
+    Emulator e;
+    e.SetSource("02_class/class.h");
+    e.SetConfigurationFile("02_class/class.yaml");
+    e.SetBinding("pybind11");
+    e.Run();
 
-  //  std::string output = testing::internal::GetCapturedStdout();
+    //  std::string output = testing::internal::GetCapturedStdout();
 }

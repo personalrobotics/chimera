@@ -1,6 +1,7 @@
 /**
  * Chimera - a tool to convert c++ headers into Boost.Python bindings.
  */
+#include "chimera/chimera.h"
 #include "chimera/configuration.h"
 #include "chimera/frontend_action.h"
 
@@ -17,6 +18,9 @@
 using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
+
+namespace chimera
+{
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -72,7 +76,7 @@ static cl::extrahelp MoreHelp(
     "Chimera is a tool to convert C++ headers into Boost.Python bindings.\n"
     "\n");
 
-int main(int argc, const char **argv)
+int run(int argc, const char **argv)
 {
     // Create parser that handles clang options.
     CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
@@ -129,3 +133,5 @@ int main(int argc, const char **argv)
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());
 }
+
+} // namespace chimera

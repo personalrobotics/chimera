@@ -50,7 +50,7 @@ function(chimera_add_test target_name) # ARGN for source files
     target_link_libraries(${target_name} libchimera gtest gtest_main)
   endif()
 
-#  clang_format_add_sources(${sources})
+  clang_format_add_sources(${sources})
 
 endfunction()
 
@@ -59,9 +59,9 @@ endfunction()
 #===============================================================================
 add_library(emulator emulator.h emulator.cpp)
 target_link_libraries(emulator PUBLIC libchimera)
-#clang_format_add_sources(
-#  emulator.h emulator.cpp
-#)
+clang_format_add_sources(
+  emulator.h emulator.cpp
+)
 target_compile_definitions(emulator
   PUBLIC
     SAMPLE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/examples/"
