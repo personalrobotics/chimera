@@ -115,4 +115,6 @@ function(chimera_add_binding_test_boost_python test_name)
       COMMAND ${CMAKE_COMMAND} -E copy ${test_name}*.so ${CMAKE_CURRENT_SOURCE_DIR}
     )
   endif()
+
+  set_property(GLOBAL APPEND PROPERTY CHIMERA_BOOST_PYTHON_BINDING_TESTS ${test_name})
 endfunction(chimera_add_binding_test_boost_python)
