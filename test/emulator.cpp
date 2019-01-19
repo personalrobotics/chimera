@@ -79,7 +79,7 @@ void Emulator::Run()
 
     for (const auto &path : sources_)
     {
-        const auto abs_path = GetSampleDirPath() + path;
+        const auto abs_path = GetExamplesDirPath() + path;
         // TODO: assumed path is a relative path
         if (!exists_file(abs_path))
         {
@@ -92,7 +92,7 @@ void Emulator::Run()
     }
 
     std::vector<const char *> argv = convertArgs(args);
-    whimsy::run(static_cast<int>(argv.size()), argv.data());
+    chimera::run(static_cast<int>(argv.size()), argv.data());
 
     exit(0);
 }
@@ -106,7 +106,7 @@ void Emulator::Run(const std::string &args)
     for (auto &arg : args_splits)
         argv.push_back(arg.data());
 
-    whimsy::run(static_cast<int>(argv.size()), argv.data());
+    chimera::run(static_cast<int>(argv.size()), argv.data());
 
     exit(0);
 }
@@ -119,7 +119,7 @@ void Emulator::RunHelp()
     argv.push_back("");
     argv.push_back("--help");
 
-    whimsy::run(argc, argv.data());
+    chimera::run(argc, argv.data());
 
     exit(0);
 }
@@ -132,7 +132,7 @@ void Emulator::RunHelpList()
     argv.push_back("");
     argv.push_back("--help-list");
 
-    whimsy::run(argc, argv.data());
+    chimera::run(argc, argv.data());
 
     exit(0);
 }
@@ -145,7 +145,7 @@ void Emulator::RunVersion()
     argv.push_back("");
     argv.push_back("--version");
 
-    whimsy::run(argc, argv.data());
+    chimera::run(argc, argv.data());
 
     exit(0);
 }
@@ -178,13 +178,13 @@ void Emulator::SetBinding(const std::string &name)
 //==============================================================================
 void Emulator::SetConfigurationFile(const std::string &path)
 {
-    config_filepath_ = GetSampleDirPath() + path;
+    config_filepath_ = GetExamplesDirPath() + path;
 }
 
 //==============================================================================
-const std::string &Emulator::GetSampleDirPath()
+const std::string &Emulator::GetExamplesDirPath()
 {
-    static auto path = std::string(SAMPLE_PATH);
+    static auto path = std::string(EXAMPLES_PATH);
     return path;
 }
 

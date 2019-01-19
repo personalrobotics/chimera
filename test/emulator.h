@@ -29,7 +29,7 @@ public:
 
     void SetConfigurationFile(const std::string &path);
 
-    static const std::string &GetSampleDirPath();
+    static const std::string &GetExamplesDirPath();
     static const std::string &GetBuildPath();
 
 private:

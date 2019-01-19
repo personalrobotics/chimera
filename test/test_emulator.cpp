@@ -41,7 +41,7 @@ TEST(Emulator, GeneralOptions)
 //==============================================================================
 TEST(Emulator, 02_Class)
 {
-    //  testing::internal::CaptureStdout();
+//    testing::internal::CaptureStdout();
 
     Emulator e;
     e.SetSource("02_class/class.h");
@@ -49,5 +49,5 @@ TEST(Emulator, 02_Class)
     e.SetBinding("pybind11");
     e.Run();
 
-    //  std::string output = testing::internal::GetCapturedStdout();
+//    std::string output = testing::internal::GetCapturedStdout();
 }
