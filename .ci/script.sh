@@ -14,7 +14,11 @@ else
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
 fi
 
-make
+make -j4
+
+if [ "$OS_NAME" = "linux" ] && [ $(lsb_release -sc) = "bionic" ]; then
+  make check-format
+fi
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
   make chimera_coverage

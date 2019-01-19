@@ -57,4 +57,11 @@ function(clang_format_add_targets)
     DEPENDS ${CLANG_FORMAT_EXECUTABLE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
+  add_custom_target(check-format
+    COMMAND ${CMAKE_COMMAND} -E echo "Checking ${formatting_files_length} files..."
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/check_format.sh ${CLANG_FORMAT_EXECUTABLE} ${formatting_files}
+    COMMAND ${CMAKE_COMMAND} -E echo "Done."
+    DEPENDS ${CLANG_FORMAT_EXECUTABLE}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
 endfunction()
