@@ -1,8 +1,8 @@
 #ifndef __CHIMERA_BINDING_H__
 #define __CHIMERA_BINDING_H__
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace chimera
 {
@@ -12,7 +12,8 @@ namespace binding
 /**
  * Interface for defining a built-in language binding.
  */
-struct Definition {
+struct Definition
+{
     std::string class_cpp;
     std::string enum_cpp;
     std::string function_cpp;
