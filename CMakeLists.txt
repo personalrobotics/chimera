@@ -9,6 +9,10 @@ set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
 ## SETUP ##
 ###########
 
+# Preset for code formatting
+include(ClangFormat)
+clang_format_setup()
+
 ## Find necessary packages.
 find_package(LLVM REQUIRED CONFIG)
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
@@ -124,6 +128,12 @@ target_link_libraries("${PROJECT_NAME}"
 add_subdirectory(bindings)
 target_link_libraries(chimera chimera_bindings)
 
+# Add main sources for code formatting
+clang_format_add_sources(
+  ${${PROJECT_NAME}_HEADERS}
+  ${${PROJECT_NAME}_SOURCES}
+)
+
 #############
 ## INSTALL ##
 #############
@@ -157,3 +167,10 @@ if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
+
+#####################
+## CODE FORMATTING ##
+#####################
+
+# Define 'format' target that runs ClangFormat
+clang_format_add_targets()
