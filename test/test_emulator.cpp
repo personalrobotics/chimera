@@ -26,28 +26,21 @@ TEST(Emulator, GeneralOptions)
 }
 
 //==============================================================================
-// TEST(Emulator, 01_Function) {
-//  testing::internal::CaptureStdout();
-
-//  Emulator e;
-//  e.SetSource("01_function/function.h");
-//  e.SetConfigurationFile("01_function/function_pybind11.yaml");
-//  e.SetBinding("pybind11");
-//  e.Run();
-
-//  std::string output = testing::internal::GetCapturedStdout();
-//}
+TEST(Emulator, 01_Function)
+{
+    Emulator e;
+    e.SetSource("01_function/function.h");
+    e.SetConfigurationFile("01_function/function_pybind11.yaml");
+    e.SetBinding("pybind11");
+    e.Run();
+}
 
 //==============================================================================
 TEST(Emulator, 02_Class)
 {
-//    testing::internal::CaptureStdout();
-
     Emulator e;
     e.SetSource("02_class/class.h");
     e.SetConfigurationFile("02_class/class.yaml");
     e.SetBinding("pybind11");
     e.Run();
-
-//    std::string output = testing::internal::GetCapturedStdout();
 }
