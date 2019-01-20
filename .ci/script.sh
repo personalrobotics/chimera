@@ -14,7 +14,7 @@ else
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
 fi
 
-make
+make -j4 binding_tests
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
   make chimera_coverage
