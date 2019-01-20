@@ -9,6 +9,14 @@ set(SHARE_INSTALL_DIR "share/${PROJECT_NAME}")
 ## SETUP ##
 ###########
 
+# Chimera version
+set(CHIMERA_MAJOR_VERSION "0")
+set(CHIMERA_MINOR_VERSION "1")
+set(CHIMERA_PATCH_VERSION "0")
+set(CHIMERA_VERSION
+  ${CHIMERA_MAJOR_VERSION}.${CHIMERA_MINOR_VERSION}.${CHIMERA_PATCH_VERSION}
+)
+
 # Preset for code formatting
 include(ClangFormat)
 clang_format_setup()
@@ -118,6 +126,13 @@ target_link_libraries(libchimera
 )
 target_link_libraries(libchimera PRIVATE mstch cling_utils)
 target_link_libraries(libchimera PRIVATE chimera_bindings)
+target_compile_definitions(libchimera
+  PUBLIC
+    CHIMERA_MAJOR_VERSION=${CHIMERA_MAJOR_VERSION}
+    CHIMERA_MINOR_VERSION=${CHIMERA_MINOR_VERSION}
+    CHIMERA_PATCH_VERSION=${CHIMERA_PATCH_VERSION}
+    CHIMERA_VERSION=${CHIMERA_VERSION}
+)
 clang_format_add_sources(${${PROJECT_NAME}_HEADERS} ${${PROJECT_NAME}_SOURCES})
 
 # Build the main chimera executable.
