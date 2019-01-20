@@ -233,6 +233,31 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             {"static_methods?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
         });
+
+    // Collect non-public nested classes
+    for (auto d = decl_->decls_begin(); d != decl_->decls_end(); ++d)
+    {
+        if (CXXRecordDecl *C = dyn_cast<CXXRecordDecl>(*d))
+        {
+            if (C->getAccess() == AS_private)
+            {
+                std::cout << "C.name (private): " << C->getNameAsString()
+                          << std::endl;
+                non_public_nested_decl_types_.insert(C->getTypeForDecl());
+            }
+            else if (C->getAccess() == AS_protected)
+            {
+                std::cout << "C.name (protected): " << C->getNameAsString()
+                          << std::endl;
+                non_public_nested_decl_types_.insert(C->getTypeForDecl());
+            }
+            else
+            {
+                std::cout << "C.name (public): " << C->getNameAsString()
+                          << std::endl;
+            }
+        }
+    }
 }
 
 ::mstch::node CXXRecord::bases()
