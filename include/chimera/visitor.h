@@ -3,10 +3,10 @@
 
 #include "chimera/configuration.h"
 
+#include <set>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
-#include <set>
 
 namespace chimera
 {

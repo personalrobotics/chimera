@@ -20,8 +20,9 @@ namespace util
  * to mstch context entries.  It optionally takes a scalar conversion function
  * which will be applied to scalars before they are re-wrapped by mstch.
  */
-using ScalarConversionFn = std::function<std::string(const YAML::Node&)>;
-::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn=nullptr);
+using ScalarConversionFn = std::function<std::string(const YAML::Node &)>;
+::mstch::node wrapYAMLNode(const YAML::Node &node,
+                           ScalarConversionFn fn = nullptr);
 
 /**
  * Adds entries from a YAML::Node to an existing mstch::map.
@@ -35,7 +36,8 @@ using ScalarConversionFn = std::function<std::string(const YAML::Node&)>;
  * false, existing properties will not be modified.
  */
 void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
-                        bool overwrite=false, ScalarConversionFn fn=nullptr);
+                        bool overwrite = false,
+                        ScalarConversionFn fn = nullptr);
 
 /**
  * Resolve a declaration string within the scope of a compiler instance.
@@ -47,7 +49,7 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
  * If it can be resolved to a named declaration, the canonical clang::Decl
  * pointer associated with the declaration will be returned, otherwise NULL.
  */
-const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
+const clang::NamedDecl *resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
 
 /**
@@ -60,7 +62,7 @@ const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
  * If it is resolved to a record declaration, the canonical clang::RecordDecl
  * pointer associated with the declaration will be returned, otherwise NULL.
  */
-const clang::RecordDecl* resolveRecord(clang::CompilerInstance *ci,
+const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
                                        const llvm::StringRef recordStr);
 
 /**
@@ -84,13 +86,12 @@ const clang::QualType resolveType(clang::CompilerInstance *ci,
  * form `namespace [nsStr] {};` within the AST that is currently loaded by the
  * provided compiler instance.
  *
- * If it is resolved to a namespace declaration, the canonical 
+ * If it is resolved to a namespace declaration, the canonical
  * clang::NamespaceDecl pointer associated with the namespace will be
  * returned, otherwise NULL.
  */
-const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
+const clang::NamespaceDecl *resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);
-
 
 /**
  * Convert the type into one with fully qualified template parameters.
@@ -234,7 +235,8 @@ bool needsReturnValuePolicy(const clang::NamedDecl *decl,
  *
  * This is possible when the function takes some number of default arguments.
  */
-std::pair<unsigned, unsigned> getFunctionArgumentRange(const clang::FunctionDecl *decl);
+std::pair<unsigned, unsigned> getFunctionArgumentRange(
+    const clang::FunctionDecl *decl);
 
 } // namespace util
 } // namespace chimera

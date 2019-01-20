@@ -30,6 +30,11 @@ $SUDO apt-get -y install lcov
 $SUDO apt-get -y install python-dev python3-dev
 $SUDO apt-get -y install libpython-dev libpython3-dev
 
+# Install ClangFormat 6
+if [ $(lsb_release -sc) = "bionic" ]; then
+  $SUDO apt-get -y install clang-format-6.0
+fi
+
 # Install pybind11 from source (we need pybind11 (>=2.2.0))
 git clone https://github.com/pybind/pybind11.git
 cd pybind11

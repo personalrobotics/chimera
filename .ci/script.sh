@@ -14,6 +14,10 @@ else
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
 fi
 
+if [ "$OS_NAME" = "linux" ] && [ $(lsb_release -sc) = "bionic" ]; then
+  make check-format
+fi
+
 make -j4 binding_tests
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
