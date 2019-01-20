@@ -1,89 +1,82 @@
-include(CTest)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
-include(chimeraFunctions)
-include(chimeraTest)
-
-# Set python version to be used to build bindings for.
-if(NOT CHIMERA_TEST_PYTHON_VERSION)
-  set(CHIMERA_TEST_PYTHON_VERSION 3.4 CACHE STRING
-    "Choose the target Python version (e.g., 3.4, 2.7)" FORCE
-  )
-endif()
-
-# Find PythonInterp
-find_package(PythonInterp ${CHIMERA_TEST_PYTHON_VERSION} REQUIRED)
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-  "from distutils.sysconfig import get_python_lib;\
-  print(get_python_lib(plat_specific=True, prefix=''))"
-  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+#===============================================================================
+# Emulator
+#===============================================================================
+add_library(emulator emulator.h emulator.cpp)
+target_link_libraries(emulator PUBLIC libchimera)
+clang_format_add_sources(emulator.h emulator.cpp)
+target_compile_definitions(emulator
+  PUBLIC
+    EXAMPLES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/examples/"
+    BUILD_PATH="${CMAKE_BINARY_DIR}"
 )
 
-# Find PythonLibs version that is the same with the version of PythonInterp.
-find_package(PythonLibs ${CHIMERA_TEST_PYTHON_VERSION} REQUIRED)
+#===============================================================================
+# GoogleTest setup
+add_library(gtest STATIC gtest/src/gtest-all.cc)
+add_library(gtest_main STATIC gtest/src/gtest_main.cc)
+target_include_directories(gtest
+  PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/gtest"
+    "${CMAKE_CURRENT_SOURCE_DIR}/gtest/include"
+)
+target_link_libraries(gtest_main gtest)
+if(NOT WIN32)
+  target_link_libraries(gtest pthread)
+endif()
+set_target_properties(
+  gtest PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+)
 
-# Find boost with python components. The name of python component varies
-# depending on the platform, boost version, and python version.
-# TODO(JS): Check if thread component is really neccessary
-if(APPLE)
-  find_package(Boost QUIET
-    COMPONENTS
-      python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
-  )
-  set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
-    ${Boost_PYTHON${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
-  )
-else() # LINUX assumed
-  if(${PYTHON_VERSION_MAJOR} EQUAL 3)
-    find_package(Boost QUIET
-      COMPONENTS
-        python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} thread
-    )
-    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES
-      ${Boost_PYTHON-PY${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}_LIBRARIES}
-    )
-    if(NOT Boost_FOUND)
-      find_package(Boost QUIET COMPONENTS python3 thread)
-      set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON3_LIBRARIES})
-    endif()
-  else() # Python 2 assumed
-    find_package(Boost QUIET COMPONENTS python thread)
-    set(CHIMERA_TEST_Boost_PYTHON_LIBRARIES ${Boost_PYTHON_LIBRARIES})
+#===============================================================================
+# This function uses following global properties:
+# - CHIMERA_UNITTESTS
+# - CHIMERA_CPP_TESTS
+#
+# Usage:
+#   chimera_add_test(test_UnitTestA) # assumed source is test_UnitTestA.cpp
+#   chimera_add_test(test_UnitTestB test_SourceB1.cpp)
+#   chimera_add_test(test_UnitTestA test_SourceC1.cpp test_SourceC2.cpp)
+#===============================================================================
+function(chimera_add_test target_name) # ARGN for source files
+
+  set_property(GLOBAL APPEND PROPERTY CHIMERA_CPP_TESTS ${target_name})
+
+  if(${ARGC} GREATER 2)
+    set(sources ${ARGN})
+  else()
+    set(sources "${target_name}.cpp")
   endif()
-endif()
-if(NOT CHIMERA_TEST_Boost_PYTHON_LIBRARIES)
-  message(WARNING "Boost.Python is not found. Omitting from unit tests.")
-endif()
 
-# Find pybind11
-# Needs to set PYBIND11_PYTHON_VERSION before finding pybind11
-set(PYBIND11_PYTHON_VERSION ${PYTHON_VERSION_STRING})
-find_package(pybind11 2.2.0 QUIET)
-if(NOT pybind11_FOUND)
-  message(WARNING "pybind11 (>=2.2.0) is not found. Omitting from unit tests.")
-endif()
+  add_executable(${target_name} ${sources})
+  add_test(${target_name} ${target_name})
 
-# Add unit tests from subdirectories (roughly in order of complexity).
-add_subdirectory(01_function)
-add_subdirectory(02_class)
-add_subdirectory(03_smart_pointers)
-add_subdirectory(04_enumeration)
-add_subdirectory(05_variable)
-add_subdirectory(99_dart_example)
-add_subdirectory(regression)
+  if(MSVC)
+    target_link_libraries(${target_name}
+        libchimera
+        emulator
+        optimized gtest debug gtestd
+        optimized gtest_main debug gtest_maind
+    )
+  else()
+    target_link_libraries(${target_name} libchimera emulator gtest gtest_main)
+  endif()
 
-# Add custom target `binding_tests` to build all the tests as a single target
-get_property(chimera_pybind11_binding_tests GLOBAL
-  PROPERTY CHIMERA_PYBIND11_BINDING_TESTS
-)
-get_property(chimera_boost_python_binding_tests GLOBAL
-  PROPERTY CHIMERA_BOOST_PYTHON_BINDING_TESTS
-)
-add_custom_target(binding_tests
-  DEPENDS
-    ${chimera_pybind11_binding_tests}
-    ${chimera_boost_python_binding_tests}
-)
+  clang_format_add_sources(${sources})
+
+endfunction()
+
+#===============================================================================
+# Add tests
+#===============================================================================
+chimera_add_test(test_empty)
+chimera_add_test(test_emulator)
+
+# Add custom target to build all the tests as a single target
+get_property(chimera_cpp_tests GLOBAL PROPERTY CHIMERA_CPP_TESTS)
+add_custom_target(tests DEPENDS ${chimera_cpp_tests})
+
+#===============================================================================
+# Add binding tests
+#===============================================================================
+add_subdirectory(examples)

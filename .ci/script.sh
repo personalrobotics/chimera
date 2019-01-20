@@ -18,7 +18,7 @@ if [ "$OS_NAME" = "linux" ] && [ $(lsb_release -sc) = "bionic" ]; then
   make check-format
 fi
 
-make -j4 binding_tests
+make -j4 tests binding_tests
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
   make chimera_coverage
