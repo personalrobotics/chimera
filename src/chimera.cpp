@@ -5,6 +5,7 @@
 #include "chimera/configuration.h"
 #include "chimera/frontend_action.h"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <clang/Tooling/ArgumentsAdjusters.h>
@@ -78,6 +79,18 @@ static cl::extrahelp MoreHelp(
 
 int run(int argc, const char **argv)
 {
+    // Print custom output for `--version` option
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::strcmp(argv[i], "--version") == 0)
+        {
+            std::cout << "Chimera " << CHIMERA_MAJOR_VERSION << "."
+                      << CHIMERA_MINOR_VERSION << "." << CHIMERA_PATCH_VERSION
+                      << "\n\n";
+            exit(0);
+        }
+    }
+
     // Create parser that handles clang options.
     CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
 
