@@ -360,6 +360,8 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
+        if (chimera::util::hasNonPublicParam(method_decl))
+            continue;
         if (method_decl->isDeleted())
             continue;
         if (!isa<CXXConstructorDecl>(method_decl))
@@ -413,6 +415,8 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
+        if (chimera::util::hasNonPublicParam(method_decl))
+            continue;
         if (isa<CXXConversionDecl>(method_decl))
             continue;
         if (isa<CXXDestructorDecl>(method_decl))

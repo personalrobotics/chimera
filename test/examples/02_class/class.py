@@ -40,6 +40,9 @@ class TestFunction(unittest.TestCase):
         self.assertEqual(py11.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(py11.StaticFields.static_type(), 'static type')
 
+        non_pub_param_in_ctr = py11.NonPublicParamInConstructor('Herb')
+        self.assertEqual(non_pub_param_in_ctr.m_name, 'Herb')
+
         # Check if the main class and the nested class can be created w/o errors
         mc = py11.MainClass()
         nc = py11.MainClass.NestedClass()
@@ -78,6 +81,9 @@ class TestFunction(unittest.TestCase):
         # boost.StaticFields.m_static_readwrite_type = 'new type'
         # self.assertEqual(boost.StaticFields.m_static_readwrite_type, 'new type')
         self.assertEqual(boost.StaticFields.static_type(), 'static type')
+
+        non_pub_param_in_ctr = boost.NonPublicParamInConstructor('Herb')
+        self.assertEqual(non_pub_param_in_ctr.m_name, 'Herb')
 
         # Check if the main class and the nested class can be created w/o errors
         mc = boost.MainClass()

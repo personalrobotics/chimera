@@ -59,6 +59,17 @@ public:
   static std::string static_type();
 };
 
+class NonPublicParamInConstructor
+{
+protected:
+  struct ProtectedData{};
+
+public:
+  NonPublicParamInConstructor(const ProtectedData&) {}
+  NonPublicParamInConstructor(const std::string& name) : m_name(name) {}
+  std::string m_name;
+};
+
 class MainClass
 {
 public:
