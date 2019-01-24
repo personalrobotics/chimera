@@ -70,6 +70,18 @@ public:
   std::string m_name;
 };
 
+class MainClass
+{
+public:
+  MainClass() = default;
+
+  class NestedClass
+  {
+  public:
+    NestedClass() = default;
+  };
+};
+
 namespace detail {
 
 class ClassInDetail {};
