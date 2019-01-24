@@ -28,7 +28,7 @@ function(chimera_add_binding_test_pybind11 test_name)
   set(prefix chimera_test)
   set(options DEBUG EXCLUDE_FROM_ALL COPY_MODULE)
   set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION)
-  set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES LINK_LIBRARIES)
+  set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES INCLUDE_DIRS LINK_LIBRARIES)
   cmake_parse_arguments(
     "${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN}
   )
@@ -51,14 +51,6 @@ function(chimera_add_binding_test_pybind11 test_name)
 
   if(chimera_test_NAMESPACES)
     set(chimera_binding_NAMESPACES NAMESPACES ${chimera_test_NAMESPACES})
-  endif()
-
-  if(chimera_test_INCLUDE_DIRS)
-    set(chimera_binding_INCLUDE_DIRS INCLUDE_DIRS ${chimera_test_INCLUDE_DIRS})
-  endif()
-
-  if(chimera_test_LINK_LIBRARIES)
-    set(chimera_binding_LINK_LIBRARIES LINK_LIBRARIES ${chimera_test_LINK_LIBRARIES})
   endif()
 
   if(chimera_test_DEBUG)
