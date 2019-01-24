@@ -17,8 +17,4 @@ chimera_add_binding_test_pybind11(${test_name}_pybind11
 #   COPY_MODULE
 # )
 
-add_test(
-  NAME ${test_name}_python_tests
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}.py
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+chimera_add_python_test(smart_pointers_python_tests smart_pointers.py)
