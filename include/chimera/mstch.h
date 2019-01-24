@@ -213,7 +213,6 @@ public:
 
 protected:
     const std::set<const clang::CXXRecordDecl *> *available_decls_;
-    std::set<const clang::Type *> non_public_nested_decl_types_;
 };
 
 class Enum : public ClangWrapper<clang::EnumDecl>
