@@ -26,7 +26,7 @@ TEST(Emulator, GeneralOptions)
 }
 
 //==============================================================================
- TEST(Emulator, 01_Function)
+TEST(Emulator, 01_Function)
 {
     Emulator e;
     e.SetSource("01_function/function.h");
