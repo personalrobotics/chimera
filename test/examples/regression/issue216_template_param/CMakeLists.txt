@@ -16,4 +16,4 @@ chimera_add_binding_test_boost_python(${test_name}_boost_python
   COPY_MODULE
 )
 
-chimera_add_python_test(issue216_template_param_python_tests issue216_template_param.py)
+chimera_add_python_test(${test_name}_python_tests ${test_name}.py)
