@@ -169,6 +169,16 @@ public:
     clang::ASTContext &GetContext() const;
 
     /**
+     * Gets the binding name of this configuration.
+     *
+     * The binding name is one of the following sources in order of priority:
+     *   1) CLI '--binding' setting
+     *   2) YAML configuration setting
+     *   3) chimera::binding::DEFAULT_NAME
+     */
+    const std::string &GetBindingName() const;
+
+    /**
      * Return if a declaration is enclosed by one of the configured namespaces.
      */
     bool IsEnclosed(const clang::Decl *decl) const;
@@ -218,6 +228,7 @@ protected:
     const Configuration &parent_;
     const YAML::Node configNode_;
     const YAML::Node bindingNode_;
+    std::string binding_name_;
     chimera::binding::Definition bindingDefinition_;
     clang::CompilerInstance *ci_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
