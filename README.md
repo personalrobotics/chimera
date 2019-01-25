@@ -9,7 +9,7 @@
 > 1.  a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
 > 2.  a utility to generate Boost.Python bindings for C++ code.
 
-Chimera is a tool for generating Boost.Python bindings from C/C++ header files.
+Chimera is a tool for generating Boost.Python/Pybind11 bindings from C/C++ header files.
 It uses the Clang/LLVM toolchain, making it capable of automatically handling
 fairly complex source files.
 
