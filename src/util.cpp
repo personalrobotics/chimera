@@ -436,6 +436,53 @@ std::string getTemplateParameterString(const FunctionDecl *decl,
     return ss.str();
 }
 
+std::vector<std::string> getTemplateParameterStrings(std::string type)
+{
+    std::vector<std::string> args;
+
+    std::string::size_type curr = type.find_first_of("<");
+    if (curr == std::string::npos)
+        return args;
+
+    curr++;
+    std::string::size_type begin = curr;
+    int level = 0;
+
+    while (curr != std::string::npos)
+    {
+        const auto &c = type[curr];
+
+        if (c == '<')
+        {
+            level++;
+        }
+        else if (c == ',')
+        {
+            if (level == 0)
+            {
+                args.push_back(trim(type.substr(begin, curr - begin)));
+                begin = curr + 1;
+            }
+        }
+        else if (c == '>')
+        {
+            if (level == 0)
+            {
+                args.push_back(trim(type.substr(begin, curr - begin)));
+                break;
+            }
+            else
+            {
+                level--;
+            }
+        }
+
+        curr++;
+    }
+
+    return args;
+}
+
 std::set<const CXXRecordDecl *> getBaseClassDecls(const CXXRecordDecl *decl)
 {
     std::set<const CXXRecordDecl *> base_decls;
@@ -673,53 +720,6 @@ std::string trimLeft(std::string s, const char *t)
 std::string trim(std::string s, const char *t)
 {
     return trimLeft(trimRight(s, t), t);
-}
-
-std::vector<std::string> getTemplateParameterStrings(std::string type)
-{
-    std::vector<std::string> args;
-
-    std::string::size_type curr = type.find_first_of("<");
-    if (curr == std::string::npos)
-        return args;
-
-    curr++;
-    std::string::size_type begin = curr;
-    int level = 0;
-
-    while (curr != std::string::npos)
-    {
-        const auto &c = type[curr];
-
-        if (c == '<')
-        {
-            level++;
-        }
-        else if (c == ',')
-        {
-            if (level == 0)
-            {
-                args.push_back(trim(type.substr(begin, curr - begin)));
-                begin = curr + 1;
-            }
-        }
-        else if (c == '>')
-        {
-            if (level == 0)
-            {
-                args.push_back(trim(type.substr(begin, curr - begin)));
-                break;
-            }
-            else
-            {
-                level--;
-            }
-        }
-
-        curr++;
-    }
-
-    return args;
 }
 
 std::string stripNoneCopyableEigenWrapper_NonQualifiered(std::string type)

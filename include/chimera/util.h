@@ -222,6 +222,14 @@ std::string getTemplateParameterString(const clang::FunctionDecl *decl,
                                        const std::string &binding_name);
 
 /**
+ * Converts the template arguments of a type string to a vector of std::strings.
+ *
+ * For example, a std::string of "std::tuple<int, double, float>" is converted
+ * to the list of {"int", "double", "float"}.
+ */
+std::vector<std::string> getTemplateParameterStrings(std::string type);
+
+/**
  * Return whether a return value policy needs to be specfied for a declaration.
  *
  * In certain cases, it is possible to deduce the return value policy that
@@ -261,14 +269,6 @@ std::string trimLeft(std::string s, const char *t = " \t\n\r\f\v");
  * Trims from both ends of string (right then left)
  */
 std::string trim(std::string s, const char *t = " \t\n\r\f\v");
-
-/**
- * Converts the template arguments of a type string to a vector of std::strings.
- *
- * For example, a std::string of "std::tuple<int, double, float>" is converted
- * to the list of {"int", "double", "float"}.
- */
-std::vector<std::string> getTemplateParameterStrings(std::string type);
 
 /**
  * Strips the Eigen's non-copyable wrapper classes from a type string.
