@@ -227,7 +227,7 @@ std::string getTemplateParameterString(const clang::FunctionDecl *decl,
  * For example, a std::string of "std::tuple<int, double, float>" is converted
  * to the list of {"int", "double", "float"}.
  */
-std::vector<std::string> getTemplateParameterStrings(std::string type);
+std::vector<std::string> getTemplateParameterStrings(const std::string &type);
 
 /**
  * Return whether a return value policy needs to be specfied for a declaration.
