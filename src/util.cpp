@@ -424,6 +424,8 @@ std::string getTemplateParameterString(const FunctionDecl *decl,
 
                 if (binding_name == "pybind11")
                     param_str = util::stripNoneCopyableEigenWrappers(param_str);
+                // FIXME: Remove this Pybind11 specific workaround with more
+                // general solution
 
                 ss << param_str;
                 if (iparam < param_strs.size() - 1)

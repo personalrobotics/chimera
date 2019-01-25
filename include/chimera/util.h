@@ -296,6 +296,7 @@ std::string trim(std::string s, const char *t = " \t\n\r\f\v");
  * - https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
  */
 std::string stripNoneCopyableEigenWrappers(std::string type);
+// FIXME: Remove this Eigen specific workaround
 
 } // namespace util
 } // namespace chimera

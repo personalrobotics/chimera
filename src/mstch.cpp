@@ -1033,6 +1033,8 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
 
     if (config_.GetBindingName() == "pybind11")
         type_str = util::stripNoneCopyableEigenWrappers(type_str);
+    // FIXME: Replace this Pybind11 specific workaround with more
+    // general solution.
 
     return type_str;
 }
