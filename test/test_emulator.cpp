@@ -61,6 +61,5 @@ TEST(Emulator, 20_Eigen)
 
     // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
     // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    e.Run();
-    //    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
 }
