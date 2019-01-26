@@ -23,7 +23,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), and Bionic (18.04).
+Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), Bionic (18.04), Cosmic (18.10), and Disco (19.04).
 
 **Trusty**
 
