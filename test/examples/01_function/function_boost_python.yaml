@@ -5,3 +5,5 @@ arguments:
 namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
+classes:
+  'chimera_test::nested_function::SuppressedClass': null
