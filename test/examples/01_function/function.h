@@ -26,5 +26,14 @@ class SuppressedClass {};
 // suppressed type.
 void function_with_suppressed_param(const SuppressedClass&);
 
+// This class is suppressed by the configuration so that not to be binded
+template <typename T>
+class SuppressedTemplateClass {};
+
+// This function should be suppressed as well because the parameter is of a
+// suppressed type.
+void function_with_suppressed_template_param(
+  const SuppressedTemplateClass<int>&);
+
 } // namespace nested_function
 } // namespace chimera_test

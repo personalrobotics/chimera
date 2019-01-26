@@ -187,6 +187,79 @@ const RecordDecl *resolveRecord(CompilerInstance *ci,
     return cast<RecordDecl>(cxx_record_type->getCanonicalDecl());
 }
 
+std::string makeTypeAliasTemplateString(const std::string& strOriginal)
+{
+    std::string str = trim(strOriginal);
+
+    if (!startsWith(str, "template"))
+      return strOriginal;
+
+    std::string::size_type curr = str.find_first_of('<');
+    if (curr == std::string::npos)
+      return strOriginal;
+
+    // Find the right pair of the opening bracket of template parameters
+    int level = 0;
+    std::string::size_type pos = std::string::npos;
+    while (curr != std::string::npos)
+    {
+        const auto &c = str[curr];
+
+        if (c == '<')
+        {
+            level++;
+        }
+        else if (c == '>')
+        {
+            level--;
+
+            if (level == 0)
+            {
+                pos = curr;
+                break;
+            }
+        }
+
+        curr++;
+    }
+
+    // Return strOriginal if failed to find
+    if (pos == std::string::npos)
+      return strOriginal;
+
+    const std::string left = str.substr(0, curr + 1);
+    const std::string right
+        = trimLeft(str.substr(curr + 1, str.size() - left.size()));
+
+    return left + " using " + generateUniqueName() + " = " + right + ";";
+}
+
+const clang::ClassTemplateDecl *resolveClassTemplate(
+    CompilerInstance *ci, const llvm::StringRef recordStr)
+{
+    auto type_alias_template_str = makeTypeAliasTemplateString(recordStr.str());
+    auto decl = resolveDeclaration(ci, type_alias_template_str);
+    auto type_alias_template_decl = dyn_cast<TypeAliasTemplateDecl>(decl);
+
+    if (!type_alias_template_decl)
+    {
+        std::cerr << "Expected type alias template declaration, found '"
+                  << decl->getNameAsString() << "'." << std::endl;
+        return nullptr;
+    }
+
+    TypeAliasDecl *type_alias_decl
+        = type_alias_template_decl->getTemplatedDecl();
+    QualType underlying_type
+        = type_alias_decl->getUnderlyingType().getCanonicalType();
+    const TemplateSpecializationType *template_specialization_type
+        = dyn_cast<TemplateSpecializationType>(underlying_type);
+    TemplateDecl *template_decl
+        = template_specialization_type->getTemplateName().getAsTemplateDecl();
+
+    return dyn_cast<ClassTemplateDecl>(template_decl->getCanonicalDecl());
+}
+
 const NamespaceDecl *resolveNamespace(CompilerInstance *ci,
                                       const llvm::StringRef nsStr)
 {
@@ -650,6 +723,29 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
         }
     }
     return false;
+}
+
+std::string trimRight(std::string s, const char *t)
+{
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
+
+std::string trimLeft(std::string s, const char *t)
+{
+    s.erase(0, s.find_first_not_of(t));
+    return s;
+}
+
+std::string trim(std::string s, const char *t)
+{
+    return trimLeft(trimRight(s, t), t);
+}
+
+bool startsWith(const std::string &str, const std::string &prefix)
+{
+    return ((prefix.size() <= str.size())
+            && std::equal(prefix.begin(), prefix.end(), str.begin()));
 }
 
 } // namespace util

@@ -34,5 +34,12 @@ void function_with_suppressed_param(const SuppressedClass&)
   // Do nothing
 }
 
+//==============================================================================
+void function_with_suppressed_template_param(
+  const SuppressedTemplateClass<int>&)
+{
+  // Do nothing
+}
+
 } // namespace nested_function
 } // namespace chimera_test

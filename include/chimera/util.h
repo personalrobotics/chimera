@@ -53,6 +53,20 @@ const clang::NamedDecl *resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
 
 /**
+ * Resolve a type string within the scope of a compiler instance.
+ *
+ * This function parses the provided record name string as a single line of
+ * the form `typedef [recordStr] <uid>;` within the AST that is currently
+ * loaded by the provided compiler instance.
+ *
+ * If it is resolved to a qualified type declaration, the canonical
+ * clang::QualType associated with the declaration will be returned, otherwise
+ * an empty clang::QualType is returned (use getTypeOrNull() to check this).
+ */
+const clang::QualType resolveType(clang::CompilerInstance *ci,
+                                  const llvm::StringRef typeStr);
+
+/**
  * Resolve a record string within the scope of a compiler instance.
  *
  * This function parses the provided record name string as a single line of
@@ -66,18 +80,21 @@ const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
                                        const llvm::StringRef recordStr);
 
 /**
- * Resolve a type string within the scope of a compiler instance.
+ * Resolve a template class string within the scope of a compiler instance.
  *
  * This function parses the provided record name string as a single line of
- * the form `typedef [recordStr] <uid>;` within the AST that is currently
- * loaded by the provided compiler instance.
+ * the form `<record_left> using <uid> = <record_right>;` within the AST that is
+ * currently loaded by the provided compiler instance, where <record_left> +
+ * <record_right> is [recordStr]. For example, if [recordStr] is
+ * `template <typename T> MyClass<T>` then the form becomes
+ * `template <typename T> using <uid> = MyClass<T>;`.
  *
- * If it is resolved to a qualified type declaration, the canonical
- * clang::QualType associated with the declaration will be returned, otherwise
- * an empty clang::QualType is returned (use getTypeOrNull() to check this).
+ * If it is resolved to a record declaration, the canonical
+ * clang::ClassTemplateDecl pointer associated with the declaration will be
+ * returned, otherwise NULL.
  */
-const clang::QualType resolveType(clang::CompilerInstance *ci,
-                                  const llvm::StringRef typeStr);
+const clang::ClassTemplateDecl *resolveClassTemplate(
+    clang::CompilerInstance *ci, const llvm::StringRef recordStr);
 
 /**
  * Resolve a namespace string within the scope of a compiler instance.
@@ -245,6 +262,26 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  * called publicly.
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
+
+/**
+ * Trims from end of string (right)
+ */
+std::string trimRight(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Trims from beginning of string (left)
+ */
+std::string trimLeft(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Trims from both ends of string (right then left)
+ */
+std::string trim(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Returns true if a string starts with a prefix, otherwise false.
+ */
+bool startsWith(const std::string &str, const std::string &prefix);
 
 } // namespace util
 } // namespace chimera
