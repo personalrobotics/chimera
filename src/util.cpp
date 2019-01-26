@@ -187,16 +187,16 @@ const RecordDecl *resolveRecord(CompilerInstance *ci,
     return cast<RecordDecl>(cxx_record_type->getCanonicalDecl());
 }
 
-std::string makeTypeAliasTemplateString(const std::string& strOriginal)
+std::string makeTypeAliasTemplateString(const std::string &strOriginal)
 {
     std::string str = trim(strOriginal);
 
     if (!startsWith(str, "template"))
-      return strOriginal;
+        return strOriginal;
 
     std::string::size_type curr = str.find_first_of('<');
     if (curr == std::string::npos)
-      return strOriginal;
+        return strOriginal;
 
     // Find the right pair of the opening bracket of template parameters
     int level = 0;
@@ -225,7 +225,7 @@ std::string makeTypeAliasTemplateString(const std::string& strOriginal)
 
     // Return strOriginal if failed to find
     if (pos == std::string::npos)
-      return strOriginal;
+        return strOriginal;
 
     const std::string left = str.substr(0, curr + 1);
     const std::string right
