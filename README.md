@@ -9,7 +9,7 @@
 > 1.  a thing that is hoped or wished for but in fact is illusory or impossible to achieve.
 > 2.  a utility to generate Boost.Python bindings for C++ code.
 
-Chimera is a tool for generating Boost.Python bindings from C/C++ header files.
+Chimera is a tool for generating Boost.Python/Pybind11 bindings from C/C++ header files.
 It uses the Clang/LLVM toolchain, making it capable of automatically handling
 fairly complex source files.
 
@@ -23,7 +23,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), and Bionic (18.04).
+Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), Bionic (18.04), Cosmic (18.10), and Disco (19.04).
 
 **Trusty**
 

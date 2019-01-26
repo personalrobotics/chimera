@@ -32,7 +32,10 @@ TEST(Emulator, 01_Function)
     e.SetSource("01_function/function.h");
     e.SetConfigurationFile("01_function/function_pybind11.yaml");
     e.SetBinding("pybind11");
-    e.Run();
+
+    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
+    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
+    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
 }
 
 //==============================================================================
@@ -42,5 +45,8 @@ TEST(Emulator, 02_Class)
     e.SetSource("02_class/class.h");
     e.SetConfigurationFile("02_class/class.yaml");
     e.SetBinding("pybind11");
-    e.Run();
+
+    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
+    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
+    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
 }

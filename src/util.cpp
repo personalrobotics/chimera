@@ -10,6 +10,11 @@
 #include <clang/Sema/SemaDiagnostic.h>
 #include "clang/AST/DeclTemplate.h"
 
+namespace chimera
+{
+namespace util
+{
+
 using namespace clang;
 
 namespace
@@ -37,8 +42,7 @@ std::string generateUniqueName()
 
 } // namespace
 
-::mstch::node chimera::util::wrapYAMLNode(const YAML::Node &node,
-                                          chimera::util::ScalarConversionFn fn)
+::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn)
 {
     switch (node.Type())
     {
@@ -72,9 +76,8 @@ std::string generateUniqueName()
     }
 }
 
-void chimera::util::extendWithYAMLNode(::mstch::map &map,
-                                       const YAML::Node &node, bool overwrite,
-                                       chimera::util::ScalarConversionFn fn)
+void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
+                        bool overwrite, ScalarConversionFn fn)
 {
     // Ignore invalid node.
     if (!node)
@@ -98,13 +101,13 @@ void chimera::util::extendWithYAMLNode(::mstch::map &map,
         auto result = map.emplace(std::make_pair(name, ::mstch::node{}));
         if (result.second || overwrite)
         {
-            result.first->second = chimera::util::wrapYAMLNode(value, fn);
+            result.first->second = wrapYAMLNode(value, fn);
         }
     }
 }
 
-const NamedDecl *chimera::util::resolveDeclaration(
-    CompilerInstance *ci, const llvm::StringRef declStr)
+const NamedDecl *resolveDeclaration(CompilerInstance *ci,
+                                    const llvm::StringRef declStr)
 {
     // Immediately return if passed an empty string.
     if (declStr.empty())
@@ -152,10 +155,9 @@ const NamedDecl *chimera::util::resolveDeclaration(
     return nullptr;
 }
 
-const QualType chimera::util::resolveType(CompilerInstance *ci,
-                                          const llvm::StringRef typeStr)
+const QualType resolveType(CompilerInstance *ci, const llvm::StringRef typeStr)
 {
-    auto decl = chimera::util::resolveDeclaration(
+    auto decl = resolveDeclaration(
         ci, "typedef " + typeStr.str() + " " + generateUniqueName());
     if (!decl)
         return emptyType_;
@@ -171,10 +173,10 @@ const QualType chimera::util::resolveType(CompilerInstance *ci,
     return typedef_decl->getUnderlyingType().getCanonicalType();
 }
 
-const RecordDecl *chimera::util::resolveRecord(CompilerInstance *ci,
-                                               const llvm::StringRef recordStr)
+const RecordDecl *resolveRecord(CompilerInstance *ci,
+                                const llvm::StringRef recordStr)
 {
-    auto type = chimera::util::resolveType(ci, recordStr).getTypePtrOrNull();
+    auto type = resolveType(ci, recordStr).getTypePtrOrNull();
     if (!type)
         return nullptr;
 
@@ -185,10 +187,10 @@ const RecordDecl *chimera::util::resolveRecord(CompilerInstance *ci,
     return cast<RecordDecl>(cxx_record_type->getCanonicalDecl());
 }
 
-const NamespaceDecl *chimera::util::resolveNamespace(
-    CompilerInstance *ci, const llvm::StringRef nsStr)
+const NamespaceDecl *resolveNamespace(CompilerInstance *ci,
+                                      const llvm::StringRef nsStr)
 {
-    auto decl = chimera::util::resolveDeclaration(
+    auto decl = resolveDeclaration(
         ci, "namespace " + generateUniqueName() + " = " + nsStr.str());
     if (!decl)
         return nullptr;
@@ -203,7 +205,7 @@ const NamespaceDecl *chimera::util::resolveNamespace(
     return cast<NamespaceAliasDecl>(decl)->getNamespace()->getCanonicalDecl();
 }
 
-std::string chimera::util::constructMangledName(const NamedDecl *decl)
+std::string constructMangledName(const NamedDecl *decl)
 {
     std::string mangled_name;
     llvm::raw_string_ostream mangled_name_stream(mangled_name);
@@ -212,7 +214,7 @@ std::string chimera::util::constructMangledName(const NamedDecl *decl)
     return mangled_name_stream.str();
 }
 
-std::string chimera::util::constructBindingName(const CXXRecordDecl *decl)
+std::string constructBindingName(const CXXRecordDecl *decl)
 {
     // If this is an anonymous struct, then use the name of its typedef.
     if (TypedefNameDecl *typedef_decl = decl->getTypedefNameForAnonDecl())
@@ -224,12 +226,12 @@ std::string chimera::util::constructBindingName(const CXXRecordDecl *decl)
 
     // If the class is a template, use the mangled string name so that it does
     // not collide with other template instantiations.
-    std::string mangled_name = chimera::util::constructMangledName(decl);
+    std::string mangled_name = constructMangledName(decl);
 
     // Throw a warning that this class name was mangled, because users will
     // probably want to override these names with more sensible ones.
     std::cerr << "Warning: The class '"
-              << chimera::util::getFullyQualifiedDeclTypeAsString(decl) << "'"
+              << getFullyQualifiedDeclTypeAsString(decl) << "'"
               << " was bound to the mangled name "
               << "'" << mangled_name << "'"
               << " because the unqualified class name of "
@@ -239,25 +241,23 @@ std::string chimera::util::constructBindingName(const CXXRecordDecl *decl)
     return mangled_name;
 }
 
-QualType chimera::util::getFullyQualifiedType(ASTContext &context, QualType qt)
+QualType getFullyQualifiedType(ASTContext &context, QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedType(qt, context);
 }
 
-std::string chimera::util::getFullyQualifiedTypeName(ASTContext &context,
-                                                     QualType qt)
+std::string getFullyQualifiedTypeName(ASTContext &context, QualType qt)
 {
     return cling::utils::TypeName::GetFullyQualifiedName(qt, context);
 }
 
-std::string chimera::util::getFullyQualifiedDeclTypeAsString(
-    const TypeDecl *decl)
+std::string getFullyQualifiedDeclTypeAsString(const TypeDecl *decl)
 {
-    return chimera::util::getFullyQualifiedTypeName(
-        decl->getASTContext(), QualType(decl->getTypeForDecl(), 0));
+    return getFullyQualifiedTypeName(decl->getASTContext(),
+                                     QualType(decl->getTypeForDecl(), 0));
 }
 
-bool chimera::util::isAssignable(const CXXRecordDecl *decl)
+bool isAssignable(const CXXRecordDecl *decl)
 {
     if (decl->isAbstract())
         return false;
@@ -272,7 +272,7 @@ bool chimera::util::isAssignable(const CXXRecordDecl *decl)
     return false;
 }
 
-bool chimera::util::isAssignable(ASTContext &context, QualType qual_type)
+bool isAssignable(ASTContext &context, QualType qual_type)
 {
     if (qual_type.isConstQualified())
         return false;
@@ -284,7 +284,7 @@ bool chimera::util::isAssignable(ASTContext &context, QualType qual_type)
         return qual_type.isTriviallyCopyableType(context);
 }
 
-bool chimera::util::isCopyable(const CXXRecordDecl *decl)
+bool isCopyable(const CXXRecordDecl *decl)
 {
     if (decl->isAbstract())
         return false;
@@ -298,7 +298,7 @@ bool chimera::util::isCopyable(const CXXRecordDecl *decl)
     return false;
 }
 
-bool chimera::util::isCopyable(ASTContext &context, QualType qual_type)
+bool isCopyable(ASTContext &context, QualType qual_type)
 {
     // TODO: Is this logic correct?
 
@@ -308,7 +308,7 @@ bool chimera::util::isCopyable(ASTContext &context, QualType qual_type)
         return qual_type.isTriviallyCopyableType(context);
 }
 
-bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
+bool isInsideTemplateClass(const DeclContext *decl_context)
 {
     if (!decl_context->isRecord())
         return false;
@@ -328,7 +328,7 @@ bool chimera::util::isInsideTemplateClass(const DeclContext *decl_context)
         return false;
 }
 
-bool chimera::util::isVariadicFunctionTemplate(const FunctionTemplateDecl *decl)
+bool isVariadicFunctionTemplate(const FunctionTemplateDecl *decl)
 {
     // Based on SemaTemplateDeduction.cpp
     // http://clang.llvm.org/doxygen/SemaTemplateDeduction_8cpp_source.html
@@ -352,7 +352,7 @@ bool chimera::util::isVariadicFunctionTemplate(const FunctionTemplateDecl *decl)
     return true;
 }
 
-std::vector<std::string> chimera::util::getTemplateParameterStrings(
+std::vector<std::string> getTemplateParameterStrings(
     ASTContext &context, const ArrayRef<TemplateArgument> &params)
 {
     std::vector<std::string> outputs;
@@ -403,7 +403,7 @@ std::vector<std::string> chimera::util::getTemplateParameterStrings(
     return outputs;
 }
 
-std::string chimera::util::getTemplateParameterString(const FunctionDecl *decl)
+std::string getTemplateParameterString(const FunctionDecl *decl)
 {
     std::stringstream ss;
 
@@ -414,7 +414,7 @@ std::string chimera::util::getTemplateParameterString(const FunctionDecl *decl)
             = decl->getTemplateSpecializationArgs())
         {
             ss << "<";
-            const auto param_strs = chimera::util::getTemplateParameterStrings(
+            const auto param_strs = getTemplateParameterStrings(
                 decl->getASTContext(), params->asArray());
 
             for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
@@ -430,8 +430,7 @@ std::string chimera::util::getTemplateParameterString(const FunctionDecl *decl)
     return ss.str();
 }
 
-std::set<const CXXRecordDecl *> chimera::util::getBaseClassDecls(
-    const CXXRecordDecl *decl)
+std::set<const CXXRecordDecl *> getBaseClassDecls(const CXXRecordDecl *decl)
 {
     std::set<const CXXRecordDecl *> base_decls;
 
@@ -448,12 +447,11 @@ std::set<const CXXRecordDecl *> chimera::util::getBaseClassDecls(
     return base_decls;
 }
 
-std::set<const CXXRecordDecl *> chimera::util::getBaseClassDecls(
+std::set<const CXXRecordDecl *> getBaseClassDecls(
     const CXXRecordDecl *decl, std::set<const CXXRecordDecl *> available_decls)
 {
     // Get all base classes.
-    std::set<const CXXRecordDecl *> all_base_decls
-        = chimera::util::getBaseClassDecls(decl);
+    std::set<const CXXRecordDecl *> all_base_decls = getBaseClassDecls(decl);
 
     // Filter the classes by availability.
     std::set<const CXXRecordDecl *> base_decls;
@@ -475,7 +473,7 @@ std::set<const CXXRecordDecl *> chimera::util::getBaseClassDecls(
     return base_decls;
 }
 
-bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
+bool containsIncompleteType(Sema &sema, QualType qual_type)
 {
     const Type *type = qual_type.getTypePtr();
 
@@ -505,7 +503,7 @@ bool chimera::util::containsIncompleteType(Sema &sema, QualType qual_type)
     }
 }
 
-bool chimera::util::containsIncompleteType(Sema &sema, const FunctionDecl *decl)
+bool containsIncompleteType(Sema &sema, const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
@@ -522,8 +520,8 @@ bool chimera::util::containsIncompleteType(Sema &sema, const FunctionDecl *decl)
                           << "'";
 
             std::cerr << " has an incomplete type '"
-                      << chimera::util::getFullyQualifiedTypeName(
-                             decl->getASTContext(), param_decl->getType())
+                      << getFullyQualifiedTypeName(decl->getASTContext(),
+                                                   param_decl->getType())
                       << "'.\n";
             return true;
         }
@@ -531,7 +529,7 @@ bool chimera::util::containsIncompleteType(Sema &sema, const FunctionDecl *decl)
     return false;
 }
 
-bool chimera::util::containsRValueReference(const FunctionDecl *decl)
+bool containsRValueReference(const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
@@ -548,8 +546,8 @@ bool chimera::util::containsRValueReference(const FunctionDecl *decl)
                           << "'";
 
             std::cerr << " is an rvalue reference of type '"
-                      << chimera::util::getFullyQualifiedTypeName(
-                             decl->getASTContext(), param_decl->getType())
+                      << getFullyQualifiedTypeName(decl->getASTContext(),
+                                                   param_decl->getType())
                       << "'.\n";
 
             return true;
@@ -558,7 +556,7 @@ bool chimera::util::containsRValueReference(const FunctionDecl *decl)
     return false;
 }
 
-bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
+bool containsNonCopyableType(const FunctionDecl *decl)
 {
     for (unsigned int iparam = 0; iparam < decl->getNumParams(); ++iparam)
     {
@@ -567,8 +565,7 @@ bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
             = param_decl->getType().getTypePtr();
 
         if (!param_type->isReferenceType() && !param_type->isPointerType()
-            && !chimera::util::isCopyable(decl->getASTContext(),
-                                          param_decl->getType()))
+            && !isCopyable(decl->getASTContext(), param_decl->getType()))
         {
             std::cerr << "Warning: Skipped function '"
                       << decl->getQualifiedNameAsString() << "' because";
@@ -580,8 +577,8 @@ bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
                           << "'";
 
             std::cerr << " has a non-copyable type '"
-                      << chimera::util::getFullyQualifiedTypeName(
-                             decl->getASTContext(), param_decl->getType())
+                      << getFullyQualifiedTypeName(decl->getASTContext(),
+                                                   param_decl->getType())
                       << "'.\n";
 
             return true;
@@ -590,8 +587,7 @@ bool chimera::util::containsNonCopyableType(const FunctionDecl *decl)
     return false;
 }
 
-bool chimera::util::needsReturnValuePolicy(const NamedDecl *decl,
-                                           QualType return_type)
+bool needsReturnValuePolicy(const NamedDecl *decl, QualType return_type)
 {
     if (return_type.getTypePtr()->isReferenceType())
     {
@@ -616,7 +612,7 @@ bool chimera::util::needsReturnValuePolicy(const NamedDecl *decl,
     return false;
 }
 
-std::pair<unsigned, unsigned> chimera::util::getFunctionArgumentRange(
+std::pair<unsigned, unsigned> getFunctionArgumentRange(
     const clang::FunctionDecl *decl)
 {
     const unsigned max_arguments = decl->getNumParams();
@@ -630,3 +626,31 @@ std::pair<unsigned, unsigned> chimera::util::getFunctionArgumentRange(
 
     return std::pair<unsigned, unsigned>(min_arguments, max_arguments);
 }
+
+bool hasNonPublicParam(const CXXMethodDecl *decl)
+{
+    for (auto i = 0u; i < decl->getNumParams(); ++i)
+    {
+        const ParmVarDecl *param_decl = decl->getParamDecl(i);
+        QualType param_type = param_decl->getType();
+        if (param_type->isReferenceType())
+        {
+            param_type = param_type.getNonReferenceType();
+        }
+        // TODO: are there any other special cases than reference type?
+
+        if (auto record_type = dyn_cast<RecordType>(param_type))
+        {
+            CXXRecordDecl *cxx_record_decl
+                = cast<CXXRecordDecl>(record_type->getDecl());
+            if (cxx_record_decl->getAccess() != AS_public)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+} // namespace util
+} // namespace chimera

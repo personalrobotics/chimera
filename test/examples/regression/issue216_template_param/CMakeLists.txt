@@ -16,8 +16,4 @@ chimera_add_binding_test_boost_python(${test_name}_boost_python
   COPY_MODULE
 )
 
-add_test(
-  NAME ${test_name}_python_tests
-  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}.py
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+chimera_add_python_test(${test_name}_python_tests ${test_name}.py)

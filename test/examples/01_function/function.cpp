@@ -1,6 +1,6 @@
 #include "function.h"
 
-namespace function {
+namespace chimera_test {
 namespace nested_function {
 
 //==============================================================================
@@ -29,4 +29,4 @@ void void_return()
 }
 
 } // namespace nested_function
-} // namespace function
+} // namespace chimera_test

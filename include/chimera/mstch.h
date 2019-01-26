@@ -68,6 +68,8 @@ public:
             });
     }
 
+    virtual ~ClangWrapper() = default;
+
     ::mstch::node last()
     {
         return last_;

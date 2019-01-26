@@ -238,6 +238,14 @@ bool needsReturnValuePolicy(const clang::NamedDecl *decl,
 std::pair<unsigned, unsigned> getFunctionArgumentRange(
     const clang::FunctionDecl *decl);
 
+/**
+ * Returns whether a method has a non-public type of parameter.
+ *
+ * This is possible when the class wants to hide the constructor from being
+ * called publicly.
+ */
+bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
+
 } // namespace util
 } // namespace chimera
 

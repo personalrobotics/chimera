@@ -1,9 +1,11 @@
-chimera_add_binding_tests(class
-  SOURCES class.h
-  EXTRA_SOURCES class.cpp
+set(test_name "class")
+
+chimera_add_binding_tests(${test_name}
+  SOURCES ${test_name}.h
+  EXTRA_SOURCES ${test_name}.cpp
   NAMESPACES chimera_test
-  CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/class.yaml
+  CONFIGURATION ${CMAKE_CURRENT_SOURCE_DIR}/${test_name}.yaml
   COPY_MODULE
 )
 
-chimera_add_python_test(class_python_tests class.py)
+chimera_add_python_test(${test_name}_python_tests ${test_name}.py)
