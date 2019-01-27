@@ -31,6 +31,8 @@ class TestFunction(unittest.TestCase):
 
         py11.void_param()
 
+        self.assertFalse(hasattr(py11, 'function_with_suppressed_param'))
+
 
     def test_function_bp(self):
         self.assertEqual(boost.add(), 3)
@@ -49,6 +51,8 @@ class TestFunction(unittest.TestCase):
         # self.assertEqual(boost.void_pointer_param(dummy), 5)
 
         boost.void_param()
+
+        self.assertFalse(hasattr(boost, 'function_with_suppressed_param'))
 
 
 if __name__ == '__main__':
