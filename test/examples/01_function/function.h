@@ -19,5 +19,12 @@ void void_param(void);
 
 void void_return();
 
+// This class is suppressed by the configuration so that not to be binded
+class SuppressedClass {};
+
+// This function should be suppressed as well because the parameter is of a
+// suppressed type.
+void function_with_suppressed_param(const SuppressedClass&);
+
 } // namespace nested_function
 } // namespace chimera_test

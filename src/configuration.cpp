@@ -566,13 +566,37 @@ bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
     if (config.IsNull())
         return true;
 
-    // Functions can be suppressed if they return a suppressed type.
-    if (isa<FunctionDecl>(decl) && !config["return_value_policy"])
+    // Functions can be suppressed if they return a suppressed type or take
+    // suppressed parameter types.
+    if (isa<FunctionDecl>(decl))
     {
         const FunctionDecl *function_decl = cast<FunctionDecl>(decl);
-        const QualType return_qual_type = chimera::util::getFullyQualifiedType(
-            GetContext(), function_decl->getReturnType());
-        return IsSuppressed(return_qual_type);
+
+        // Check if they return a suppressed type.
+        if (!config["return_value_policy"])
+        {
+            const QualType return_qual_type
+                = chimera::util::getFullyQualifiedType(
+                    GetContext(), function_decl->getReturnType());
+            if (IsSuppressed(return_qual_type))
+                return true;
+        }
+
+        // Check if they take suppressed parameter types.
+        for (auto i = 0u; i < function_decl->getNumParams(); ++i)
+        {
+            const ParmVarDecl *param_decl = function_decl->getParamDecl(i);
+            QualType param_type = param_decl->getType();
+            if (param_type->isReferenceType())
+                param_type = param_type.getNonReferenceType();
+            if (auto param_tag_type = dyn_cast<TagType>(param_type))
+            {
+                TagDecl *param_tag_decl
+                    = cast<TagDecl>(param_tag_type->getDecl());
+                if (IsSuppressed(param_tag_decl))
+                    return true;
+            }
+        }
     }
     // Fields can be suppressed if they represent a suppressed type.
     else if (isa<FieldDecl>(decl) && !config["return_value_policy"])
