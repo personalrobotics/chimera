@@ -22,7 +22,7 @@ include(ClangFormat)
 clang_format_setup()
 
 ## Find necessary packages.
-find_package(LLVM REQUIRED CONFIG)
+include(chimeraFindLLVM)
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
