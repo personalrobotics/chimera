@@ -56,7 +56,7 @@ matrix:
         - BUILD_NAME=BIONIC_GCC_RELEASE
         - BUILD_TYPE=Release
         - COMPILER=GCC
-        - LLVM_VERSION=3.9
+        - LLVM_VERSION=6.0
         - PYTHON_VERSION=3.6
         - DOCKERFILE="Dockerfile.ubuntu-bionic"
       services: docker

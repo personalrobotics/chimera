@@ -38,7 +38,7 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.9
+    LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.6
     DOCKERFILE: Dockerfile.ubuntu-bionic
   steps:
