@@ -6,4 +6,5 @@ namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
 classes:
+  'template <typename T> chimera_test::nested_function::SuppressedTemplateClass': null
   'chimera_test::nested_function::SuppressedClass': null
