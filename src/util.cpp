@@ -317,7 +317,7 @@ private:
     bool parse_template_param(const std::string &str,
                               std::string::size_type &curr,
                               std::string::size_type &token_begin,
-                              const std::string& whitespaces)
+                              const std::string &whitespaces)
     {
         auto token_end = str.find_first_of(whitespaces, token_begin);
         template_param_types_.push_back(
@@ -370,13 +370,16 @@ const clang::ClassTemplateDecl *resolveClassTemplate(
     CompilerInstance *ci, const llvm::StringRef recordStr)
 {
     auto type_alias_template_str = makeTypeAliasTemplateString(recordStr.str());
-    //std::string type_alias_template_str = "using unique_name_10 = chimera_test::nested_function::MyClass<int>;";
-//    std::string type_alias_template_str = "template<class V> using my_name_10 = typename ::chimera_test::nested_function::MyClass<V>;";
+
     auto decl = resolveDeclaration(ci, type_alias_template_str);
     if (!decl)
+    {
+        std::cerr << "Failed to parse following template type alias:\n\n"
+                  << type_alias_template_str << std::endl;
         return nullptr;
-    auto type_alias_template_decl = dyn_cast<TypeAliasTemplateDecl>(decl);
+    }
 
+    auto type_alias_template_decl = dyn_cast<TypeAliasTemplateDecl>(decl);
     if (!type_alias_template_decl)
     {
         std::cerr << "Expected type alias template declaration, found '"
