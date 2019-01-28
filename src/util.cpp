@@ -187,58 +187,194 @@ const RecordDecl *resolveRecord(CompilerInstance *ci,
     return cast<RecordDecl>(cxx_record_type->getCanonicalDecl());
 }
 
-std::string makeTypeAliasTemplateString(const std::string &strOriginal)
+class TemplateDeclString
 {
-    std::string str = trim(strOriginal);
-
-    if (!startsWith(str, "template"))
-        return strOriginal;
-
-    std::string::size_type curr = str.find_first_of('<');
-    if (curr == std::string::npos)
-        return strOriginal;
-
-    // Find the right pair of the opening bracket of template parameters
-    int level = 0;
-    std::string::size_type pos = std::string::npos;
-    while (curr != std::string::npos)
+public:
+    TemplateDeclString() = default;
+    TemplateDeclString(const std::string &str)
+      : origianl_str_(str), is_valid_(false)
     {
-        const auto &c = str[curr];
-
-        if (c == '<')
-        {
-            level++;
-        }
-        else if (c == '>')
-        {
-            level--;
-
-            if (level == 0)
-            {
-                pos = curr;
-                break;
-            }
-        }
-
-        curr++;
+        tokenize(str);
     }
 
-    // Return strOriginal if failed to find
-    if (pos == std::string::npos)
-        return strOriginal;
+    const std::string &get_decl_string() const
+    {
+        return origianl_str_;
+    }
 
-    const std::string left = str.substr(0, curr + 1);
-    const std::string right
-        = trimLeft(str.substr(curr + 1, str.size() - left.size()));
+    bool isValid() const
+    {
+        return is_valid_;
+    }
 
-    return left + " using " + generateUniqueName() + " = " + right + ";";
+    const std::string &get_class_name() const
+    {
+        return class_name_;
+    }
+
+    const std::vector<std::string> &get_template_param_types() const
+    {
+        return template_param_types_;
+    }
+
+    const std::vector<std::string> &get_template_param_names() const
+    {
+        return template_param_names_;
+    }
+
+    const std::string &get_template_params_decl() const
+    {
+        return template_params_decl_;
+    }
+
+private:
+    void tokenize(const std::string &inputStr)
+    {
+        // TODO: template template parameters are not supported (yet)
+
+        static const std::string template_keword = "template";
+        static const std::string whitespaces = " \t\n\r\f\v";
+
+        const std::string str = trim(inputStr);
+        std::string::size_type curr = 0;
+
+        template_param_types_.clear();
+        template_param_names_.clear();
+
+        // Fail if the string doesn't start with "template" keyword
+        if (!startsWith(str, template_keword))
+        {
+            is_valid_ = false;
+            return;
+        }
+
+        // Set curr to the first non-whitespace character after "template"
+        // keyword
+        curr = str.find_first_not_of(whitespaces, template_keword.size());
+        if (curr == std::string::npos || str[curr] != '<')
+        {
+            is_valid_ = false;
+            return;
+        }
+
+        // Find template parameters
+        int depth = 0;
+        curr = str.find_first_not_of(whitespaces, curr + 1);
+        auto token_begin = curr;
+        while (curr != str.size() && curr != std::string::npos)
+        {
+            const auto &c = str[curr];
+
+            if (c == '<')
+            {
+                depth++;
+            }
+            else if (c == ',')
+            {
+                if (depth == 0)
+                {
+                    if (!parse_template_param(str, curr, token_begin,
+                                              whitespaces))
+                    {
+                        is_valid_ = false;
+                        return;
+                    }
+                }
+            }
+            else if (c == '>')
+            {
+                if (depth == 0)
+                {
+                    template_params_decl_ = str.substr(0, curr + 1);
+                    if (!parse_template_param(str, curr, token_begin,
+                                              whitespaces))
+                    {
+                        is_valid_ = false;
+                        return;
+                    }
+                    break;
+                }
+
+                depth--;
+            }
+
+            curr++;
+        }
+
+        // The numbers of left brackets and right brackets should be the same
+        if (depth > 0)
+        {
+            is_valid_ = false;
+            return;
+        }
+
+        // Class name
+        class_name_ = str.substr(curr, str.size() - curr);
+
+        is_valid_ = true;
+    }
+
+    bool parse_template_param(const std::string &str,
+                              std::string::size_type &curr,
+                              std::string::size_type &token_begin,
+                              const std::string& whitespaces)
+    {
+        auto token_end = str.find_first_of(whitespaces, token_begin);
+        template_param_types_.push_back(
+            str.substr(token_begin, token_end - token_begin));
+
+        token_begin = str.find_first_not_of(whitespaces, token_end);
+        token_end = str.find_first_of(whitespaces + ">" + ",", curr);
+        template_param_names_.push_back(
+            str.substr(token_begin, token_end - token_begin));
+
+        curr = str.find_first_not_of(whitespaces, curr + 1);
+        token_begin = curr;
+        return true;
+    }
+
+    std::string origianl_str_;
+    std::string template_params_decl_;
+    std::vector<std::string> template_param_types_;
+    std::vector<std::string> template_param_names_;
+    std::string class_name_;
+    bool is_valid_;
+};
+
+std::string makeTypeAliasTemplateString(const std::string &declStr)
+{
+    auto parsed_decl_str = TemplateDeclString(declStr);
+    if (!parsed_decl_str.isValid())
+        return declStr;
+
+    std::stringstream ss;
+    ss << parsed_decl_str.get_template_params_decl();
+    ss << " using ";
+    ss << generateUniqueName();
+    ss << " = ";
+    ss << parsed_decl_str.get_class_name();
+    ss << "<";
+    const auto &param_names = parsed_decl_str.get_template_param_names();
+    for (auto i = 0u; i < param_names.size(); ++i)
+    {
+        ss << param_names[i];
+        if (i != param_names.size() - 1u)
+            ss << ", ";
+    }
+    ss << ">;";
+
+    return ss.str();
 }
 
 const clang::ClassTemplateDecl *resolveClassTemplate(
     CompilerInstance *ci, const llvm::StringRef recordStr)
 {
     auto type_alias_template_str = makeTypeAliasTemplateString(recordStr.str());
+    //std::string type_alias_template_str = "using unique_name_10 = chimera_test::nested_function::MyClass<int>;";
+//    std::string type_alias_template_str = "template<class V> using my_name_10 = typename ::chimera_test::nested_function::MyClass<V>;";
     auto decl = resolveDeclaration(ci, type_alias_template_str);
+    if (!decl)
+        return nullptr;
     auto type_alias_template_decl = dyn_cast<TypeAliasTemplateDecl>(decl);
 
     if (!type_alias_template_decl)
