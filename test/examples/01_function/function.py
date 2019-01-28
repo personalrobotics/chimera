@@ -32,6 +32,7 @@ class TestFunction(unittest.TestCase):
         py11.void_param()
 
         self.assertFalse(hasattr(py11, 'function_with_suppressed_param'))
+        self.assertFalse(hasattr(py11, 'function_with_suppressed_template_param'))
 
 
     def test_function_bp(self):
@@ -53,6 +54,7 @@ class TestFunction(unittest.TestCase):
         boost.void_param()
 
         self.assertFalse(hasattr(boost, 'function_with_suppressed_param'))
+        self.assertFalse(hasattr(boost, 'function_with_suppressed_template_param'))
 
 
 if __name__ == '__main__':

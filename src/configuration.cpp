@@ -247,17 +247,33 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             for (const auto &it : configNode_["classes"])
             {
                 std::string decl_str = it.first.as<std::string>();
-                auto decl = chimera::util::resolveRecord(ci, decl_str);
-                if (decl)
+
+                // TODO: Use better way to detect if [decl_str] is template
+                // class type
+                if (util::startsWith(decl_str, "template ")
+                    || util::startsWith(decl_str, "template<"))
                 {
-                    declarations_[decl] = it.second;
+                    auto decl
+                        = chimera::util::resolveClassTemplate(ci, decl_str);
+                    if (decl)
+                    {
+                        declarations_[decl] = it.second;
+                        continue;
+                    }
                 }
                 else
                 {
-                    std::cerr << "Unable to resolve class declaration: "
-                              << "'" << decl_str << "'" << std::endl;
-                    exit(-2);
+                    auto decl = chimera::util::resolveRecord(ci, decl_str);
+                    if (decl)
+                    {
+                        declarations_[decl] = it.second;
+                        continue;
+                    }
                 }
+
+                std::cerr << "Unable to resolve class declaration: "
+                          << "'" << decl_str << "'" << std::endl;
+                exit(-2);
             }
         }
 
@@ -585,11 +601,22 @@ bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
             QualType param_type = param_decl->getType();
             if (param_type->isReferenceType())
                 param_type = param_type.getNonReferenceType();
+
             if (auto param_tag_type = dyn_cast<TagType>(param_type))
             {
                 TagDecl *param_tag_decl
                     = cast<TagDecl>(param_tag_type->getDecl());
                 if (IsSuppressed(param_tag_decl))
+                    return true;
+            }
+
+            if (auto template_specialization_type
+                = dyn_cast<TemplateSpecializationType>(param_type))
+            {
+                auto template_decl
+                    = template_specialization_type->getTemplateName()
+                          .getAsTemplateDecl();
+                if (IsSuppressed(template_decl))
                     return true;
             }
         }
