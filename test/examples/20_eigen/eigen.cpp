@@ -1,9 +1,9 @@
 #include "eigen.h"
 
 namespace chimera_test {
-namespace nested_function {
+namespace nested_namespace {
 
 //==============================================================================
 
-} // namespace nested_function
+} // namespace nested_namespace
 } // namespace chimera_test
