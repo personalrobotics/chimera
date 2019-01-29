@@ -8,11 +8,6 @@ fi
 mkdir build
 cd build
 
-# [DEBUG]
-dpkg -L llvm-${LLVM_VERSION}-dev
-dpkg -L llvm-${LLVM_VERSION}-tools
-test -e ${LLVM_DIR} && echo file exists || echo file not found
-
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=ON" ..
 else
