@@ -2,11 +2,16 @@
 set -ex
 
 if [ "${OS_NAME}" = "linux" ]; then
-  export LLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/"
+  export LLVM_DIR="/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm/"
 fi
 
 mkdir build
 cd build
+
+# [DEBUG]
+dpkg -L llvm-${LLVM_VERSION}-dev
+dpkg -L llvm-${LLVM_VERSION}-tools
+test -e ${LLVM_DIR} && echo file exists || echo file not found
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=ON" ..
