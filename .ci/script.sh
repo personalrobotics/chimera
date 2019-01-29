@@ -2,7 +2,11 @@
 set -ex
 
 if [ "${OS_NAME}" = "linux" ]; then
-  export LLVM_DIR="/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm/"
+  if [ "${CI}" = "TRAVIS" ]
+    export LLVM_DIR="/usr/share/llvm-${LLVM_VERSION}/cmake/"
+  else
+    export LLVM_DIR="/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm/"
+  fi
 fi
 
 mkdir build
