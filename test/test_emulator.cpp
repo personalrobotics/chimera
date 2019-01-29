@@ -50,3 +50,16 @@ TEST(Emulator, 02_Class)
     // doesn't stop at the breakpoints. For debugging use e.Run() instead.
     EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
 }
+
+//==============================================================================
+TEST(Emulator, 20_Eigen)
+{
+    Emulator e;
+    e.SetSource("20_eigen/eigen.h");
+    e.SetConfigurationFile("20_eigen/eigen_pybind11.yaml");
+    e.SetBinding("pybind11");
+
+    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
+    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
+    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+}
