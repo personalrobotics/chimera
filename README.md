@@ -57,8 +57,8 @@ $ brew install chimera
 
 ### Requirements
 
-* libclang 3.6 or above
-* llvm 3.6 or above (+ tools)
+* libclang 3.6, 3,9 or 6.0
+* llvm 3.6, 3,9 or 6.0 (+ tools)
 * libedit
 * yaml-cpp
 * boost
