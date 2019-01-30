@@ -1,16 +1,25 @@
 import unittest
 
-# import eigen_pybind11.nested_namespace as py11
+import eigen_pybind11.nested_namespace as py11
 import eigen_boost_python.nested_namespace as boost
 
 
 class TestFunction(unittest.TestCase):
 
-    # def test_function_py11(self):
-    #     py11.test_print_size()
-    #     py11.test_print_block()
-    #     py11.test_print_max_coeff()
-    #     py11.test_print_inv_cond()
+    def test_function_py11(self):
+
+        self.assertTrue(hasattr(py11, 'print_size'))
+        self.assertTrue(hasattr(py11, 'print_block'))
+        self.assertTrue(hasattr(py11, 'print_max_coeff'))
+        self.assertTrue(hasattr(py11, 'print_inv_cond'))
+
+        py11.test_print_size()
+        py11.test_print_block()
+        py11.test_print_max_coeff()
+        py11.test_print_inv_cond()
+
+        self.assertFalse(hasattr(py11, 'function_with_map_param'))
+        self.assertTrue(hasattr(py11, 'test_function_with_map_param'))
 
 
     def test_function_bp(self):

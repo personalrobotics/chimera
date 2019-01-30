@@ -930,7 +930,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_call"])
         return node.as<std::string>();
 
-    const auto template_str = chimera::util::getTemplateParameterString(decl_);
+    const auto template_str = chimera::util::getTemplateParameterString(
+        decl_, config_.GetBindingName());
 
     // Construct the basic qualified name.
     if (!class_decl_)
@@ -946,7 +947,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         return node.as<std::string>();
 
     return decl_->getNameAsString()
-           + chimera::util::getTemplateParameterString(decl_);
+           + chimera::util::getTemplateParameterString(
+                 decl_, config_.GetBindingName());
 }
 
 ::mstch::node Function::isTemplate()
@@ -1026,8 +1028,15 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["type"])
         return node.as<std::string>();
 
-    return chimera::util::getFullyQualifiedTypeName(config_.GetContext(),
-                                                    decl_->getType());
+    auto type_str = chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), decl_->getType());
+
+    if (config_.GetBindingName() == "pybind11")
+        type_str = util::stripNoneCopyableEigenWrappers(type_str);
+    // FIXME: Replace this Pybind11 specific workaround with a more
+    // general solution.
+
+    return type_str;
 }
 
 Variable::Variable(const ::chimera::CompiledConfiguration &config,

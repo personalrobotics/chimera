@@ -355,26 +355,25 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Set the binding name from one of the following sources in order of
     // priority: 1) CLI '--binding' setting 2) YAML configuration setting 3)
     // chimera::binding::DEFAULT_NAME
-    std::string binding_name;
     if (!parent_.bindingName_.empty())
     {
-        binding_name = parent_.bindingName_;
+        binding_name_ = parent_.bindingName_;
     }
     else if (!config_binding_name.empty())
     {
-        binding_name = config_binding_name;
+        binding_name_ = config_binding_name;
     }
     else
     {
-        binding_name = chimera::binding::DEFAULT_NAME;
+        binding_name_ = chimera::binding::DEFAULT_NAME;
     }
 
     // Resolve the base binding definition from the specified binding name.
-    const auto bindingIt = chimera::binding::DEFINITIONS.find(binding_name);
+    const auto bindingIt = chimera::binding::DEFINITIONS.find(binding_name_);
     if (bindingIt == chimera::binding::DEFINITIONS.end())
     {
         std::cerr << "Unable to resolve binding definition: "
-                  << "'" << binding_name << "'" << std::endl;
+                  << "'" << binding_name_ << "'" << std::endl;
         exit(-2);
     }
     bindingDefinition_ = bindingIt->second;
@@ -539,6 +538,11 @@ clang::CompilerInstance *chimera::CompiledConfiguration::GetCompilerInstance()
 clang::ASTContext &chimera::CompiledConfiguration::GetContext() const
 {
     return ci_->getASTContext();
+}
+
+const std::string &chimera::CompiledConfiguration::GetBindingName() const
+{
+    return binding_name_;
 }
 
 bool chimera::CompiledConfiguration::IsEnclosed(const clang::Decl *decl) const

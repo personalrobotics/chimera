@@ -242,7 +242,16 @@ std::vector<std::string> getTemplateParameterStrings(
  * This formats and concatenates the result of getTemplateParameterStrings()
  * for a given function declaration.
  */
-std::string getTemplateParameterString(const clang::FunctionDecl *decl);
+std::string getTemplateParameterString(const clang::FunctionDecl *decl,
+                                       const std::string &binding_name);
+
+/**
+ * Converts the template arguments of a type string to a vector of std::strings.
+ *
+ * For example, a std::string of "std::tuple<int, double, float>" is converted
+ * to the list of {"int", "double", "float"}.
+ */
+std::vector<std::string> getTemplateParameterStrings(const std::string &type);
 
 /**
  * Return whether a return value policy needs to be specfied for a declaration.
@@ -310,6 +319,34 @@ std::string toString(const clang::Type *type);
  * This is a helper function for debugging.
  */
 std::string toString(const clang::Decl *decl);
+
+/**
+ * Strips the Eigen's non-copyable wrapper classes from a type string.
+ *
+ * This function returns the derived type string or PlainObjectType of the given
+ * Eigen type string. For example, "Eigen::MatrixBase<Eigen::Matrix3d>" becomes
+ * "Eigen::Matrix3d" and "Eigen::CwiseNullaryOp<..., Eigen::Vector3d>" becomes
+ * "Eigen::Vector3d".
+ *
+ * Supported types are:
+ * - Eigen::EigenBase
+   - Eigen::DenseBase
+   - Eigen::ArrayBase
+   - Eigen::MatrixBase
+   - Eigen::CwiseNullaryOp
+ *
+ * This is used as a workaround for the fact that Pybind11 only supports Eigen
+ * types that are default-constructible. Those non-default-constructible Eigen
+ * types are used when binding template functions whose parameter type is
+ * Eigen base classes such as the functions in this document:
+ * https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
+ *
+ * Related link:
+ * - https://github.com/pybind/pybind11/issues/1324
+ * - https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
+ */
+std::string stripNoneCopyableEigenWrappers(std::string type);
+// FIXME: Remove this Eigen specific workaround
 
 } // namespace util
 } // namespace chimera

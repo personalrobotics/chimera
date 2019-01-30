@@ -615,7 +615,8 @@ std::vector<std::string> getTemplateParameterStrings(
     return outputs;
 }
 
-std::string getTemplateParameterString(const FunctionDecl *decl)
+std::string getTemplateParameterString(const FunctionDecl *decl,
+                                       const std::string &binding_name)
 {
     std::stringstream ss;
 
@@ -631,7 +632,14 @@ std::string getTemplateParameterString(const FunctionDecl *decl)
 
             for (size_t iparam = 0; iparam < param_strs.size(); ++iparam)
             {
-                ss << param_strs[iparam];
+                auto param_str = param_strs[iparam];
+
+                if (binding_name == "pybind11")
+                    param_str = util::stripNoneCopyableEigenWrappers(param_str);
+                // FIXME: Replace this Pybind11 specific workaround with a more
+                // general solution.
+
+                ss << param_str;
                 if (iparam < param_strs.size() - 1)
                     ss << ", ";
             }
@@ -640,6 +648,53 @@ std::string getTemplateParameterString(const FunctionDecl *decl)
     }
 
     return ss.str();
+}
+
+std::vector<std::string> getTemplateParameterStrings(const std::string &type)
+{
+    std::vector<std::string> args;
+
+    std::string::size_type curr = type.find_first_of("<");
+    if (curr == std::string::npos)
+        return args;
+
+    curr++;
+    std::string::size_type begin = curr;
+    int level = 0;
+
+    while (curr != std::string::npos)
+    {
+        const auto &c = type[curr];
+
+        if (c == '<')
+        {
+            level++;
+        }
+        else if (c == ',')
+        {
+            if (level == 0)
+            {
+                args.push_back(trim(type.substr(begin, curr - begin)));
+                begin = curr + 1;
+            }
+        }
+        else if (c == '>')
+        {
+            if (level == 0)
+            {
+                args.push_back(trim(type.substr(begin, curr - begin)));
+                break;
+            }
+            else
+            {
+                level--;
+            }
+        }
+
+        curr++;
+    }
+
+    return args;
 }
 
 std::set<const CXXRecordDecl *> getBaseClassDecls(const CXXRecordDecl *decl)
@@ -1040,6 +1095,75 @@ std::string toString(const Decl *decl)
         return "Decl";
     else
         return "Error: Unresolved decl";
+}
+
+std::string stripNoneCopyableEigenWrapper_NonQualifiered(std::string type)
+{
+    assert(!type.empty());
+
+    // 1. Strip off Eigen bases to get the derived type, which is one of:
+    // - Eigen::EigenBase
+    // - Eigen::DenseBase
+    // - Eigen::ArrayBase
+    // - Eigen::MatrixBase
+    static const std::vector<std::string> eigenBasePrefixes
+        = {"Eigen::EigenBase", "Eigen::DenseBase", "Eigen::ArrayBase",
+           "Eigen::MatrixBase"};
+    std::string::size_type pos = std::string::npos;
+    for (const auto &prefix : eigenBasePrefixes)
+    {
+        // If type starts with prefix, strip off the wrapper of prefix type.
+        if (type.find(prefix) == 0)
+        {
+            const auto left = type.find_first_of('<');
+            const auto right = type.find_last_of('>');
+            assert(left != type.size() - 1);
+            assert(right != 0);
+            type = trim(type.substr(left + 1, right - left - 1));
+            return stripNoneCopyableEigenWrapper_NonQualifiered(type);
+        }
+    }
+
+    // 2. Strip off Eigen::CwiseNullaryOp
+    static const std::string eigenCwiseNullaryOp = "Eigen::CwiseNullaryOp";
+    pos = type.find(eigenCwiseNullaryOp);
+    if (pos != std::string::npos)
+    {
+        const auto templateArgs = getTemplateParameterStrings(type);
+        assert(templateArgs.size() == 2);
+        return stripNoneCopyableEigenWrapper_NonQualifiered(templateArgs[1]);
+    }
+
+    return type;
+}
+
+std::string stripNoneCopyableEigenWrappers(std::string type)
+{
+    if (type.empty())
+        return type;
+
+    const auto left = type.find_first_of('<');
+    const auto right = type.find_last_of('>');
+
+    if (left == std::string::npos || right == std::string::npos)
+        return type;
+
+    std::string prefix;
+    if (type.substr(0, 6) == "const ")
+        prefix = "const ";
+
+    std::string suffix;
+    const auto lastPosOfRightBracket = type.find_last_of('>');
+    const auto suffix_size = type.size() - lastPosOfRightBracket - 1;
+    if (suffix_size > 0)
+        suffix = type.substr(lastPosOfRightBracket + 1, suffix_size);
+
+    type = trim(type);
+
+    return prefix
+           + stripNoneCopyableEigenWrapper_NonQualifiered(type.substr(
+                 prefix.size(), type.size() - prefix.size() - suffix.size()))
+           + suffix;
 }
 
 } // namespace util
