@@ -178,13 +178,11 @@ function(add_chimera_binding)
     # For BUILD_COMMAND, '$(MAKE)' is used instead of 'make' to propagate the
     # make commands of the parent project to the child process.
     # (see: http://stackoverflow.com/a/33171336)
-    ExternalProject_Add("${binding_TARGET}_REBUILD"
-        DOWNLOAD_COMMAND ""
-        INSTALL_COMMAND ""
-        BUILD_COMMAND $(MAKE) "${binding_TARGET}_SOURCES"
-        DEPENDS "${binding_TARGET}_SOURCES"
-        SOURCE_DIR "${PROJECT_SOURCE_DIR}"
-        BINARY_DIR "${PROJECT_BINARY_DIR}"
+    add_custom_target("${binding_TARGET}_REBUILD" DEPENDS "${binding_TARGET}_SOURCES")
+    add_custom_command(
+        OUTPUT "${binding_DESTINATION}/rebuild.txt"
+        COMMAND $(MAKE) "${binding_TARGET}_SOURCES"
+        VERBATIM
     )
     set_target_properties("${binding_TARGET}_REBUILD" PROPERTIES EXCLUDE_FROM_ALL TRUE)
     add_dependencies("${binding_TARGET}" "${binding_TARGET}_REBUILD")
