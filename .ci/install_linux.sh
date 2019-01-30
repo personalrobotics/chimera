@@ -12,7 +12,7 @@ $SUDO apt-get -y install "llvm-${LLVM_VERSION}-dev" "llvm-${LLVM_VERSION}-tools"
 
 # Install build tools
 $SUDO apt-get -y install \
-  build-essential  \
+  build-essential \
   cmake \
   curl \
   git \
