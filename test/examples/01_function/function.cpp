@@ -1,7 +1,7 @@
 #include "function.h"
 
 namespace chimera_test {
-namespace nested_function {
+namespace nested_namespace {
 
 //==============================================================================
 int add(int i, int j)
@@ -41,5 +41,5 @@ void function_with_suppressed_template_param(
   // Do nothing
 }
 
-} // namespace nested_function
+} // namespace nested_namespace
 } // namespace chimera_test

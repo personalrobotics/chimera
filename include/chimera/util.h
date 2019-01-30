@@ -8,6 +8,13 @@
 #include <mstch/mstch.hpp>
 #include <yaml-cpp/yaml.h>
 
+// clang-format off
+#define LLVM_VERSION_AT_LEAST(x,y,z) \
+  (LLVM_VERSION_MAJOR > x || (LLVM_VERSION_MAJOR >= x && \
+  (LLVM_VERSION_MINOR > y || (LLVM_VERSION_MINOR >= y && \
+  LLVM_VERSION_PATCH >= z))))
+// clang-format on
+
 namespace chimera
 {
 namespace util
@@ -282,6 +289,27 @@ std::string trim(std::string s, const char *t = " \t\n\r\f\v");
  * Returns true if a string starts with a prefix, otherwise false.
  */
 bool startsWith(const std::string &str, const std::string &prefix);
+
+/**
+ * Returns the concrete type in string from a type.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(clang::QualType qual_type);
+
+/**
+ * Returns the concrete type in string from a type pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Type *type);
+
+/**
+ * Returns the concrete type in string from a declaration pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Decl *decl);
 
 } // namespace util
 } // namespace chimera
