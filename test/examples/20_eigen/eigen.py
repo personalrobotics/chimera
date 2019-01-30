@@ -1,7 +1,7 @@
 import unittest
 
-import eigen_pybind11.nested_function as py11
-import eigen_boost_python.nested_function as boost
+import eigen_pybind11.nested_namespace as py11
+import eigen_boost_python.nested_namespace as boost
 
 
 class TestFunction(unittest.TestCase):
@@ -18,8 +18,8 @@ class TestFunction(unittest.TestCase):
         py11.test_print_max_coeff()
         py11.test_print_inv_cond()
 
-        self.assertFalse(hasattr(boost, 'function_with_map_param'))
-        self.assertTrue(hasattr(boost, 'test_function_with_map_param'))
+        self.assertFalse(hasattr(py11, 'function_with_map_param'))
+        self.assertTrue(hasattr(py11, 'test_function_with_map_param'))
 
 
     def test_function_bp(self):
