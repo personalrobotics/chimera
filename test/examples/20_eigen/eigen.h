@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 
 namespace chimera_test {
-namespace nested_function {
+namespace nested_namespace {
 
 template <typename Derived>
 void print_size(const Eigen::EigenBase<Derived>& b)
@@ -51,5 +51,9 @@ inline void test_print_inv_cond()
   print_inv_cond(Eigen::Matrix3d::Identity());
 }
 
-} // namespace nested_function
+void function_with_map_param(Eigen::Map<Eigen::VectorXd> map);
+
+void test_function_with_map_param();
+
+} // namespace nested_namespace
 } // namespace chimera_test

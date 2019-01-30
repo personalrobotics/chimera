@@ -9,3 +9,5 @@ template:
   file:
     header: |
       #include <pybind11/eigen.h>
+classes:
+  'template <typename PlainObjectType, int MapOptions, typename StrideType> class Eigen::Map': null
