@@ -650,7 +650,7 @@ std::string getTemplateParameterString(const FunctionDecl *decl,
     return ss.str();
 }
 
-std::vector<std::string> getTemplateParameterStrings(const std::string& type)
+std::vector<std::string> getTemplateParameterStrings(const std::string &type)
 {
     std::vector<std::string> args;
 
