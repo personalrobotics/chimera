@@ -925,7 +925,7 @@ std::string trimRight(std::string s, const char *t)
     return s;
 }
 
-std::string trimLeft(std::string s, const char *t)<<<<<<< HEAD
+std::string trimLeft(std::string s, const char *t)
 {
     s.erase(0, s.find_first_not_of(t));
     return s;
