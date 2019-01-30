@@ -572,11 +572,23 @@ bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
     if (!IsEnclosed(decl))
         return true;
 
-    const auto config = chimera::CompiledConfiguration::GetDeclaration(decl);
+    const auto config = GetDeclaration(decl);
 
     // If the declaration is directly suppressed, report this.
     if (config.IsNull())
         return true;
+
+    // If the (canonical) declaration is specialized template class, check if
+    // the template class is suppressed.
+    auto canonical_decl = decl->getCanonicalDecl();
+    if (auto specialized_templ_decl
+        = dyn_cast<ClassTemplateSpecializationDecl>(canonical_decl))
+    {
+        auto templ_decl = specialized_templ_decl->getSpecializedTemplate();
+        const auto config = GetDeclaration(templ_decl);
+        if (config.IsNull())
+            return true;
+    }
 
     // Functions can be suppressed if they return a suppressed type or take
     // suppressed parameter types.
@@ -599,14 +611,18 @@ bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
         {
             const ParmVarDecl *param_decl = function_decl->getParamDecl(i);
             QualType param_type = param_decl->getType();
+
             if (param_type->isReferenceType())
                 param_type = param_type.getNonReferenceType();
+
+            if (auto elaborated_type = dyn_cast<ElaboratedType>(param_type))
+                param_type = elaborated_type->desugar();
 
             if (auto param_tag_type = dyn_cast<TagType>(param_type))
             {
                 TagDecl *param_tag_decl
                     = cast<TagDecl>(param_tag_type->getDecl());
-                if (IsSuppressed(param_tag_decl))
+                if (GetDeclaration(param_tag_decl).IsNull())
                     return true;
             }
 
@@ -616,7 +632,7 @@ bool chimera::CompiledConfiguration::IsSuppressed(const clang::Decl *decl) const
                 auto template_decl
                     = template_specialization_type->getTemplateName()
                           .getAsTemplateDecl();
-                if (IsSuppressed(template_decl))
+                if (GetDeclaration(template_decl).IsNull())
                     return true;
             }
         }

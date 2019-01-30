@@ -887,5 +887,154 @@ bool startsWith(const std::string &str, const std::string &prefix)
             && std::equal(prefix.begin(), prefix.end(), str.begin()));
 }
 
+std::string toString(QualType qual_type)
+{
+    return toString(qual_type.getTypePtr());
+}
+
+std::string toString(const Type *type)
+{
+    if (dyn_cast<DecayedType>(type))
+        return "DecayedType : AdjustedType";
+    else if (dyn_cast<AdjustedType>(type))
+        return "ArrayType";
+    else if (dyn_cast<ConstantArrayType>(type))
+        return "ConstantArrayType : ArrayType";
+    else if (dyn_cast<DependentSizedArrayType>(type))
+        return "DependentSizedArrayType : ArrayType";
+    else if (dyn_cast<IncompleteArrayType>(type))
+        return "IncompleteArrayType : ArrayType";
+    else if (dyn_cast<VariableArrayType>(type))
+        return "VariableArrayType : ArrayType";
+    else if (dyn_cast<ArrayType>(type))
+        return "ArrayType";
+    else if (dyn_cast<AtomicType>(type))
+        return "AtomicType";
+    else if (dyn_cast<AttributedType>(type))
+        return "AttributedType";
+    else if (dyn_cast<BlockPointerType>(type))
+        return "BlockPointerType";
+    else if (dyn_cast<BuiltinType>(type))
+        return "BuiltinType";
+    else if (dyn_cast<ComplexType>(type))
+        return "ComplexType";
+    else if (dyn_cast<DependentDecltypeType>(type))
+        return "DependentDecltypeType : DecltypeType";
+    else if (dyn_cast<DecltypeType>(type))
+        return "DecltypeType";
+    else if (dyn_cast<AutoType>(type))
+        return "AutoType : DeducedType";
+    else if (dyn_cast<DeducedTemplateSpecializationType>(type))
+        return "DeducedTemplateSpecializationType : DecudedType";
+    else if (dyn_cast<DeducedType>(type))
+        return "DeducedDecudedType";
+    else if (dyn_cast<DependentAddressSpaceType>(type))
+        return "DependentAddressSpaceType";
+    else if (dyn_cast<DependentSizedExtVectorType>(type))
+        return "TDependentSizedExtVectorType";
+    else if (dyn_cast<FunctionNoProtoType>(type))
+        return "FunctionNoProtoType : FunctionType";
+    else if (dyn_cast<FunctionProtoType>(type))
+        return "FunctionProtoType : FunctionType";
+    else if (dyn_cast<FunctionType>(type))
+        return "FunctionType";
+    else if (dyn_cast<InjectedClassNameType>(type))
+        return "InjectedClassNameType";
+    else if (dyn_cast<MemberPointerType>(type))
+        return "MemberPointerType";
+    else if (dyn_cast<ObjCObjectPointerType>(type))
+        return "ObjCObjectPointerType";
+    else if (dyn_cast<ObjCInterfaceType>(type))
+        return "ObjCInterfaceType : ObjCObjectType";
+    else if (dyn_cast<ObjCObjectType>(type))
+        return "ObjCObjectType";
+    else if (dyn_cast<ObjCTypeParamType>(type))
+        return "ObjCTypeParamType";
+    else if (dyn_cast<PackExpansionType>(type))
+        return "PackExpansionType";
+    else if (dyn_cast<ParenType>(type))
+        return "ParenType";
+    else if (dyn_cast<PipeType>(type))
+        return "PipeType";
+    else if (dyn_cast<PointerType>(type))
+        return "PointerType";
+    else if (dyn_cast<ReferenceType>(type))
+        return "ReferenceType";
+    else if (dyn_cast<SubstTemplateTypeParmPackType>(type))
+        return "SubstTemplateTypeParmPackType";
+    else if (dyn_cast<SubstTemplateTypeParmType>(type))
+        return "SubstTemplateTypeParmType";
+    else if (dyn_cast<EnumType>(type))
+        return "EnumType : TagType";
+    else if (dyn_cast<RecordType>(type))
+        return "RecordType : TagType";
+    else if (dyn_cast<TagType>(type))
+        return "TagType";
+    else if (dyn_cast<DependentNameType>(type))
+        return "DependentNameType : TypeWithKeyword";
+    else if (dyn_cast<DependentTemplateSpecializationType>(type))
+        return "DependentTemplateSpecializationType : TypeWithKeyword";
+    else if (dyn_cast<ElaboratedType>(type))
+        return "ElaboratedType : TypeWithKeyword";
+    else if (dyn_cast<TemplateSpecializationType>(type))
+        return "TemplateSpecializationType";
+    else if (dyn_cast<TemplateTypeParmType>(type))
+        return "TemplateTypeParmType";
+    else if (dyn_cast<TypedefType>(type))
+        return "TypedefType";
+    else if (dyn_cast<TypeOfExprType>(type))
+        return "TypeOfExprType";
+    else if (dyn_cast<TypeOfType>(type))
+        return "TypeOfType";
+    else if (dyn_cast<UnaryTransformType>(type))
+        return "UnaryTransformType";
+    else if (dyn_cast<UnresolvedUsingType>(type))
+        return "UnresolvedUsingType";
+    else if (dyn_cast<VectorType>(type))
+        return "VectorType";
+    else if (dyn_cast<Type>(type))
+        return "Type";
+    else
+        return "Error: Unresolved type";
+}
+
+std::string toString(const Decl *decl)
+{
+    // TODO: Incomplete
+    if (dyn_cast<AccessSpecDecl>(decl))
+        return "AccessSpecDecl";
+    if (dyn_cast<BlockDecl>(decl))
+        return "BlockDecl";
+    // ...
+    if (dyn_cast<LabelDecl>(decl))
+        return "LabelDecl : NamedDecl";
+    // ...
+    if (dyn_cast<EnumDecl>(decl))
+        return "EnumDecl : TagDecl : TypeDecl : NamedDecl";
+    if (dyn_cast<ClassTemplatePartialSpecializationDecl>(decl))
+        return "ClassTemplatePartialSpecializationDecl : "
+               "ClassTemplateSpecialization : CXXRecordDecl : RecordDecl : "
+               "TagDecl : TypeDecl : NamedDecl";
+    if (dyn_cast<ClassTemplateSpecializationDecl>(decl))
+        return "ClassTemplateSpecialization : CXXRecordDecl : RecordDecl : "
+               "TagDecl : TypeDecl : NamedDecl";
+    if (dyn_cast<CXXRecordDecl>(decl))
+        return "CXXRecordDecl : RecordDecl : TagDecl : TypeDecl : NamedDecl";
+    if (dyn_cast<RecordDecl>(decl))
+        return "RecordDecl : TagDecl : TypeDecl : NamedDecl";
+    if (dyn_cast<TagDecl>(decl))
+        return "TagDecl : TypeDecl : NamedDecl";
+    // ...
+    if (dyn_cast<TypeDecl>(decl))
+        return "TypeDecl : NamedDecl";
+    // ...
+    else if (dyn_cast<NamedDecl>(decl))
+        return "NamedDecl";
+    else if (dyn_cast<Decl>(decl))
+        return "Decl";
+    else
+        return "Error: Unresolved decl";
+}
+
 } // namespace util
 } // namespace chimera

@@ -283,6 +283,27 @@ std::string trim(std::string s, const char *t = " \t\n\r\f\v");
  */
 bool startsWith(const std::string &str, const std::string &prefix);
 
+/**
+ * Returns the concrete type in string from a type.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(clang::QualType qual_type);
+
+/**
+ * Returns the concrete type in string from a type pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Type *type);
+
+/**
+ * Returns the concrete type in string from a declaration pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Decl *decl);
+
 } // namespace util
 } // namespace chimera
 
