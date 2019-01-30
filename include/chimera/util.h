@@ -8,6 +8,13 @@
 #include <mstch/mstch.hpp>
 #include <yaml-cpp/yaml.h>
 
+// clang-format off
+#define LLVM_VERSION_AT_LEAST(x,y,z) \
+  (LLVM_VERSION_MAJOR > x || (LLVM_VERSION_MAJOR >= x && \
+  (LLVM_VERSION_MINOR > y || (LLVM_VERSION_MINOR >= y && \
+  LLVM_VERSION_PATCH >= z))))
+// clang-format on
+
 namespace chimera
 {
 namespace util

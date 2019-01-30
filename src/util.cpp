@@ -924,12 +924,14 @@ std::string toString(const Type *type)
         return "DecltypeType";
     else if (dyn_cast<AutoType>(type))
         return "AutoType : DeducedType";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<DeducedTemplateSpecializationType>(type))
         return "DeducedTemplateSpecializationType : DecudedType";
     else if (dyn_cast<DeducedType>(type))
         return "DeducedDecudedType";
     else if (dyn_cast<DependentAddressSpaceType>(type))
         return "DependentAddressSpaceType";
+#endif
     else if (dyn_cast<DependentSizedExtVectorType>(type))
         return "TDependentSizedExtVectorType";
     else if (dyn_cast<FunctionNoProtoType>(type))
@@ -948,14 +950,18 @@ std::string toString(const Type *type)
         return "ObjCInterfaceType : ObjCObjectType";
     else if (dyn_cast<ObjCObjectType>(type))
         return "ObjCObjectType";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<ObjCTypeParamType>(type))
         return "ObjCTypeParamType";
+#endif
     else if (dyn_cast<PackExpansionType>(type))
         return "PackExpansionType";
     else if (dyn_cast<ParenType>(type))
         return "ParenType";
+#if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<PipeType>(type))
         return "PipeType";
+#endif
     else if (dyn_cast<PointerType>(type))
         return "PointerType";
     else if (dyn_cast<ReferenceType>(type))
