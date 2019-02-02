@@ -1064,29 +1064,52 @@ std::string toString(const Decl *decl)
     // TODO: Incomplete
     if (dyn_cast<AccessSpecDecl>(decl))
         return "AccessSpecDecl";
-    if (dyn_cast<BlockDecl>(decl))
+    else if (dyn_cast<BlockDecl>(decl))
         return "BlockDecl";
     // ...
-    if (dyn_cast<LabelDecl>(decl))
+    else if (dyn_cast<LabelDecl>(decl))
         return "LabelDecl : NamedDecl";
     // ...
-    if (dyn_cast<EnumDecl>(decl))
+#if LLVM_VERSION_AT_LEAST(3, 9, 0)
+    else if (dyn_cast<BuiltinTemplateDecl>(decl))
+        return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
+#endif
+    else if (dyn_cast<ClassTemplateDecl>(decl))
+        return "ClassTemplateDecl : RedeclarableTemplateDecl : TemplateDecl : "
+               "NamedDecl";
+    else if (dyn_cast<FunctionTemplateDecl>(decl))
+        return "FunctionTemplateDecl : RedeclarableTemplateDecl : TemplateDecl "
+               ": NamedDecl";
+    else if (dyn_cast<TypeAliasTemplateDecl>(decl))
+        return "TypeAliasTemplateDecl : RedeclarableTemplateDecl : "
+               "TemplateDecl : NamedDecl";
+    else if (dyn_cast<VarTemplateDecl>(decl))
+        return "VarTemplateDecl : RedeclarableTemplateDecl : TemplateDecl : "
+               "NamedDecl";
+    else if (dyn_cast<RedeclarableTemplateDecl>(decl))
+        return "RedeclarableTemplateDecl : TemplateDecl : NamedDecl";
+    else if (dyn_cast<TemplateTemplateParmDecl>(decl))
+        return "TemplateTemplateParmDecl : TemplateDecl : NamedDecl";
+    else if (dyn_cast<TemplateDecl>(decl))
+        return "TemplateDecl : NamedDecl";
+    // ...
+    else if (dyn_cast<EnumDecl>(decl))
         return "EnumDecl : TagDecl : TypeDecl : NamedDecl";
-    if (dyn_cast<ClassTemplatePartialSpecializationDecl>(decl))
+    else if (dyn_cast<ClassTemplatePartialSpecializationDecl>(decl))
         return "ClassTemplatePartialSpecializationDecl : "
                "ClassTemplateSpecialization : CXXRecordDecl : RecordDecl : "
                "TagDecl : TypeDecl : NamedDecl";
-    if (dyn_cast<ClassTemplateSpecializationDecl>(decl))
+    else if (dyn_cast<ClassTemplateSpecializationDecl>(decl))
         return "ClassTemplateSpecialization : CXXRecordDecl : RecordDecl : "
                "TagDecl : TypeDecl : NamedDecl";
-    if (dyn_cast<CXXRecordDecl>(decl))
+    else if (dyn_cast<CXXRecordDecl>(decl))
         return "CXXRecordDecl : RecordDecl : TagDecl : TypeDecl : NamedDecl";
-    if (dyn_cast<RecordDecl>(decl))
+    else if (dyn_cast<RecordDecl>(decl))
         return "RecordDecl : TagDecl : TypeDecl : NamedDecl";
-    if (dyn_cast<TagDecl>(decl))
+    else if (dyn_cast<TagDecl>(decl))
         return "TagDecl : TypeDecl : NamedDecl";
     // ...
-    if (dyn_cast<TypeDecl>(decl))
+    else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
     // ...
     else if (dyn_cast<NamedDecl>(decl))

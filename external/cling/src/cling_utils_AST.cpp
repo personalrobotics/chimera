@@ -7,6 +7,11 @@
 // LICENSE.TXT for details.
 //------------------------------------------------------------------------------
 
+// Updates for Chimera
+// - 2019-02-02 Updated CreateNestedNameSpecifierForScopeOf() to consider
+//   TemplateSpecializationType as well to fix #228
+// - 2018-10-07 Fixed #216
+
 #include "cling_utils_AST.h"
 
 #include "clang/AST/ASTContext.h"
@@ -1564,16 +1569,25 @@ namespace utils {
     if (!TypePtr)
       return 0;
 
+    ////////////////////////////
+    // MODIFIED FOR CHIMERA
+    ////////////////////////////
+
     Decl *decl = 0;
     if (const TypedefType* typedeftype = llvm::dyn_cast<TypedefType>(TypePtr)) {
-      decl = typedeftype->getDecl();
-    } else {
-      // There are probably other cases ...
-      if (const TagType* tagdecltype = llvm::dyn_cast_or_null<TagType>(TypePtr))
+        decl = typedeftype->getDecl();
+    } else if (const TagType* tagdecltype = llvm::dyn_cast_or_null<TagType>(TypePtr)) {
         decl = tagdecltype->getDecl();
-      else
+    } else if (const TemplateSpecializationType* templtype = llvm::dyn_cast_or_null<TemplateSpecializationType>(TypePtr)) {
+        decl = templtype->getTemplateName().getAsTemplateDecl();
+    } else {
+        // There are probably other cases ...
         decl = TypePtr->getAsCXXRecordDecl();
     }
+
+    ////////////////////////////
+    // END MODIFIED FOR CHIMERA
+    ////////////////////////////
 
     if (!decl)
       return 0;
