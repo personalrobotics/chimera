@@ -1605,7 +1605,7 @@ namespace utils {
     if (!Namesp) return 0;
 
     bool FullyQualified = true; // doesn't matter, DeclContexts are namespaces
-    auto nns = NestedNameSpecifier::Create(Ctx, CreateOuterNNS(Ctx, Namesp,
+    return NestedNameSpecifier::Create(Ctx, CreateOuterNNS(Ctx, Namesp,
                                                            FullyQualified),
                                        Namesp);
   }
@@ -1743,7 +1743,7 @@ namespace utils {
         array_type->getSizeModifier(), array_type->getIndexTypeCVRQualifiers(),
         array_type->getBracketsRange());
       QT = Ctx.getQualifiedType(QT, quals);
-      auto tmp_name = QT.getAsString();
+
       return QT;
     }
 
