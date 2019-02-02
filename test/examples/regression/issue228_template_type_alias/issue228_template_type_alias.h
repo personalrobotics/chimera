@@ -1,12 +1,14 @@
 #pragma once
 
-#include <memory>
+#include <vector>
 
 namespace chimera_test {
 namespace nested_namespace {
 
-template <class T> using custom_shared_ptr = std::shared_ptr<T>;
-void take_custom_shared_ptr(custom_shared_ptr<int> val) {}
+template <class T>
+using my_vector = std::vector<T>;
+
+void take_template_type_alias(const my_vector<int>& vec);
 
 } // namespace nested_namespace
 } // namespace chimera_test
