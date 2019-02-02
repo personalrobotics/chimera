@@ -1070,8 +1070,10 @@ std::string toString(const Decl *decl)
     else if (dyn_cast<LabelDecl>(decl))
         return "LabelDecl : NamedDecl";
     // ...
+#if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<BuiltinTemplateDecl>(decl))
         return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
+#endif
     else if (dyn_cast<ClassTemplateDecl>(decl))
         return "ClassTemplateDecl : RedeclarableTemplateDecl : TemplateDecl : "
                "NamedDecl";
