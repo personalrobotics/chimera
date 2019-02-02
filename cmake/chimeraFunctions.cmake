@@ -182,9 +182,10 @@ function(add_chimera_binding)
         DOWNLOAD_COMMAND ""
         INSTALL_COMMAND ""
         BUILD_COMMAND $(MAKE) "${binding_TARGET}_SOURCES"
+        COMMAND cd "${PROJECT_BINARY_DIR}"
         DEPENDS "${binding_TARGET}_SOURCES"
         SOURCE_DIR "${PROJECT_SOURCE_DIR}"
-        BUILD_IN_SOURCE 1
+        BINARY_DIR "${PROJECT_BINARY_DIR}"
     )
     set_target_properties("${binding_TARGET}_REBUILD" PROPERTIES EXCLUDE_FROM_ALL TRUE)
     add_dependencies("${binding_TARGET}" "${binding_TARGET}_REBUILD")
