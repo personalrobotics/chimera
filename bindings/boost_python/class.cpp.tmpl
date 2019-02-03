@@ -5,7 +5,6 @@
 {{#sources}}
 #include <{{.}}>
 {{/sources}}
-{{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
 
@@ -34,6 +33,8 @@ namespace {
 
 void {{class.mangled_name}}()
 {
+    {{precontent}}
+
     ::boost::python::object parent_object(::boost::python::scope(){{!
         }}{{#class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/class.scope}});
     ::boost::python::scope parent_scope(parent_object);
@@ -105,6 +106,7 @@ void {{class.mangled_name}}()
     }}::boost::python::make_getter({{qualified_name}}))
 {{/class.static_fields}}
     ;
+
+    {{postcontent}}
 }
-{{postcontent}}
 {{footer}}

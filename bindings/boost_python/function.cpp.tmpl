@@ -5,12 +5,13 @@
 {{#sources}}
 #include <{{.}}>
 {{/sources}}
-{{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
 
 void {{function.mangled_name}}()
 {
+    {{precontent}}
+
     ::boost::python::object parent_object(::boost::python::scope(){{!
         }}{{#function.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/function.scope}});
     ::boost::python::scope parent_scope(parent_object);
@@ -24,6 +25,6 @@ void {{function.mangled_name}}()
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}});
 {{/function.overloads}}
 
+    {{postcontent}}
 }
-{{postcontent}}
 {{footer}}
