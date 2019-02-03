@@ -5,19 +5,18 @@
 {{#sources}}
 #include <{{.}}>
 {{/sources}}
-{{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
-
 {{#module.bindings}}
 void {{.}}();
 {{/module.bindings}}
 
 BOOST_PYTHON_MODULE({{module.name}})
 {
+    {{precontent}}
+
     ::boost::python::docstring_options options(true, true, false);
 
-    {{precontent}}
 {{#module.namespaces}}{{#name}}
     ::boost::python::scope(){{!
         }}{{#scope}}{{#name}}.attr("{{name}}"){{/name}}{{/scope}}.attr("{{name}}") = {{!
@@ -29,6 +28,7 @@ BOOST_PYTHON_MODULE({{module.name}})
 {{#module.bindings}}
     {{.}}();
 {{/module.bindings}}
+
+    {{postcontent}}
 }
-{{postcontent}}
 {{footer}}
