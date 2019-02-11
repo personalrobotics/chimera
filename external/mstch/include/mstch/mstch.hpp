@@ -29,10 +29,16 @@ class object_t {
   }
 
  protected:
+  ////////////////////////////
+  // MODIFIED FOR CHIMERA
+  ////////////////////////////
+
   template<class S>
   void register_methods(S* s, std::map<std::string,N(S::*)()> methods) {
     for(auto& item: methods)
-      this->methods.insert({item.first, std::bind(item.second, s)});
+      // This is a modification to the original mstch implementation that allows
+      // to override methods.
+      this->methods[item.first] = std::bind(item.second, s);
   }
 
   // This is a modification to the original mstch implementation that allows
@@ -40,6 +46,10 @@ class object_t {
   void register_lambda(std::string name, std::function<N()> func) {
     this->methods[name] = func;
   }
+
+  ////////////////////////////
+  // END MODIFIED FOR CHIMERA
+  ////////////////////////////
 
  private:
   std::map<std::string, std::function<N()>> methods;
