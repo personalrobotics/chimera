@@ -202,7 +202,6 @@ public:
 
     ::mstch::node name() override;
     ::mstch::node qualifiedName() override;
-    ::mstch::node heldType();
 
     ::mstch::node constructors();
     ::mstch::node methods();
