@@ -34,7 +34,7 @@ $ sudo apt update
 $ sudo apt install chimera
 ```
 
-**Xenial/Bionic**
+**Xenial/Bionic/Cosmic/Disco**
 
 ```shell
 $ sudo add-apt-repository ppa:personalrobotics/ppa
