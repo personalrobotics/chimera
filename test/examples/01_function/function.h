@@ -1,5 +1,4 @@
 namespace chimera_test {
-namespace nested_namespace {
 
 int add(int i = 1, int j = 2);
 
@@ -35,5 +34,4 @@ class SuppressedTemplateClass {};
 void function_with_suppressed_template_param(
   const SuppressedTemplateClass<int>&);
 
-} // namespace nested_namespace
 } // namespace chimera_test

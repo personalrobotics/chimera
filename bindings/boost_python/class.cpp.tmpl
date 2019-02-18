@@ -35,9 +35,11 @@ void {{class.mangled_name}}()
 {
     {{precontent}}
 
-    ::boost::python::object parent_object(::boost::python::scope(){{!
+    {{#class.scope?}}{{!
+    }}::boost::python::object parent_object(::boost::python::scope(){{!
         }}{{#class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/class.scope}});
-    ::boost::python::scope parent_scope(parent_object);
+    ::boost::python::scope parent_scope(parent_object);{{!
+    }}{{/class.scope?}}
 
     ::boost::python::class_<{{class.type}}{{^class.is_copyable}}, {{!
         }}::boost::noncopyable{{/class.is_copyable}}{{#class.held_type}}, {{!

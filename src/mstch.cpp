@@ -150,8 +150,9 @@ namespace mstch
             {
                 NamespaceDecl *parent_decl
                     = nns->getAsNamespace()->getCanonicalDecl();
-                scope_templates.push_back(
-                    std::make_shared<Namespace>(config, parent_decl));
+                auto ns = std::make_shared<Namespace>(config, parent_decl);
+                ns->name();
+                scope_templates.push_back(ns);
                 break;
             }
             case NestedNameSpecifier::TypeSpec:

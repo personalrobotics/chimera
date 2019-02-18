@@ -6,7 +6,6 @@
 #include <boost/python.hpp>
 
 namespace chimera_test {
-namespace nested_namespace {
 
 template <typename T>
 void val_param(T /*val*/) { }
@@ -59,5 +58,4 @@ public:
   }
 };
 
-} // namespace nested_namespace
 } // namespace chimera_test
