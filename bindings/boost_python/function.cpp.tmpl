@@ -12,18 +12,8 @@ void {{function.mangled_name}}()
 {
     {{precontent}}
 
-    {{#function.scope?}} /* scope */ {{/function.scope?}}
-    {{^function.scope?}} /* NO scope */ {{/function.scope?}}
-
-{{#function.overloads}}
-    {{#scope?}} /* scope */ {{/scope?}}{{!
-    }}{{^scope?}} /* NO scope */ {{/scope?}}
-    {{#params?}} /* params */ {{/params?}}{{!
-    }}{{^params?}} /* NO params */ {{/params?}}
-{{/function.overloads}}
-
-    {{#function.scope?}}
-    ::boost::python::object parent_object(::boost::python::scope(){{!
+    {{#function.scope?}}{{!
+    }}::boost::python::object parent_object(::boost::python::scope(){{!
         }}{{#function.scope}}.attr("{{name}}"){{/function.scope}});
     ::boost::python::scope parent_scope(parent_object);
     {{/function.scope?}}

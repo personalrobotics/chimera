@@ -83,7 +83,7 @@ public:
         return last_;
     }
 
-    virtual ::mstch::node name()
+    virtual ::std::string nameAsString()
     {
         if (const YAML::Node &node = decl_config_["name"])
         {
@@ -99,6 +99,11 @@ public:
         }
 
         return decl_->getNameAsString();
+    }
+
+    ::mstch::node name()
+    {
+        return nameAsString();
     }
 
     virtual ::mstch::node mangledName()
@@ -208,7 +213,7 @@ public:
     ::mstch::node scope() override;
     ::mstch::node isCopyable();
 
-    ::mstch::node name() override;
+    ::std::string nameAsString() override;
     ::mstch::node qualifiedName() override;
 
     ::mstch::node constructors();
@@ -326,7 +331,7 @@ public:
               const clang::CXXRecordDecl *class_decl,
               const std::string default_name = "");
 
-    ::mstch::node name() override;
+    ::std::string nameAsString() override;
     ::mstch::node type();
 
 private:

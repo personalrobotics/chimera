@@ -2,12 +2,12 @@ import inspect
 import unittest
 
 try:
-    import class_pybind11.nested_namespace as py11
+    import class_pybind11 as py11
     has_pybind11 = True
 except:
     has_pybind11 = False
 
-import class_boost_python.nested_namespace as boost
+import class_boost_python as boost
 
 
 class TestFunction(unittest.TestCase):
@@ -53,8 +53,7 @@ class TestFunction(unittest.TestCase):
         self.assertTrue(inspect.isclass(py11.MainClass.NestedClass))
 
         import class_pybind11
-        self.assertTrue(hasattr(class_pybind11, 'nested_namespace'))
-        self.assertFalse(hasattr(class_pybind11.nested_namespace, 'detail'))
+        self.assertFalse(hasattr(class_pybind11, 'detail'))
 
     def test_function_bp(self):
         dog = boost.Dog()
@@ -95,8 +94,7 @@ class TestFunction(unittest.TestCase):
         self.assertTrue(inspect.isclass(boost.MainClass.NestedClass))
 
         import class_boost_python
-        self.assertTrue(hasattr(class_boost_python, 'nested_namespace'))
-        self.assertFalse(hasattr(class_boost_python.nested_namespace, 'detail'))
+        self.assertFalse(hasattr(class_boost_python, 'detail'))
 
 
 if __name__ == '__main__':
