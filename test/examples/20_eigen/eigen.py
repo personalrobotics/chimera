@@ -1,7 +1,7 @@
 import unittest
 
-import eigen_pybind11.nested_namespace as py11
-import eigen_boost_python.nested_namespace as boost
+import eigen_pybind11 as py11
+import eigen_boost_python as boost
 
 
 class TestFunction(unittest.TestCase):

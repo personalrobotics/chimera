@@ -1,12 +1,12 @@
 import unittest
 
 try:
-    import function_pybind11.nested_namespace as py11
+    import function_pybind11 as py11
     has_pybind11 = True
 except:
     has_pybind11 = False
 
-import function_boost_python.nested_namespace as boost
+import function_boost_python as boost
 
 
 class TestFunction(unittest.TestCase):

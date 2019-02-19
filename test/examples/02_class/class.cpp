@@ -1,7 +1,6 @@
 #include "class.h"
 
 namespace chimera_test {
-namespace nested_namespace {
 
 //==============================================================================
 Animal::Animal()
@@ -99,5 +98,4 @@ std::string StaticFields::static_type()
   return type;
 }
 
-} // namespace nested_namespace
 } // namespace chimera_test

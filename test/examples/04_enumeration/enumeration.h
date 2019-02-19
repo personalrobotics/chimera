@@ -1,7 +1,6 @@
 #pragma once
 
 namespace chimera_test {
-namespace nested_namespace {
 
 struct Animal
 {
@@ -16,5 +15,4 @@ struct Animal
   Type type;
 };
 
-} // namespace nested_namespace
 } // namespace chimera_test
