@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 
 namespace chimera_test {
-namespace nested_namespace {
 
 template <typename Derived>
 void print_size(const Eigen::EigenBase<Derived>& b)
@@ -55,5 +54,4 @@ void function_with_map_param(Eigen::Map<Eigen::VectorXd> map);
 
 void test_function_with_map_param();
 
-} // namespace nested_namespace
 } // namespace chimera_test

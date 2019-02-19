@@ -59,9 +59,17 @@ public:
                 {"mangled_name", &ClangWrapper::mangledName},
                 {"qualified_name", &ClangWrapper::qualifiedName},
                 {"namespace_scope", &ClangWrapper::namespaceScope},
+                {"namespace_scope?",
+                 &ClangWrapper::isNonFalse<ClangWrapper,
+                                           &ClangWrapper::namespaceScope>},
                 {"class_scope", &ClangWrapper::classScope},
+                {"class_scope?",
+                 &ClangWrapper::isNonFalse<ClangWrapper,
+                                           &ClangWrapper::classScope>},
                 {"scope",
                  &ClangWrapper::scope}, // namespace_scope + class_scope
+                {"scope?",
+                 &ClangWrapper::isNonFalse<ClangWrapper, &ClangWrapper::scope>},
                 {"comment", &ClangWrapper::comment},
                 {"comment?", &ClangWrapper::isNonFalse<ClangWrapper,
                                                        &ClangWrapper::comment>},
@@ -75,7 +83,7 @@ public:
         return last_;
     }
 
-    virtual ::mstch::node name()
+    virtual ::std::string nameAsString()
     {
         if (const YAML::Node &node = decl_config_["name"])
         {
@@ -91,6 +99,11 @@ public:
         }
 
         return decl_->getNameAsString();
+    }
+
+    ::mstch::node name()
+    {
+        return nameAsString();
     }
 
     virtual ::mstch::node mangledName()
@@ -200,7 +213,7 @@ public:
     ::mstch::node scope() override;
     ::mstch::node isCopyable();
 
-    ::mstch::node name() override;
+    ::std::string nameAsString() override;
     ::mstch::node qualifiedName() override;
 
     ::mstch::node constructors();
@@ -318,7 +331,7 @@ public:
               const clang::CXXRecordDecl *class_decl,
               const std::string default_name = "");
 
-    ::mstch::node name() override;
+    ::std::string nameAsString() override;
     ::mstch::node type();
 
 private:

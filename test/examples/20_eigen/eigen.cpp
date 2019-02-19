@@ -1,7 +1,6 @@
 #include "eigen.h"
 
 namespace chimera_test {
-namespace nested_namespace {
 
 //==============================================================================
 void function_with_map_param(Eigen::Map<Eigen::VectorXd> map)
@@ -17,5 +16,4 @@ void test_function_with_map_param()
   function_with_map_param(map);
 }
 
-} // namespace nested_namespace
 } // namespace chimera_test

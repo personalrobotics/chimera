@@ -1,13 +1,13 @@
 import unittest
 
 try:
-    import smart_pointers_pybind11.nested_namespace as py11
+    import smart_pointers_pybind11 as py11
     has_pybind11 = True
 except:
     has_pybind11 = False
 
 try:
-    import smart_pointers_boost_python.nested_namespace as boost
+    import smart_pointers_boost_python as boost
     has_boost_python = True
 except:
     has_boost_python = False

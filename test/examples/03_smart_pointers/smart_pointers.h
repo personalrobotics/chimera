@@ -5,7 +5,6 @@
 #include <memory>
 
 namespace chimera_test {
-namespace nested_namespace {
 
 class Example {};
 
@@ -29,5 +28,4 @@ class ExampleShared {};
 // Otherwise, it will causes segfaults.
 std::shared_ptr<ExampleShared> create_example_shared();
 
-} // namespace nested_namespace
 } // namespace chimera_test
