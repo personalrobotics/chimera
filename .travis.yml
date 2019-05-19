@@ -2,7 +2,7 @@ language: cpp
 
 sudo: required
 
-dist: trusty
+dist: xenial
 
 env:
   global:
@@ -13,39 +13,12 @@ env:
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc
-      env:
-        - BUILD_NAME=TRUSTY_GCC_DEBUG
-        - BUILD_TYPE=Debug
-        - COMPILER=GCC
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
-        - SUDO=sudo
       # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=TRUSTY_GCC_RELEASE
-        - BUILD_TYPE=Release
-        - COMPILER=GCC
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
-        - SUDO=sudo
-    - os: linux
-      compiler: clang
-      env:
-        - BUILD_NAME=TRUSTY_CLANG_RELEASE
-        - BUILD_TYPE=Release
-        - COMPILER=CLANG
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
-        - SUDO=sudo
-    - os: linux
-      compiler: gcc
-      env:
-        - BUILD_NAME=XENIAL_GCC_RELEASE
-        - BUILD_TYPE=Release
+        - BUILD_NAME=XENIAL_GCC_DEBUG
+        - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=3.9
         - PYTHON_VERSION=3.5
@@ -54,12 +27,22 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=BIONIC_GCC_RELEASE
-        - BUILD_TYPE=Release
+        - BUILD_NAME=BIONIC_GCC_DEBUG
+        - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=6.0
         - PYTHON_VERSION=3.6
         - DOCKERFILE="Dockerfile.ubuntu-bionic"
+      services: docker
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=DISCO_GCC_DEBUG
+        - BUILD_TYPE=Debug
+        - COMPILER=GCC
+        - LLVM_VERSION=6.0
+        - PYTHON_VERSION=3.7
+        - DOCKERFILE="Dockerfile.ubuntu-disco"
       services: docker
 
 before_install:
