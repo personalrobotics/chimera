@@ -33,7 +33,10 @@ class TestFunction(unittest.TestCase):
         boost.test_print_max_coeff()
         boost.test_print_inv_cond()
 
-        self.assertTrue(hasattr(boost, 'function_with_map_param'))
+        # Boost.Python < 1.65.1 doesn't work for Eigen::Map parameter
+        # Once Boost.Python >= 1.65.1 becomes the minimum required version, change following check to self.assertTrue(...)
+        self.assertFalse(hasattr(boost, 'function_with_map_param'))
+
         self.assertTrue(hasattr(boost, 'test_function_with_map_param'))
 
 

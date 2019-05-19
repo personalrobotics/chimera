@@ -5,3 +5,7 @@ arguments:
 namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
+# Boost.Python < 1.65.1 doesn't work for Eigen::Map parameter
+# Once Boost.Python >= 1.65.1 becomes the minimum required version, remove followings
+classes:
+  'template <typename PlainObjectType, int MapOptions, typename StrideType> class Eigen::Map': null
