@@ -14,8 +14,8 @@ namespace chimera
 class FrontendAction : public clang::ASTFrontendAction
 {
 public:
-    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
-        clang::CompilerInstance &CI, clang::StringRef file);
+    std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(
+        clang::CompilerInstance &CI, clang::StringRef file) override;
 };
 
 } // namespace chimera

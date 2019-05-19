@@ -6,7 +6,7 @@
 using namespace clang;
 
 std::unique_ptr<clang::ASTConsumer> chimera::FrontendAction::CreateASTConsumer(
-    CompilerInstance &CI, StringRef file)
+    CompilerInstance &CI, StringRef /*file*/)
 {
     // For some unknown reason, this is called twice, which should be once.
     // As a workaround, we check if this called first, otherwise return nullptr.
