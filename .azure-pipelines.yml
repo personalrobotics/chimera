@@ -2,34 +2,6 @@
 # Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines
 
 jobs:
-- job: ubuntu_trusty_gcc_release
-  pool:
-    vmImage: 'ubuntu-16.04'
-  variables:
-    OS_NAME: linux
-    COMPILER: gcc
-    BUILD_TYPE: Release
-    BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.6
-    PYTHON_VERSION: 3.4
-    DOCKERFILE: Dockerfile.ubuntu-trusty
-  steps:
-  - template: .ci/azure-pipelines/docker.yml
-
-- job: ubuntu_trusty_clang_release
-  pool:
-    vmImage: 'ubuntu-16.04'
-  variables:
-    OS_NAME: linux
-    COMPILER: clang
-    BUILD_TYPE: Release
-    BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.6
-    PYTHON_VERSION: 3.4
-    DOCKERFILE: Dockerfile.ubuntu-trusty
-  steps:
-  - template: .ci/azure-pipelines/docker.yml
-
 - job: ubuntu_xenial_gcc_release
   pool:
     vmImage: 'ubuntu-16.04'
@@ -94,8 +66,8 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0
-    PYTHON_VERSION: 3.6
+    LLVM_VERSION: 8
+    PYTHON_VERSION: 3.7
     DOCKERFILE: Dockerfile.ubuntu-disco
   steps:
   - template: .ci/azure-pipelines/docker.yml
@@ -108,8 +80,8 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0
-    PYTHON_VERSION: 3.6
+    LLVM_VERSION: 8
+    PYTHON_VERSION: 3.7
     DOCKERFILE: Dockerfile.ubuntu-disco
   steps:
   - template: .ci/azure-pipelines/docker.yml

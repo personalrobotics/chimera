@@ -25,6 +25,7 @@ $SUDO apt-get -y install \
   wget
 
 # Install test dependencies.
+$SUDO apt-get -y install libeigen3-dev
 $SUDO apt-get -y install libboost-python-dev libboost-thread-dev
 $SUDO apt-get -y install lcov
 $SUDO apt-get -y install python-dev python3-dev
