@@ -81,8 +81,10 @@ namespace utils {
     if (!ND)
       return false;
 
-    return StringRef(ND->getNameAsString())
-      .startswith(Synthesize::UniquePrefix);
+    if (!ND->getDeclName().isIdentifier())
+          return false;
+
+    return ND->getName().startswith(Synthesize::UniquePrefix);
   }
 
   void Analyze::maybeMangleDeclName(const GlobalDecl& GD,
