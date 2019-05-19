@@ -114,7 +114,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: macos_high_seirra_clang_llvm4_release
+- job: macos_mojav_clang_llvm4_release
   pool:
     vmImage: 'macOS-10.14'
   variables:
@@ -129,7 +129,7 @@ jobs:
       . .ci/script.sh
     displayName: 'Install/Script'
 
-- job: macos_high_seirra_clang_llvm5_release
+- job: macos_mojav_clang_llvm5_release
   pool:
     vmImage: 'macOS-10.14'
   variables:
@@ -144,7 +144,7 @@ jobs:
       . .ci/script.sh
     displayName: 'Install/Script'
 
-- job: macos_high_seirra_clang_llvm6_release
+- job: macos_mojav_clang_llvm6_release
   pool:
     vmImage: 'macOS-10.14'
   variables:
@@ -159,7 +159,7 @@ jobs:
       . .ci/script.sh
     displayName: 'Install/Script'
 
-- job: macos_high_seirra_clang_llvm6_release
+- job: macos_mojav_clang_llvm7_release
   pool:
     vmImage: 'macOS-10.14'
   variables:
@@ -174,7 +174,7 @@ jobs:
       . .ci/script.sh
     displayName: 'Install/Script'
 
-- job: macos_high_seirra_clang_llvm6_release
+- job: macos_mojav_clang_llvm8_release
   pool:
     vmImage: 'macOS-10.14'
   variables:
