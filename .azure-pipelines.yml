@@ -114,47 +114,77 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-# - job: macos_high_seirra_clang_llvm4_release
-#   pool:
-#     vmImage: 'macOS 10.13'
-#   variables:
-#     OS_NAME: osx
-#     COMPILER: clang
-#     BUILD_TYPE: Release
-#     BUILD_DIR: $(Build.SourcesDirectory)
-#     LLVM_VERSION: 4
-#   steps:
-#   - script: |
-#       . .ci/install_macos.sh
-#       . .ci/script.sh
-#     displayName: 'Install/Script'
+- job: macos_high_seirra_clang_llvm4_release
+  pool:
+    vmImage: 'macOS-10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 4
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
 
-# - job: macos_high_seirra_clang_llvm5_release
-#   pool:
-#     vmImage: 'macOS 10.13'
-#   variables:
-#     OS_NAME: osx
-#     COMPILER: clang
-#     BUILD_TYPE: Release
-#     BUILD_DIR: $(Build.SourcesDirectory)
-#     LLVM_VERSION: 5
-#   steps:
-#   - script: |
-#       source .ci/install_macos.sh
-#       . .ci/script.sh
-#     displayName: 'Install/Script'
+- job: macos_high_seirra_clang_llvm5_release
+  pool:
+    vmImage: 'macOS-10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 5
+  steps:
+  - script: |
+      source .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
 
-# - job: macos_high_seirra_clang_llvm6_release
-#   pool:
-#     vmImage: 'macOS 10.13'
-#   variables:
-#     OS_NAME: osx
-#     COMPILER: clang
-#     BUILD_TYPE: Release
-#     BUILD_DIR: $(Build.SourcesDirectory)
-#     LLVM_VERSION: 6
-#   steps:
-#   - script: |
-#       . .ci/install_macos.sh
-#       . .ci/script.sh
-#     displayName: 'Install/Script'
+- job: macos_high_seirra_clang_llvm6_release
+  pool:
+    vmImage: 'macOS-10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 6
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
+
+- job: macos_high_seirra_clang_llvm6_release
+  pool:
+    vmImage: 'macOS-10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 7
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
+
+- job: macos_high_seirra_clang_llvm6_release
+  pool:
+    vmImage: 'macOS-10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 8
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
