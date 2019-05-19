@@ -13,16 +13,6 @@ env:
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc
-      env:
-        - BUILD_NAME=TRUSTY_GCC_DEBUG
-        - BUILD_TYPE=Debug
-        - COMPILER=GCC
-        - LLVM_VERSION=3.6
-        - PYTHON_VERSION=3.4
-        - DOCKERFILE="Dockerfile.ubuntu-trusty"
-      services: docker
       # TODO: Fix CODECOV reporting
     - os: linux
       compiler: gcc
