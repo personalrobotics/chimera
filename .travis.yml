@@ -40,7 +40,7 @@ matrix:
         - BUILD_NAME=DISCO_GCC_DEBUG
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=8.0
+        - LLVM_VERSION=8
         - PYTHON_VERSION=3.7
         - DOCKERFILE="Dockerfile.ubuntu-disco"
       services: docker
