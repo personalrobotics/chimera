@@ -226,8 +226,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     std::cerr << "Warning: Skipped namespace namespace '"
                               << ns_str << "' because it's unable to resolve "
-                              << "the namespace."
-                              << std::endl;
+                              << "the namespace." << std::endl;
                     continue;
                 }
             }
@@ -337,8 +336,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     std::cerr << "Warning: Skipped the configuration for "
                               << "type '" << type_str << "' becuase it's "
-                              << "unable to resolve the type."
-                              << std::endl;
+                              << "unable to resolve the type." << std::endl;
                     continue;
                 }
             }
