@@ -158,3 +158,18 @@ jobs:
 #       . .ci/install_macos.sh
 #       . .ci/script.sh
 #     displayName: 'Install/Script'
+
+- job: macos_catalina_clang_llvm6_release
+  pool:
+    vmImage: 'macOS 10.15'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 10
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
