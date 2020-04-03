@@ -58,7 +58,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_disco_gcc_release
+- job: ubuntu_eoan_gcc_release
   pool:
     vmImage: 'ubuntu-16.04'
   variables:
@@ -66,13 +66,13 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0
+    LLVM_VERSION: 9.0
     PYTHON_VERSION: 3.7
-    DOCKERFILE: Dockerfile.ubuntu-disco
+    DOCKERFILE: Dockerfile.ubuntu-eoan
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_disco_clang_release
+- job: ubuntu_eoan_clang_release
   pool:
     vmImage: 'ubuntu-16.04'
   variables:
@@ -80,9 +80,37 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0
+    LLVM_VERSION: 9.0
     PYTHON_VERSION: 3.7
-    DOCKERFILE: Dockerfile.ubuntu-disco
+    DOCKERFILE: Dockerfile.ubuntu-eoan
+  steps:
+  - template: .ci/azure-pipelines/docker.yml
+
+- job: ubuntu_focal_gcc_release
+  pool:
+    vmImage: 'ubuntu-16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: gcc
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 10.0
+    PYTHON_VERSION: 3.8
+    DOCKERFILE: Dockerfile.ubuntu-focal
+  steps:
+  - template: .ci/azure-pipelines/docker.yml
+
+- job: ubuntu_focal_clang_release
+  pool:
+    vmImage: 'ubuntu-16.04'
+  variables:
+    OS_NAME: linux
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 10.0
+    PYTHON_VERSION: 3.8
+    DOCKERFILE: Dockerfile.ubuntu-focal
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
