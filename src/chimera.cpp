@@ -73,7 +73,7 @@ static cl::opt<bool> SuppressSources(
 
 // Option for treating unresolvable configuration as errors.
 static cl::opt<bool> Strict(
-    "s", cl::cat(ChimeraCategory),
+    "strict", cl::cat(ChimeraCategory),
     cl::desc("Treat unresolvable configuration as errors"));
 
 // Add a footer to the help text.
