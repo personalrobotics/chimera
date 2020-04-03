@@ -27,7 +27,7 @@ make -j4
 # Building tests and binding_tests fails on macOS (see: https://github.com/personalrobotics/chimera/issues/218)
 if [ "${OS_NAME}" = "linux" ]; then
   # Building binding_tests fails on Ubuntu Focal
-  if [ ! $(lsb_release -sc) = "forcal" ]; then
+  if [ ! $(lsb_release -sc) = "focal" ]; then
     make -j4 tests binding_tests
 
     if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
