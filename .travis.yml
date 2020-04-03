@@ -40,7 +40,7 @@ matrix:
         - BUILD_NAME=EOAN_GCC_DEBUG
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=9.0
+        - LLVM_VERSION=9
         - PYTHON_VERSION=3.7
         - DOCKERFILE="Dockerfile.ubuntu-eoan"
       services: docker
@@ -50,7 +50,7 @@ matrix:
         - BUILD_NAME=FOCAL_GCC_DEBUG
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=10.0
+        - LLVM_VERSION=10
         - PYTHON_VERSION=3.8
         - DOCKERFILE="Dockerfile.ubuntu-focal"
       services: docker
