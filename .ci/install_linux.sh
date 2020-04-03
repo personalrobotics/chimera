@@ -2,6 +2,8 @@
 set -ex
 
 $SUDO apt-get -q update
+$SUDO apt-get -y install \
+  lsb-release
 
 if [ $(lsb_release -sc) = "trusty" ]; then
   wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | $SUDO apt-key add -
