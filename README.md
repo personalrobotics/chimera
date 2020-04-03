@@ -23,7 +23,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Trusty (14.04), Xenial (16.04), Bionic (18.04), Cosmic (18.10), and Disco (19.04).
+Chimera provides Ubuntu packages for Trusty (14.04 LTS), Xenial (16.04 LTS), and Bionic (18.04 LTS).
 
 **Trusty**
 
@@ -34,7 +34,7 @@ $ sudo apt update
 $ sudo apt install chimera
 ```
 
-**Xenial/Bionic/Cosmic/Disco**
+**Xenial and greater**
 
 ```shell
 $ sudo add-apt-repository ppa:personalrobotics/ppa
@@ -80,7 +80,7 @@ $ make
 $ sudo make install
 ```
 
-**Xenial/Bionic**
+**Xenial and greater**
 
 ```bash
 $ sudo apt-get install llvm-4.0-dev llvm-4.0-tools libclang-4.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
