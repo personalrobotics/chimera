@@ -78,6 +78,16 @@ public:
     void AddSourcePath(const std::string &sourcePath);
 
     /**
+     * Set whether to treat unresolvable configuration as errors.
+     */
+    void SetStrict(bool val);
+
+    /**
+     * Return whether to treat unresolvable configuration as errors.
+     */
+    bool GetStrict() const;
+
+    /**
      * Process the configuration settings against the current AST.
      */
     std::unique_ptr<CompiledConfiguration> Process(
@@ -114,6 +124,7 @@ protected:
     std::string outputModuleName_;
     std::vector<std::string> inputNamespaceNames_;
     std::vector<std::string> inputSourcePaths_;
+    bool strict{false};
 
     friend class CompiledConfiguration;
 };

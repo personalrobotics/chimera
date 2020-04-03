@@ -137,6 +137,16 @@ void chimera::Configuration::AddSourcePath(const std::string &sourcePath)
     inputSourcePaths_.push_back(sourcePath);
 }
 
+void chimera::Configuration::SetStrict(bool val)
+{
+    strict = val;
+}
+
+bool chimera::Configuration::GetStrict() const
+{
+    return strict;
+}
+
 std::unique_ptr<chimera::CompiledConfiguration> chimera::Configuration::Process(
     CompilerInstance *ci) const
 {
@@ -224,10 +234,19 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Warning: Skipped namespace namespace '"
-                              << ns_str << "' because it's unable to resolve "
-                              << "the namespace." << std::endl;
-                    continue;
+                    if (parent.GetStrict())
+                    {
+                        std::cerr << "Unable to resolve namespace: "
+                                  << "'" << ns_str << "'." << std::endl;
+                        exit(-2);
+                    }
+                    else
+                    {
+                        std::cout << "Warning: Skipped namespace namespace '"
+                                  << ns_str
+                                  << "' because it's unable to resolve "
+                                  << "the namespace." << std::endl;
+                    }
                 }
             }
         }
@@ -272,10 +291,20 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                 }
 
-                std::cerr << "Warning: Skipped the configuration for "
-                          << "class '" << decl_str << "' becuase it's "
-                          << "unable to resolve the class declaration."
-                          << std::endl;
+                if (parent.GetStrict())
+                {
+                    std::cerr << "Unable to resolve class declaration: "
+                              << "'" << decl_str << "'" << std::endl;
+                    exit(-2);
+                }
+                else
+                {
+                    std::cout
+                        << "Warning: Skipped the configuration for class '"
+                        << decl_str << "' becuase it's "
+                        << "unable to resolve the class declaration."
+                        << std::endl;
+                }
             }
         }
 
@@ -302,11 +331,20 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Warning: Skipped the configuration for "
-                              << "function '" << decl_str << "' becuase it's "
-                              << "unable to resolve the function declaration."
-                              << std::endl;
-                    continue;
+                    if (parent.GetStrict())
+                    {
+                        std::cerr << "Unable to resolve function declaration: "
+                                  << "'" << decl_str << "'" << std::endl;
+                        exit(-2);
+                    }
+                    else
+                    {
+                        std::cout
+                            << "Warning: Skipped the configuration for "
+                            << "function '" << decl_str << "' becuase it's "
+                            << "unable to resolve the function declaration."
+                            << std::endl;
+                    }
                 }
             }
         }
@@ -334,10 +372,19 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Warning: Skipped the configuration for "
-                              << "type '" << type_str << "' becuase it's "
-                              << "unable to resolve the type." << std::endl;
-                    continue;
+                    if (parent.GetStrict())
+                    {
+                        std::cerr << "Unable to resolve type: "
+                                  << "'" << type_str << "'" << std::endl;
+                        exit(-2);
+                    }
+                    else
+                    {
+                        std::cout << "Warning: Skipped the configuration for "
+                                  << "type '" << type_str << "' becuase it's "
+                                  << "unable to resolve the type." << std::endl;
+                        continue;
+                    }
                 }
             }
         }
