@@ -21,7 +21,6 @@ $SUDO apt-get -y install \
   lib32z1-dev \
   lsb-release \
   pkg-config \
-  python \
   software-properties-common \
   sudo \
   wget
