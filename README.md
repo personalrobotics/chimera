@@ -80,7 +80,7 @@ $ make
 $ sudo make install
 ```
 
-**Xenial and higher**
+**Xenial and greater**
 
 ```bash
 $ sudo apt-get install llvm-4.0-dev llvm-4.0-tools libclang-4.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev

@@ -41,16 +41,25 @@ if [ $(lsb_release -sc) = "bionic" ]; then
 fi
 
 # Install pybind11 (we need pybind11 (>=2.2.0))
-if [ $(lsb_release -sc) = "xenial" ] || [ $(lsb_release -sc) = "bionic" ]; then
-  git clone https://github.com/pybind/pybind11.git
-  cd pybind11
-  git checkout tags/v2.2.4
-  mkdir build
-  cd build
-  cmake .. -DPYBIND11_TEST=OFF -DPYBIND11_PYTHON_VERSION=$PYTHON_VERSION
-  make -j4
-  $SUDO make install
-  cd ../..
-else
-  $SUDO apt-get -y install pybind11-dev
-fi
+git clone https://github.com/pybind/pybind11.git
+cd pybind11
+git checkout tags/v2.5.0
+mkdir build
+cd build
+cmake .. -DPYBIND11_TEST=OFF -DPYBIND11_PYTHON_VERSION=$PYTHON_VERSION
+make -j4
+$SUDO make install
+cd ../..
+# if [ $(lsb_release -sc) = "xenial" ] || [ $(lsb_release -sc) = "bionic" ]; then
+#   git clone https://github.com/pybind/pybind11.git
+#   cd pybind11
+#   git checkout tags/v2.2.4
+#   mkdir build
+#   cd build
+#   cmake .. -DPYBIND11_TEST=OFF -DPYBIND11_PYTHON_VERSION=$PYTHON_VERSION
+#   make -j4
+#   $SUDO make install
+#   cd ../..
+# else
+#   $SUDO apt-get -y install pybind11-dev
+# fi
