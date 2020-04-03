@@ -30,8 +30,11 @@ $SUDO apt-get -y install \
 $SUDO apt-get -y install libeigen3-dev
 $SUDO apt-get -y install libboost-python-dev libboost-thread-dev
 $SUDO apt-get -y install lcov
-$SUDO apt-get -y install python-dev python3-dev
-$SUDO apt-get -y install libpython-dev libpython3-dev
+# Install Python 2 up to Eoan
+if [ $(lsb_release -sc) = "xenial" ] || [ $(lsb_release -sc) = "bionic" ] || [ $(lsb_release -sc) = "eoan" ]; then
+  $SUDO apt-get -y install python-dev libpython-dev
+fi
+$SUDO apt-get -y install python3-dev libpython3-dev
 
 # Install ClangFormat 6
 if [ $(lsb_release -sc) = "bionic" ]; then
