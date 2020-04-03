@@ -22,12 +22,20 @@ if [ "$OS_NAME" = "linux" ] && [ $(lsb_release -sc) = "bionic" ]; then
   make check-format
 fi
 
-make -j4 tests binding_tests
+make -j4
 
-if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
-  make chimera_coverage
-else
-  ctest --output-on-failure
+# Building tests and binding_tests fails on macOS (see: https://github.com/personalrobotics/chimera/issues/218)
+if [ "${OS_NAME}" = "linux" ]; then
+  # Building binding_tests fails on Ubuntu Focal
+  if [ ! $(lsb_release -sc) = "forcal" ]; then
+    make -j4 tests binding_tests
+
+    if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
+      make chimera_coverage
+    else
+      ctest --output-on-failure
+    fi
+  fi
 fi
 
 $SUDO make install
