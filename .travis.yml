@@ -2,7 +2,7 @@ language: cpp
 
 sudo: required
 
-dist: xenial
+dist: bionic
 
 env:
   global:

@@ -4,7 +4,7 @@
 jobs:
 - job: ubuntu_xenial_gcc_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: gcc
@@ -18,7 +18,7 @@ jobs:
 
 - job: ubuntu_xenial_clang_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: clang
@@ -32,7 +32,7 @@ jobs:
 
 - job: ubuntu_bionic_gcc_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: gcc
@@ -46,7 +46,7 @@ jobs:
 
 - job: ubuntu_bionic_clang_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: clang
@@ -60,7 +60,7 @@ jobs:
 
 - job: ubuntu_eoan_gcc_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: gcc
@@ -74,7 +74,7 @@ jobs:
 
 - job: ubuntu_eoan_clang_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: clang
@@ -88,7 +88,7 @@ jobs:
 
 - job: ubuntu_focal_gcc_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: gcc
@@ -102,7 +102,7 @@ jobs:
 
 - job: ubuntu_focal_clang_release
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
   variables:
     OS_NAME: linux
     COMPILER: clang
