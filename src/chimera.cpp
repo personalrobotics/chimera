@@ -129,7 +129,7 @@ int run(int argc, const char **argv)
             chimera::Configuration::GetInstance().AddSourcePath(path);
 
     // If strict option is on, treats unresolvable configuration as errors.
-    if (!Strict)
+    if (Strict)
         chimera::Configuration::GetInstance().SetStrict(true);
 
     // Create tool that uses the command-line options.

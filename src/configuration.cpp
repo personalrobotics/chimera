@@ -8,6 +8,8 @@
 #include <map>
 #include <sstream>
 
+#include <boost/optional.hpp>
+
 using namespace clang;
 
 namespace
@@ -175,8 +177,49 @@ chimera::CompiledConfiguration::CompiledConfiguration(
   , configNode_(parent.GetRoot())         // TODO: do we need this reference?
   , bindingNode_(configNode_["template"]) // TODO: is this always ok?
   , ci_(ci)
-  , strict_(parent.strict_)
 {
+    // This placeholder will be filled in by the options.strict specified
+    // in the configuration YAML if it exists, or remain unset otherwise.
+    boost::optional<bool> config_options_strict;
+
+    // Parse 'options' section of configuration YAML if it exists.
+    if (configNode_)
+    {
+        const YAML::Node &optionsNode = configNode_["options"];
+        if (optionsNode)
+        {
+            const YAML::Node &strictNode = optionsNode["strict"];
+            if (strictNode)
+            {
+                // Check that 'strict' node in configuration YAML is a scalar.
+                if (!strictNode.IsScalar())
+                {
+                    std::cerr << "'options.strict' in configuration YAML must "
+                                 "be a scalar."
+                              << std::endl;
+                    exit(-2);
+                }
+                config_options_strict = strictNode.as<bool>();
+            }
+        }
+    }
+
+    // Set the options.strict from one of the following sources in order of
+    // priority: 1) CLI '-strict' setting (True if -strict passed, False
+    // otherwise) 2) YAML configuration setting (True/False) 3) false by default
+    if (parent.strict_)
+    {
+        strict_ = parent.strict_;
+    }
+    else if (config_options_strict)
+    {
+        strict_ = *config_options_strict;
+    }
+    else
+    {
+        strict_ = false;
+    }
+
     // This placeholder will be filled in by the binding name specified
     // in the configuration YAML if it exists, or remain empty otherwise.
     std::string config_binding_name;
@@ -523,7 +566,7 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
 
 bool chimera::CompiledConfiguration::GetStrict() const
 {
-    return true;
+    return strict_;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(
