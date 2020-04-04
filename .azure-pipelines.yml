@@ -80,7 +80,7 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 8.0  # 9 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 8  # 9 is the default but Chimera doesn't work with it
     PYTHON_VERSION: 3.7
     DOCKERFILE: Dockerfile.ubuntu-eoan
   steps:
@@ -94,7 +94,7 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 9.0
+    LLVM_VERSION: 9
     PYTHON_VERSION: 3.7
     DOCKERFILE: Dockerfile.ubuntu-eoan
   steps:
