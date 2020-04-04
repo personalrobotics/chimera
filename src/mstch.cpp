@@ -243,7 +243,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node CXXRecord::bases()
 {
-    if (const YAML::Node &node = decl_config_["bases"])
+    if (const YAML::Node node = decl_config_["bases"])
         return chimera::util::wrapYAMLNode(node);
 
     // Get all bases of this class.
@@ -296,7 +296,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node CXXRecord::type()
 {
-    if (const YAML::Node &node = decl_config_["type"])
+    if (const YAML::Node node = decl_config_["type"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedTypeName(
@@ -323,7 +323,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node CXXRecord::isCopyable()
 {
-    if (const YAML::Node &node = decl_config_["is_copyable"])
+    if (const YAML::Node node = decl_config_["is_copyable"])
         return node.as<bool>();
 
     return chimera::util::isCopyable(decl_);
@@ -331,7 +331,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 
 ::std::string CXXRecord::nameAsString()
 {
-    if (const YAML::Node &node = decl_config_["name"])
+    if (const YAML::Node node = decl_config_["name"])
         return node.as<std::string>();
 
     return chimera::util::constructBindingName(decl_);
@@ -339,7 +339,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 
 ::mstch::node CXXRecord::qualifiedName()
 {
-    if (const YAML::Node &node = decl_config_["qualified_name"])
+    if (const YAML::Node node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
     // In the special case of CXXRecords, the fully-qualified name of the
@@ -609,7 +609,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)
 
 ::mstch::node Enum::qualifiedName()
 {
-    if (const YAML::Node &node = decl_config_["qualified_name"])
+    if (const YAML::Node node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
     // In the special case of Enums, the fully-qualified name of the
