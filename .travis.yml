@@ -2,7 +2,7 @@ language: cpp
 
 sudo: required
 
-dist: xenial
+dist: bionic
 
 env:
   global:
@@ -37,12 +37,22 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=DISCO_GCC_DEBUG
+        - BUILD_NAME=EOAN_GCC_DEBUG
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=6.0
+        - LLVM_VERSION=6.0  # 9 is the default but Chimera doesn't work with it
         - PYTHON_VERSION=3.7
-        - DOCKERFILE="Dockerfile.ubuntu-disco"
+        - DOCKERFILE="Dockerfile.ubuntu-eoan"
+      services: docker
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=FOCAL_GCC_DEBUG
+        - BUILD_TYPE=Debug
+        - COMPILER=GCC
+        - LLVM_VERSION=6.0  # 10 is the default but Chimera doesn't work with it
+        - PYTHON_VERSION=3.8
+        - DOCKERFILE="Dockerfile.ubuntu-focal"
       services: docker
 
 before_install:

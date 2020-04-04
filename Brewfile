@@ -1,5 +1,5 @@
 brew 'boost'
-brew 'yaml-cpp', args: ["with-static-lib"]
+brew 'yaml-cpp'
 
 # For testing
 brew 'boost-python'
