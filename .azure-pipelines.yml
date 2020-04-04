@@ -142,7 +142,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: macos_mojave_clang_llvm6_release
+- job: macos_mojave_clang_release_llvm6
   pool:
     vmImage: 'macOS 10.14'
   variables:
@@ -151,6 +151,21 @@ jobs:
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
     LLVM_VERSION: 6
+  steps:
+  - script: |
+      . .ci/install_macos.sh
+      . .ci/script.sh
+    displayName: 'Install/Script'
+
+- job: macos_mojave_clang_release_llvm10
+  pool:
+    vmImage: 'macOS 10.14'
+  variables:
+    OS_NAME: osx
+    COMPILER: clang
+    BUILD_TYPE: Release
+    BUILD_DIR: $(Build.SourcesDirectory)
+    LLVM_VERSION: 10
   steps:
   - script: |
       . .ci/install_macos.sh
