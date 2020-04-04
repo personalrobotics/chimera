@@ -116,7 +116,17 @@ const NamedDecl *resolveDeclaration(CompilerInstance *ci,
     // Create a new parser to handle this type parsing.
     Preprocessor &preprocessor = ci->getPreprocessor();
     Sema &sema = ci->getSema();
+#if LLVM_VERSION_AT_LEAST(7, 0, 0)
+    // TODO: Since LLVM 7, segfault occurs when the destructor of clang::Parser
+    // is called. Following code workaround the segfault by not destructing
+    // the clang::Parser instance, which leads to memory leak. This should be
+    // fixed. See https://github.com/personalrobotics/chimera/issues/222
+    auto *parser_ptr
+        = new Parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
+    Parser &parser = *parser_ptr;
+#else
     Parser parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
+#endif
 
     // Set up the preprocessor to only care about incrementally handling type.
     preprocessor.getDiagnostics().setIgnoreAllWarnings(true);
