@@ -59,7 +59,7 @@ const YAML::Node chimera::CompiledConfiguration::emptyNode_(
     YAML::NodeType::Undefined);
 
 chimera::Configuration::Configuration()
-  : outputPath_("."), outputModuleName_("chimera_binding")
+  : outputPath_("."), outputModuleName_("chimera_binding"), strict_(false)
 {
     // Do nothing.
 }
@@ -142,11 +142,6 @@ void chimera::Configuration::SetStrict(bool val)
     strict = val;
 }
 
-bool chimera::Configuration::GetStrict() const
-{
-    return strict;
-}
-
 std::unique_ptr<chimera::CompiledConfiguration> chimera::Configuration::Process(
     CompilerInstance *ci) const
 {
@@ -180,6 +175,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
   , configNode_(parent.GetRoot())         // TODO: do we need this reference?
   , bindingNode_(configNode_["template"]) // TODO: is this always ok?
   , ci_(ci)
+  , strict_(parent.strict_)
 {
     // This placeholder will be filled in by the binding name specified
     // in the configuration YAML if it exists, or remain empty otherwise.
@@ -234,7 +230,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    if (parent.GetStrict())
+                    if (GetStrict())
                     {
                         std::cerr << "Unable to resolve namespace: "
                                   << "'" << ns_str << "'." << std::endl;
@@ -291,7 +287,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                 }
 
-                if (parent.GetStrict())
+                if (GetStrict())
                 {
                     std::cerr << "Unable to resolve class declaration: "
                               << "'" << decl_str << "'" << std::endl;
@@ -331,7 +327,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    if (parent.GetStrict())
+                    if (GetStrict())
                     {
                         std::cerr << "Unable to resolve function declaration: "
                                   << "'" << decl_str << "'" << std::endl;
@@ -372,7 +368,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    if (parent.GetStrict())
+                    if (GetStrict())
                     {
                         std::cerr << "Unable to resolve type: "
                                   << "'" << type_str << "'" << std::endl;
@@ -523,6 +519,11 @@ chimera::CompiledConfiguration::~CompiledConfiguration()
     // Render the mstch template to the given output file.
     *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
     std::cout << binding_filename << std::endl;
+}
+
+bool chimera::CompiledConfiguration::GetStrict() const
+{
+    return true;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(
