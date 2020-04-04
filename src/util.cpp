@@ -116,7 +116,10 @@ const NamedDecl *resolveDeclaration(CompilerInstance *ci,
     // Create a new parser to handle this type parsing.
     Preprocessor &preprocessor = ci->getPreprocessor();
     Sema &sema = ci->getSema();
-    Parser parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
+    auto *parser_ptr
+        = new Parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
+    Parser &parser = *parser_ptr;
+    // Parser parser(preprocessor, sema, /* SkipFunctionBodies = */ false);
 
     // Set up the preprocessor to only care about incrementally handling type.
     preprocessor.getDiagnostics().setIgnoreAllWarnings(true);
