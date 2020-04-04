@@ -121,7 +121,7 @@ protected:
 class CompiledConfiguration
 {
 public:
-    virtual ~CompiledConfiguration();
+    virtual ~CompiledConfiguration() noexcept(false);
     CompiledConfiguration(const CompiledConfiguration &) = delete;
     CompiledConfiguration &operator=(const CompiledConfiguration &) = delete;
 
