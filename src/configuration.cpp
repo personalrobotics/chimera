@@ -139,7 +139,7 @@ void chimera::Configuration::AddSourcePath(const std::string &sourcePath)
 
 void chimera::Configuration::SetStrict(bool val)
 {
-    strict = val;
+    strict_ = val;
 }
 
 std::unique_ptr<chimera::CompiledConfiguration> chimera::Configuration::Process(
