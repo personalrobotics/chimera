@@ -32,7 +32,7 @@ endif()
 
 # Check if LLVM is compatible with Chimera
 # LLVM >= 7 is disabled: https://github.com/personalrobotics/chimera/issues/222
-set(COMPATIBLE_LLVM_VERSIONS 3.6 3.9 6.0)
+set(COMPATIBLE_LLVM_VERSIONS 3.6 3.9 6.0 8.0 9.0 10.0)
 set(LLVM_VERSION_MAJOR_MINOR ${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR})
 set(FOUND_COMPATIBLE_LLVM FALSE)
 foreach(version ${COMPATIBLE_LLVM_VERSIONS})
