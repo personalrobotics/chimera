@@ -194,7 +194,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     if (configNode_)
     {
         // Parse 'namespaces' section of configuration YAML if it exists.
-        const YAML::Node &namespacesNode = configNode_["namespaces"];
+        const YAML::Node namespacesNode = configNode_["namespaces"];
         if (namespacesNode)
         {
             // Check that 'namespaces' node in configuration YAML is a map.
@@ -232,7 +232,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'classes' section of configuration YAML if it exists.
-        const YAML::Node &classesNode = configNode_["classes"];
+        const YAML::Node classesNode = configNode_["classes"];
         if (classesNode)
         {
             // Check that 'classes' node in configuration YAML is a map.
@@ -244,7 +244,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             }
 
             // Resolve class/struct configuration entries within provided AST.
-            for (const auto &it : configNode_["classes"])
+            for (const auto it : configNode_["classes"])
             {
                 std::string decl_str = it.first.as<std::string>();
 
@@ -278,7 +278,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'functions' section of configuration YAML if it exists.
-        const YAML::Node &functionsNode = configNode_["functions"];
+        const YAML::Node functionsNode = configNode_["functions"];
         if (functionsNode)
         {
             // Check that 'functions' node in configuration YAML is a map.
@@ -308,7 +308,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'types' section of configuration YAML if it exists.
-        const YAML::Node &typesNode = configNode_["types"];
+        const YAML::Node typesNode = configNode_["types"];
         if (typesNode)
         {
             // Check that 'types' node in configuration YAML is a map.
@@ -338,7 +338,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'binding' section of configuration YAML if it exists.
-        const YAML::Node &bindingNode = configNode_["binding"];
+        const YAML::Node bindingNode = configNode_["binding"];
         if (bindingNode)
         {
             // Check that 'binding' node in configuration YAML is a scalar.
@@ -381,19 +381,19 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Override individual templates if specified in the configuration.
     if (bindingNode_)
     {
-        if (const YAML::Node &classTemplateNode = bindingNode_["class"])
+        if (const YAML::Node classTemplateNode = bindingNode_["class"])
             bindingDefinition_.class_cpp = Lookup(classTemplateNode);
 
-        if (const YAML::Node &enumTemplateNode = bindingNode_["enum"])
+        if (const YAML::Node enumTemplateNode = bindingNode_["enum"])
             bindingDefinition_.enum_cpp = Lookup(enumTemplateNode);
 
-        if (const YAML::Node &functionTemplateNode = bindingNode_["function"])
+        if (const YAML::Node functionTemplateNode = bindingNode_["function"])
             bindingDefinition_.function_cpp = Lookup(functionTemplateNode);
 
-        if (const YAML::Node &moduleTemplateNode = bindingNode_["module"])
+        if (const YAML::Node moduleTemplateNode = bindingNode_["module"])
             bindingDefinition_.module_cpp = Lookup(moduleTemplateNode);
 
-        if (const YAML::Node &variableTemplateNode = bindingNode_["variable"])
+        if (const YAML::Node variableTemplateNode = bindingNode_["variable"])
             bindingDefinition_.variable_cpp = Lookup(variableTemplateNode);
     }
 

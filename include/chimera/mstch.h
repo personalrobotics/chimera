@@ -85,7 +85,7 @@ public:
 
     virtual ::std::string nameAsString()
     {
-        if (const YAML::Node &node = decl_config_["name"])
+        if (const YAML::Node node = decl_config_["name"])
         {
             // Convert a `null` to an empty string.
             // This helps users semantically mark names that should be
@@ -108,7 +108,7 @@ public:
 
     virtual ::mstch::node mangledName()
     {
-        if (const YAML::Node &node = decl_config_["mangled_name"])
+        if (const YAML::Node node = decl_config_["mangled_name"])
             return node.as<std::string>();
 
         return chimera::util::constructMangledName(decl_);
@@ -137,7 +137,7 @@ public:
 
     virtual ::mstch::node qualifiedName()
     {
-        if (const YAML::Node &node = decl_config_["qualified_name"])
+        if (const YAML::Node node = decl_config_["qualified_name"])
             return node.as<std::string>();
 
         return decl_->getQualifiedNameAsString();
