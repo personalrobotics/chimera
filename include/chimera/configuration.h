@@ -121,7 +121,7 @@ protected:
 class CompiledConfiguration
 {
 public:
-    virtual ~CompiledConfiguration() noexcept(false);
+    virtual ~CompiledConfiguration() = default;
     CompiledConfiguration(const CompiledConfiguration &) = delete;
     CompiledConfiguration &operator=(const CompiledConfiguration &) = delete;
 
@@ -215,6 +215,12 @@ public:
     bool Render(const std::shared_ptr<chimera::mstch::Enum> context);
     bool Render(const std::shared_ptr<chimera::mstch::Function> context);
     bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
+
+    /**
+     * Renders the top-level mstch template. The rendered filename is specified
+     * by Configuration::SetOutputModuleName().
+     */
+    void Render();
 
 private:
     CompiledConfiguration(const Configuration &parent,
