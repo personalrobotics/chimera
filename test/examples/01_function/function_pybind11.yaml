@@ -5,6 +5,11 @@ arguments:
 namespaces:
   'chimera_test':
     name: null # TODO: otherwise, import error
+template:
+  file:
+    header: |
+      #include <pybind11/stl.h>
+      #include <pybind11/stl_bind.h>
 classes:
   'template <typename T> chimera_test::SuppressedTemplateClass': null
   'chimera_test::SuppressedClass': null

@@ -15,6 +15,34 @@ class TestFunction(unittest.TestCase):
         if not has_pybind11:
             return
 
+        self.assertTrue(hasattr(py11, 'void_bool'))
+        self.assertTrue(hasattr(py11, 'void_int'))
+        self.assertTrue(hasattr(py11, 'void_long'))
+        self.assertTrue(hasattr(py11, 'void_float'))
+        self.assertTrue(hasattr(py11, 'void_double'))
+        # self.assertTrue(hasattr(py11, 'void_a'))
+        self.assertTrue(hasattr(py11, 'void_shared_a'))
+        self.assertTrue(hasattr(py11, 'void_pair'))
+
+        self.assertTrue(hasattr(py11, 'void_cr_bool'))
+        self.assertTrue(hasattr(py11, 'void_cr_int'))
+        self.assertTrue(hasattr(py11, 'void_cr_long'))
+        self.assertTrue(hasattr(py11, 'void_cr_float'))
+        self.assertTrue(hasattr(py11, 'void_cr_double'))
+        self.assertTrue(hasattr(py11, 'void_cr_a'))
+        self.assertTrue(hasattr(py11, 'void_cr_shared_a'))
+        self.assertTrue(hasattr(py11, 'void_cr_shared_c_a'))
+        self.assertTrue(hasattr(py11, 'void_cr_pair'))
+
+        self.assertTrue(hasattr(py11, 'void_p_bool'))
+        self.assertTrue(hasattr(py11, 'void_p_int'))
+        self.assertTrue(hasattr(py11, 'void_p_long'))
+        self.assertTrue(hasattr(py11, 'void_p_float'))
+        self.assertTrue(hasattr(py11, 'void_p_double'))
+        self.assertTrue(hasattr(py11, 'void_p_a'))
+        self.assertTrue(hasattr(py11, 'void_p_shared_a'))
+        # self.assertTrue(hasattr(py11, 'void_p_pair'))
+
         self.assertEqual(py11.add(), 3)
         self.assertEqual(py11.add(3, 4), 7)
         self.assertEqual(py11.add(i=5, j=6), 11)
