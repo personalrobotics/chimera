@@ -1,11 +1,15 @@
 #ifndef __DART_EXAMPLE_H__
 #define __DART_EXAMPLE_H__
 
-namespace dart {
-namespace common {
+namespace dart
+{
+namespace common
+{
 
-namespace signal {
-namespace detail {
+namespace signal
+{
+namespace detail
+{
 
 template <typename T>
 struct DefaultCombiner
@@ -16,15 +20,14 @@ struct DefaultCombiner
 } // namespace signal
 
 template <typename _Signature,
-          template<class> class Combiner = signal::detail::DefaultCombiner>
-          class Signal;
-
+          template <class> class Combiner = signal::detail::DefaultCombiner>
+class Signal;
 
 template <typename... _ArgTypes>
 class Signal<void(_ArgTypes...)>
 {
 public:
-  void f() { /* do nothing */ };
+    void f(){/* do nothing */};
 };
 
 template <typename T>
@@ -32,9 +35,10 @@ class SlotRegister
 {
 };
 
-}  // namespace common
+} // namespace common
 
-namespace dynamics {
+namespace dynamics
+{
 
 class Frame
 {
@@ -42,15 +46,13 @@ class Frame
 
 class Entity
 {
-  using FrameChangedSignal
-        = common::Signal<void(const Entity*,
-                         const Frame* _oldFrame,
-                         const Frame* _newFrame)>;
+    using FrameChangedSignal = common::Signal<void(
+        const Entity *, const Frame *_oldFrame, const Frame *_newFrame)>;
 
-  FrameChangedSignal mFrameChangedSignal;
+    FrameChangedSignal mFrameChangedSignal;
 };
 
-}  // namespace dynamics
-}  // namespace dart
+} // namespace dynamics
+} // namespace dart
 
 #endif // __DART_EXAMPLE_H__

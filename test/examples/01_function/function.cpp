@@ -1,43 +1,44 @@
 #include "function.h"
 
-namespace chimera_test {
+namespace chimera_test
+{
 
 //==============================================================================
 int add(int i, int j)
 {
-  return i + j;
+    return i + j;
 }
 
 //==============================================================================
-int void_pointer_param(void* dummy)
+int void_pointer_param(void *dummy)
 {
-  Dummy* casted = static_cast<Dummy*>(dummy);
-  return casted->val;
+    Dummy *casted = static_cast<Dummy *>(dummy);
+    return casted->val;
 }
 
 //==============================================================================
 void void_param()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 void void_return()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
-void function_with_suppressed_param(const SuppressedClass&)
+void function_with_suppressed_param(const SuppressedClass &)
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 void function_with_suppressed_template_param(
-  const SuppressedTemplateClass<int>&)
+    const SuppressedTemplateClass<int> &)
 {
-  // Do nothing
+    // Do nothing
 }
 
 } // namespace chimera_test
