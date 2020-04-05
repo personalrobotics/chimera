@@ -3,6 +3,7 @@
 
 #include "chimera/configuration.h"
 
+#include <memory>
 #include <set>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
@@ -15,7 +16,7 @@ class Visitor : public clang::RecursiveASTVisitor<Visitor>
 {
 public:
     Visitor(clang::CompilerInstance *ci,
-            std::unique_ptr<CompiledConfiguration> cc);
+            std::shared_ptr<CompiledConfiguration> cc);
 
     bool shouldVisitImplicitCode() const;
     bool shouldVisitTemplateInstantiations() const;
@@ -29,7 +30,7 @@ protected:
 
 private:
     clang::PrintingPolicy printing_policy_;
-    std::unique_ptr<CompiledConfiguration> config_;
+    std::shared_ptr<CompiledConfiguration> config_;
 
     std::set<const clang::CXXRecordDecl *> traversed_class_decls_;
 };

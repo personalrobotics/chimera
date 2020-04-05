@@ -408,71 +408,6 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         = [](const std::string &str) -> std::string { return str; };
 }
 
-chimera::CompiledConfiguration::~CompiledConfiguration()
-{
-    // Create and sanitize path and filename of top-level source file.
-    // Because we may compress the filename to fit OS character limits,
-    // we generate the full path, then split the filename from it.
-    const std::string binding_path = sanitizePath(
-        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
-    size_t path_index = binding_path.find_last_of("/");
-    const std::string binding_filename
-        = (path_index == std::string::npos)
-              ? ""
-              : binding_path.substr(path_index + 1);
-
-    // Create an output file depending on the provided parameters.
-    auto stream = ci_->createOutputFile(
-        binding_path,
-        false, // Open the file in binary mode
-        false, // Register with llvm::sys::RemoveFileOnSignal
-        "",    // The derived basename (shouldn't be used)
-        "",    // The extension to use for derived name (shouldn't be used)
-        false, // Use a temporary file that should be renamed
-        false  // Create missing directories in the output path
-    );
-
-    // If file creation failed, report the error and fail immediately.
-    if (!stream)
-    {
-        std::cerr << "Failed to create top-level output file "
-                  << "'" << binding_path << "'." << std::endl;
-        exit(-4);
-    }
-
-    // Create collections for the ordered sets of bindings, sources,
-    // and namespaces.
-    ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
-    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
-                                      binding_namespaces_.end());
-    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
-                                   parent_.inputSourcePaths_.end());
-
-    // Create a top-level context that contains the extracted information
-    // about the module.
-    ::mstch::map full_context{
-        {"module",
-         ::mstch::map{{"name", parent_.GetOutputModuleName()},
-                      {"bindings", binding_names},
-                      {"sources", binding_sources},
-                      // Note: binding namespaces will be lexically ordered.
-                      {"namespaces", binding_namespaces}}}};
-
-    // Resolve customizable snippets that will be inserted into the file
-    // from the configuration file's "template::main" entry.
-    if (bindingNode_)
-    {
-        chimera::util::extendWithYAMLNode(
-            full_context, bindingNode_["main"], false,
-            std::bind(&chimera::CompiledConfiguration::Lookup, this,
-                      std::placeholders::_1));
-    }
-
-    // Render the mstch template to the given output file.
-    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
-    std::cout << binding_filename << std::endl;
-}
-
 void chimera::CompiledConfiguration::AddTraversedNamespace(
     const clang::NamespaceDecl *decl)
 {
@@ -802,4 +737,69 @@ bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Variable> context)
 {
     return Render(bindingDefinition_.variable_cpp, "variable", context);
+}
+
+void chimera::CompiledConfiguration::Render()
+{
+    // Create and sanitize path and filename of top-level source file.
+    // Because we may compress the filename to fit OS character limits,
+    // we generate the full path, then split the filename from it.
+    const std::string binding_path = sanitizePath(
+        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
+    size_t path_index = binding_path.find_last_of("/");
+    const std::string binding_filename
+        = (path_index == std::string::npos)
+              ? ""
+              : binding_path.substr(path_index + 1);
+
+    // Create an output file depending on the provided parameters.
+    auto stream = ci_->createOutputFile(
+        binding_path,
+        false, // Open the file in binary mode
+        false, // Register with llvm::sys::RemoveFileOnSignal
+        "",    // The derived basename (shouldn't be used)
+        "",    // The extension to use for derived name (shouldn't be used)
+        false, // Use a temporary file that should be renamed
+        false  // Create missing directories in the output path
+    );
+
+    // If file creation failed, report the error and fail immediately.
+    if (!stream)
+    {
+        std::cerr << "Failed to create top-level output file "
+                  << "'" << binding_path << "'." << std::endl;
+        exit(-4);
+    }
+
+    // Create collections for the ordered sets of bindings, sources,
+    // and namespaces.
+    ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
+    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
+                                      binding_namespaces_.end());
+    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
+                                   parent_.inputSourcePaths_.end());
+
+    // Create a top-level context that contains the extracted information
+    // about the module.
+    ::mstch::map full_context{
+        {"module",
+         ::mstch::map{{"name", parent_.GetOutputModuleName()},
+                      {"bindings", binding_names},
+                      {"sources", binding_sources},
+                      // Note: binding namespaces will be lexically ordered.
+                      {"namespaces", binding_namespaces}}}};
+
+    // Resolve customizable snippets that will be inserted into the file
+    // from the configuration file's "template::main" entry.
+    if (bindingNode_)
+    {
+        chimera::util::extendWithYAMLNode(
+            full_context, bindingNode_["main"], false,
+            std::bind(&chimera::CompiledConfiguration::Lookup, this,
+                      std::placeholders::_1));
+    }
+
+    // Render the mstch template to the given output file.
+    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
+    std::cout << binding_filename << std::endl;
 }
