@@ -15,8 +15,7 @@ namespace chimera
 class Visitor : public clang::RecursiveASTVisitor<Visitor>
 {
 public:
-    Visitor(clang::CompilerInstance *ci,
-            std::shared_ptr<CompiledConfiguration> cc);
+    Visitor(clang::CompilerInstance *ci, CompiledConfiguration &cc);
 
     bool shouldVisitImplicitCode() const;
     bool shouldVisitTemplateInstantiations() const;
@@ -30,7 +29,7 @@ protected:
 
 private:
     clang::PrintingPolicy printing_policy_;
-    std::shared_ptr<CompiledConfiguration> config_;
+    CompiledConfiguration &config_;
 
     std::set<const clang::CXXRecordDecl *> traversed_class_decls_;
 };

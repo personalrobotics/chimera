@@ -217,8 +217,8 @@ public:
     bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
 
     /**
-     * Renders the top-level mstch template where the filename is specified by
-     * Configuration::SetOutputModuleName().
+     * Renders the top-level mstch template. The rendered filename is specified
+     * by Configuration::SetOutputModuleName().
      */
     void Render();
 
