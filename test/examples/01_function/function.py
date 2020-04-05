@@ -15,11 +15,6 @@ class TestFunction(unittest.TestCase):
         if not has_pybind11:
             return
 
-        py11.foo(True)
-        py11.foo(0)
-        py11.foo(0l)
-        py11.foo(0.0)
-
         self.assertEqual(py11.add(), 3)
         self.assertEqual(py11.add(3, 4), 7)
         self.assertEqual(py11.add(i=5, j=6), 11)

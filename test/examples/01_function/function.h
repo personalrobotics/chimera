@@ -1,35 +1,7 @@
-#pragma once
-
 #include <memory>
 
 namespace chimera_test
 {
-
-class A
-{
-};
-
-inline void void_bool(bool)
-{
-}
-inline void void_int(int)
-{
-}
-inline void void_long(long)
-{
-}
-inline void void_float(float)
-{
-}
-inline void void_double(double)
-{
-}
-inline void void_a(A)
-{
-}
-inline void void_shared_a(std::shared_ptr<A>)
-{
-}
 
 int add(int i = 1, int j = 2);
 
