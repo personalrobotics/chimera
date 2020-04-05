@@ -2,6 +2,7 @@
 #include "chimera/mstch.h"
 #include "chimera/util.h"
 
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -82,10 +83,10 @@ void chimera::Configuration::LoadFile(const std::string &filename)
     catch (YAML::Exception &e)
     {
         // If unable to read the configuration YAML, terminate with an error.
-        std::cerr << "Unable to read configuration '" << filename << "'."
-                  << std::endl
-                  << e.what() << std::endl;
-        exit(-1);
+        std::stringstream ss;
+        ss << "Unable to read configuration '" << filename << "'.\n"
+           << e.what();
+        throw std::invalid_argument(ss.str());
     }
 }
 
@@ -96,8 +97,8 @@ void chimera::Configuration::SetBindingName(const std::string &name)
     // soon as possible to a possible parsing issue.
     if (name.empty())
     {
-        std::cerr << "Binding name cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Binding name cannot be set to empty string.");
     }
     bindingName_ = name;
 }
@@ -109,8 +110,8 @@ void chimera::Configuration::SetOutputPath(const std::string &path)
     // user as soon as possible to a possible parsing issue.
     if (path.empty())
     {
-        std::cerr << "Output path cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Output path cannot be set to empty string.");
     }
     outputPath_ = path;
 }
@@ -122,8 +123,8 @@ void chimera::Configuration::SetOutputModuleName(const std::string &moduleName)
     // user as soon as possible to a possible parsing issue.
     if (moduleName.empty())
     {
-        std::cerr << "Module name cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Module name cannot be set to empty string.");
     }
     outputModuleName_ = moduleName;
 }
@@ -243,15 +244,14 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     if (configNode_)
     {
         // Parse 'namespaces' section of configuration YAML if it exists.
-        const YAML::Node &namespacesNode = configNode_["namespaces"];
+        const YAML::Node namespacesNode = configNode_["namespaces"];
         if (namespacesNode)
         {
             // Check that 'namespaces' node in configuration YAML is a map.
             if (!namespacesNode.IsMap())
             {
-                std::cerr << "'namespaces' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'namespaces' in configuration YAML must be a map.");
             }
 
             // Resolve namespace configuration entries within provided AST.
@@ -275,9 +275,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (GetStrict())
                     {
-                        std::cerr << "Unable to resolve namespace: "
-                                  << "'" << ns_str << "'." << std::endl;
-                        exit(-2);
+                        throw std::runtime_error(
+                            "Unable to resolve namespace: '" + ns_str + "'.");
                     }
                     else
                     {
@@ -291,19 +290,18 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'classes' section of configuration YAML if it exists.
-        const YAML::Node &classesNode = configNode_["classes"];
+        const YAML::Node classesNode = configNode_["classes"];
         if (classesNode)
         {
             // Check that 'classes' node in configuration YAML is a map.
             if (!classesNode.IsMap())
             {
-                std::cerr << "'classes' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'classes' in configuration YAML must be a map.");
             }
 
             // Resolve class/struct configuration entries within provided AST.
-            for (const auto &it : configNode_["classes"])
+            for (const auto it : configNode_["classes"])
             {
                 std::string decl_str = it.first.as<std::string>();
 
@@ -332,9 +330,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 
                 if (GetStrict())
                 {
-                    std::cerr << "Unable to resolve class declaration: "
-                              << "'" << decl_str << "'" << std::endl;
-                    exit(-2);
+                    throw std::runtime_error(
+                        "Unable to resolve class declaration: '" + decl_str + "'");
                 }
                 else
                 {
@@ -348,15 +345,14 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'functions' section of configuration YAML if it exists.
-        const YAML::Node &functionsNode = configNode_["functions"];
+        const YAML::Node functionsNode = configNode_["functions"];
         if (functionsNode)
         {
             // Check that 'functions' node in configuration YAML is a map.
             if (!functionsNode.IsMap())
             {
-                std::cerr << "'functions' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'functions' in configuration YAML must be a map.");
             }
 
             // Resolve function configuration entries within provided AST.
@@ -372,9 +368,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (GetStrict())
                     {
-                        std::cerr << "Unable to resolve function declaration: "
-                                  << "'" << decl_str << "'" << std::endl;
-                        exit(-2);
+                        throw std::runtime_error(
+                            "Unable to resolve function declaration: '" + decl_str
+                            + "'");
                     }
                     else
                     {
@@ -389,15 +385,14 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'types' section of configuration YAML if it exists.
-        const YAML::Node &typesNode = configNode_["types"];
+        const YAML::Node typesNode = configNode_["types"];
         if (typesNode)
         {
             // Check that 'types' node in configuration YAML is a map.
             if (!typesNode.IsMap())
             {
-                std::cerr << "'types' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'types' in configuration YAML must be a map.");
             }
 
             // Resolve type configuration entries within provided AST.
@@ -413,9 +408,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (GetStrict())
                     {
-                        std::cerr << "Unable to resolve type: "
-                                  << "'" << type_str << "'" << std::endl;
-                        exit(-2);
+                        throw std::runtime_error(
+                            "Unable to resolve type: '" + type_str + "'");
                     }
                     else
                     {
@@ -429,15 +423,14 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         // Parse 'binding' section of configuration YAML if it exists.
-        const YAML::Node &bindingNode = configNode_["binding"];
+        const YAML::Node bindingNode = configNode_["binding"];
         if (bindingNode)
         {
             // Check that 'binding' node in configuration YAML is a scalar.
             if (!bindingNode.IsScalar())
             {
-                std::cerr << "'binding' in configuration YAML must be a scalar."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'binding' in configuration YAML must be a scalar.");
             }
             config_binding_name = bindingNode.as<std::string>();
         }
@@ -463,28 +456,27 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     const auto bindingIt = chimera::binding::DEFINITIONS.find(binding_name_);
     if (bindingIt == chimera::binding::DEFINITIONS.end())
     {
-        std::cerr << "Unable to resolve binding definition: "
-                  << "'" << binding_name_ << "'" << std::endl;
-        exit(-2);
+        throw std::runtime_error(
+            "Unable to resolve binding definition: " + binding_name_ + "'");
     }
     bindingDefinition_ = bindingIt->second;
 
     // Override individual templates if specified in the configuration.
     if (bindingNode_)
     {
-        if (const YAML::Node &classTemplateNode = bindingNode_["class"])
+        if (const YAML::Node classTemplateNode = bindingNode_["class"])
             bindingDefinition_.class_cpp = Lookup(classTemplateNode);
 
-        if (const YAML::Node &enumTemplateNode = bindingNode_["enum"])
+        if (const YAML::Node enumTemplateNode = bindingNode_["enum"])
             bindingDefinition_.enum_cpp = Lookup(enumTemplateNode);
 
-        if (const YAML::Node &functionTemplateNode = bindingNode_["function"])
+        if (const YAML::Node functionTemplateNode = bindingNode_["function"])
             bindingDefinition_.function_cpp = Lookup(functionTemplateNode);
 
-        if (const YAML::Node &moduleTemplateNode = bindingNode_["module"])
+        if (const YAML::Node moduleTemplateNode = bindingNode_["module"])
             bindingDefinition_.module_cpp = Lookup(moduleTemplateNode);
 
-        if (const YAML::Node &variableTemplateNode = bindingNode_["variable"])
+        if (const YAML::Node variableTemplateNode = bindingNode_["variable"])
             bindingDefinition_.variable_cpp = Lookup(variableTemplateNode);
     }
 
@@ -497,71 +489,6 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     //
     ::mstch::config::escape
         = [](const std::string &str) -> std::string { return str; };
-}
-
-chimera::CompiledConfiguration::~CompiledConfiguration()
-{
-    // Create and sanitize path and filename of top-level source file.
-    // Because we may compress the filename to fit OS character limits,
-    // we generate the full path, then split the filename from it.
-    const std::string binding_path = sanitizePath(
-        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
-    size_t path_index = binding_path.find_last_of("/");
-    const std::string binding_filename
-        = (path_index == std::string::npos)
-              ? ""
-              : binding_path.substr(path_index + 1);
-
-    // Create an output file depending on the provided parameters.
-    auto stream = ci_->createOutputFile(
-        binding_path,
-        false, // Open the file in binary mode
-        false, // Register with llvm::sys::RemoveFileOnSignal
-        "",    // The derived basename (shouldn't be used)
-        "",    // The extension to use for derived name (shouldn't be used)
-        false, // Use a temporary file that should be renamed
-        false  // Create missing directories in the output path
-    );
-
-    // If file creation failed, report the error and fail immediately.
-    if (!stream)
-    {
-        std::cerr << "Failed to create top-level output file "
-                  << "'" << binding_path << "'." << std::endl;
-        exit(-4);
-    }
-
-    // Create collections for the ordered sets of bindings, sources,
-    // and namespaces.
-    ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
-    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
-                                      binding_namespaces_.end());
-    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
-                                   parent_.inputSourcePaths_.end());
-
-    // Create a top-level context that contains the extracted information
-    // about the module.
-    ::mstch::map full_context{
-        {"module",
-         ::mstch::map{{"name", parent_.GetOutputModuleName()},
-                      {"bindings", binding_names},
-                      {"sources", binding_sources},
-                      // Note: binding namespaces will be lexically ordered.
-                      {"namespaces", binding_namespaces}}}};
-
-    // Resolve customizable snippets that will be inserted into the file
-    // from the configuration file's "template::main" entry.
-    if (bindingNode_)
-    {
-        chimera::util::extendWithYAMLNode(
-            full_context, bindingNode_["main"], false,
-            std::bind(&chimera::CompiledConfiguration::Lookup, this,
-                      std::placeholders::_1));
-    }
-
-    // Render the mstch template to the given output file.
-    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
-    std::cout << binding_filename << std::endl;
 }
 
 bool chimera::CompiledConfiguration::GetStrict() const
@@ -755,9 +682,8 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
     // If the node is not scalar, we cannot load it, so return the default.
     if (!node.IsScalar())
     {
-        std::cerr << "Unable to parse expected scalar or file source."
-                  << std::endl;
-        exit(-2);
+        throw std::invalid_argument(
+            "Unable to parse expected scalar or file source.");
     }
 
     // If the node type tag is "!file" then load the contents of a file.
@@ -787,9 +713,10 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
         std::ifstream source(source_path);
         if (source.fail())
         {
-            std::cerr << "Failed to open source '" << source_path
-                      << "': " << strerror(errno) << std::endl;
-            exit(-5);
+            std::stringstream ss;
+            ss << "Failed to open source '" << source_path
+               << "': " << strerror(errno);
+            throw std::runtime_error(ss.str());
         }
 
         // Copy file content to the output stream.
@@ -841,12 +768,10 @@ bool chimera::CompiledConfiguration::Render(
     // If file creation failed, report the error and fail immediately.
     if (!stream)
     {
-        std::cerr << "Failed to create output file "
-                  << "'" << binding_path << "'"
-                  << " for "
-                  << "'" << ::mstch::render("{{name}}", context) << "'."
-                  << std::endl;
-        exit(-6);
+        std::stringstream ss;
+        ss << "Failed to create output file '" << binding_path << "' for '"
+           << ::mstch::render("{{name}}", context) << "'.";
+        throw std::runtime_error(ss.str());
     }
 
     // Create collections for the ordered sets of sources.
@@ -898,4 +823,68 @@ bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Variable> context)
 {
     return Render(bindingDefinition_.variable_cpp, "variable", context);
+}
+
+void chimera::CompiledConfiguration::Render()
+{
+    // Create and sanitize path and filename of top-level source file.
+    // Because we may compress the filename to fit OS character limits,
+    // we generate the full path, then split the filename from it.
+    const std::string binding_path = sanitizePath(
+        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
+    size_t path_index = binding_path.find_last_of("/");
+    const std::string binding_filename
+        = (path_index == std::string::npos)
+              ? ""
+              : binding_path.substr(path_index + 1);
+
+    // Create an output file depending on the provided parameters.
+    auto stream = ci_->createOutputFile(
+        binding_path,
+        false, // Open the file in binary mode
+        false, // Register with llvm::sys::RemoveFileOnSignal
+        "",    // The derived basename (shouldn't be used)
+        "",    // The extension to use for derived name (shouldn't be used)
+        false, // Use a temporary file that should be renamed
+        false  // Create missing directories in the output path
+    );
+
+    // If file creation failed, report the error and fail immediately.
+    if (!stream)
+    {
+        throw std::runtime_error("Failed to create top-level output file '"
+                                 + binding_path + "'");
+    }
+
+    // Create collections for the ordered sets of bindings, sources,
+    // and namespaces.
+    ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
+    ::mstch::array binding_namespaces(binding_namespaces_.begin(),
+                                      binding_namespaces_.end());
+    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
+                                   parent_.inputSourcePaths_.end());
+
+    // Create a top-level context that contains the extracted information
+    // about the module.
+    ::mstch::map full_context{
+        {"module",
+         ::mstch::map{{"name", parent_.GetOutputModuleName()},
+                      {"bindings", binding_names},
+                      {"sources", binding_sources},
+                      // Note: binding namespaces will be lexically ordered.
+                      {"namespaces", binding_namespaces}}}};
+
+    // Resolve customizable snippets that will be inserted into the file
+    // from the configuration file's "template::main" entry.
+    if (bindingNode_)
+    {
+        chimera::util::extendWithYAMLNode(
+            full_context, bindingNode_["main"], false,
+            std::bind(&chimera::CompiledConfiguration::Lookup, this,
+                      std::placeholders::_1));
+    }
+
+    // Render the mstch template to the given output file.
+    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
+    std::cout << binding_filename << std::endl;
 }

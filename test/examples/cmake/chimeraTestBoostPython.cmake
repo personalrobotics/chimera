@@ -108,5 +108,8 @@ function(chimera_add_binding_test_boost_python test_name)
     )
   endif()
 
+  clang_format_add_sources(${chimera_test_SOURCES})
+  clang_format_add_sources(${chimera_test_EXTRA_SOURCES})
+
   set_property(GLOBAL APPEND PROPERTY CHIMERA_BOOST_PYTHON_BINDING_TESTS ${test_name})
 endfunction(chimera_add_binding_test_boost_python)

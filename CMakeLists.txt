@@ -143,12 +143,6 @@ clang_format_add_sources(src/chimera_main.cpp)
 # Generate built-in template bindings for supported languages.
 add_subdirectory(bindings)
 
-# Add main sources for code formatting
-clang_format_add_sources(
-  ${${PROJECT_NAME}_HEADERS}
-  ${${PROJECT_NAME}_SOURCES}
-)
-
 #############
 ## INSTALL ##
 #############

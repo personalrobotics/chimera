@@ -1,4 +1,4 @@
-# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![Build Status](https://dev.azure.com/personalrobotics/chimera/_apis/build/status/personalrobotics.chimera?branchName=master)](https://dev.azure.com/personalrobotics/chimera/_build/latest?definitionId=2?branchName=master) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera)
+# chimera [![Build Status](https://travis-ci.org/personalrobotics/chimera.svg?branch=master)](https://travis-ci.org/personalrobotics/chimera) [![Build Status](https://dev.azure.com/personalrobotics/chimera/_apis/build/status/personalrobotics.chimera?branchName=master)](https://dev.azure.com/personalrobotics/chimera/_build/latest?definitionId=2&branchName=master) [![codecov](https://codecov.io/gh/personalrobotics/chimera/branch/master/graph/badge.svg)](https://codecov.io/gh/personalrobotics/chimera)
 
 > ##### chi·me·ra
 >
@@ -23,7 +23,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Trusty (14.04 LTS), Xenial (16.04 LTS), and Bionic (18.04 LTS).
+Chimera provides Ubuntu packages for Trusty (14.04 LTS), Xenial (16.04 LTS), Bionic (18.04 LTS), and Eoan (19.10).
 
 **Trusty**
 
@@ -57,13 +57,15 @@ $ brew install chimera
 
 ### Requirements
 
-* libclang 3.6, 3,9 or 6.0
-* llvm 3.6, 3,9 or 6.0 (+ tools)
+* libclang 3.6, 3,9 or 6.0, 7, 8, 9
+* llvm 3.6, 3,9, 6.0, 7, 8, 9 (+ tools)
 * libedit
 * yaml-cpp
 * boost
 
 ### On Ubuntu from Source
+
+#### Install Dependencies
 
 **Trusty**
 
@@ -72,18 +74,23 @@ $ sudo apt-add-repository ppa:george-edison55/cmake-3.x
 $ sudo apt-get update
 $ sudo apt-get install cmake
 $ sudo apt-get install llvm-3.7-dev llvm-3.7-tools libclang-3.7-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
-$ git clone https://github.com/personalrobotics/chimera.git
-$ cd chimera
-$ mkdir build && cd build
-$ cmake -DCMAKE_BUILD_TYPE=Release ..
-$ make
-$ sudo make install
 ```
 
-**Xenial and greater**
+**Xenial**
 
 ```bash
-$ sudo apt-get install llvm-4.0-dev llvm-4.0-tools libclang-4.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+$ sudo apt-get install llvm-3.9-dev llvm-3.9-tools libclang-3.9-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+```
+
+**Bionic and greater**
+
+```bash
+$ sudo apt-get install llvm-6.0-dev llvm-6.0-tools libclang-6.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+```
+
+#### Build Chimera
+
+```bash
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
@@ -95,8 +102,8 @@ $ sudo make install
 ### On macOS from Source
 
 ```bash
-$ brew install boost llvm
-$ brew install yaml-cpp --with-static-lib
+$ brew install boost llvm yaml-cpp
+$ brew install eigen  # for examples
 $ git clone https://github.com/personalrobotics/chimera.git
 $ cd chimera
 $ mkdir build && cd build
@@ -166,7 +173,9 @@ information.
 
 ## Authors
 
-Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
+Chimera is developed by Michael Koval ([**@mkoval**](https://github.com/mkoval)) and
+Pras Velagapudi ([**@psigen**](https://github.com/psigen)), and it has received major
+contributions from Jeongseok Lee ([**@jslee02**](https://github.com/jslee02)).
 
 [1]: http://audio.oxforddictionaries.com/en/mp3/chimera_gb_1.mp3
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg

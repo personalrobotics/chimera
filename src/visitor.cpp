@@ -75,8 +75,8 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
 } // namespace
 
 chimera::Visitor::Visitor(clang::CompilerInstance *ci,
-                          std::unique_ptr<CompiledConfiguration> cc)
-  : printing_policy_(ci->getLangOpts()), config_(std::move(cc))
+                          CompiledConfiguration &cc)
+  : printing_policy_(ci->getLangOpts()), config_(cc)
 {
     // Do nothing.
 }
@@ -94,7 +94,7 @@ bool chimera::Visitor::shouldVisitImplicitCode() const
 bool chimera::Visitor::VisitDecl(Decl *decl)
 {
     // Only visit declarations in namespaces we are configured to read.
-    if (config_->IsSuppressed(decl))
+    if (config_.IsSuppressed(decl))
         return true;
 
     // Only visit declarations whose enclosing classes are generatable.
@@ -154,7 +154,7 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
         // We don't need to generate anything here, but we should
         // tell the compiled configuration that we reached this
         // namespace during traversal.
-        config_->AddTraversedNamespace(cast<NamespaceDecl>(decl));
+        config_.AddTraversedNamespace(cast<NamespaceDecl>(decl));
     }
 
     return true;
@@ -216,8 +216,8 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
 
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::CXXRecord>(
-        *config_, decl, &traversed_class_decls_);
-    return config_->Render(context);
+        config_, decl, &traversed_class_decls_);
+    return config_.Render(context);
 }
 
 bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
@@ -227,8 +227,8 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
         return false;
 
     // Serialize using a mstch template.
-    auto context = std::make_shared<chimera::mstch::Enum>(*config_, decl);
-    return config_->Render(context);
+    auto context = std::make_shared<chimera::mstch::Enum>(config_, decl);
+    return config_.Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
@@ -243,8 +243,8 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
 
     // Serialize using a mstch template.
-    auto context = std::make_shared<chimera::mstch::Variable>(*config_, decl);
-    return config_->Render(context);
+    auto context = std::make_shared<chimera::mstch::Variable>(config_, decl);
+    return config_.Render(context);
 }
 
 bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
@@ -267,7 +267,7 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
     // requires RTTI information about all arguments, including references and
     // pointers.
     if (chimera::util::containsIncompleteType(
-            config_->GetCompilerInstance()->getSema(), decl))
+            config_.GetCompilerInstance()->getSema(), decl))
         return false;
 
     // Skip functions that have non-copyable argument types passed by value.
@@ -281,6 +281,6 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
 
     // Serialize using a mstch template.
-    auto context = std::make_shared<chimera::mstch::Function>(*config_, decl);
-    return config_->Render(context);
+    auto context = std::make_shared<chimera::mstch::Function>(config_, decl);
+    return config_.Render(context);
 }
