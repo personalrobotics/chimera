@@ -166,7 +166,9 @@ information.
 
 ## Authors
 
-Chimera is developed by Michael Koval (**@mkoval**) and Pras Velagapudi (**@psigen**).
+Chimera is developed by Michael Koval ([**@mkoval**](https://github.com/mkoval)) and
+Pras Velagapudi ([**@psigen**](https://github.com/psigen)), and it has received major
+contributions from Jeongseok Lee ([**@jslee02**](https://github.com/jslee02)).
 
 [1]: http://audio.oxforddictionaries.com/en/mp3/chimera_gb_1.mp3
 [2]: https://upload.wikimedia.org/wikipedia/commons/7/74/Speaker_icon.svg
