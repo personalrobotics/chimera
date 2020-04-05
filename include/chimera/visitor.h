@@ -3,7 +3,6 @@
 
 #include "chimera/configuration.h"
 
-#include <memory>
 #include <set>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
