@@ -2,6 +2,7 @@
 #include "chimera/mstch.h"
 #include "chimera/util.h"
 
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -80,10 +81,10 @@ void chimera::Configuration::LoadFile(const std::string &filename)
     catch (YAML::Exception &e)
     {
         // If unable to read the configuration YAML, terminate with an error.
-        std::cerr << "Unable to read configuration '" << filename << "'."
-                  << std::endl
-                  << e.what() << std::endl;
-        exit(-1);
+        std::stringstream ss;
+        ss << "Unable to read configuration '" << filename << "'.\n"
+           << e.what();
+        throw std::invalid_argument(ss.str());
     }
 }
 
@@ -94,8 +95,8 @@ void chimera::Configuration::SetBindingName(const std::string &name)
     // soon as possible to a possible parsing issue.
     if (name.empty())
     {
-        std::cerr << "Binding name cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Binding name cannot be set to empty string.");
     }
     bindingName_ = name;
 }
@@ -107,8 +108,8 @@ void chimera::Configuration::SetOutputPath(const std::string &path)
     // user as soon as possible to a possible parsing issue.
     if (path.empty())
     {
-        std::cerr << "Output path cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Output path cannot be set to empty string.");
     }
     outputPath_ = path;
 }
@@ -120,8 +121,8 @@ void chimera::Configuration::SetOutputModuleName(const std::string &moduleName)
     // user as soon as possible to a possible parsing issue.
     if (moduleName.empty())
     {
-        std::cerr << "Module name cannot be set to empty string." << std::endl;
-        exit(-1);
+        throw std::invalid_argument(
+            "Module name cannot be set to empty string.");
     }
     outputModuleName_ = moduleName;
 }
@@ -200,9 +201,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             // Check that 'namespaces' node in configuration YAML is a map.
             if (!namespacesNode.IsMap())
             {
-                std::cerr << "'namespaces' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'namespaces' in configuration YAML must be a map.");
             }
 
             // Resolve namespace configuration entries within provided AST.
@@ -224,9 +224,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Unable to resolve namespace: "
-                              << "'" << ns_str << "'." << std::endl;
-                    exit(-2);
+                    throw std::runtime_error(
+                        "Unable to resolve namespace: " + ns_str + "'.");
                 }
             }
         }
@@ -238,9 +237,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             // Check that 'classes' node in configuration YAML is a map.
             if (!classesNode.IsMap())
             {
-                std::cerr << "'classes' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'classes' in configuration YAML must be a map.");
             }
 
             // Resolve class/struct configuration entries within provided AST.
@@ -271,9 +269,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                 }
 
-                std::cerr << "Unable to resolve class declaration: "
-                          << "'" << decl_str << "'" << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "Unable to resolve class declaration: " + decl_str + "'");
             }
         }
 
@@ -284,9 +281,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             // Check that 'functions' node in configuration YAML is a map.
             if (!functionsNode.IsMap())
             {
-                std::cerr << "'functions' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'functions' in configuration YAML must be a map.");
             }
 
             // Resolve function configuration entries within provided AST.
@@ -300,9 +296,9 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Unable to resolve function declaration: "
-                              << "'" << decl_str << "'" << std::endl;
-                    exit(-2);
+                    throw std::runtime_error(
+                        "Unable to resolve function declaration: " + decl_str
+                        + "'");
                 }
             }
         }
@@ -314,9 +310,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             // Check that 'types' node in configuration YAML is a map.
             if (!typesNode.IsMap())
             {
-                std::cerr << "'types' in configuration YAML must be a map."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'types' in configuration YAML must be a map.");
             }
 
             // Resolve type configuration entries within provided AST.
@@ -330,9 +325,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cerr << "Unable to resolve type: "
-                              << "'" << type_str << "'" << std::endl;
-                    exit(-2);
+                    throw std::runtime_error(
+                        "Unable to resolve type: " + type_str + "'");
                 }
             }
         }
@@ -344,9 +338,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             // Check that 'binding' node in configuration YAML is a scalar.
             if (!bindingNode.IsScalar())
             {
-                std::cerr << "'binding' in configuration YAML must be a scalar."
-                          << std::endl;
-                exit(-2);
+                throw std::runtime_error(
+                    "'binding' in configuration YAML must be a scalar.");
             }
             config_binding_name = bindingNode.as<std::string>();
         }
@@ -372,9 +365,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     const auto bindingIt = chimera::binding::DEFINITIONS.find(binding_name_);
     if (bindingIt == chimera::binding::DEFINITIONS.end())
     {
-        std::cerr << "Unable to resolve binding definition: "
-                  << "'" << binding_name_ << "'" << std::endl;
-        exit(-2);
+        throw std::runtime_error(
+            "Unable to resolve binding definition: " + binding_name_ + "'");
     }
     bindingDefinition_ = bindingIt->second;
 
@@ -594,9 +586,8 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
     // If the node is not scalar, we cannot load it, so return the default.
     if (!node.IsScalar())
     {
-        std::cerr << "Unable to parse expected scalar or file source."
-                  << std::endl;
-        exit(-2);
+        throw std::invalid_argument(
+            "Unable to parse expected scalar or file source.");
     }
 
     // If the node type tag is "!file" then load the contents of a file.
@@ -626,9 +617,10 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
         std::ifstream source(source_path);
         if (source.fail())
         {
-            std::cerr << "Failed to open source '" << source_path
-                      << "': " << strerror(errno) << std::endl;
-            exit(-5);
+            std::stringstream ss;
+            ss << "Failed to open source '" << source_path
+               << "': " << strerror(errno);
+            throw std::runtime_error(ss.str());
         }
 
         // Copy file content to the output stream.
@@ -680,12 +672,10 @@ bool chimera::CompiledConfiguration::Render(
     // If file creation failed, report the error and fail immediately.
     if (!stream)
     {
-        std::cerr << "Failed to create output file "
-                  << "'" << binding_path << "'"
-                  << " for "
-                  << "'" << ::mstch::render("{{name}}", context) << "'."
-                  << std::endl;
-        exit(-6);
+        std::stringstream ss;
+        ss << "Failed to create output file '" << binding_path << "' for '"
+           << ::mstch::render("{{name}}", context) << "'.";
+        throw std::runtime_error(ss.str());
     }
 
     // Create collections for the ordered sets of sources.
@@ -766,9 +756,8 @@ void chimera::CompiledConfiguration::Render()
     // If file creation failed, report the error and fail immediately.
     if (!stream)
     {
-        std::cerr << "Failed to create top-level output file "
-                  << "'" << binding_path << "'." << std::endl;
-        exit(-4);
+        throw std::runtime_error("Failed to create top-level output file '"
+                                 + binding_path + "'");
     }
 
     // Create collections for the ordered sets of bindings, sources,
