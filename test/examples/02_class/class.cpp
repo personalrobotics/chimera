@@ -1,90 +1,90 @@
 #include "class.h"
 
-namespace chimera_test {
+namespace chimera_test
+{
 
 //==============================================================================
 Animal::Animal()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 Animal::~Animal()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 std::string Animal::type() const
 {
-  return "Animal";
+    return "Animal";
 }
 
 //==============================================================================
 Dog::Dog()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 std::string Dog::type() const
 {
-  return "Dog";
+    return "Dog";
 }
 
 //==============================================================================
 std::string Dog::pure_virtual_type() const
 {
-  return "Dog";
+    return "Dog";
 }
 
 //==============================================================================
 std::string Dog::static_type()
 {
-  return "Dog";
+    return "Dog";
 }
 
 //==============================================================================
 Husky::Husky()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 std::string Husky::type() const
 {
-  return "Husky";
+    return "Husky";
 }
 
 //==============================================================================
 std::string Husky::pure_virtual_type() const
 {
-  return "Husky";
+    return "Husky";
 }
 
 //==============================================================================
-StrongHusky::StrongHusky()
-  : Dog(), Strong()
+StrongHusky::StrongHusky() : Dog(), Strong()
 {
-  // Do nothing
+    // Do nothing
 }
 
 //==============================================================================
 std::string StrongHusky::type() const
 {
-  return "StrongHusky";
+    return "StrongHusky";
 }
 
 //==============================================================================
 std::string StrongHusky::pure_virtual_type() const
 {
-  return "StrongHusky";
+    return "StrongHusky";
 }
 
 //==============================================================================
 int DefaultArguments::add(int i, int j) const
 {
-  return i + j;
+    return i + j;
 }
 
 //==============================================================================
@@ -94,8 +94,8 @@ const std::string StaticFields::m_static_readonly_type = "static readonly type";
 //==============================================================================
 std::string StaticFields::static_type()
 {
-  static std::string type = "static type";
-  return type;
+    static std::string type = "static type";
+    return type;
 }
 
 } // namespace chimera_test
