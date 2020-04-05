@@ -1,5 +1,3 @@
-#include <memory>
-
 namespace chimera_test
 {
 
