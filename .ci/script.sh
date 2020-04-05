@@ -28,7 +28,7 @@ make -j4
 if [ "${OS_NAME}" = "linux" ]; then
   # Building binding_tests fails on Ubuntu Focal
   if [ ! $(lsb_release -sc) = "focal" ]; then
-    make -j4 tests binding_tests
+    make tests binding_tests
 
     if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
       make chimera_coverage
