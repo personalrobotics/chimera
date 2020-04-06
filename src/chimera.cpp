@@ -87,7 +87,7 @@ int run(int argc, const char **argv)
             std::cout << "Chimera " << CHIMERA_MAJOR_VERSION << "."
                       << CHIMERA_MINOR_VERSION << "." << CHIMERA_PATCH_VERSION
                       << "\n\n";
-            exit(0);
+            return 0;
         }
     }
 
