@@ -2,6 +2,7 @@
 #define __CHIMERA_CONFIGURATION_H__
 
 #include "chimera/binding.h"
+#include "chimera/logging.h"
 
 #include <map>
 #include <memory>
@@ -114,6 +115,7 @@ protected:
     std::string outputModuleName_;
     std::vector<std::string> inputNamespaceNames_;
     std::vector<std::string> inputSourcePaths_;
+    std::shared_ptr<logging::Logger> binding_logger_;
 
     friend class CompiledConfiguration;
 };

@@ -12,13 +12,13 @@ class Emulator
 public:
     Emulator();
 
-    void Run();
+    bool Run();
 
-    static void Run(const std::string &args);
+    static bool Run(const std::string &args);
 
-    static void RunHelp();
-    static void RunHelpList();
-    static void RunVersion();
+    static bool RunHelp();
+    static bool RunHelpList();
+    static bool RunVersion();
 
     void SetSource(const std::string &filename);
     void SetSources(const std::vector<std::string> &filenames);

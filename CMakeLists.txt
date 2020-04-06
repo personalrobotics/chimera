@@ -86,6 +86,7 @@ set(${PROJECT_NAME}_HEADERS
   include/chimera/configuration.h
   include/chimera/consumer.h
   include/chimera/frontend_action.h
+  include/chimera/logging.h
   include/chimera/mstch.h
   include/chimera/util.h
   include/chimera/visitor.h
@@ -95,9 +96,10 @@ set(${PROJECT_NAME}_SOURCES
   src/configuration.cpp
   src/consumer.cpp
   src/frontend_action.cpp
-  src/visitor.cpp
-  src/util.cpp
+  src/logging.cpp
   src/mstch.cpp
+  src/util.cpp
+  src/visitor.cpp
 )
 
 ## Use LLVM CMake macro to collate and order link libraries.

@@ -12,17 +12,30 @@ TEST(Emulator, GeneralOptions)
 {
     testing::internal::CaptureStdout();
 
+    // EXPECT_EXIT is used to continue running the rest of the tests. This is
+    // because ClangTool exits right after it prints help. Note that this makes
+    // the breakpoints don't work in executing the test s in EXPECT_EXIT.
     EXPECT_EXIT(Emulator::RunHelp(), ::testing::ExitedWithCode(0), ".*");
     EXPECT_EXIT(Emulator::Run("--help"), ::testing::ExitedWithCode(0), ".*");
-
     EXPECT_EXIT(Emulator::RunHelpList(), ::testing::ExitedWithCode(0), ".*");
     EXPECT_EXIT(Emulator::Run("--help-list"), ::testing::ExitedWithCode(0),
                 ".*");
 
-    EXPECT_EXIT(Emulator::RunVersion(), ::testing::ExitedWithCode(0), ".*");
-    EXPECT_EXIT(Emulator::Run("--version"), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(Emulator::RunVersion());
+    EXPECT_TRUE(Emulator::Run("--version"));
 
     std::string output = testing::internal::GetCapturedStdout();
+}
+
+//==============================================================================
+TEST(Emulator, FailedToLoadNonExistingFile)
+{
+    Emulator e;
+    e.SetSource("01_function/function.h");
+    e.SetConfigurationFile("not_existing.yaml");
+    e.SetBinding("pybind11");
+
+    EXPECT_THROW(e.Run(), std::invalid_argument);
 }
 
 //==============================================================================
@@ -33,9 +46,7 @@ TEST(Emulator, 01_Function)
     e.SetConfigurationFile("01_function/function_pybind11.yaml");
     e.SetBinding("pybind11");
 
-    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
-    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(e.Run());
 }
 
 //==============================================================================
@@ -46,9 +57,7 @@ TEST(Emulator, 02_Class)
     e.SetConfigurationFile("02_class/class.yaml");
     e.SetBinding("pybind11");
 
-    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
-    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(e.Run());
 }
 
 //==============================================================================
@@ -59,9 +68,7 @@ TEST(Emulator, 04_Enumeration)
     e.SetConfigurationFile("04_enumeration/enumeration.yaml");
     e.SetBinding("pybind11");
 
-    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
-    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(e.Run());
 }
 
 //==============================================================================
@@ -72,9 +79,7 @@ TEST(Emulator, 20_Eigen)
     e.SetConfigurationFile("20_eigen/eigen_pybind11.yaml");
     e.SetBinding("pybind11");
 
-    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
-    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(e.Run());
 }
 
 //==============================================================================
@@ -89,7 +94,5 @@ TEST(Emulator, issue228)
         "issue228_template_type_alias_pybind11.yaml");
     e.SetBinding("pybind11");
 
-    // EXPECT_EXIT is necessary to continue to run subsequent tests, but it
-    // doesn't stop at the breakpoints. For debugging use e.Run() instead.
-    EXPECT_EXIT(e.Run(), ::testing::ExitedWithCode(0), ".*");
+    EXPECT_TRUE(e.Run());
 }

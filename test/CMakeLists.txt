@@ -71,6 +71,7 @@ endfunction()
 #===============================================================================
 chimera_add_test(test_empty)
 chimera_add_test(test_emulator)
+chimera_add_test(test_logger)
 
 # Add custom target to build all the tests as a single target
 get_property(chimera_cpp_tests GLOBAL PROPERTY CHIMERA_CPP_TESTS)

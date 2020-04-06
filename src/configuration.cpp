@@ -62,7 +62,7 @@ const YAML::Node chimera::CompiledConfiguration::emptyNode_(
 chimera::Configuration::Configuration()
   : outputPath_("."), outputModuleName_("chimera_binding")
 {
-    // Do nothing.
+    binding_logger_ = std::make_shared<logging::StdOutLogger>();
 }
 
 chimera::Configuration &chimera::Configuration::GetInstance()

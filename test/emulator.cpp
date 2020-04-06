@@ -61,7 +61,7 @@ Emulator::Emulator()
 }
 
 //==============================================================================
-void Emulator::Run()
+bool Emulator::Run()
 {
     std::vector<std::string> args;
     args.push_back("");
@@ -92,13 +92,11 @@ void Emulator::Run()
     }
 
     std::vector<const char *> argv = convertArgs(args);
-    chimera::run(static_cast<int>(argv.size()), argv.data());
-
-    exit(0);
+    return chimera::run(static_cast<int>(argv.size()), argv.data()) == 0;
 }
 
 //==============================================================================
-void Emulator::Run(const std::string &args)
+bool Emulator::Run(const std::string &args)
 {
     std::vector<std::string> args_splits = split(args, " ");
     std::vector<const char *> argv;
@@ -106,48 +104,40 @@ void Emulator::Run(const std::string &args)
     for (auto &arg : args_splits)
         argv.push_back(arg.data());
 
-    chimera::run(static_cast<int>(argv.size()), argv.data());
-
-    exit(0);
+    return chimera::run(static_cast<int>(argv.size()), argv.data()) == 0;
 }
 
 //==============================================================================
-void Emulator::RunHelp()
+bool Emulator::RunHelp()
 {
     int argc = 2;
     std::vector<const char *> argv;
     argv.push_back("");
     argv.push_back("--help");
 
-    chimera::run(argc, argv.data());
-
-    exit(0);
+    return chimera::run(argc, argv.data()) == 0;
 }
 
 //==============================================================================
-void Emulator::RunHelpList()
+bool Emulator::RunHelpList()
 {
     int argc = 2;
     std::vector<const char *> argv;
     argv.push_back("");
     argv.push_back("--help-list");
 
-    chimera::run(argc, argv.data());
-
-    exit(0);
+    return chimera::run(argc, argv.data()) == 0;
 }
 
 //==============================================================================
-void Emulator::RunVersion()
+bool Emulator::RunVersion()
 {
     int argc = 2;
     std::vector<const char *> argv;
     argv.push_back("");
     argv.push_back("--version");
 
-    chimera::run(argc, argv.data());
-
-    exit(0);
+    return chimera::run(argc, argv.data()) == 0;
 }
 
 //==============================================================================
