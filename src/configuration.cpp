@@ -183,26 +183,18 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // in the configuration YAML if it exists, or remain unset otherwise.
     boost::optional<bool> config_options_strict;
 
-    // Parse 'options' section of configuration YAML if it exists.
-    if (configNode_)
+    // Parse 'options.strict' tag in configuration YAML
+    const YAML::Node strictNode
+        = chimera::util::lookupYAMLNode(configNode_, "options", "strict");
+    if (strictNode)
     {
-        const YAML::Node &optionsNode = configNode_["options"];
-        if (optionsNode)
+        // Check that 'strict' node in configuration YAML is a scalar.
+        if (not strictNode.IsScalar())
         {
-            const YAML::Node &strictNode = optionsNode["strict"];
-            if (strictNode)
-            {
-                // Check that 'strict' node in configuration YAML is a scalar.
-                if (!strictNode.IsScalar())
-                {
-                    std::cerr << "'options.strict' in configuration YAML must "
-                                 "be a scalar."
-                              << std::endl;
-                    exit(-2);
-                }
-                config_options_strict = strictNode.as<bool>();
-            }
+            throw std::runtime_error(
+                "'options.strict' in configuration YAML must be a scalar.");
         }
+        config_options_strict = strictNode.as<bool>();
     }
 
     // Set the options.strict from one of the following sources in order of
@@ -331,7 +323,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 if (GetStrict())
                 {
                     throw std::runtime_error(
-                        "Unable to resolve class declaration: '" + decl_str + "'");
+                        "Unable to resolve class declaration: '" + decl_str
+                        + "'");
                 }
                 else
                 {
@@ -369,8 +362,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     if (GetStrict())
                     {
                         throw std::runtime_error(
-                            "Unable to resolve function declaration: '" + decl_str
-                            + "'");
+                            "Unable to resolve function declaration: '"
+                            + decl_str + "'");
                     }
                     else
                     {
@@ -408,8 +401,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 {
                     if (GetStrict())
                     {
-                        throw std::runtime_error(
-                            "Unable to resolve type: '" + type_str + "'");
+                        throw std::runtime_error("Unable to resolve type: '"
+                                                 + type_str + "'");
                     }
                     else
                     {
