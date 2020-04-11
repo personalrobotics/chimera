@@ -92,7 +92,13 @@ bool Emulator::Run()
     }
 
     std::vector<const char *> argv = convertArgs(args);
-    return chimera::run(static_cast<int>(argv.size()), argv.data()) == 0;
+    auto success = chimera::run(static_cast<int>(argv.size()), argv.data()) == 0;
+    if (not success)
+    {
+      for (const auto& arg : args)
+        std::cout << "[DEBUG] arg: " << arg << std::endl;
+    }
+    return success;
 }
 
 //==============================================================================
