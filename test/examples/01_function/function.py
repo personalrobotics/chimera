@@ -22,6 +22,7 @@ class TestFunction(unittest.TestCase):
         self.assertTrue(hasattr(py11, 'void_double'))
         # self.assertTrue(hasattr(py11, 'void_a'))
         self.assertTrue(hasattr(py11, 'void_shared_a'))
+        self.assertTrue(hasattr(py11, 'void_shared_c_a'))
         self.assertTrue(hasattr(py11, 'void_pair'))
 
         self.assertTrue(hasattr(py11, 'void_cr_bool'))
