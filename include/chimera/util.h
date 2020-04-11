@@ -47,6 +47,35 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
                         ScalarConversionFn fn = nullptr);
 
 /**
+ * Returns a YAML node for a key in @c node. Returns an invalid node if @c node
+ * is invalid or @c key is doesn't exist in @node.
+ */
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key);
+
+/**
+ * Returns a nested YAML node for a series of keys. Returns an invalid nod if
+ * @c node is invalid or failed to find any nested YAML node for a key in @c
+ * keys.
+ */
+template <typename... Args>
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
+                          Args &&... args)
+{
+    // Return if 'node' is invalid
+    if (not node)
+        return node;
+
+    auto next = node[key];
+
+    // Return if failed to find a tag of 'key'
+    if (not next)
+        return next;
+
+    // Lookup for the next nested tags
+    return lookupYAMLNode(next, std::forward<Args>(args)...);
+}
+
+/**
  * Resolve a declaration string within the scope of a compiler instance.
  *
  * This function parses the provided declaration string as a single line of
