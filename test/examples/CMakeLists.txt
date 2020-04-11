@@ -73,6 +73,7 @@ add_subdirectory(03_smart_pointers)
 add_subdirectory(04_enumeration)
 add_subdirectory(05_variable)
 add_subdirectory(20_eigen)
+add_subdirectory(30_pybind11_examples)
 add_subdirectory(99_dart_example)
 add_subdirectory(regression)
 
