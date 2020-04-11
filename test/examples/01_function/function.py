@@ -21,9 +21,6 @@ class TestFunction(unittest.TestCase):
         self.assertTrue(hasattr(py11, 'void_float'))
         self.assertTrue(hasattr(py11, 'void_double'))
         # self.assertTrue(hasattr(py11, 'void_a'))
-        self.assertTrue(hasattr(py11, 'void_shared_a'))
-        self.assertTrue(hasattr(py11, 'void_shared_c_a'))
-        self.assertTrue(hasattr(py11, 'void_pair'))
 
         self.assertTrue(hasattr(py11, 'void_cr_bool'))
         self.assertTrue(hasattr(py11, 'void_cr_int'))
@@ -31,18 +28,6 @@ class TestFunction(unittest.TestCase):
         self.assertTrue(hasattr(py11, 'void_cr_float'))
         self.assertTrue(hasattr(py11, 'void_cr_double'))
         self.assertTrue(hasattr(py11, 'void_cr_a'))
-        self.assertTrue(hasattr(py11, 'void_cr_shared_a'))
-        self.assertTrue(hasattr(py11, 'void_cr_shared_c_a'))
-        self.assertTrue(hasattr(py11, 'void_cr_pair'))
-
-        self.assertTrue(hasattr(py11, 'void_p_bool'))
-        self.assertTrue(hasattr(py11, 'void_p_int'))
-        self.assertTrue(hasattr(py11, 'void_p_long'))
-        self.assertTrue(hasattr(py11, 'void_p_float'))
-        self.assertTrue(hasattr(py11, 'void_p_double'))
-        self.assertTrue(hasattr(py11, 'void_p_a'))
-        self.assertTrue(hasattr(py11, 'void_p_shared_a'))
-        # self.assertTrue(hasattr(py11, 'void_p_pair'))
 
         self.assertEqual(py11.add(), 3)
         self.assertEqual(py11.add(3, 4), 7)
@@ -61,10 +46,24 @@ class TestFunction(unittest.TestCase):
         py11.void_param()
 
         self.assertFalse(hasattr(py11, 'function_with_suppressed_param'))
-        self.assertFalse(hasattr(py11, 'function_with_suppressed_template_param'))
-
+        self.assertFalse(
+            hasattr(py11, 'function_with_suppressed_template_param'))
 
     def test_function_bp(self):
+        self.assertTrue(hasattr(boost, 'void_bool'))
+        self.assertTrue(hasattr(boost, 'void_int'))
+        self.assertTrue(hasattr(boost, 'void_long'))
+        self.assertTrue(hasattr(boost, 'void_float'))
+        self.assertTrue(hasattr(boost, 'void_double'))
+        # self.assertTrue(hasattr(boost, 'void_a'))
+
+        self.assertTrue(hasattr(boost, 'void_cr_bool'))
+        self.assertTrue(hasattr(boost, 'void_cr_int'))
+        self.assertTrue(hasattr(boost, 'void_cr_long'))
+        self.assertTrue(hasattr(boost, 'void_cr_float'))
+        self.assertTrue(hasattr(boost, 'void_cr_double'))
+        self.assertTrue(hasattr(boost, 'void_cr_a'))
+
         self.assertEqual(boost.add(), 3)
         self.assertEqual(boost.add(3, 4), 7)
         self.assertEqual(boost.add(i=5, j=6), 11)
@@ -83,7 +82,8 @@ class TestFunction(unittest.TestCase):
         boost.void_param()
 
         self.assertFalse(hasattr(boost, 'function_with_suppressed_param'))
-        self.assertFalse(hasattr(boost, 'function_with_suppressed_template_param'))
+        self.assertFalse(
+            hasattr(boost, 'function_with_suppressed_template_param'))
 
 
 if __name__ == '__main__':
