@@ -71,6 +71,11 @@ static cl::opt<bool> SuppressSources(
     "no-default-sources", cl::cat(ChimeraCategory),
     cl::desc("Suppress the forwarding of source file paths to binding"));
 
+// Option for treating unresolvable configuration as errors.
+static cl::opt<bool> Strict(
+    "strict", cl::cat(ChimeraCategory),
+    cl::desc("Treat unresolvable configuration as errors"));
+
 // Add a footer to the help text.
 static cl::extrahelp MoreHelp(
     "\n"
@@ -122,6 +127,10 @@ int run(int argc, const char **argv)
     if (!SuppressSources)
         for (const std::string &path : OptionsParser.getSourcePathList())
             chimera::Configuration::GetInstance().AddSourcePath(path);
+
+    // If strict option is on, treats unresolvable configuration as errors.
+    if (Strict)
+        chimera::Configuration::GetInstance().SetStrict(true);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
