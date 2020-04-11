@@ -12,9 +12,9 @@
 namespace chimera_test
 {
 
-//-------------------------------------
-// Creating bindings for a custom type
-//-------------------------------------
+//------------------------------------------------------------------
+// Creating bindings for a custom type & Instance and static fields
+//------------------------------------------------------------------
 
 struct Pet
 {
