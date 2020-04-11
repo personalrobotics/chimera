@@ -28,7 +28,13 @@ make -j4
 if [ "${OS_NAME}" = "linux" ]; then
   # Building binding_tests fails on Ubuntu Focal
   if [ ! $(lsb_release -sc) = "focal" ]; then
-    make -j4 tests binding_tests
+    # Parallel build for examples is disabled by
+    # https://github.com/personalrobotics/chimera/pull/274
+    # because it seems to cause missing intermediate target. Here are examples of the
+    # build failures:
+    # - https://travis-ci.org/github/personalrobotics/chimera/jobs/671315806#L2226-L2301
+    # - https://travis-ci.org/github/personalrobotics/chimera/jobs/671301082#L2523-L2573
+    make tests binding_tests
 
     if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
       make chimera_coverage
