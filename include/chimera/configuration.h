@@ -34,13 +34,9 @@ class CompiledConfiguration;
 class Configuration
 {
 public:
+    Configuration();
     Configuration(const Configuration &) = delete;
     Configuration &operator=(const Configuration &) = delete;
-
-    /**
-     * Gets the chimera configuration singleton for this process.
-     */
-    static Configuration &GetInstance();
 
     /**
      * Loads the specified file to use as the YAML configuration.
@@ -107,9 +103,6 @@ public:
      * Gets the desired output python module name for top-level binding.
      */
     const std::string &GetOutputModuleName() const;
-
-private:
-    Configuration();
 
 protected:
     YAML::Node configNode_;

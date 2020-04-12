@@ -10,7 +10,6 @@
 #include <string>
 #include <clang/Tooling/ArgumentsAdjusters.h>
 #include <clang/Tooling/CommonOptionsParser.h>
-#include <clang/Tooling/Tooling.h>
 #include <llvm/Support/CommandLine.h>
 
 #define STR_DETAIL(x) #x
@@ -99,38 +98,40 @@ int run(int argc, const char **argv)
     // Create parser that handles clang options.
     CommonOptionsParser OptionsParser(argc, argv, ChimeraCategory);
 
+    // Create a new configuration that will be used for the run.
+    chimera::Configuration Config;
+
     // Parse the YAML configuration file if it exists, otherwise initialize it
     // to an empty node.
     if (!ConfigFilename.empty())
-        chimera::Configuration::GetInstance().LoadFile(ConfigFilename);
+        Config.LoadFile(ConfigFilename);
 
     // If a binding definition was specified, set configuration to use it.
     if (!BindingName.empty())
-        chimera::Configuration::GetInstance().SetBindingName(BindingName);
+        Config.SetBindingName(BindingName);
 
     // If an output path was specified, set configuration to use it.
     if (!OutputPath.empty())
-        chimera::Configuration::GetInstance().SetOutputPath(OutputPath);
+        Config.SetOutputPath(OutputPath);
 
     // If a top-level binding file was specified, set configuration to use it.
     if (!OutputModuleName.empty())
-        chimera::Configuration::GetInstance().SetOutputModuleName(
-            OutputModuleName);
+        Config.SetOutputModuleName(OutputModuleName);
 
     // Add top-level namespaces to the configuration.
     if (NamespaceNames.size())
         for (const std::string &name : NamespaceNames)
-            chimera::Configuration::GetInstance().AddInputNamespaceName(name);
+            Config.AddInputNamespaceName(name);
 
     // Add compilation source paths to the configuration.
     // These will be made available to templates.
     if (!SuppressSources)
         for (const std::string &path : OptionsParser.getSourcePathList())
-            chimera::Configuration::GetInstance().AddSourcePath(path);
+            Config.AddSourcePath(path);
 
     // If strict option is on, treats unresolvable configuration as errors.
     if (Strict)
-        chimera::Configuration::GetInstance().SetStrict(true);
+        Config.SetStrict(true);
 
     // Create tool that uses the command-line options.
     ClangTool Tool(OptionsParser.getCompilations(),
@@ -153,7 +154,7 @@ int run(int argc, const char **argv)
         ArgumentInsertPosition::END));
 
     // Run the instantiated tool on the Chimera frontend.
-    return Tool.run(newFrontendActionFactory<chimera::FrontendAction>().get());
+    return Tool.run(chimera::newFrontendActionFactory(Config).get());
 }
 
 } // namespace chimera
