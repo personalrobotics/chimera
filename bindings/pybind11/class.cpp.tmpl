@@ -29,6 +29,42 @@ namespace {
 {{/comment?}}{{!
 }}{{/class.methods}}
 
+{{#class.allow_inheritance}}{{!
+}}template <class {{class.name}}Base = {{class.type}}>
+class __Py{{class.name}}__ : public {{class.name}}Base {
+public:
+  /* Inherit the constructors */
+  using {{class.name}}Base::{{class.name}}Base;
+
+  {{!/* [pure] virtual member functions */}}
+{{#class.methods}}{{!
+}}{{^is_static}}{{!
+}}{{#is_virtual}}{{!
+}}{{#overloads}}{{!
+}}{{#is_void}}  void {{/is_void}}{{!
+}}{{^is_void}}  {{return_type}} {{/is_void}}{{!
+}}{{name}}{{!
+}}({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) override {
+    {{#is_pure_virtual}}PYBIND11_OVERLOAD_PURE({{/is_pure_virtual}}{{!
+    }}{{^is_pure_virtual}}PYBIND11_OVERLOAD({{/is_pure_virtual}}
+      {{!/* Return type */}}
+      {{#is_void}}void{{/is_void}}{{!
+      }}{{^is_void}}{{return_type}}{{/is_void}},
+      {{!/* Parent class */}}
+      {{class.name}}Base,
+      {{!/* Name of function in C++ (must match Python name) */}}
+      {{name}}
+      {{!/* Argument(s) */}}
+      {{#params}}, {{name}}{{/params}}
+    );
+  }
+{{/overloads}}{{!
+}}{{/is_virtual}}{{!
+}}{{/is_static}}{{!
+}}{{/class.methods}}
+};{{!
+}}{{/class.allow_inheritance}}
+
 } // namespace
 
 void {{class.mangled_name}}(::pybind11::module& m)
@@ -41,43 +77,8 @@ void {{class.mangled_name}}(::pybind11::module& m)
     auto attr = sm{{!
         }}{{#class.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/class.class_scope}};
 
-    {{#class.allow_inheritance}}{{!
-    }}class __Py{{class.name}}__ : public {{class.type}} {
-    public:
-      /* Inherit the constructors */
-      using {{class.type}}::{{class.name}};
-
-      {{!/* member [pure] virtual functions */}}
-{{#class.methods}}{{!
-}}{{^is_static}}{{!
-}}{{#is_virtual}}{{!
-}}{{#overloads}}{{!
-    }}{{#is_void}}      void {{/is_void}}{{!
-    }}{{^is_void}}      {{return_type}} {{/is_void}}{{!
-    }}{{name}}{{!
-    }}({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) override {
-        {{#is_pure_virtual}}PYBIND11_OVERLOAD_PURE({{/is_pure_virtual}}{{!
-        }}{{^is_pure_virtual}}PYBIND11_OVERLOAD({{/is_pure_virtual}}
-          {{!/* Return type */}}
-          {{#is_void}}void{{/is_void}}{{!
-          }}{{^is_void}}{{return_type}}{{/is_void}},
-          {{!/* Parent class */}}
-          {{class.type}},
-          {{!/* Name of function in C++ (must match Python name) */}}
-          {{name}}
-          {{!/* Argument(s) */}}
-          {{#params}}, {{name}}{{/params}}
-        );
-      }
-{{/overloads}}{{!
-}}{{/is_virtual}}{{!
-}}{{/is_static}}{{!
-}}{{/class.methods}}
-    };{{!
-    }}{{/class.allow_inheritance}}
-
     ::pybind11::class_<{{class.type}}{{!
-        }}{{#class.allow_inheritance}}, __Py{{class.name}}__{{/class.allow_inheritance}}{{!
+        }}{{#class.allow_inheritance}}, __Py{{class.name}}__<{{class.type}}>{{/class.allow_inheritance}}{{!
         }}{{#class.held_type}}, {{!
         }}{{.}}{{/class.held_type}}{{#class.bases?}}, {{!
         }}{{!
