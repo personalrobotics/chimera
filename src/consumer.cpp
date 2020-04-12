@@ -1,12 +1,13 @@
 #include "chimera/consumer.h"
-#include "chimera/configuration.h"
 #include "chimera/visitor.h"
 
 #include <iostream>
 
 using namespace clang;
 
-chimera::Consumer::Consumer(CompilerInstance *ci) : ci_(ci)
+chimera::Consumer::Consumer(CompilerInstance *ci,
+                            const chimera::Configuration &config)
+  : ci_(ci), config_(config)
 {
     // Do nothing.
 }
@@ -14,10 +15,8 @@ chimera::Consumer::Consumer(CompilerInstance *ci) : ci_(ci)
 void chimera::Consumer::HandleTranslationUnit(ASTContext &context)
 {
     // Use the current translation unit to resolve the YAML configuration.
-    chimera::Configuration &config = chimera::Configuration::GetInstance();
-
     std::unique_ptr<chimera::CompiledConfiguration> compiled_config
-        = config.Process(ci_);
+        = config_.Process(ci_);
     chimera::Visitor visitor(ci_, *compiled_config);
 
     // We can use ASTContext to get the TranslationUnitDecl, which is
