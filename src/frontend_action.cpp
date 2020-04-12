@@ -35,12 +35,8 @@ chimera::ChimeraFrontendActionFactory::ChimeraFrontendActionFactory(
     // Do nothing.
 }
 
-// TODO: Check the specific version at which this API change occurs.
-//
-// At some point between Clang 6 and Clang 10, the return value for
-// FrontendActionFactory::create() changed from a raw pointer to a
-// std::unique_ptr, but we haven't specifically checked which version
-// the change occurred in yet.
+// Between Clang 9 and Clang 10, the return value for
+// FrontendActionFactory::create() changed from raw pointer to std::unique_ptr.
 #if LLVM_VERSION_AT_LEAST(10, 0, 0)
 std::unique_ptr<FrontendAction> chimera::ChimeraFrontendActionFactory::create()
 {
