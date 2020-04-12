@@ -83,7 +83,7 @@ YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
  * provided compiler instance.
  *
  * If it can be resolved to a named declaration, the canonical clang::Decl
- * pointer associated with the declaration will be returned, otherwise NULL.
+ * pointer associated with the declaration will be returned, otherwise nullptr.
  */
 const clang::NamedDecl *resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
@@ -110,7 +110,7 @@ const clang::QualType resolveType(clang::CompilerInstance *ci,
  * loaded by the provided compiler instance.
  *
  * If it is resolved to a record declaration, the canonical clang::RecordDecl
- * pointer associated with the declaration will be returned, otherwise NULL.
+ * pointer associated with the declaration will be returned, otherwise nullptr.
  */
 const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
                                        const llvm::StringRef recordStr);
@@ -127,7 +127,7 @@ const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
  *
  * If it is resolved to a record declaration, the canonical
  * clang::ClassTemplateDecl pointer associated with the declaration will be
- * returned, otherwise NULL.
+ * returned, otherwise nullptr.
  */
 const clang::ClassTemplateDecl *resolveClassTemplate(
     clang::CompilerInstance *ci, const llvm::StringRef recordStr);
@@ -141,7 +141,7 @@ const clang::ClassTemplateDecl *resolveClassTemplate(
  *
  * If it is resolved to a namespace declaration, the canonical
  * clang::NamespaceDecl pointer associated with the namespace will be
- * returned, otherwise NULL.
+ * returned, otherwise nullptr.
  */
 const clang::NamespaceDecl *resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);
