@@ -1,6 +1,5 @@
 build/
 ci/
-test/
 .codecov.yml
 .gitignore
 .travis.yml

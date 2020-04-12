@@ -69,7 +69,6 @@ endfunction()
 #===============================================================================
 # Add tests
 #===============================================================================
-chimera_add_test(test_empty)
 chimera_add_test(test_emulator)
 
 # Add custom target to build all the tests as a single target
