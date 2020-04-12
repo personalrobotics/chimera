@@ -969,6 +969,8 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
     register_methods(this, {
                                {"is_const", &Method::isConst},
                                {"is_static", &Method::isStatic},
+                               {"is_virtual", &Method::isVirtual},
+                               {"is_pure_virtual", &Method::isPureVirtual},
                            });
 }
 
@@ -980,6 +982,16 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
 ::mstch::node Method::isStatic()
 {
     return method_decl_->isStatic();
+}
+
+::mstch::node Method::isVirtual()
+{
+    return method_decl_->isVirtual();
+}
+
+::mstch::node Method::isPureVirtual()
+{
+    return method_decl_->isPure();
 }
 
 Namespace::Namespace(const ::chimera::CompiledConfiguration &config,
