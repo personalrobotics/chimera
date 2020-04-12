@@ -42,7 +42,7 @@ public:
 // FrontendActionFactory::create() changed from a raw pointer to a
 // std::unique_ptr, but we haven't specifically checked which version
 // the change occurred in yet.
-#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+#if LLVM_VERSION_AT_LEAST(9, 0, 0)
     std::unique_ptr<clang::FrontendAction> create() override;
 #else
     clang::FrontendAction *create() override;
