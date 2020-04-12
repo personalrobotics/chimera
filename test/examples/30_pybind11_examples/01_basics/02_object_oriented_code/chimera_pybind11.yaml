@@ -9,5 +9,5 @@ types:
   "const std::string &":
     return_value_policy: copy
 classes:
-  "chimera_test::Pet":
+  "chimera_test::test1::Pet":
     dynamic_attr: True
