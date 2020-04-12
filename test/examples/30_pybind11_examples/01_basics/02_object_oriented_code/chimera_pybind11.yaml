@@ -8,3 +8,6 @@ namespaces:
 types:
   "const std::string &":
     return_value_policy: copy
+classes:
+  "chimera_test::Pet":
+    dynamic_attr: True
