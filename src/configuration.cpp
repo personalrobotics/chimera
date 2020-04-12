@@ -67,12 +67,6 @@ chimera::Configuration::Configuration()
     // Do nothing.
 }
 
-chimera::Configuration &chimera::Configuration::GetInstance()
-{
-    static chimera::Configuration config;
-    return config;
-}
-
 void chimera::Configuration::LoadFile(const std::string &filename)
 {
     try

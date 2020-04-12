@@ -95,9 +95,9 @@ set(${PROJECT_NAME}_SOURCES
   src/configuration.cpp
   src/consumer.cpp
   src/frontend_action.cpp
-  src/visitor.cpp
-  src/util.cpp
   src/mstch.cpp
+  src/util.cpp
+  src/visitor.cpp
 )
 
 ## Use LLVM CMake macro to collate and order link libraries.
@@ -171,8 +171,11 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 )
 
 # Enable unit testing by including the `test` subdirectory.
-enable_testing()
-add_subdirectory(test EXCLUDE_FROM_ALL)
+option(BUILD_TESTING "Enable building tests" ON)
+if(BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(test EXCLUDE_FROM_ALL)
+endif()
 
 #####################
 ## CODE FORMATTING ##
