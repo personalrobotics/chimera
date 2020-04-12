@@ -204,7 +204,7 @@ public:
     CXXRecord(const ::chimera::CompiledConfiguration &config,
               const clang::CXXRecordDecl *decl,
               const std::set<const clang::CXXRecordDecl *> *available_decls
-              = NULL);
+              = nullptr);
 
     ::mstch::node bases();
     ::mstch::node type();
@@ -276,7 +276,7 @@ class Function : public ClangWrapper<clang::FunctionDecl>,
 public:
     Function(const ::chimera::CompiledConfiguration &config,
              const clang::FunctionDecl *decl,
-             const clang::CXXRecordDecl *class_decl = NULL,
+             const clang::CXXRecordDecl *class_decl = nullptr,
              const int argument_limit = -1);
 
     ::mstch::node type();
@@ -304,7 +304,7 @@ class Method : public Function
 public:
     Method(const ::chimera::CompiledConfiguration &config,
            const clang::CXXMethodDecl *decl,
-           const clang::CXXRecordDecl *class_decl = NULL);
+           const clang::CXXRecordDecl *class_decl = nullptr);
 
     ::mstch::node isConst();
     ::mstch::node isStatic();
@@ -345,7 +345,7 @@ class Variable : public ClangWrapper<clang::VarDecl>
 public:
     Variable(const ::chimera::CompiledConfiguration &config,
              const clang::VarDecl *decl,
-             const clang::CXXRecordDecl *class_decl = NULL);
+             const clang::CXXRecordDecl *class_decl = nullptr);
 
     ::mstch::node isAssignable();
     ::mstch::node qualifiedName() override;
