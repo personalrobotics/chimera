@@ -7,6 +7,10 @@ import object_oriented_code_boost_python as boost
 class TestObjectOrientedCode(unittest.TestCase):
 
     def _test_function(self, binding):
+        # Test class docstring
+        self.assertTrue(
+            "Pet implementation that has name" in binding.Pet.__doc__)
+
         p = binding.Pet('Molly')
 
         self.assertEqual(p.getName(), 'Molly')

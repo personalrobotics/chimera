@@ -18,6 +18,7 @@ namespace chimera_test
 // & Dynamic attributes
 //------------------------------------------------------------------
 
+/// Pet implementation that has name
 struct Pet
 {
     Pet(const std::string &name) : name(name)

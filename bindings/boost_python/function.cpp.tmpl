@@ -8,6 +8,18 @@
 #include <boost/python.hpp>
 {{postinclude}}
 
+namespace {
+
+{{#function.comment?}}{{!
+}}constexpr char {{function.mangled_name}}_docstring[] = R"CHIMERA_STRING({{!
+}}{{#function.comment}}{{!
+}}{{.}}
+{{/function.comment}}{{!
+}})CHIMERA_STRING";
+{{/function.comment?}}
+
+} // namespace
+
 void {{function.mangled_name}}()
 {
     {{precontent}}
@@ -23,6 +35,7 @@ void {{function.mangled_name}}()
     }}{{#is_void}} { {{/is_void}}{{!
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
     }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
+    }}{{#comment?}}, {{function.mangled_name}}_docstring{{/comment?}}{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}});
 {{/function.overloads}}
