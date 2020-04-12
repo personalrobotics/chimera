@@ -14,6 +14,7 @@ namespace chimera_test
 // Creating bindings for a simple function
 //-----------------------------------------
 
+/// Returns sum of two integers
 int add(int i, int j);
 
 //-------------------

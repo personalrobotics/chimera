@@ -7,6 +7,9 @@ import first_steps_boost_python as boost
 class TestFirstSteps(unittest.TestCase):
 
     def _test_function(self, binding):
+        # Test function docstring
+        self.assertTrue("Returns sum of two integers" in binding.add.__doc__)
+
         self.assertEqual(binding.add(1, 2), 3)
         self.assertEqual(binding.add(i=3, j=4), 7)
 
