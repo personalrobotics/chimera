@@ -45,7 +45,7 @@ CXXRecordDecl *GetEnclosingClassDecl(DeclContext *decl_context)
     // TODO: replace this with null-ing cast operation.
     return (isa<CXXRecordDecl>(parent_context))
                ? cast<CXXRecordDecl>(parent_context)
-               : NULL;
+               : nullptr;
 }
 
 /**
@@ -69,7 +69,7 @@ CXXRecordDecl *GetEnclosingClassDecl(Decl *decl)
         return GetEnclosingClassDecl(
             cast<FunctionDecl>(decl)->getEnclosingNamespaceContext());
     }
-    return NULL;
+    return nullptr;
 }
 
 } // namespace
