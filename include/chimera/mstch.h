@@ -308,6 +308,8 @@ public:
 
     ::mstch::node isConst();
     ::mstch::node isStatic();
+    ::mstch::node isVirtual();
+    ::mstch::node isPureVirtual();
 
 private:
     const clang::CXXMethodDecl *method_decl_;
