@@ -47,6 +47,35 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
                         ScalarConversionFn fn = nullptr);
 
 /**
+ * Returns a YAML node for a key in @c node. Returns an invalid node if @c node
+ * is invalid or @c key is doesn't exist in @node.
+ */
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key);
+
+/**
+ * Returns a nested YAML node for a series of keys. Returns an invalid nod if
+ * @c node is invalid or failed to find any nested YAML node for a key in @c
+ * keys.
+ */
+template <typename... Args>
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
+                          Args &&... args)
+{
+    // Return if 'node' is invalid
+    if (not node)
+        return node;
+
+    auto next = node[key];
+
+    // Return if failed to find a tag of 'key'
+    if (not next)
+        return next;
+
+    // Lookup for the next nested tags
+    return lookupYAMLNode(next, std::forward<Args>(args)...);
+}
+
+/**
  * Resolve a declaration string within the scope of a compiler instance.
  *
  * This function parses the provided declaration string as a single line of
@@ -54,7 +83,7 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
  * provided compiler instance.
  *
  * If it can be resolved to a named declaration, the canonical clang::Decl
- * pointer associated with the declaration will be returned, otherwise NULL.
+ * pointer associated with the declaration will be returned, otherwise nullptr.
  */
 const clang::NamedDecl *resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
@@ -81,7 +110,7 @@ const clang::QualType resolveType(clang::CompilerInstance *ci,
  * loaded by the provided compiler instance.
  *
  * If it is resolved to a record declaration, the canonical clang::RecordDecl
- * pointer associated with the declaration will be returned, otherwise NULL.
+ * pointer associated with the declaration will be returned, otherwise nullptr.
  */
 const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
                                        const llvm::StringRef recordStr);
@@ -98,7 +127,7 @@ const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
  *
  * If it is resolved to a record declaration, the canonical
  * clang::ClassTemplateDecl pointer associated with the declaration will be
- * returned, otherwise NULL.
+ * returned, otherwise nullptr.
  */
 const clang::ClassTemplateDecl *resolveClassTemplate(
     clang::CompilerInstance *ci, const llvm::StringRef recordStr);
@@ -112,7 +141,7 @@ const clang::ClassTemplateDecl *resolveClassTemplate(
  *
  * If it is resolved to a namespace declaration, the canonical
  * clang::NamespaceDecl pointer associated with the namespace will be
- * returned, otherwise NULL.
+ * returned, otherwise nullptr.
  */
 const clang::NamespaceDecl *resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);

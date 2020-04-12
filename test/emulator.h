@@ -1,3 +1,6 @@
+#ifndef __CHIMERA_TEST_EMULATOR_H__
+#define __CHIMERA_TEST_EMULATOR_H__
+
 #include <string>
 #include <vector>
 #include "chimera/chimera.h"
@@ -48,3 +51,5 @@ private:
 
 } // namespace test
 } // namespace chimera
+
+#endif
