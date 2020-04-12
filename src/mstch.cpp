@@ -238,6 +238,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             {"static_methods", &CXXRecord::staticMethods},
             {"static_methods?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"dynamic_attr", &CXXRecord::isDynamicAttributesEnabled},
         });
 }
 
@@ -596,6 +597,14 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
     for (auto static_field_template : static_field_vector)
         static_field_templates.push_back(static_field_template);
     return static_field_templates;
+}
+
+::mstch::node CXXRecord::isDynamicAttributesEnabled()
+{
+    if (const YAML::Node node = decl_config_["dynamic_attr"])
+        return node.as<bool>();
+
+    return false;
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)

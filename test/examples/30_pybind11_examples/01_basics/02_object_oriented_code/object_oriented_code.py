@@ -17,6 +17,12 @@ class TestObjectOrientedCode(unittest.TestCase):
         p.name = 'Molly'
         self.assertEqual(p.name, 'Molly')
 
+        # Dynamic attributes
+        if binding is py11:
+            # Adding new dynamic attribute, age, to Pet
+            p.age = 2
+            self.assertEqual(p.age, 2)
+
     def test_function(self):
         self._test_function(py11)
         self._test_function(boost)
