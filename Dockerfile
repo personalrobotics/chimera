@@ -1,14 +1,15 @@
-FROM ubuntu:16.04 as builder
+FROM ubuntu:18.04 as builder
 
 # Install APT dependencies required for building chimera.
 RUN apt-get update -qq \
   && apt-get install -y -qq \
   cmake \
   clang \
-  llvm-3.7-dev \
-  llvm-3.7-tools \
+  clang-format \
+  llvm-6.0-dev \
+  llvm-6.0-tools \
   libboost-dev \
-  libclang-3.7-dev \
+  libclang-6.0-dev \
   libedit-dev \
   libyaml-cpp-dev \
   libz-dev \
@@ -22,13 +23,13 @@ RUN mkdir build && cd build \
   && make install
 
 #############################################################################
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # Install APT dependencies required for running chimera.
 RUN apt-get update -qq \
   && apt-get install -y -qq \
-  llvm-3.7-tools \
-  libclang-3.7 \
+  llvm-6.0-tools \
+  libclang-6.0 \
   libedit2 \
   libyaml-cpp0.5v5 \
   zlib1g \

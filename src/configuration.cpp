@@ -9,6 +9,8 @@
 #include <map>
 #include <sstream>
 
+#include <boost/optional.hpp>
+
 using namespace clang;
 
 namespace
@@ -60,15 +62,9 @@ const YAML::Node chimera::CompiledConfiguration::emptyNode_(
     YAML::NodeType::Undefined);
 
 chimera::Configuration::Configuration()
-  : outputPath_("."), outputModuleName_("chimera_binding")
+  : outputPath_("."), outputModuleName_("chimera_binding"), strict_(false)
 {
     // Do nothing.
-}
-
-chimera::Configuration &chimera::Configuration::GetInstance()
-{
-    static chimera::Configuration config;
-    return config;
 }
 
 void chimera::Configuration::LoadFile(const std::string &filename)
@@ -138,6 +134,11 @@ void chimera::Configuration::AddSourcePath(const std::string &sourcePath)
     inputSourcePaths_.push_back(sourcePath);
 }
 
+void chimera::Configuration::SetStrict(bool val)
+{
+    strict_ = val;
+}
+
 std::unique_ptr<chimera::CompiledConfiguration> chimera::Configuration::Process(
     CompilerInstance *ci) const
 {
@@ -172,6 +173,40 @@ chimera::CompiledConfiguration::CompiledConfiguration(
   , bindingNode_(configNode_["template"]) // TODO: is this always ok?
   , ci_(ci)
 {
+    // This placeholder will be filled in by the options.strict specified
+    // in the configuration YAML if it exists, or remain unset otherwise.
+    boost::optional<bool> config_options_strict;
+
+    // Parse 'options.strict' tag in configuration YAML
+    const YAML::Node strictNode
+        = chimera::util::lookupYAMLNode(configNode_, "options", "strict");
+    if (strictNode)
+    {
+        // Check that 'strict' node in configuration YAML is a scalar.
+        if (not strictNode.IsScalar())
+        {
+            throw std::runtime_error(
+                "'options.strict' in configuration YAML must be a scalar.");
+        }
+        config_options_strict = strictNode.as<bool>();
+    }
+
+    // Set the options.strict from one of the following sources in order of
+    // priority: 1) CLI '-strict' setting (True if -strict passed, False
+    // otherwise) 2) YAML configuration setting (True/False) 3) false by default
+    if (parent.strict_)
+    {
+        strict_ = parent.strict_;
+    }
+    else if (config_options_strict)
+    {
+        strict_ = *config_options_strict;
+    }
+    else
+    {
+        strict_ = false;
+    }
+
     // This placeholder will be filled in by the binding name specified
     // in the configuration YAML if it exists, or remain empty otherwise.
     std::string config_binding_name;
@@ -224,8 +259,18 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    throw std::runtime_error(
-                        "Unable to resolve namespace: " + ns_str + "'.");
+                    if (GetStrict())
+                    {
+                        throw std::runtime_error(
+                            "Unable to resolve namespace: '" + ns_str + "'.");
+                    }
+                    else
+                    {
+                        std::cout << "Warning: Skipped namespace namespace '"
+                                  << ns_str
+                                  << "' because it's unable to resolve "
+                                  << "the namespace." << std::endl;
+                    }
                 }
             }
         }
@@ -269,8 +314,20 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                 }
 
-                throw std::runtime_error(
-                    "Unable to resolve class declaration: " + decl_str + "'");
+                if (GetStrict())
+                {
+                    throw std::runtime_error(
+                        "Unable to resolve class declaration: '" + decl_str
+                        + "'");
+                }
+                else
+                {
+                    std::cout
+                        << "Warning: Skipped the configuration for class '"
+                        << decl_str << "' becuase it's "
+                        << "unable to resolve the class declaration."
+                        << std::endl;
+                }
             }
         }
 
@@ -296,9 +353,20 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    throw std::runtime_error(
-                        "Unable to resolve function declaration: " + decl_str
-                        + "'");
+                    if (GetStrict())
+                    {
+                        throw std::runtime_error(
+                            "Unable to resolve function declaration: '"
+                            + decl_str + "'");
+                    }
+                    else
+                    {
+                        std::cout
+                            << "Warning: Skipped the configuration for "
+                            << "function '" << decl_str << "' becuase it's "
+                            << "unable to resolve the function declaration."
+                            << std::endl;
+                    }
                 }
             }
         }
@@ -325,8 +393,18 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    throw std::runtime_error(
-                        "Unable to resolve type: " + type_str + "'");
+                    if (GetStrict())
+                    {
+                        throw std::runtime_error("Unable to resolve type: '"
+                                                 + type_str + "'");
+                    }
+                    else
+                    {
+                        std::cout << "Warning: Skipped the configuration for "
+                                  << "type '" << type_str << "' becuase it's "
+                                  << "unable to resolve the type." << std::endl;
+                        continue;
+                    }
                 }
             }
         }
@@ -398,6 +476,11 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     //
     ::mstch::config::escape
         = [](const std::string &str) -> std::string { return str; };
+}
+
+bool chimera::CompiledConfiguration::GetStrict() const
+{
+    return strict_;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(
