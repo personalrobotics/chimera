@@ -122,7 +122,7 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 10 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 10
     PYTHON_VERSION: 3.8
     DOCKERFILE: Dockerfile.ubuntu-focal
   steps:
@@ -136,7 +136,7 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 10 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 10
     PYTHON_VERSION: 3.8
     DOCKERFILE: Dockerfile.ubuntu-focal
   steps:
