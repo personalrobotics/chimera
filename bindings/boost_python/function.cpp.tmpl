@@ -5,23 +5,41 @@
 {{#sources}}
 #include <{{.}}>
 {{/sources}}
-{{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
 
+namespace {
+
+{{#function.comment?}}{{!
+}}constexpr char {{function.mangled_name}}_docstring[] = R"CHIMERA_STRING({{!
+}}{{#function.comment}}{{!
+}}{{.}}
+{{/function.comment}}{{!
+}})CHIMERA_STRING";
+{{/function.comment?}}
+
+} // namespace
+
 void {{function.mangled_name}}()
 {
-::boost::python::object parent_object(::boost::python::scope(){{!
-    }}{{#function.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/function.scope}});
-::boost::python::scope parent_scope(parent_object);
+    {{precontent}}
+
+    {{#function.scope?}}{{!
+    }}::boost::python::object parent_object(::boost::python::scope(){{!
+        }}{{#function.scope}}.attr("{{name}}"){{/function.scope}});
+    ::boost::python::scope parent_scope(parent_object);
+    {{/function.scope?}}
 
 {{#function.overloads}}{{!
-    }}::boost::python::def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) -> {{return_type}} { {{!
-    }}return {{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
-    }}{{#return_value_policy}}, ::boost::python::return_value_policy<{{.}} >(){{/return_value_policy}}{{!
+    }}    ::boost::python::def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
+    }}{{#is_void}} { {{/is_void}}{{!
+    }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
+    }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
+    }}{{#comment?}}, {{function.mangled_name}}_docstring{{/comment?}}{{!
+    }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}});
 {{/function.overloads}}
 
+    {{postcontent}}
 }
-{{postcontent}}
 {{footer}}

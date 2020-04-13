@@ -8,6 +8,13 @@
 #include <mstch/mstch.hpp>
 #include <yaml-cpp/yaml.h>
 
+// clang-format off
+#define LLVM_VERSION_AT_LEAST(x,y,z) \
+  (LLVM_VERSION_MAJOR > x || (LLVM_VERSION_MAJOR >= x && \
+  (LLVM_VERSION_MINOR > y || (LLVM_VERSION_MINOR >= y && \
+  LLVM_VERSION_PATCH >= z))))
+// clang-format on
+
 namespace chimera
 {
 namespace util
@@ -20,8 +27,9 @@ namespace util
  * to mstch context entries.  It optionally takes a scalar conversion function
  * which will be applied to scalars before they are re-wrapped by mstch.
  */
-using ScalarConversionFn = std::function<std::string(const YAML::Node&)>;
-::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn=nullptr);
+using ScalarConversionFn = std::function<std::string(const YAML::Node &)>;
+::mstch::node wrapYAMLNode(const YAML::Node &node,
+                           ScalarConversionFn fn = nullptr);
 
 /**
  * Adds entries from a YAML::Node to an existing mstch::map.
@@ -35,7 +43,37 @@ using ScalarConversionFn = std::function<std::string(const YAML::Node&)>;
  * false, existing properties will not be modified.
  */
 void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
-                        bool overwrite=false, ScalarConversionFn fn=nullptr);
+                        bool overwrite = false,
+                        ScalarConversionFn fn = nullptr);
+
+/**
+ * Returns a YAML node for a key in @c node. Returns an invalid node if @c node
+ * is invalid or @c key is doesn't exist in @node.
+ */
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key);
+
+/**
+ * Returns a nested YAML node for a series of keys. Returns an invalid nod if
+ * @c node is invalid or failed to find any nested YAML node for a key in @c
+ * keys.
+ */
+template <typename... Args>
+YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
+                          Args &&... args)
+{
+    // Return if 'node' is invalid
+    if (not node)
+        return node;
+
+    auto next = node[key];
+
+    // Return if failed to find a tag of 'key'
+    if (not next)
+        return next;
+
+    // Lookup for the next nested tags
+    return lookupYAMLNode(next, std::forward<Args>(args)...);
+}
 
 /**
  * Resolve a declaration string within the scope of a compiler instance.
@@ -45,23 +83,10 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
  * provided compiler instance.
  *
  * If it can be resolved to a named declaration, the canonical clang::Decl
- * pointer associated with the declaration will be returned, otherwise NULL.
+ * pointer associated with the declaration will be returned, otherwise nullptr.
  */
-const clang::NamedDecl* resolveDeclaration(clang::CompilerInstance *ci,
+const clang::NamedDecl *resolveDeclaration(clang::CompilerInstance *ci,
                                            const llvm::StringRef declStr);
-
-/**
- * Resolve a record string within the scope of a compiler instance.
- *
- * This function parses the provided record name string as a single line of
- * the form `typedef [recordStr] <uid>;` within the AST that is currently
- * loaded by the provided compiler instance.
- *
- * If it is resolved to a record declaration, the canonical clang::RecordDecl
- * pointer associated with the declaration will be returned, otherwise NULL.
- */
-const clang::RecordDecl* resolveRecord(clang::CompilerInstance *ci,
-                                       const llvm::StringRef recordStr);
 
 /**
  * Resolve a type string within the scope of a compiler instance.
@@ -78,19 +103,48 @@ const clang::QualType resolveType(clang::CompilerInstance *ci,
                                   const llvm::StringRef typeStr);
 
 /**
+ * Resolve a record string within the scope of a compiler instance.
+ *
+ * This function parses the provided record name string as a single line of
+ * the form `typedef [recordStr] <uid>;` within the AST that is currently
+ * loaded by the provided compiler instance.
+ *
+ * If it is resolved to a record declaration, the canonical clang::RecordDecl
+ * pointer associated with the declaration will be returned, otherwise nullptr.
+ */
+const clang::RecordDecl *resolveRecord(clang::CompilerInstance *ci,
+                                       const llvm::StringRef recordStr);
+
+/**
+ * Resolve a template class string within the scope of a compiler instance.
+ *
+ * This function parses the provided record name string as a single line of
+ * the form `<record_left> using <uid> = <record_right>;` within the AST that is
+ * currently loaded by the provided compiler instance, where <record_left> +
+ * <record_right> is [recordStr]. For example, if [recordStr] is
+ * `template <typename T> MyClass<T>` then the form becomes
+ * `template <typename T> using <uid> = MyClass<T>;`.
+ *
+ * If it is resolved to a record declaration, the canonical
+ * clang::ClassTemplateDecl pointer associated with the declaration will be
+ * returned, otherwise nullptr.
+ */
+const clang::ClassTemplateDecl *resolveClassTemplate(
+    clang::CompilerInstance *ci, const llvm::StringRef recordStr);
+
+/**
  * Resolve a namespace string within the scope of a compiler instance.
  *
  * This function parses the provided namespace string as a single line of the
  * form `namespace [nsStr] {};` within the AST that is currently loaded by the
  * provided compiler instance.
  *
- * If it is resolved to a namespace declaration, the canonical 
+ * If it is resolved to a namespace declaration, the canonical
  * clang::NamespaceDecl pointer associated with the namespace will be
- * returned, otherwise NULL.
+ * returned, otherwise nullptr.
  */
-const clang::NamespaceDecl* resolveNamespace(clang::CompilerInstance *ci,
+const clang::NamespaceDecl *resolveNamespace(clang::CompilerInstance *ci,
                                              const llvm::StringRef nsStr);
-
 
 /**
  * Convert the type into one with fully qualified template parameters.
@@ -217,7 +271,16 @@ std::vector<std::string> getTemplateParameterStrings(
  * This formats and concatenates the result of getTemplateParameterStrings()
  * for a given function declaration.
  */
-std::string getTemplateParameterString(const clang::FunctionDecl *decl);
+std::string getTemplateParameterString(const clang::FunctionDecl *decl,
+                                       const std::string &binding_name);
+
+/**
+ * Converts the template arguments of a type string to a vector of std::strings.
+ *
+ * For example, a std::string of "std::tuple<int, double, float>" is converted
+ * to the list of {"int", "double", "float"}.
+ */
+std::vector<std::string> getTemplateParameterStrings(const std::string &type);
 
 /**
  * Return whether a return value policy needs to be specfied for a declaration.
@@ -234,7 +297,85 @@ bool needsReturnValuePolicy(const clang::NamedDecl *decl,
  *
  * This is possible when the function takes some number of default arguments.
  */
-std::pair<unsigned, unsigned> getFunctionArgumentRange(const clang::FunctionDecl *decl);
+std::pair<unsigned, unsigned> getFunctionArgumentRange(
+    const clang::FunctionDecl *decl);
+
+/**
+ * Returns whether a method has a non-public type of parameter.
+ *
+ * This is possible when the class wants to hide the constructor from being
+ * called publicly.
+ */
+bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
+
+/**
+ * Trims from end of string (right)
+ */
+std::string trimRight(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Trims from beginning of string (left)
+ */
+std::string trimLeft(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Trims from both ends of string (right then left)
+ */
+std::string trim(std::string s, const char *t = " \t\n\r\f\v");
+
+/**
+ * Returns true if a string starts with a prefix, otherwise false.
+ */
+bool startsWith(const std::string &str, const std::string &prefix);
+
+/**
+ * Returns the concrete type in string from a type.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(clang::QualType qual_type);
+
+/**
+ * Returns the concrete type in string from a type pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Type *type);
+
+/**
+ * Returns the concrete type in string from a declaration pointer.
+ *
+ * This is a helper function for debugging.
+ */
+std::string toString(const clang::Decl *decl);
+
+/**
+ * Strips the Eigen's non-copyable wrapper classes from a type string.
+ *
+ * This function returns the derived type string or PlainObjectType of the given
+ * Eigen type string. For example, "Eigen::MatrixBase<Eigen::Matrix3d>" becomes
+ * "Eigen::Matrix3d" and "Eigen::CwiseNullaryOp<..., Eigen::Vector3d>" becomes
+ * "Eigen::Vector3d".
+ *
+ * Supported types are:
+ * - Eigen::EigenBase
+   - Eigen::DenseBase
+   - Eigen::ArrayBase
+   - Eigen::MatrixBase
+   - Eigen::CwiseNullaryOp
+ *
+ * This is used as a workaround for the fact that Pybind11 only supports Eigen
+ * types that are default-constructible. Those non-default-constructible Eigen
+ * types are used when binding template functions whose parameter type is
+ * Eigen base classes such as the functions in this document:
+ * https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
+ *
+ * Related link:
+ * - https://github.com/pybind/pybind11/issues/1324
+ * - https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
+ */
+std::string stripNoneCopyableEigenWrappers(std::string type);
+// FIXME: Remove this Eigen specific workaround
 
 } // namespace util
 } // namespace chimera

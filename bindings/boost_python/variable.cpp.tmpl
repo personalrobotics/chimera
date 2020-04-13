@@ -5,17 +5,21 @@
 {{#sources}}
 #include <{{.}}>
 {{/sources}}
-{{precontent}}
 #include <boost/python.hpp>
 {{postinclude}}
 
 void {{variable.mangled_name}}()
 {
-::boost::python::object parent_object(::boost::python::scope(){{!
-    }}{{#variable.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/variable.scope}});
-::boost::python::scope parent_scope(parent_object);
+    {{precontent}}
 
-::boost::python::scope().attr("{{variable.name}}") = {{variable.qualified_name}};
+    {{#variable.scope?}}{{!
+    }}::boost::python::object parent_object(::boost::python::scope(){{!
+        }}{{#variable.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/variable.scope}});
+    ::boost::python::scope parent_scope(parent_object);
+    {{/variable.scope?}}
+
+    ::boost::python::scope().attr("{{variable.name}}") = {{variable.qualified_name}};
+
+    {{postcontent}}
 }
-{{postcontent}}
 {{footer}}

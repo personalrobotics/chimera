@@ -1,42 +1,81 @@
-include(CTest)
-
-set(chimera_EXECUTABLE $<TARGET_FILE:chimera>)
-include(chimeraFunctions)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Boost REQUIRED COMPONENTS python)
-find_package(PythonLibs REQUIRED)
-
-add_chimera_binding(
-  EXCLUDE_FROM_ALL
-  TARGET test_binding
-  SOURCES dart-example.h
-  NAMESPACES dart
+#===============================================================================
+# Emulator
+#===============================================================================
+add_library(emulator emulator.h emulator.cpp)
+target_link_libraries(emulator PUBLIC libchimera)
+clang_format_add_sources(emulator.h emulator.cpp)
+target_compile_definitions(emulator
+  PUBLIC
+    EXAMPLES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/examples/"
+    BUILD_PATH="${CMAKE_BINARY_DIR}"
 )
 
-set_target_properties(test_binding PROPERTIES PREFIX "")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-target_compile_options(test_binding
-  PUBLIC "-std=c++11"
+#===============================================================================
+# GoogleTest setup
+add_library(gtest STATIC gtest/src/gtest-all.cc)
+add_library(gtest_main STATIC gtest/src/gtest_main.cc)
+target_include_directories(gtest
+  PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/gtest"
+    "${CMAKE_CURRENT_SOURCE_DIR}/gtest/include"
+)
+target_link_libraries(gtest_main gtest)
+if(NOT WIN32)
+  target_link_libraries(gtest pthread)
+endif()
+set_target_properties(
+  gtest PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-target_include_directories(test_binding SYSTEM
-  PRIVATE
-    ${Boost_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_DIRS}
-)
+#===============================================================================
+# This function uses following global properties:
+# - CHIMERA_UNITTESTS
+# - CHIMERA_CPP_TESTS
+#
+# Usage:
+#   chimera_add_test(test_UnitTestA) # assumed source is test_UnitTestA.cpp
+#   chimera_add_test(test_UnitTestB test_SourceB1.cpp)
+#   chimera_add_test(test_UnitTestA test_SourceC1.cpp test_SourceC2.cpp)
+#===============================================================================
+function(chimera_add_test target_name) # ARGN for source files
 
-target_link_libraries(test_binding
-  PRIVATE
-    ${Boost_PYTHON_LIBRARY}
-    ${PYTHON_LIBRARIES}
-)
+  set_property(GLOBAL APPEND PROPERTY CHIMERA_CPP_TESTS ${target_name})
 
-add_test(
-  NAME ctest_build_binding
-  COMMAND "${CMAKE_COMMAND}"
-    --build ${CMAKE_BINARY_DIR}
-    --target test_binding
-)
+  if(${ARGC} GREATER 2)
+    set(sources ${ARGN})
+  else()
+    set(sources "${target_name}.cpp")
+  endif()
+
+  add_executable(${target_name} ${sources})
+  add_test(${target_name} ${target_name})
+
+  if(MSVC)
+    target_link_libraries(${target_name}
+        libchimera
+        emulator
+        optimized gtest debug gtestd
+        optimized gtest_main debug gtest_maind
+    )
+  else()
+    target_link_libraries(${target_name} libchimera emulator gtest gtest_main)
+  endif()
+
+  clang_format_add_sources(${sources})
+
+endfunction()
+
+#===============================================================================
+# Add tests
+#===============================================================================
+chimera_add_test(test_emulator)
+
+# Add custom target to build all the tests as a single target
+get_property(chimera_cpp_tests GLOBAL PROPERTY CHIMERA_CPP_TESTS)
+add_custom_target(tests DEPENDS ${chimera_cpp_tests})
+
+#===============================================================================
+# Add binding tests
+#===============================================================================
+add_subdirectory(examples)

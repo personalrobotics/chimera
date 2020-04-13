@@ -1,12 +1,12 @@
-#include "chimera/configuration.h"
 #include "chimera/mstch.h"
+#include "chimera/configuration.h"
 #include "chimera/util.h"
 #include "cling_utils_AST.h"
 
-#include <boost/variant/get.hpp>
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <boost/variant/get.hpp>
 
 using namespace clang;
 
@@ -14,6 +14,132 @@ namespace chimera
 {
 namespace mstch
 {
+
+::mstch::node generateNamespaceScope(
+    const ::chimera::CompiledConfiguration &config,
+    const NestedNameSpecifier *nns)
+{
+    ::mstch::array scope_templates;
+    while (nns)
+    {
+        switch (nns->getKind())
+        {
+            case NestedNameSpecifier::Namespace:
+            {
+                NamespaceDecl *parent_decl
+                    = nns->getAsNamespace()->getCanonicalDecl();
+                auto ns = std::make_shared<Namespace>(config, parent_decl);
+                if (!ns->nameAsString().empty())
+                    scope_templates.push_back(ns);
+                break;
+            }
+            case NestedNameSpecifier::TypeSpec:
+                break;
+            case NestedNameSpecifier::Global:
+            case NestedNameSpecifier::Identifier:
+            case NestedNameSpecifier::NamespaceAlias:
+            case NestedNameSpecifier::Super:
+            case NestedNameSpecifier::TypeSpecWithTemplate:
+                throw std::runtime_error(
+                    "Unsupported type of NestedNameSpecifier.");
+            default:
+                throw std::runtime_error(
+                    "Unknown type of NestedNameSpecifier.");
+        }
+
+        nns = nns->getPrefix();
+    }
+
+    std::reverse(scope_templates.begin(), scope_templates.end());
+    return scope_templates;
+}
+
+::mstch::node generateNamespaceScope(
+    const ::chimera::CompiledConfiguration &config,
+    const clang::DeclContext *decl_context)
+{
+    if (!decl_context)
+        throw std::runtime_error("Decl was not enclosed by a context.");
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
+    if (!namespace_decl)
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
+
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config.GetContext(), namespace_decl->getCanonicalDecl());
+
+    return generateNamespaceScope(config, nns);
+}
+
+::mstch::node generateClassScope(const ::chimera::CompiledConfiguration &config,
+                                 const NestedNameSpecifier *nns)
+{
+    ::mstch::array scope_templates;
+    while (nns)
+    {
+        switch (nns->getKind())
+        {
+            case NestedNameSpecifier::TypeSpec:
+            {
+                CXXRecordDecl *parent_decl
+                    = nns->getAsType()->getAsCXXRecordDecl();
+                if (!parent_decl)
+                    throw std::runtime_error(
+                        "TypeSpec was not a CXXRecordDecl.");
+                auto cxx_record
+                    = std::make_shared<CXXRecord>(config, parent_decl);
+                if (!cxx_record->nameAsString().empty())
+                    scope_templates.push_back(cxx_record);
+                break;
+            }
+            case NestedNameSpecifier::Namespace:
+                break;
+            case NestedNameSpecifier::Global:
+            case NestedNameSpecifier::Identifier:
+            case NestedNameSpecifier::NamespaceAlias:
+            case NestedNameSpecifier::Super:
+            case NestedNameSpecifier::TypeSpecWithTemplate:
+                throw std::runtime_error(
+                    "Unsupported type of NestedNameSpecifier.");
+            default:
+                throw std::runtime_error(
+                    "Unknown type of NestedNameSpecifier.");
+        }
+
+        nns = nns->getPrefix();
+    }
+
+    std::reverse(scope_templates.begin(), scope_templates.end());
+    return scope_templates;
+}
+
+::mstch::node generateClassScope(const ::chimera::CompiledConfiguration &config,
+                                 const clang::DeclContext *decl_context)
+{
+    if (!decl_context)
+        throw std::runtime_error("Decl was not enclosed by a context.");
+
+    auto namespace_decl = llvm::dyn_cast_or_null<NamespaceDecl>(decl_context);
+    if (!namespace_decl)
+    {
+        std::stringstream ss;
+        ss << "Decl was not enclosed by a namespace; got '"
+           << decl_context->getDeclKindName() << "' instead.";
+        throw std::runtime_error(ss.str());
+    }
+
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config.GetContext(), namespace_decl->getCanonicalDecl());
+
+    return generateClassScope(config, nns);
+}
 
 ::mstch::node generateScope(const ::chimera::CompiledConfiguration &config,
                             const NestedNameSpecifier *nns)
@@ -23,35 +149,38 @@ namespace mstch
     {
         switch (nns->getKind())
         {
-        case NestedNameSpecifier::Namespace:
-        {
-            NamespaceDecl *parent_decl =
-                nns->getAsNamespace()->getCanonicalDecl();
-            scope_templates.push_back(
-                std::make_shared<Namespace>(config, parent_decl));
-            break;
-        }
-        case NestedNameSpecifier::TypeSpec:
-        {
-            CXXRecordDecl *parent_decl =
-                nns->getAsType()->getAsCXXRecordDecl();
-            if (!parent_decl)
+            case NestedNameSpecifier::Namespace:
+            {
+                NamespaceDecl *parent_decl
+                    = nns->getAsNamespace()->getCanonicalDecl();
+                auto ns = std::make_shared<Namespace>(config, parent_decl);
+                if (!ns->nameAsString().empty())
+                    scope_templates.push_back(ns);
+                break;
+            }
+            case NestedNameSpecifier::TypeSpec:
+            {
+                CXXRecordDecl *parent_decl
+                    = nns->getAsType()->getAsCXXRecordDecl();
+                if (!parent_decl)
+                    throw std::runtime_error(
+                        "TypeSpec was not a CXXRecordDecl.");
+                auto cxx_record
+                    = std::make_shared<CXXRecord>(config, parent_decl);
+                if (!cxx_record->nameAsString().empty())
+                    scope_templates.push_back(cxx_record);
+                break;
+            }
+            case NestedNameSpecifier::Global:
+            case NestedNameSpecifier::Identifier:
+            case NestedNameSpecifier::NamespaceAlias:
+            case NestedNameSpecifier::Super:
+            case NestedNameSpecifier::TypeSpecWithTemplate:
                 throw std::runtime_error(
-                    "TypeSpec was not a CXXRecordDecl.");
-            scope_templates.push_back(
-                std::make_shared<CXXRecord>(config, parent_decl));
-            break;
-        }
-        case NestedNameSpecifier::Global:
-        case NestedNameSpecifier::Identifier:
-        case NestedNameSpecifier::NamespaceAlias:
-        case NestedNameSpecifier::Super:
-        case NestedNameSpecifier::TypeSpecWithTemplate:
-            throw std::runtime_error(
-                "Unsupported type of NestedNameSpecifier.");
-        default:
-            throw std::runtime_error(
-                "Unknown type of NestedNameSpecifier.");
+                    "Unsupported type of NestedNameSpecifier.");
+            default:
+                throw std::runtime_error(
+                    "Unknown type of NestedNameSpecifier.");
         }
 
         nns = nns->getPrefix();
@@ -76,71 +205,72 @@ namespace mstch
         throw std::runtime_error(ss.str());
     }
 
-    const NestedNameSpecifier *nns =
-        cling::utils::TypeName::CreateNestedNameSpecifier(
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
             config.GetContext(), namespace_decl->getCanonicalDecl());
 
     return generateScope(config, nns);
 }
 
-CXXRecord::CXXRecord(
-    const ::chimera::CompiledConfiguration &config,
-    const CXXRecordDecl *decl,
-    const std::set<const CXXRecordDecl*> *available_decls)
-: ClangWrapper(config, decl)
-, available_decls_(available_decls)
+CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
+                     const CXXRecordDecl *decl,
+                     const std::set<const CXXRecordDecl *> *available_decls)
+  : ClangWrapper(config, decl), available_decls_(available_decls)
 {
-    register_methods(this, {
-        {"bases", &CXXRecord::bases},
-        {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
-        {"type", &CXXRecord::type},
-        {"is_copyable", &CXXRecord::isCopyable},
-        {"constructors", &CXXRecord::constructors},
-        {"constructors?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
-        {"methods", &CXXRecord::methods},
-        {"methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
-        {"fields", &CXXRecord::fields},
-        {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
-        {"static_fields", &CXXRecord::staticFields},
-        {"static_fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
-        {"static_methods", &CXXRecord::staticMethods},
-        {"static_methods?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
-    });
+    register_methods(
+        this,
+        {
+            {"bases", &CXXRecord::bases},
+            {"bases?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::bases>},
+            {"type", &CXXRecord::type},
+            {"is_copyable", &CXXRecord::isCopyable},
+            {"constructors", &CXXRecord::constructors},
+            {"constructors?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::constructors>},
+            {"methods", &CXXRecord::methods},
+            {"methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"fields", &CXXRecord::fields},
+            {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
+            {"static_fields", &CXXRecord::staticFields},
+            {"static_fields?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
+            {"static_methods", &CXXRecord::staticMethods},
+            {"static_methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+        });
 }
 
 ::mstch::node CXXRecord::bases()
 {
-    if (const YAML::Node &node = decl_config_["bases"])
+    if (const YAML::Node node = decl_config_["bases"])
         return chimera::util::wrapYAMLNode(node);
 
     // Get all bases of this class.
-    std::set<const CXXRecordDecl *> base_decls =
-        chimera::util::getBaseClassDecls(decl_);
+    std::set<const CXXRecordDecl *> base_decls
+        = chimera::util::getBaseClassDecls(decl_);
 
-    // If a list of available decls is provided, only use available base classes.
+    // If a list of available decls is provided, only use available base
+    // classes.
     if (available_decls_)
     {
         std::set<const CXXRecordDecl *> available_base_decls;
         std::copy_if(
             base_decls.begin(), base_decls.end(),
             std::inserter(available_base_decls, available_base_decls.end()),
-            [this](const CXXRecordDecl* base_decl)
-            {
+            [this](const CXXRecordDecl *base_decl) {
                 return (available_decls_->find(base_decl->getCanonicalDecl())
-                            != available_decls_->end());
-            }
-        );
+                        != available_decls_->end());
+            });
         base_decls = available_base_decls;
     }
 
     // Convert each base class to a template object.
     // Since template objects are lazily-evaluated, this isn't expensive.
     std::vector<std::shared_ptr<CXXRecord>> base_vector;
-    for(const auto *base_decl : base_decls)
+    for (const auto *base_decl : base_decls)
     {
-        base_vector.push_back(
-            std::make_shared<CXXRecord>(
-                config_, base_decl));
+        base_vector.push_back(std::make_shared<CXXRecord>(config_, base_decl));
     }
 
     // Find and flag the last item.
@@ -157,8 +287,8 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::scope()
 {
-    const NestedNameSpecifier *nns =
-        cling::utils::TypeName::CreateNestedNameSpecifier(
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
             config_.GetContext(), decl_->getCanonicalDecl(), true);
 
     return generateScope(config_, nns->getPrefix());
@@ -166,24 +296,42 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::type()
 {
-    if (const YAML::Node &node = decl_config_["type"])
+    if (const YAML::Node node = decl_config_["type"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedTypeName(
         config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
 }
 
+::mstch::node CXXRecord::namespaceScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateNamespaceScope(config_, nns->getPrefix());
+}
+
+::mstch::node CXXRecord::classScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateClassScope(config_, nns->getPrefix());
+}
+
 ::mstch::node CXXRecord::isCopyable()
 {
-    if (const YAML::Node &node = decl_config_["is_copyable"])
+    if (const YAML::Node node = decl_config_["is_copyable"])
         return node.as<bool>();
 
     return chimera::util::isCopyable(decl_);
 }
 
-::mstch::node CXXRecord::name()
+::std::string CXXRecord::nameAsString()
 {
-    if (const YAML::Node &node = decl_config_["name"])
+    if (const YAML::Node node = decl_config_["name"])
         return node.as<std::string>();
 
     return chimera::util::constructBindingName(decl_);
@@ -191,7 +339,7 @@ CXXRecord::CXXRecord(
 
 ::mstch::node CXXRecord::qualifiedName()
 {
-    if (const YAML::Node &node = decl_config_["qualified_name"])
+    if (const YAML::Node node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
     // In the special case of CXXRecords, the fully-qualified name of the
@@ -218,6 +366,8 @@ CXXRecord::CXXRecord(
             continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
+        if (chimera::util::hasNonPublicParam(method_decl))
+            continue;
         if (method_decl->isDeleted())
             continue;
         if (!isa<CXXConstructorDecl>(method_decl))
@@ -238,14 +388,13 @@ CXXRecord::CXXRecord(
         if (chimera::util::containsNonCopyableType(method_decl))
             continue;
 
-        const CXXConstructorDecl *constructor_decl =
-            cast<CXXConstructorDecl>(method_decl);
+        const CXXConstructorDecl *constructor_decl
+            = cast<CXXConstructorDecl>(method_decl);
         if (constructor_decl->isCopyOrMoveConstructor())
             continue;
 
         constructor_vector.push_back(
-            std::make_shared<Method>(
-                config_, method_decl, decl_));
+            std::make_shared<Method>(config_, method_decl, decl_));
     }
 
     // Find and flag the last item.
@@ -272,6 +421,8 @@ CXXRecord::CXXRecord(
             continue;
         if (method_decl->getAccess() != AS_public)
             continue; // skip protected and private members
+        if (chimera::util::hasNonPublicParam(method_decl))
+            continue;
         if (isa<CXXConversionDecl>(method_decl))
             continue;
         if (isa<CXXDestructorDecl>(method_decl))
@@ -305,8 +456,8 @@ CXXRecord::CXXRecord(
 
         // Check if a return_value_policy can be generated for this function.
         if (::mstch::render("{{return_value_policy}}", method).empty()
-                && chimera::util::needsReturnValuePolicy(
-                    method_decl, method_decl->getReturnType()))
+            && chimera::util::needsReturnValuePolicy(
+                   method_decl, method_decl->getReturnType()))
         {
             // `needsReturnValuePolicy()` already prints an error message,
             // so just continue to the next method if we got here.
@@ -336,14 +487,16 @@ CXXRecord::CXXRecord(
     // Iterate through all methods searching for static ones.
     for (const ::mstch::node method_node : method_templates)
     {
-        // Resolve the static-ness and name of each function from method templates.
-        const auto method = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        // Resolve the static-ness and name of each function from method
+        // templates.
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const std::string name = boost::get<std::string>(method->at("name"));
         const bool is_static = boost::get<bool>(method->at("is_static"));
 
         // Throw a warning if a static and non-static method share a name.
-        if ((is_static_method.find(name) != is_static_method.end()) &&
-                (is_static_method[name] != is_static))
+        if ((is_static_method.find(name) != is_static_method.end())
+            && (is_static_method[name] != is_static))
         {
             std::cerr
                 << "Warning: Method '" << name << "' has ambiguous static and"
@@ -364,7 +517,7 @@ CXXRecord::CXXRecord(
 
     // Add all static method names to this list.
     ::mstch::array static_method_list;
-    for (auto const& entry : is_static_method)
+    for (auto const &entry : is_static_method)
     {
         if (entry.second)
             static_method_list.push_back(entry.first);
@@ -386,13 +539,12 @@ CXXRecord::CXXRecord(
         if (field_decl->getAccess() != AS_public)
             continue; // skip protected and private fields
 
-        if (!chimera::util::isCopyable(
-                config_.GetContext(), field_decl->getType()))
+        if (!chimera::util::isCopyable(config_.GetContext(),
+                                       field_decl->getType()))
             continue;
 
         field_vector.push_back(
-            std::make_shared<Field>(
-                config_, field_decl, decl_));
+            std::make_shared<Field>(config_, field_decl, decl_));
     }
 
     // Find and flag the last item.
@@ -427,13 +579,12 @@ CXXRecord::CXXRecord(
             continue;
 
         // Check if a return_value_policy can be generated for this function.
-        if (chimera::util::needsReturnValuePolicy(
-                static_field_decl, static_field_decl->getType()))
+        if (chimera::util::needsReturnValuePolicy(static_field_decl,
+                                                  static_field_decl->getType()))
             continue;
 
         static_field_vector.push_back(
-            std::make_shared<Variable>(
-                config_, static_field_decl, decl_));
+            std::make_shared<Variable>(config_, static_field_decl, decl_));
     }
 
     // Find and flag the last item.
@@ -447,19 +598,18 @@ CXXRecord::CXXRecord(
     return static_field_templates;
 }
 
-Enum::Enum(const ::chimera::CompiledConfiguration &config,
-           const EnumDecl *decl)
-: ClangWrapper(config, decl)
+Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)
+  : ClangWrapper(config, decl)
 {
     register_methods(this, {
-        {"type", &Enum::type},
-        {"values", &Enum::values},
-    });
+                               {"type", &Enum::type},
+                               {"values", &Enum::values},
+                           });
 }
 
 ::mstch::node Enum::qualifiedName()
 {
-    if (const YAML::Node &node = decl_config_["qualified_name"])
+    if (const YAML::Node node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
     // In the special case of Enums, the fully-qualified name of the
@@ -469,10 +619,28 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
     return type();
 }
 
+::mstch::node Enum::namespaceScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateNamespaceScope(config_, nns->getPrefix());
+}
+
+::mstch::node Enum::classScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateClassScope(config_, nns->getPrefix());
+}
+
 ::mstch::node Enum::scope()
 {
-    const NestedNameSpecifier *nns =
-        cling::utils::TypeName::CreateNestedNameSpecifier(
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
             config_.GetContext(), decl_->getCanonicalDecl(), true);
 
     return generateScope(config_, nns->getPrefix());
@@ -498,8 +666,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
         if (config_.IsSuppressed(constant_decl))
             continue;
         constant_vector.push_back(
-            std::make_shared<EnumConstant>(
-                config_, constant_decl, decl_));
+            std::make_shared<EnumConstant>(config_, constant_decl, decl_));
     }
 
     // Find and flag the last item.
@@ -516,8 +683,7 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config,
 EnumConstant::EnumConstant(const ::chimera::CompiledConfiguration &config,
                            const EnumConstantDecl *decl,
                            const EnumDecl *enum_decl)
-: ClangWrapper(config, decl)
-, enum_decl_(enum_decl)
+  : ClangWrapper(config, decl), enum_decl_(enum_decl)
 {
     // Do nothing.
 }
@@ -531,21 +697,20 @@ EnumConstant::EnumConstant(const ::chimera::CompiledConfiguration &config,
     // fully resolve the qualified name, we can simply get it from appending
     // this value to the parent Enum's qualified name.
     auto enumeration = std::make_shared<Enum>(config_, enum_decl_);
-    return ::mstch::render("{{type}}", enumeration) + "::" +
-        decl_->getNameAsString();
+    return ::mstch::render("{{type}}", enumeration)
+           + "::" + decl_->getNameAsString();
 }
 
 Field::Field(const ::chimera::CompiledConfiguration &config,
-             const FieldDecl *decl,
-             const CXXRecordDecl *class_decl)
-: ClangWrapper(config, decl)
-, class_decl_(class_decl)
+             const FieldDecl *decl, const CXXRecordDecl *class_decl)
+  : ClangWrapper(config, decl), class_decl_(class_decl)
 {
-    register_methods(this, {
-        {"is_assignable", &Field::isAssignable},
-        {"is_copyable", &Field::isCopyable},
-        {"return_value_policy", &Field::returnValuePolicy},
-    });
+    register_methods(this,
+                     {
+                         {"is_assignable", &Field::isAssignable},
+                         {"is_copyable", &Field::isCopyable},
+                         {"return_value_policy", &Field::returnValuePolicy},
+                     });
 }
 
 ::mstch::node Field::isAssignable()
@@ -553,8 +718,7 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["is_assignable"])
         return node.as<std::string>();
 
-    return chimera::util::isAssignable(
-        config_.GetContext(), decl_->getType());
+    return chimera::util::isAssignable(config_.GetContext(), decl_->getType());
 }
 
 ::mstch::node Field::isCopyable()
@@ -562,8 +726,7 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["is_copyable"])
         return node.as<std::string>();
 
-    return chimera::util::isCopyable(
-        config_.GetContext(), decl_->getType());
+    return chimera::util::isCopyable(config_.GetContext(), decl_->getType());
 }
 
 ::mstch::node Field::returnValuePolicy()
@@ -573,13 +736,12 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
         return node.as<std::string>();
 
     // Extract the value type of this field declaration.
-    const QualType value_qual_type =
-        chimera::util::getFullyQualifiedType(config_.GetContext(),
-                                             decl_->getType());
+    const QualType value_qual_type = chimera::util::getFullyQualifiedType(
+        config_.GetContext(), decl_->getType());
 
     // Next, check if a return_value_policy is defined on the value type.
-    if (const YAML::Node &type_node =
-            config_.GetType(value_qual_type)["return_value_policy"])
+    if (const YAML::Node &type_node
+        = config_.GetType(value_qual_type)["return_value_policy"])
         return type_node.as<std::string>();
 
     // Return an empty string if no return value policy exists.
@@ -591,30 +753,32 @@ Field::Field(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_name"])
         return node.as<std::string>();
 
-    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_) +
-        "::" + decl_->getNameAsString();
+    return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
+           + "::" + decl_->getNameAsString();
 }
 
 Function::Function(const ::chimera::CompiledConfiguration &config,
-                   const FunctionDecl *decl,
-                   const CXXRecordDecl *class_decl,
+                   const FunctionDecl *decl, const CXXRecordDecl *class_decl,
                    const int argument_limit)
-: ClangWrapper(config, decl)
-, class_decl_(class_decl)
-, argument_limit_(argument_limit)
+  : ClangWrapper(config, decl)
+  , class_decl_(class_decl)
+  , argument_limit_(argument_limit)
 {
-    register_methods(this, {
-        {"type", &Function::type},
-        {"overloads", &Function::overloads},
-        {"params", &Function::params},
-        {"params?", &Function::isNonFalse<Function, &Function::params>},
-        {"return_type", &Function::returnType},
-        {"return_value_policy", &Function::returnValuePolicy},
-        {"uses_defaults", &Function::usesDefaults},
-        {"is_template", &Function::isTemplate},
-        {"call", &Function::call},
-        {"qualified_call", &Function::qualifiedCall},
-    });
+    register_methods(
+        this,
+        {
+            {"type", &Function::type},
+            {"overloads", &Function::overloads},
+            {"params", &Function::params},
+            {"params?", &Function::isNonFalse<Function, &Function::params>},
+            {"return_type", &Function::returnType},
+            {"return_value_policy", &Function::returnValuePolicy},
+            {"is_void", &Function::isVoid},
+            {"uses_defaults", &Function::usesDefaults},
+            {"is_template", &Function::isTemplate},
+            {"call", &Function::call},
+            {"qualified_call", &Function::qualifiedCall},
+        });
 }
 
 ::mstch::node Function::scope()
@@ -638,8 +802,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         pointer_type = config_.GetContext().getPointerType(decl_->getType());
     }
 
-    return chimera::util::getFullyQualifiedTypeName(
-        config_.GetContext(), pointer_type);
+    return chimera::util::getFullyQualifiedTypeName(config_.GetContext(),
+                                                    pointer_type);
 }
 
 ::mstch::node Function::overloads()
@@ -652,8 +816,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     for (unsigned n_args = arg_range.first; n_args < arg_range.second; ++n_args)
     {
         overloads.push_back(
-            std::make_shared<Function>(
-                config_, decl_, class_decl_, n_args));
+            std::make_shared<Function>(config_, decl_, class_decl_, n_args));
     }
 
     // Add this function to its own list of overloads.
@@ -686,9 +849,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
         // Create a parameter template and add it to the parameter array.
         const ParmVarDecl *param_decl = decl_->getParamDecl(param_idx);
-        param_vector.push_back(
-            std::make_shared<Parameter>(
-                config_, param_decl, decl_, class_decl_, ss.str()));
+        param_vector.push_back(std::make_shared<Parameter>(
+            config_, param_decl, decl_, class_decl_, ss.str()));
     }
 
     // Find and flag the last item.
@@ -709,8 +871,8 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         return node.as<std::string>();
 
     // Extract the return type of this function declaration.
-    return chimera::util::getFullyQualifiedTypeName(
-        config_.GetContext(), decl_->getReturnType());
+    return chimera::util::getFullyQualifiedTypeName(config_.GetContext(),
+                                                    decl_->getReturnType());
 }
 
 ::mstch::node Function::returnValuePolicy()
@@ -720,17 +882,36 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         return node.as<std::string>();
 
     // Extract the return type of this function declaration.
-    const QualType return_qual_type =
-        chimera::util::getFullyQualifiedType(config_.GetContext(),
-                                             decl_->getReturnType());
+    const QualType return_qual_type = chimera::util::getFullyQualifiedType(
+        config_.GetContext(), decl_->getReturnType());
 
     // Next, check if a return_value_policy is defined on the return type.
-    if (const YAML::Node &type_node =
-            config_.GetType(return_qual_type)["return_value_policy"])
+    if (const YAML::Node &type_node
+        = config_.GetType(return_qual_type)["return_value_policy"])
         return type_node.as<std::string>();
 
     // Return an empty string if no return value policy exists.
     return std::string{""};
+}
+
+::mstch::node Function::isVoid()
+{
+    // First, check if a return_value_policy was specified for this function.
+    if (const YAML::Node &node = decl_config_["return_type"])
+        return (node.as<std::string>() == "void");
+
+    return decl_->getReturnType()->isVoidType();
+}
+
+::mstch::node Function::namespaceScope()
+{
+    return generateNamespaceScope(config_,
+                                  decl_->getEnclosingNamespaceContext());
+}
+
+::mstch::node Function::classScope()
+{
+    return generateClassScope(config_, decl_->getEnclosingNamespaceContext());
 }
 
 ::mstch::node Function::usesDefaults()
@@ -747,7 +928,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
         return decl_->getQualifiedNameAsString();
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
-        + "::" + decl_->getNameAsString();
+           + "::" + decl_->getNameAsString();
 }
 
 ::mstch::node Function::qualifiedCall()
@@ -755,14 +936,15 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["qualified_call"])
         return node.as<std::string>();
 
-    const auto template_str = chimera::util::getTemplateParameterString(decl_);
+    const auto template_str = chimera::util::getTemplateParameterString(
+        decl_, config_.GetBindingName());
 
     // Construct the basic qualified name.
     if (!class_decl_)
         return decl_->getQualifiedNameAsString() + template_str;
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
-        + "::" + decl_->getNameAsString() + template_str;
+           + "::" + decl_->getNameAsString() + template_str;
 }
 
 ::mstch::node Function::call()
@@ -770,8 +952,9 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["call"])
         return node.as<std::string>();
 
-    return decl_->getNameAsString() +
-        chimera::util::getTemplateParameterString(decl_);
+    return decl_->getNameAsString()
+           + chimera::util::getTemplateParameterString(
+                 decl_, config_.GetBindingName());
 }
 
 ::mstch::node Function::isTemplate()
@@ -780,15 +963,15 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 }
 
 Method::Method(const ::chimera::CompiledConfiguration &config,
-               const CXXMethodDecl *decl,
-               const CXXRecordDecl *class_decl)
-: Function(config, decl, class_decl)
-, method_decl_(decl)
+               const CXXMethodDecl *decl, const CXXRecordDecl *class_decl)
+  : Function(config, decl, class_decl), method_decl_(decl)
 {
     register_methods(this, {
-        {"is_const", &Method::isConst},
-        {"is_static", &Method::isStatic},
-    });
+                               {"is_const", &Method::isConst},
+                               {"is_static", &Method::isStatic},
+                               {"is_virtual", &Method::isVirtual},
+                               {"is_pure_virtual", &Method::isPureVirtual},
+                           });
 }
 
 ::mstch::node Method::isConst()
@@ -801,53 +984,61 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
     return method_decl_->isStatic();
 }
 
+::mstch::node Method::isVirtual()
+{
+    return method_decl_->isVirtual();
+}
+
+::mstch::node Method::isPureVirtual()
+{
+    return method_decl_->isPure();
+}
+
 Namespace::Namespace(const ::chimera::CompiledConfiguration &config,
                      const NamespaceDecl *decl)
-: ClangWrapper(config, decl)
+  : ClangWrapper(config, decl)
 {
     // Do nothing.
 }
 
 ::mstch::node Namespace::scope()
 {
-    const NestedNameSpecifier *nns =
-        cling::utils::TypeName::CreateNestedNameSpecifier(
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
             config_.GetContext(), decl_->getCanonicalDecl());
 
     return generateScope(config_, nns->getPrefix());
 }
 
 Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
-                     const ParmVarDecl *decl,
-                     const FunctionDecl *method_decl,
+                     const ParmVarDecl *decl, const FunctionDecl *method_decl,
                      const CXXRecordDecl *class_decl,
                      const std::string default_name)
-: ClangWrapper(config, decl)
-, method_decl_(method_decl)
-, class_decl_(class_decl)
-, default_name_(default_name)
+  : ClangWrapper(config, decl)
+  , method_decl_(method_decl)
+  , class_decl_(class_decl)
+  , default_name_(default_name)
 {
     register_methods(this, {
-        {"name", &Parameter::name},
-        {"type", &Parameter::type},
-    });
+                               {"name", &Parameter::name},
+                               {"type", &Parameter::type},
+                           });
 }
 
-::mstch::node Parameter::name()
+::std::string Parameter::nameAsString()
 {
     if (const YAML::Node &node = decl_config_["name"])
         return node.as<std::string>();
 
     // Ignore argument is part of a variadic function
     // (since it could be non-unique).
-    if (const auto template_decl =
-            method_decl_->getPrimaryTemplate())
+    if (const auto template_decl = method_decl_->getPrimaryTemplate())
         if (chimera::util::isVariadicFunctionTemplate(template_decl))
             return default_name_;
 
     // Use the "default_name" if the name would otherwise be empty
     std::string name = decl_->getNameAsString();
-    return (name.empty()) ? default_name_: name;
+    return (name.empty()) ? default_name_ : name;
 }
 
 ::mstch::node Parameter::type()
@@ -855,19 +1046,24 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["type"])
         return node.as<std::string>();
 
-    return chimera::util::getFullyQualifiedTypeName(
+    auto type_str = chimera::util::getFullyQualifiedTypeName(
         config_.GetContext(), decl_->getType());
+
+    if (config_.GetBindingName() == "pybind11")
+        type_str = util::stripNoneCopyableEigenWrappers(type_str);
+    // FIXME: Replace this Pybind11 specific workaround with a more
+    // general solution.
+
+    return type_str;
 }
 
 Variable::Variable(const ::chimera::CompiledConfiguration &config,
-                   const VarDecl *decl,
-                   const CXXRecordDecl *class_decl)
-: ClangWrapper(config, decl)
-, class_decl_(class_decl)
+                   const VarDecl *decl, const CXXRecordDecl *class_decl)
+  : ClangWrapper(config, decl), class_decl_(class_decl)
 {
     register_methods(this, {
-        {"is_assignable", &Variable::isAssignable},
-    });
+                               {"is_assignable", &Variable::isAssignable},
+                           });
 }
 
 ::mstch::node Variable::qualifiedName()
@@ -879,7 +1075,17 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
         return decl_->getQualifiedNameAsString();
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
-        + "::" + decl_->getNameAsString();
+           + "::" + decl_->getNameAsString();
+}
+
+::mstch::node Variable::namespaceScope()
+{
+    return generateNamespaceScope(config_, decl_->getDeclContext());
+}
+
+::mstch::node Variable::classScope()
+{
+    return generateClassScope(config_, decl_->getDeclContext());
 }
 
 ::mstch::node Variable::scope()
@@ -892,8 +1098,7 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
     if (const YAML::Node &node = decl_config_["is_assignable"])
         return node.as<std::string>();
 
-    return chimera::util::isAssignable(
-        config_.GetContext(), decl_->getType());
+    return chimera::util::isAssignable(config_.GetContext(), decl_->getType());
 }
 
 } // namespace mstch

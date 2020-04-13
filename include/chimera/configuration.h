@@ -3,13 +3,13 @@
 
 #include "chimera/binding.h"
 
+#include <map>
+#include <memory>
+#include <set>
 #include <clang/AST/DeclBase.h>
 #include <clang/AST/Mangle.h>
 #include <clang/Frontend/CompilerInstance.h>
-#include <map>
-#include <memory>
 #include <mstch/mstch.hpp>
-#include <set>
 #include <yaml-cpp/yaml.h>
 
 namespace chimera
@@ -21,10 +21,10 @@ class CXXRecord;
 class Enum;
 class Function;
 class Variable;
+class Namespace;
 
-} // mstch
-} // chimera
-
+} // namespace mstch
+} // namespace chimera
 
 namespace chimera
 {
@@ -34,79 +34,85 @@ class CompiledConfiguration;
 class Configuration
 {
 public:
-    Configuration(const Configuration&) = delete;
-    Configuration &operator=(const Configuration&) = delete;
+    Configuration();
+    Configuration(const Configuration &) = delete;
+    Configuration &operator=(const Configuration &) = delete;
 
     /**
-     * Get the chimera configuration singleton for this process.
-     */
-    static Configuration& GetInstance();
-
-    /**
-     * Load the specified file to use as the YAML configuration.
+     * Loads the specified file to use as the YAML configuration.
      */
     void LoadFile(const std::string &filename);
 
     /**
-     * Set the desired output path to be prepended to every binding.
+     * Sets the desired binding definition by name.
+     * If unspecified, the default is "boost_python".
+     */
+    void SetBindingName(const std::string &name);
+
+    /**
+     * Sets the desired output path to be prepended to every binding.
      * If unspecified, the default is the current working directory.
      */
     void SetOutputPath(const std::string &path);
 
     /**
-     * Set the desired output python module for the top-level binding.
+     * Sets the desired output python module for the top-level binding.
      * If unspecified, the default is "chimera_binding".
      */
     void SetOutputModuleName(const std::string &moduleName);
 
     /**
-     * Append an enclosing namespace that should be generated as part
+     * Appends an enclosing namespace that should be generated as part
      * of the top-level binding.
      */
     void AddInputNamespaceName(const std::string &namespaceName);
 
     /**
-     * Append the path to a source file that will be processed as part
+     * Appends the path to a source file that will be processed as part
      * of the binding generation.
      */
     void AddSourcePath(const std::string &sourcePath);
 
     /**
-     * Process the configuration settings against the current AST.
+     * Sets whether to treat unresolvable configuration as errors.
      */
-    std::unique_ptr<CompiledConfiguration>
-    Process(clang::CompilerInstance *ci) const;
+    void SetStrict(bool val);
 
     /**
-     * Get the root node of the YAML configuration structure.
+     * Processes the configuration settings against the current AST.
      */
-    const YAML::Node& GetRoot() const;
+    std::unique_ptr<CompiledConfiguration> Process(
+        clang::CompilerInstance *ci) const;
 
     /**
-     * Get the filename of the loaded YAML configuration file, if it exists.
+     * Gets the root node of the YAML configuration structure.
      */
-    const std::string& GetConfigFilename() const;
+    const YAML::Node &GetRoot() const;
 
     /**
-     * Get the desired output path for bindings.
+     * Gets the filename of the loaded YAML configuration file, if it exists.
      */
-    const std::string& GetOutputPath() const;
+    const std::string &GetConfigFilename() const;
 
     /**
-     * Get the desired output python module name for top-level binding.
+     * Gets the desired output path for bindings.
      */
-    const std::string& GetOutputModuleName() const;
+    const std::string &GetOutputPath() const;
 
-private:
-    Configuration();
+    /**
+     * Gets the desired output python module name for top-level binding.
+     */
+    const std::string &GetOutputModuleName() const;
 
 protected:
     YAML::Node configNode_;
+    std::string bindingName_;
     std::string configFilename_;
     std::string outputPath_;
     std::string outputModuleName_;
     std::vector<std::string> inputNamespaceNames_;
     std::vector<std::string> inputSourcePaths_;
+    bool strict_;
 
     friend class CompiledConfiguration;
 };
@@ -114,36 +120,47 @@ protected:
 class CompiledConfiguration
 {
 public:
-    virtual ~CompiledConfiguration();
-    CompiledConfiguration(const CompiledConfiguration&) = delete;
-    CompiledConfiguration &operator=(const CompiledConfiguration&) = delete;
+    virtual ~CompiledConfiguration() = default;
+    CompiledConfiguration(const CompiledConfiguration &) = delete;
+    CompiledConfiguration &operator=(const CompiledConfiguration &) = delete;
+
+    /**
+     * Return whether to treat unresolvable configuration as errors.
+     */
+    bool GetStrict() const;
 
     /**
      * Adds a namespace to an ordered set of traversed namespaces.
      * This set can later be rendered in a template.
      */
-    void AddTraversedNamespace(const clang::NamespaceDecl* decl);
+    void AddTraversedNamespace(const clang::NamespaceDecl *decl);
 
     /**
-     * Return list of namespace declarations that should be included.
+     * Returns list of namespace declarations that should be included.
      *
      * Note: these declarations will be lexically ordered.  Normally this
      * is desirable since parent namespaces will naturally be lexically
      * ordered before their children.
      */
-    const std::set<const clang::NamespaceDecl*>& GetNamespaces() const;
+    const std::set<const clang::NamespaceDecl *> &GetNamespacesIncluded() const;
 
     /**
-     * Get the YAML configuration associated with a specific declaration,
-     * or return an empty YAML node if no configuration was found.
+     * Returns list of namespace declarations that should be skipped.
      */
-    const YAML::Node& GetDeclaration(const clang::Decl *decl) const;
+    const std::set<const clang::NamespaceDecl *> &GetNamespacesSuppressed()
+        const;
 
     /**
-     * Get the YAML configuration associated with a specific qualified type,
+     * Gets the YAML configuration associated with a specific declaration,
      * or return an empty YAML node if no configuration was found.
      */
-    const YAML::Node& GetType(const clang::QualType type) const;
+    const YAML::Node &GetDeclaration(const clang::Decl *decl) const;
+
+    /**
+     * Gets the YAML configuration associated with a specific qualified type,
+     * or return an empty YAML node if no configuration was found.
+     */
+    const YAML::Node &GetType(const clang::QualType type) const;
 
     /**
      * Gets the compiler instance used by this configuration.
@@ -154,6 +171,16 @@ public:
      * Gets the AST context used by this configuration.
      */
     clang::ASTContext &GetContext() const;
+
+    /**
+     * Gets the binding name of this configuration.
+     *
+     * The binding name is one of the following sources in order of priority:
+     *   1) CLI '--binding' setting
+     *   2) YAML configuration setting
+     *   3) chimera::binding::DEFAULT_NAME
+     */
+    const std::string &GetBindingName() const;
 
     /**
      * Return if a declaration is enclosed by one of the configured namespaces.
@@ -184,13 +211,20 @@ public:
     std::string Lookup(const YAML::Node &node) const;
 
     /**
-     * Render a particular mstch template based on some declaration.
-     * This context must contain a "mangled_name" from which to create the filename.
+     * Renders a particular mstch template based on some declaration.
+     * This context must contain a "mangled_name" from which to create the
+     * filename.
      */
     bool Render(const std::shared_ptr<chimera::mstch::CXXRecord> context);
     bool Render(const std::shared_ptr<chimera::mstch::Enum> context);
     bool Render(const std::shared_ptr<chimera::mstch::Function> context);
     bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
+
+    /**
+     * Renders the top-level mstch template. The rendered filename is specified
+     * by Configuration::SetOutputModuleName().
+     */
+    void Render();
 
 private:
     CompiledConfiguration(const Configuration &parent,
@@ -204,14 +238,19 @@ protected:
     const Configuration &parent_;
     const YAML::Node configNode_;
     const YAML::Node bindingNode_;
+    std::string binding_name_;
     chimera::binding::Definition bindingDefinition_;
     clang::CompilerInstance *ci_;
     std::vector<std::pair<const clang::QualType, YAML::Node>> types_;
-    std::map<const clang::Decl*, YAML::Node> declarations_;
-    std::set<const clang::NamespaceDecl*> namespaces_;
+    std::map<const clang::Decl *, YAML::Node> declarations_;
+    std::set<const clang::NamespaceDecl *> namespacesIncluded_;
+    std::set<const clang::NamespaceDecl *> namespacesSuppressed_;
 
     std::vector<std::string> binding_names_;
-    std::set<const clang::NamespaceDecl*> binding_namespaces_;
+    std::vector<std::shared_ptr<chimera::mstch::Namespace>> binding_namespaces_;
+    std::set<const clang::NamespaceDecl *> binding_namespace_decls_;
+
+    bool strict_;
 
     friend class Configuration;
 };
