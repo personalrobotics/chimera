@@ -67,37 +67,6 @@ function(chimera_add_test target_name) # ARGN for source files
 endfunction()
 
 #===============================================================================
-# pytest
-#===============================================================================
-# Make sure pytest is installed
-if (NOT CHIMERA_PYTEST_FOUND)
-  execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
-    RESULT_VARIABLE pytest_not_found
-    OUTPUT_VARIABLE pytest_version
-    ERROR_QUIET
-  )
-  if(pytest_not_found)
-    message(FATAL_ERROR "Running the tests requires pytest. Please install it "
-      "manually (try: ${PYTHON_EXECUTABLE} -m pip install pytest)"
-    )
-  elseif(pytest_version VERSION_LESS 3.0)
-    message(FATAL_ERROR "Running the tests requires pytest >= 3.0. Found: "
-      "${pytest_version} Please update it "
-      "(try: ${PYTHON_EXECUTABLE} -m pip install -U pytest)"
-    )
-  endif()
-  set(CHIMERA_PYTEST_FOUND TRUE CACHE INTERNAL "")
-endif()
-
-# A single command to compile and run the tests
-add_custom_target(pytest
-  COMMAND ${PYTHON_EXECUTABLE} -m pytest ${PYBIND11_PYTEST_FILES}
-  DEPENDS libchimera
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-#===============================================================================
 # Add tests
 #===============================================================================
 chimera_add_test(test_emulator)
