@@ -29,4 +29,9 @@ pybind11::cpp_function func_cpp();
 // TODO: Add more sections...
 //---------------------------------------------
 
+inline std::function<void()> foo_NOT_BINDED()
+{
+    return [] {};
+}
+
 } // namespace chimera_test
