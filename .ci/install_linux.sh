@@ -29,6 +29,9 @@ $SUDO apt-get -y install \
 $SUDO apt-get -y install libeigen3-dev
 $SUDO apt-get -y install libboost-python-dev libboost-thread-dev
 $SUDO apt-get -y install lcov
+$SUDO apt-get -y install python3-pip
+pip3 install pytest -U
+
 # Install Python 2 up to Eoan
 if [ $(lsb_release -sc) = "xenial" ] || [ $(lsb_release -sc) = "bionic" ] || [ $(lsb_release -sc) = "eoan" ]; then
   $SUDO apt-get -y install python-dev libpython-dev

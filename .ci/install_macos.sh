@@ -5,6 +5,9 @@ set -ex
 brew update > /dev/null
 brew bundle
 
+# Install pytest
+pip3 install -U pytest
+
 # Compare two semantic version numbers A and B. Return code is 0 if A == B, 1
 # if A > B, and 2 if A < B.
 # Usage: compare_versions 3.9.0 4.0.0
