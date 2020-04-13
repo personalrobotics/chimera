@@ -12,7 +12,7 @@ fi
 mkdir build
 cd build
 
-if [ $BUILD_NAME = XENIAL_GCC_DEBUG ]; then
+if [ $BUILD_NAME = BIONIC_GCC_DEBUG_CODECOV ]; then
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=ON" ..
 else
   cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
@@ -36,7 +36,7 @@ if [ "${OS_NAME}" = "linux" ]; then
     # - https://travis-ci.org/github/personalrobotics/chimera/jobs/671301082#L2523-L2573
     make tests binding_tests
 
-    if [ $BUILD_NAME = XENIAL_GCC_DEBUG ]; then
+    if [ $BUILD_NAME = BIONIC_GCC_DEBUG_CODECOV ]; then
       make chimera_coverage
     else
       ctest --output-on-failure

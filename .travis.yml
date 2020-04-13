@@ -13,7 +13,14 @@ env:
 
 matrix:
   include:
-      # TODO: Fix CODECOV reporting
+    - os: linux
+      compiler: gcc
+      env:
+        - BUILD_NAME=BIONIC_GCC_DEBUG_CODECOV
+        - BUILD_TYPE=Debug
+        - COMPILER=GCC
+        - LLVM_VERSION=6.0
+        - PYTHON_VERSION=3.6
     - os: linux
       compiler: gcc
       env:
