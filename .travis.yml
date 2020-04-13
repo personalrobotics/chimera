@@ -21,6 +21,7 @@ matrix:
         - COMPILER=GCC
         - LLVM_VERSION=6.0
         - PYTHON_VERSION=3.6
+        - SUDO=sudo
     - os: linux
       compiler: gcc
       env:
