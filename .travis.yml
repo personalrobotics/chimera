@@ -17,7 +17,7 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=XENIAL_GCC_DEBUG
+        - BUILD_NAME=XENIAL_GCC_DEBUG_LLVM3_9
         - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=3.9
@@ -27,7 +27,7 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=BIONIC_GCC_DEBUG
+        - BUILD_NAME=BIONIC_GCC_DEBUG_LLVM6
         - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=6.0
@@ -37,20 +37,20 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=EOAN_GCC_DEBUG
+        - BUILD_NAME=EOAN_GCC_DEBUG_LLVM9
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=6.0  # 9 is the default but Chimera doesn't work with it
+        - LLVM_VERSION=9
         - PYTHON_VERSION=3.7
         - DOCKERFILE="Dockerfile.ubuntu-eoan"
       services: docker
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=FOCAL_GCC_DEBUG
+        - BUILD_NAME=FOCAL_GCC_DEBUG_LLVM9
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=6.0  # 10 is the default but Chimera doesn't work with it
+        - LLVM_VERSION=9  # 10 is the default but Chimera doesn't work with it
         - PYTHON_VERSION=3.8
         - DOCKERFILE="Dockerfile.ubuntu-focal"
       services: docker
