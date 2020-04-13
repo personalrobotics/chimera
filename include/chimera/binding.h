@@ -14,10 +14,14 @@ namespace binding
  */
 struct Definition
 {
+    std::string class_h;
     std::string class_cpp;
+    std::string enum_h;
     std::string enum_cpp;
+    std::string function_h;
     std::string function_cpp;
     std::string module_cpp;
+    std::string variable_h;
     std::string variable_cpp;
 };
 
