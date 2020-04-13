@@ -1,2 +1,3 @@
 add_subdirectory(01_functions)
 add_subdirectory(02_classes)
+add_subdirectory(03_exceptions)
