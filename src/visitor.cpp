@@ -240,6 +240,10 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
     // Ignore unspecialized template variables.
     else if (decl->getDescribedVarTemplate())
         return false;
+    // TODO(#297): Ignore specialized template variables because the current
+    // variable mastch and template not able to generate valid binding.
+    else if (isa<clang::VarTemplateSpecializationDecl>(decl))
+        return false;
 
     // TODO: Support return_value_policy for global variables.
     if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
