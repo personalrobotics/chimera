@@ -1,2 +1,3 @@
 add_subdirectory(issue216_template_param)
 add_subdirectory(issue228_template_type_alias)
+add_subdirectory(issue297_template_variable)
