@@ -237,6 +237,9 @@ bool chimera::Visitor::GenerateGlobalVar(clang::VarDecl *decl)
         return false;
     else if (!decl->isThisDeclarationADefinition())
         return false;
+    // Ignore unspecialized template variables.
+    else if (decl->getDescribedVarTemplate())
+        return false;
 
     // TODO: Support return_value_policy for global variables.
     if (chimera::util::needsReturnValuePolicy(decl, decl->getType()))
