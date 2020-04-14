@@ -1131,6 +1131,25 @@ std::string toString(const Decl *decl)
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
     // ...
+    else if (dyn_cast<DecompositionDecl>(decl))
+        return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<ImplicitParamDecl>(decl))
+        return "ImplicitParamDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<ParmVarDecl>(decl))
+        return "ParmVarDecl : VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<VarTemplateSpecializationDecl>(decl))
+        return "VarTemplateSpecializationDecl : VarDecl : DeclaratorDecl : "
+               "ValueDecl : NamedDecl";
+    else if (dyn_cast<VarDecl>(decl))
+        return "VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<DeclaratorDecl>(decl))
+        return "DeclaratorDecl : ValueDecl : NamedDecl";
+    // ...
+    else if (dyn_cast<ValueDecl>(decl))
+        return "ValueDecl : NamedDecl";
+    // ...
     else if (dyn_cast<NamedDecl>(decl))
         return "NamedDecl";
     else if (dyn_cast<Decl>(decl))
