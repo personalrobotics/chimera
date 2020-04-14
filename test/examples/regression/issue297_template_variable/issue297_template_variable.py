@@ -8,6 +8,7 @@ class TestIssue297(unittest.TestCase):
 
     def _test_issue297(self, binding):
         self.assertFalse(hasattr(binding, 'template_var'))
+        self.assertTrue(hasattr(binding, 'specialized_var'))
 
     def test_issue297(self):
         self._test_issue297(py11)
