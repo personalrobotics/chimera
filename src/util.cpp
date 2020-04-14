@@ -1131,9 +1131,11 @@ std::string toString(const Decl *decl)
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
     // ...
+#if LLVM_VERSION_AT_LEAST(6,0,0)
     else if (dyn_cast<DecompositionDecl>(decl))
         return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
                "NamedDecl";
+#endif
     else if (dyn_cast<ImplicitParamDecl>(decl))
         return "ImplicitParamDecl : VarDecl : DeclaratorDecl : ValueDecl : "
                "NamedDecl";
