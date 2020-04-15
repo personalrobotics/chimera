@@ -473,7 +473,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
             = lookupYAMLNode(bindingNode_, "function", "source"))
             bindingDefinition_.function_cpp = Lookup(node);
 
-        if (const auto node = bindingNode_["module"])
+        if (const auto node = lookupYAMLNode(bindingNode_, "module"))
             bindingDefinition_.module_cpp = Lookup(node);
 
         if (const auto node
