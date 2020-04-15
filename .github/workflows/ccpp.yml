@@ -1,0 +1,117 @@
+# Reference: https://help.github.com/en/articles/workflow-syntax-for-github-actions
+
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+  schedule:
+    # Run at 02:00 UTC every day
+    - cron: "0 2 * * 0-6"
+
+jobs:
+  xenial_gcc_release:
+    name: xenial_gcc_release_llvm3_9
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: linux
+          COMPILER: gcc
+          BUILD_TYPE: Release
+          LLVM_VERSION: 3.9
+          PYTHON_VERSION: 3.5
+          DOCKERFILE: Dockerfile.ubuntu-xenial
+        run: |
+          docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+      - name: Build
+        run: |
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+
+  bionic_gcc_release:
+    name: bionic_gcc_release_llvm6
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: linux
+          COMPILER: gcc
+          BUILD_TYPE: Release
+          LLVM_VERSION: 6.0
+          PYTHON_VERSION: 3.6
+          DOCKERFILE: Dockerfile.ubuntu-bionic
+        run: |
+          docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+      - name: Build
+        run: |
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+
+  eoan_gcc_release:
+    name: eoan_gcc_release_llvm9
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: linux
+          COMPILER: gcc
+          BUILD_TYPE: Release
+          LLVM_VERSION: 9
+          PYTHON_VERSION: 3.7
+          DOCKERFILE: Dockerfile.ubuntu-eoan
+        run: |
+          docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+      - name: Build
+        run: |
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+
+  focal_gcc_release:
+    name: focal_gcc_release_llvm9
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: linux
+          COMPILER: gcc
+          BUILD_TYPE: Release
+          LLVM_VERSION: 9 # 10 is the default but Chimera doesn't work with it
+          PYTHON_VERSION: 3.8
+          DOCKERFILE: Dockerfile.ubuntu-focal
+        run: |
+          docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+      - name: Build
+        run: |
+          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+
+  mojav_clang_release:
+    name: mojav_clang_release_llvm9
+    runs-on: macOS-10.15
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: osx
+          LLVM_VERSION: 9
+        run: .ci/install.sh
+      - name: Build
+        env:
+          OS_NAME: osx
+          COMPILER: clang
+          BUILD_TYPE: Release
+          LLVM_VERSION: 9
+        run: sudo -E .ci/script.sh
