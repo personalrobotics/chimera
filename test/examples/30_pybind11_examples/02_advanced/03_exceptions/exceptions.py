@@ -16,6 +16,7 @@ class TestExceptions(unittest.TestCase):
             self.assertRaises(IndexError, binding.throw_out_of_range)
             self.assertRaises(ValueError, binding.throw_range_error)
             self.assertRaises(OverflowError, binding.throw_overflow_error)
+        # TODO: Fill in Boost.Python handling of exceptions.
 
     def test_built_in_exception_translation(self):
         self._test_built_in_exception_translation(py11)
