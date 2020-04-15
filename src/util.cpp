@@ -971,6 +971,7 @@ std::string toString(const Type *type)
     // Reference:
     // https://clang.llvm.org/doxygen/classclang_1_1ExtQualsTypeCommonBase.html
 
+    // TODO: There are more types that are not handled.
     if (dyn_cast<DecayedType>(type))
         return "DecayedType : AdjustedType";
     else if (dyn_cast<AdjustedType>(type))
@@ -1117,15 +1118,15 @@ std::string toString(const Type *type)
 
 std::string toString(const Decl *decl)
 {
-    // TODO: Incomplete
+    // Reference: https://clang.llvm.org/doxygen/classclang_1_1Decl.html
+
+    // TODO: There are more types that are not handled.
     if (dyn_cast<AccessSpecDecl>(decl))
         return "AccessSpecDecl";
     else if (dyn_cast<BlockDecl>(decl))
         return "BlockDecl";
-    // ...
     else if (dyn_cast<LabelDecl>(decl))
         return "LabelDecl : NamedDecl";
-        // ...
 #if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<BuiltinTemplateDecl>(decl))
         return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
@@ -1148,7 +1149,6 @@ std::string toString(const Decl *decl)
         return "TemplateTemplateParmDecl : TemplateDecl : NamedDecl";
     else if (dyn_cast<TemplateDecl>(decl))
         return "TemplateDecl : NamedDecl";
-    // ...
     else if (dyn_cast<EnumDecl>(decl))
         return "EnumDecl : TagDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<ClassTemplatePartialSpecializationDecl>(decl))
@@ -1164,10 +1164,27 @@ std::string toString(const Decl *decl)
         return "RecordDecl : TagDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TagDecl>(decl))
         return "TagDecl : TypeDecl : NamedDecl";
-    // ...
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
-    // ...
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<DecompositionDecl>(decl))
+        return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#endif
+    else if (dyn_cast<ImplicitParamDecl>(decl))
+        return "ImplicitParamDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<ParmVarDecl>(decl))
+        return "ParmVarDecl : VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<VarTemplateSpecializationDecl>(decl))
+        return "VarTemplateSpecializationDecl : VarDecl : DeclaratorDecl : "
+               "ValueDecl : NamedDecl";
+    else if (dyn_cast<VarDecl>(decl))
+        return "VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<DeclaratorDecl>(decl))
+        return "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<ValueDecl>(decl))
+        return "ValueDecl : NamedDecl";
     else if (dyn_cast<NamedDecl>(decl))
         return "NamedDecl";
     else if (dyn_cast<Decl>(decl))
