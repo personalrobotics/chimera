@@ -2,7 +2,7 @@
 # Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines
 
 jobs:
-- job: ubuntu_xenial_gcc_release
+- job: ubuntu_xenial_gcc_release_llvm3_9
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -16,7 +16,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_xenial_clang_release
+- job: ubuntu_xenial_clang_release_llvm3_9
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -30,7 +30,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_bionic_gcc_release
+- job: ubuntu_bionic_gcc_release_llvm6
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -44,7 +44,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_bionic_clang_release
+- job: ubuntu_bionic_clang_release_llvm6
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -55,34 +55,6 @@ jobs:
     LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.6
     DOCKERFILE: Dockerfile.ubuntu-bionic
-  steps:
-  - template: .ci/azure-pipelines/docker.yml
-
-- job: ubuntu_eoan_gcc_release_llvm6
-  pool:
-    vmImage: 'ubuntu-18.04'
-  variables:
-    OS_NAME: linux
-    COMPILER: gcc
-    BUILD_TYPE: Release
-    BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 9 is the default but Chimera doesn't work with it
-    PYTHON_VERSION: 3.7
-    DOCKERFILE: Dockerfile.ubuntu-eoan
-  steps:
-  - template: .ci/azure-pipelines/docker.yml
-
-- job: ubuntu_eoan_gcc_release_llvm8
-  pool:
-    vmImage: 'ubuntu-18.04'
-  variables:
-    OS_NAME: linux
-    COMPILER: gcc
-    BUILD_TYPE: Release
-    BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 8  # 9 is the default but Chimera doesn't work with it
-    PYTHON_VERSION: 3.7
-    DOCKERFILE: Dockerfile.ubuntu-eoan
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
@@ -100,7 +72,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_eoan_clang_release
+- job: ubuntu_eoan_clang_release_llvm9
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -108,13 +80,13 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 9 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 9
     PYTHON_VERSION: 3.7
     DOCKERFILE: Dockerfile.ubuntu-eoan
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_focal_gcc_release
+- job: ubuntu_focal_gcc_release_llvm9
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -122,13 +94,13 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 10 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 9  # 10 is the default but Chimera doesn't work with it
     PYTHON_VERSION: 3.8
     DOCKERFILE: Dockerfile.ubuntu-focal
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_focal_clang_release
+- job: ubuntu_focal_clang_release_llvm9
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -136,13 +108,13 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6.0  # 10 is the default but Chimera doesn't work with it
+    LLVM_VERSION: 9  # 10 is the default but Chimera doesn't work with it
     PYTHON_VERSION: 3.8
     DOCKERFILE: Dockerfile.ubuntu-focal
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: macos_mojave_clang_llvm6_release
+- job: macos_mojave_clang_release_llvm9
   pool:
     vmImage: 'macOS 10.14'
   variables:
@@ -150,7 +122,7 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 6
+    LLVM_VERSION: 9
   steps:
   - script: |
       . .ci/install_macos.sh
