@@ -231,8 +231,7 @@ private:
                           clang::CompilerInstance *ci);
 
     bool Render(const std::string &key, const std::string &header_view,
-                const std::string &source_view, const std::string &header_ext,
-                const std::string &source_ext,
+                const std::string &source_view,
                 const std::shared_ptr<::mstch::object> &template_context);
     bool Render(const std::string &mangled_name, const std::string &view,
                 const std::string &extension,

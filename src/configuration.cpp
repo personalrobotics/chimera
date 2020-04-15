@@ -737,8 +737,7 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 
 bool chimera::CompiledConfiguration::Render(
     const std::string &key, const std::string &header_view,
-    const std::string &source_view, const std::string &header_ext,
-    const std::string &source_ext,
+    const std::string &source_view,
     const std::shared_ptr<::mstch::object> &context)
 {
     // Get the mangled name property if it exists.
@@ -769,12 +768,10 @@ bool chimera::CompiledConfiguration::Render(
                       std::placeholders::_1));
     }
 
-    if (not Render(mangled_name, header_view, header_ext, context,
-                   full_context))
+    if (not Render(mangled_name, header_view, "h", context, full_context))
         return false;
 
-    if (not Render(mangled_name, source_view, source_ext, context,
-                   full_context))
+    if (not Render(mangled_name, source_view, "cpp", context, full_context))
         return false;
 
     // Record this binding name for use at the top-level.
@@ -830,28 +827,28 @@ bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::CXXRecord> context)
 {
     return Render("class", bindingDefinition_.class_h,
-                  bindingDefinition_.class_cpp, "h", "cpp", context);
+                  bindingDefinition_.class_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Enum> context)
 {
     return Render("enum", bindingDefinition_.enum_h,
-                  bindingDefinition_.enum_cpp, "h", "cpp", context);
+                  bindingDefinition_.enum_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Function> context)
 {
     return Render("function", bindingDefinition_.function_h,
-                  bindingDefinition_.function_cpp, "h", "cpp", context);
+                  bindingDefinition_.function_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Variable> context)
 {
     return Render("variable", bindingDefinition_.variable_h,
-                  bindingDefinition_.variable_cpp, "h", "cpp", context);
+                  bindingDefinition_.variable_cpp, context);
 }
 
 void chimera::CompiledConfiguration::Render()
