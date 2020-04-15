@@ -499,7 +499,19 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         }
 
         if (const auto node = lookupYAMLNode(bindingNode_, "module"))
-            bindingDefinition_.module_cpp = Lookup(node);
+        {
+            if (node.IsScalar())
+            {
+                bindingDefinition_.module_cpp = Lookup(node);
+            }
+            else
+            {
+                if (const auto header_node = lookupYAMLNode(node, "header"))
+                    bindingDefinition_.module_h = Lookup(header_node);
+                if (const auto source_node = lookupYAMLNode(node, "source"))
+                    bindingDefinition_.module_cpp = Lookup(source_node);
+            }
+        }
 
         if (const auto node = lookupYAMLNode(bindingNode_, "variable"))
         {
@@ -843,8 +855,17 @@ bool chimera::CompiledConfiguration::Render(
     if (!stream)
     {
         std::stringstream ss;
-        ss << "Failed to create output file '" << binding_path << "' for '"
-           << ::mstch::render("{{name}}", context) << "'.";
+
+        if (context)
+        {
+            ss << "Failed to create output file '" << binding_path << "' for '"
+               << ::mstch::render("{{name}}", context) << "'.";
+        }
+        else
+        {
+            ss << "Failed to create top-level output file '" << binding_path
+               << "'";
+        }
         throw std::runtime_error(ss.str());
     }
 
@@ -885,35 +906,6 @@ bool chimera::CompiledConfiguration::Render(
 
 void chimera::CompiledConfiguration::Render()
 {
-    // Create and sanitize path and filename of top-level source file.
-    // Because we may compress the filename to fit OS character limits,
-    // we generate the full path, then split the filename from it.
-    const std::string binding_path = sanitizePath(
-        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
-    size_t path_index = binding_path.find_last_of("/");
-    const std::string binding_filename
-        = (path_index == std::string::npos)
-              ? ""
-              : binding_path.substr(path_index + 1);
-
-    // Create an output file depending on the provided parameters.
-    auto stream = ci_->createOutputFile(
-        binding_path,
-        false, // Open the file in binary mode
-        false, // Register with llvm::sys::RemoveFileOnSignal
-        "",    // The derived basename (shouldn't be used)
-        "",    // The extension to use for derived name (shouldn't be used)
-        false, // Use a temporary file that should be renamed
-        false  // Create missing directories in the output path
-    );
-
-    // If file creation failed, report the error and fail immediately.
-    if (!stream)
-    {
-        throw std::runtime_error("Failed to create top-level output file '"
-                                 + binding_path + "'");
-    }
-
     // Create collections for the ordered sets of bindings, sources,
     // and namespaces.
     ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
@@ -943,6 +935,8 @@ void chimera::CompiledConfiguration::Render()
     }
 
     // Render the mstch template to the given output file.
-    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
-    std::cout << binding_filename << std::endl;
+    const auto &filename = parent_.GetOutputModuleName();
+    Render(filename, bindingDefinition_.module_h, "h", nullptr, full_context);
+    Render(filename, bindingDefinition_.module_cpp, "cpp", nullptr,
+           full_context);
 }

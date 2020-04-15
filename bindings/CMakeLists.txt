@@ -28,6 +28,7 @@ foreach(binding_NAME IN LISTS binding_LIST)
         "${binding_IMPL_PATH}/function.cpp.tmpl"
         "${binding_IMPL_PATH}/variable.h.tmpl"
         "${binding_IMPL_PATH}/variable.cpp.tmpl"
+        "${binding_IMPL_PATH}/module.h.tmpl"
         "${binding_IMPL_PATH}/module.cpp.tmpl"
       COMMENT "Importing binding definition for '${binding_NAME}'."
       VERBATIM

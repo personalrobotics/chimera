@@ -20,6 +20,7 @@ struct Definition
     std::string enum_cpp;
     std::string function_h;
     std::string function_cpp;
+    std::string module_h;
     std::string module_cpp;
     std::string variable_h;
     std::string variable_cpp;
