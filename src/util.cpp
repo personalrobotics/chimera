@@ -968,10 +968,13 @@ std::string toString(QualType qual_type)
 
 std::string toString(const Type *type)
 {
+    // Reference:
+    // https://clang.llvm.org/doxygen/classclang_1_1ExtQualsTypeCommonBase.html
+
     if (dyn_cast<DecayedType>(type))
         return "DecayedType : AdjustedType";
     else if (dyn_cast<AdjustedType>(type))
-        return "ArrayType";
+        return "AdjustedType";
     else if (dyn_cast<ConstantArrayType>(type))
         return "ConstantArrayType : ArrayType";
     else if (dyn_cast<DependentSizedArrayType>(type))
@@ -1002,12 +1005,16 @@ std::string toString(const Type *type)
     else if (dyn_cast<DeducedTemplateSpecializationType>(type))
         return "DeducedTemplateSpecializationType : DecudedType";
     else if (dyn_cast<DeducedType>(type))
-        return "DeducedDecudedType";
+        return "DeducedType";
     else if (dyn_cast<DependentAddressSpaceType>(type))
         return "DependentAddressSpaceType";
 #endif
     else if (dyn_cast<DependentSizedExtVectorType>(type))
-        return "TDependentSizedExtVectorType";
+        return "DependentSizedExtVectorType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<DependentVectorType>(type))
+        return "DependentVectorType";
+#endif
     else if (dyn_cast<FunctionNoProtoType>(type))
         return "FunctionNoProtoType : FunctionType";
     else if (dyn_cast<FunctionProtoType>(type))
@@ -1016,12 +1023,24 @@ std::string toString(const Type *type)
         return "FunctionType";
     else if (dyn_cast<InjectedClassNameType>(type))
         return "InjectedClassNameType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<LocInfoType>(type))
+        return "LocInfoType";
+#endif
+#if LLVM_VERSION_AT_LEAST(9, 0, 0)
+    else if (dyn_cast<MacroQualifiedType>(type))
+        return "MacroQualifiedType";
+#endif
     else if (dyn_cast<MemberPointerType>(type))
         return "MemberPointerType";
     else if (dyn_cast<ObjCObjectPointerType>(type))
         return "ObjCObjectPointerType";
     else if (dyn_cast<ObjCInterfaceType>(type))
         return "ObjCInterfaceType : ObjCObjectType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<ObjCObjectTypeImpl>(type))
+        return "ObjCObjectTypeImpl : ObjCObjectType";
+#endif
     else if (dyn_cast<ObjCObjectType>(type))
         return "ObjCObjectType";
 #if LLVM_VERSION_AT_LEAST(6, 0, 0)
@@ -1038,6 +1057,12 @@ std::string toString(const Type *type)
 #endif
     else if (dyn_cast<PointerType>(type))
         return "PointerType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<LValueReferenceType>(type))
+        return "LValueReferenceType : ReferenceType";
+    else if (dyn_cast<RValueReferenceType>(type))
+        return "RValueReferenceType : ReferenceType";
+#endif
     else if (dyn_cast<ReferenceType>(type))
         return "ReferenceType";
     else if (dyn_cast<SubstTemplateTypeParmPackType>(type))
@@ -1050,26 +1075,38 @@ std::string toString(const Type *type)
         return "RecordType : TagType";
     else if (dyn_cast<TagType>(type))
         return "TagType";
-    else if (dyn_cast<DependentNameType>(type))
-        return "DependentNameType : TypeWithKeyword";
-    else if (dyn_cast<DependentTemplateSpecializationType>(type))
-        return "DependentTemplateSpecializationType : TypeWithKeyword";
-    else if (dyn_cast<ElaboratedType>(type))
-        return "ElaboratedType : TypeWithKeyword";
     else if (dyn_cast<TemplateSpecializationType>(type))
         return "TemplateSpecializationType";
     else if (dyn_cast<TemplateTypeParmType>(type))
         return "TemplateTypeParmType";
     else if (dyn_cast<TypedefType>(type))
         return "TypedefType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<DependentTypeOfExprType>(type))
+        return "DependentTypeOfExprType : TypeOfExprType";
+#endif
     else if (dyn_cast<TypeOfExprType>(type))
         return "TypeOfExprType";
     else if (dyn_cast<TypeOfType>(type))
         return "TypeOfType";
+    else if (dyn_cast<DependentNameType>(type))
+        return "DependentNameType : TypeWithKeyword";
+    else if (dyn_cast<DependentTemplateSpecializationType>(type))
+        return "DependentTemplateSpecializationType : TypeWithKeyword";
+    else if (dyn_cast<ElaboratedType>(type))
+        return "ElaboratedType : TypeWithKeyword";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<DependentUnaryTransformType>(type))
+        return "DependentUnaryTransformType : UnaryTransformType";
+#endif
     else if (dyn_cast<UnaryTransformType>(type))
         return "UnaryTransformType";
     else if (dyn_cast<UnresolvedUsingType>(type))
         return "UnresolvedUsingType";
+#if LLVM_VERSION_AT_LEAST(8, 0, 0)
+    else if (dyn_cast<ExtVectorType>(type))
+        return "ExtVectorType : VectorType";
+#endif
     else if (dyn_cast<VectorType>(type))
         return "VectorType";
     else if (dyn_cast<Type>(type))
