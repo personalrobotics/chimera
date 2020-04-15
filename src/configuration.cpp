@@ -453,36 +453,68 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // Override individual templates if specified in the configuration.
     if (bindingNode_)
     {
-        if (const auto node = lookupYAMLNode(bindingNode_, "class", "header"))
-            bindingDefinition_.class_h = Lookup(node);
+        if (const auto node = lookupYAMLNode(bindingNode_, "class"))
+        {
+            if (node.IsScalar())
+            {
+                bindingDefinition_.class_cpp = Lookup(node);
+            }
+            else
+            {
+                if (const auto header_node = lookupYAMLNode(node, "header"))
+                    bindingDefinition_.class_h = Lookup(header_node);
+                if (const auto source_node = lookupYAMLNode(node, "source"))
+                    bindingDefinition_.class_cpp = Lookup(source_node);
+            }
+        }
 
-        if (const auto node = lookupYAMLNode(bindingNode_, "class", "source"))
-            bindingDefinition_.class_cpp = Lookup(node);
+        if (const auto node = lookupYAMLNode(bindingNode_, "enum"))
+        {
+            if (node.IsScalar())
+            {
+                bindingDefinition_.enum_cpp = Lookup(node);
+            }
+            else
+            {
+                if (const auto header_node = lookupYAMLNode(node, "header"))
+                    bindingDefinition_.enum_h = Lookup(header_node);
+                if (const auto source_node = lookupYAMLNode(node, "source"))
+                    bindingDefinition_.enum_cpp = Lookup(source_node);
+            }
+        }
 
-        if (const auto node = lookupYAMLNode(bindingNode_, "enum", "header"))
-            bindingDefinition_.enum_h = Lookup(node);
-
-        if (const auto node = lookupYAMLNode(bindingNode_, "enum", "source"))
-            bindingDefinition_.enum_cpp = Lookup(node);
-
-        if (const auto node
-            = lookupYAMLNode(bindingNode_, "function", "header"))
-            bindingDefinition_.function_h = Lookup(node);
-
-        if (const auto node
-            = lookupYAMLNode(bindingNode_, "function", "source"))
-            bindingDefinition_.function_cpp = Lookup(node);
+        if (const auto node = lookupYAMLNode(bindingNode_, "function"))
+        {
+            if (node.IsScalar())
+            {
+                bindingDefinition_.function_cpp = Lookup(node);
+            }
+            else
+            {
+                if (const auto header_node = lookupYAMLNode(node, "header"))
+                    bindingDefinition_.function_h = Lookup(header_node);
+                if (const auto source_node = lookupYAMLNode(node, "source"))
+                    bindingDefinition_.function_cpp = Lookup(source_node);
+            }
+        }
 
         if (const auto node = lookupYAMLNode(bindingNode_, "module"))
             bindingDefinition_.module_cpp = Lookup(node);
 
-        if (const auto node
-            = lookupYAMLNode(bindingNode_, "variable", "header"))
-            bindingDefinition_.variable_h = Lookup(node);
-
-        if (const auto node
-            = lookupYAMLNode(bindingNode_, "variable", "source"))
-            bindingDefinition_.variable_cpp = Lookup(node);
+        if (const auto node = lookupYAMLNode(bindingNode_, "variable"))
+        {
+            if (node.IsScalar())
+            {
+                bindingDefinition_.variable_cpp = Lookup(node);
+            }
+            else
+            {
+                if (const auto header_node = lookupYAMLNode(node, "header"))
+                    bindingDefinition_.variable_h = Lookup(header_node);
+                if (const auto source_node = lookupYAMLNode(node, "source"))
+                    bindingDefinition_.variable_cpp = Lookup(source_node);
+            }
+        }
     }
 
     // Set custom escape function that disables HTML escaping on mstch output.
