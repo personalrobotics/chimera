@@ -54,10 +54,19 @@ inline void throw_range_error()
     throw std::range_error("");
 }
 
+// If pybind11 is at least 2.5.0
+// TODO: Make a util header to have a version check macro for pybind11 like
+// LLVM_VERSION_AT_LEASET
+#if (PYBIND11_VERSION_MAJOR > 2                                                \
+     || (PYBIND11_VERSION_MAJOR >= 2                                           \
+         && (PYBIND11_VERSION_MINOR > 5                                        \
+             || (PYBIND11_VERSION_MINOR >= 5                                   \
+                 && PYBIND11_VERSION_PATCH >= 0))))
 inline void throw_overflow_error()
 {
     throw std::overflow_error("");
 }
+#endif
 
 //---------------------------------------------
 // Registering custom translators
