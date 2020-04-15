@@ -20,6 +20,9 @@ namespace chimera
 namespace util
 {
 
+constexpr char FLAG_NO_RENDER[]
+    = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
+
 /**
  * Wrapper that generates context for a YAML node.
  *
@@ -62,13 +65,13 @@ YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
                           Args &&... args)
 {
     // Return if 'node' is invalid
-    if (not node)
+    if (!node)
         return node;
 
     auto next = node[key];
 
     // Return if failed to find a tag of 'key'
-    if (not next)
+    if (!next)
         return next;
 
     // Lookup for the next nested tags
