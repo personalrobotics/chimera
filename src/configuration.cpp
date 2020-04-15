@@ -185,7 +185,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     if (strictNode)
     {
         // Check that 'strict' node in configuration YAML is a scalar.
-        if (not strictNode.IsScalar())
+        if (!strictNode.IsScalar())
         {
             throw std::runtime_error(
                 "'options.strict' in configuration YAML must be a scalar.");
@@ -812,10 +812,10 @@ bool chimera::CompiledConfiguration::Render(
                       std::placeholders::_1));
     }
 
-    if (not Render(mangled_name, header_view, "h", context, full_context))
+    if (!Render(mangled_name, header_view, "h", context, full_context))
         return false;
 
-    if (not Render(mangled_name, source_view, "cpp", context, full_context))
+    if (!Render(mangled_name, source_view, "cpp", context, full_context))
         return false;
 
     // Record this binding name for use at the top-level.
