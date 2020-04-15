@@ -217,6 +217,13 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::CXXRecord>(
         config_, decl, &traversed_class_decls_);
+
+    // TODO(#148): Workaround to skip generating class binding that is
+    // unintentionally generated for lambda function in header. See #148 for the
+    // details.
+    if (context->typeAsString() == "(lambda)")
+        return false;
+
     return config_.Render(context);
 }
 
