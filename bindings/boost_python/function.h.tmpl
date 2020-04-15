@@ -1,0 +1,14 @@
+#pragma once
+
+{{header}}
+{{#includes}}
+#include <{{.}}>
+{{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
+#include <boost/python.hpp>
+{{postinclude}}
+
+void {{function.mangled_name}}();
+{{footer}}

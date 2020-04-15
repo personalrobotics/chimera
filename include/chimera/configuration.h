@@ -230,8 +230,15 @@ private:
     CompiledConfiguration(const Configuration &parent,
                           clang::CompilerInstance *ci);
 
-    bool Render(std::string view, std::string key,
+    bool Render(const std::string &key, const std::string &header_view,
+                const std::string &source_view,
                 const std::shared_ptr<::mstch::object> &template_context);
+    bool Render(const std::string &mangled_name, const std::string &view,
+                const std::string &extension,
+                const std::shared_ptr<::mstch::object> &context,
+                const ::mstch::map &full_context);
+    void SetBindingDefinitions(const std::string &key, std::string &header_def,
+                               std::string &source_def);
 
 protected:
     static const YAML::Node emptyNode_;

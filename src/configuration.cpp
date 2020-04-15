@@ -173,6 +173,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
   , bindingNode_(configNode_["template"]) // TODO: is this always ok?
   , ci_(ci)
 {
+    using chimera::util::lookupYAMLNode;
+
     // This placeholder will be filled in by the options.strict specified
     // in the configuration YAML if it exists, or remain unset otherwise.
     boost::optional<bool> config_options_strict;
@@ -183,7 +185,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     if (strictNode)
     {
         // Check that 'strict' node in configuration YAML is a scalar.
-        if (not strictNode.IsScalar())
+        if (!strictNode.IsScalar())
         {
             throw std::runtime_error(
                 "'options.strict' in configuration YAML must be a scalar.");
@@ -449,23 +451,16 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     bindingDefinition_ = bindingIt->second;
 
     // Override individual templates if specified in the configuration.
-    if (bindingNode_)
-    {
-        if (const YAML::Node classTemplateNode = bindingNode_["class"])
-            bindingDefinition_.class_cpp = Lookup(classTemplateNode);
-
-        if (const YAML::Node enumTemplateNode = bindingNode_["enum"])
-            bindingDefinition_.enum_cpp = Lookup(enumTemplateNode);
-
-        if (const YAML::Node functionTemplateNode = bindingNode_["function"])
-            bindingDefinition_.function_cpp = Lookup(functionTemplateNode);
-
-        if (const YAML::Node moduleTemplateNode = bindingNode_["module"])
-            bindingDefinition_.module_cpp = Lookup(moduleTemplateNode);
-
-        if (const YAML::Node variableTemplateNode = bindingNode_["variable"])
-            bindingDefinition_.variable_cpp = Lookup(variableTemplateNode);
-    }
+    SetBindingDefinitions("class", bindingDefinition_.class_h,
+                          bindingDefinition_.class_cpp);
+    SetBindingDefinitions("enum", bindingDefinition_.enum_h,
+                          bindingDefinition_.enum_cpp);
+    SetBindingDefinitions("function", bindingDefinition_.function_h,
+                          bindingDefinition_.function_cpp);
+    SetBindingDefinitions("module", bindingDefinition_.module_h,
+                          bindingDefinition_.module_cpp);
+    SetBindingDefinitions("variable", bindingDefinition_.variable_h,
+                          bindingDefinition_.variable_cpp);
 
     // Set custom escape function that disables HTML escaping on mstch output.
     //
@@ -718,7 +713,8 @@ std::string chimera::CompiledConfiguration::Lookup(const YAML::Node &node) const
 }
 
 bool chimera::CompiledConfiguration::Render(
-    std::string view, std::string key,
+    const std::string &key, const std::string &header_view,
+    const std::string &source_view,
     const std::shared_ptr<::mstch::object> &context)
 {
     // Get the mangled name property if it exists.
@@ -728,13 +724,52 @@ bool chimera::CompiledConfiguration::Render(
                   << std::endl;
         return false;
     }
-    std::string mangled_name = ::mstch::render("{{mangled_name}}", context);
+    const std::string mangled_name
+        = ::mstch::render("{{mangled_name}}", context);
+
+    // Create collections for the ordered sets of sources.
+    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
+                                   parent_.inputSourcePaths_.end());
+
+    // Create a top-level context that contains the extracted information
+    // about this particular binding component.
+    ::mstch::map full_context{{key, context}, {"sources", binding_sources}};
+
+    // Resolve customizable snippets that will be inserted into the file
+    // from the configuration file's "template::file" entry.
+    if (bindingNode_)
+    {
+        chimera::util::extendWithYAMLNode(
+            full_context, bindingNode_["file"], false,
+            std::bind(&chimera::CompiledConfiguration::Lookup, this,
+                      std::placeholders::_1));
+    }
+
+    if (!Render(mangled_name, header_view, "h", context, full_context))
+        return false;
+
+    if (!Render(mangled_name, source_view, "cpp", context, full_context))
+        return false;
+
+    // Record this binding name for use at the top-level.
+    binding_names_.push_back(mangled_name);
+    return true;
+}
+
+bool chimera::CompiledConfiguration::Render(
+    const std::string &mangled_name, const std::string &view,
+    const std::string &extension,
+    const std::shared_ptr<::mstch::object> &context,
+    const ::mstch::map &full_context)
+{
+    if (view == chimera::util::FLAG_NO_RENDER)
+        return true;
 
     // Create and sanitize path and filename of top-level source file.
     // Because we may compress the filename to fit OS character limits,
     // we generate the full path, then split the filename from it.
-    const std::string binding_path
-        = sanitizePath(parent_.GetOutputPath() + "/" + mangled_name + ".cpp");
+    const std::string binding_path = sanitizePath(
+        parent_.GetOutputPath() + "/" + mangled_name + "." + extension);
     size_t path_index = binding_path.find_last_of("/");
     const std::string binding_filename
         = (path_index == std::string::npos)
@@ -756,93 +791,57 @@ bool chimera::CompiledConfiguration::Render(
     if (!stream)
     {
         std::stringstream ss;
-        ss << "Failed to create output file '" << binding_path << "' for '"
-           << ::mstch::render("{{name}}", context) << "'.";
+
+        if (context)
+        {
+            ss << "Failed to create output file '" << binding_path << "' for '"
+               << ::mstch::render("{{name}}", context) << "'.";
+        }
+        else
+        {
+            ss << "Failed to create top-level output file '" << binding_path
+               << "'";
+        }
         throw std::runtime_error(ss.str());
-    }
-
-    // Create collections for the ordered sets of sources.
-    ::mstch::array binding_sources(parent_.inputSourcePaths_.begin(),
-                                   parent_.inputSourcePaths_.end());
-
-    // Create a top-level context that contains the extracted information
-    // about this particular binding component.
-    ::mstch::map full_context{{key, context}, {"sources", binding_sources}};
-
-    // Resolve customizable snippets that will be inserted into the file
-    // from the configuration file's "template::file" entry.
-    if (bindingNode_)
-    {
-        chimera::util::extendWithYAMLNode(
-            full_context, bindingNode_["file"], false,
-            std::bind(&chimera::CompiledConfiguration::Lookup, this,
-                      std::placeholders::_1));
     }
 
     // Render the mstch template to the given output file.
     *stream << ::mstch::render(view, full_context);
     std::cout << binding_filename << std::endl;
 
-    // Record this binding name for use at the top-level.
-    binding_names_.push_back(mangled_name);
     return true;
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::CXXRecord> context)
 {
-    return Render(bindingDefinition_.class_cpp, "class", context);
+    return Render("class", bindingDefinition_.class_h,
+                  bindingDefinition_.class_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Enum> context)
 {
-    return Render(bindingDefinition_.enum_cpp, "enum", context);
+    return Render("enum", bindingDefinition_.enum_h,
+                  bindingDefinition_.enum_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Function> context)
 {
-    return Render(bindingDefinition_.function_cpp, "function", context);
+    return Render("function", bindingDefinition_.function_h,
+                  bindingDefinition_.function_cpp, context);
 }
 
 bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<chimera::mstch::Variable> context)
 {
-    return Render(bindingDefinition_.variable_cpp, "variable", context);
+    return Render("variable", bindingDefinition_.variable_h,
+                  bindingDefinition_.variable_cpp, context);
 }
 
 void chimera::CompiledConfiguration::Render()
 {
-    // Create and sanitize path and filename of top-level source file.
-    // Because we may compress the filename to fit OS character limits,
-    // we generate the full path, then split the filename from it.
-    const std::string binding_path = sanitizePath(
-        parent_.GetOutputPath() + "/" + parent_.GetOutputModuleName() + ".cpp");
-    size_t path_index = binding_path.find_last_of("/");
-    const std::string binding_filename
-        = (path_index == std::string::npos)
-              ? ""
-              : binding_path.substr(path_index + 1);
-
-    // Create an output file depending on the provided parameters.
-    auto stream = ci_->createOutputFile(
-        binding_path,
-        false, // Open the file in binary mode
-        false, // Register with llvm::sys::RemoveFileOnSignal
-        "",    // The derived basename (shouldn't be used)
-        "",    // The extension to use for derived name (shouldn't be used)
-        false, // Use a temporary file that should be renamed
-        false  // Create missing directories in the output path
-    );
-
-    // If file creation failed, report the error and fail immediately.
-    if (!stream)
-    {
-        throw std::runtime_error("Failed to create top-level output file '"
-                                 + binding_path + "'");
-    }
-
     // Create collections for the ordered sets of bindings, sources,
     // and namespaces.
     ::mstch::array binding_names(binding_names_.begin(), binding_names_.end());
@@ -872,6 +871,35 @@ void chimera::CompiledConfiguration::Render()
     }
 
     // Render the mstch template to the given output file.
-    *stream << ::mstch::render(bindingDefinition_.module_cpp, full_context);
-    std::cout << binding_filename << std::endl;
+    const auto &filename = parent_.GetOutputModuleName();
+    Render(filename, bindingDefinition_.module_h, "h", nullptr, full_context);
+    Render(filename, bindingDefinition_.module_cpp, "cpp", nullptr,
+           full_context);
+}
+
+void chimera::CompiledConfiguration::SetBindingDefinitions(
+    const std::string &key, std::string &header_def, std::string &source_def)
+{
+    using chimera::util::lookupYAMLNode;
+
+    if (const auto node = lookupYAMLNode(bindingNode_, key))
+    {
+        if (node.IsNull())
+        {
+            header_def = chimera::util::FLAG_NO_RENDER;
+            source_def = chimera::util::FLAG_NO_RENDER;
+        }
+        else if (node.IsScalar())
+        {
+            header_def = chimera::util::FLAG_NO_RENDER;
+            source_def = Lookup(node);
+        }
+        else
+        {
+            if (const auto header_node = lookupYAMLNode(node, "header"))
+                header_def = Lookup(header_node);
+            if (const auto source_node = lookupYAMLNode(node, "source"))
+                source_def = Lookup(source_node);
+        }
+    }
 }
