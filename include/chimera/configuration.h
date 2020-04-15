@@ -237,6 +237,8 @@ private:
                 const std::string &extension,
                 const std::shared_ptr<::mstch::object> &context,
                 const ::mstch::map &full_context);
+    void SetBindingDefinitions(const std::string &key, std::string &header_def,
+                               std::string &source_def);
 
 protected:
     static const YAML::Node emptyNode_;

@@ -20,6 +20,9 @@ namespace chimera
 namespace util
 {
 
+constexpr char FLAG_NO_RENDER[]
+    = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
+
 /**
  * Wrapper that generates context for a YAML node.
  *

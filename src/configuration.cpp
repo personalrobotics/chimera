@@ -451,83 +451,16 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     bindingDefinition_ = bindingIt->second;
 
     // Override individual templates if specified in the configuration.
-    if (bindingNode_)
-    {
-        if (const auto node = lookupYAMLNode(bindingNode_, "class"))
-        {
-            if (node.IsScalar())
-            {
-                bindingDefinition_.class_cpp = Lookup(node);
-            }
-            else
-            {
-                if (const auto header_node = lookupYAMLNode(node, "header"))
-                    bindingDefinition_.class_h = Lookup(header_node);
-                if (const auto source_node = lookupYAMLNode(node, "source"))
-                    bindingDefinition_.class_cpp = Lookup(source_node);
-            }
-        }
-
-        if (const auto node = lookupYAMLNode(bindingNode_, "enum"))
-        {
-            if (node.IsScalar())
-            {
-                bindingDefinition_.enum_cpp = Lookup(node);
-            }
-            else
-            {
-                if (const auto header_node = lookupYAMLNode(node, "header"))
-                    bindingDefinition_.enum_h = Lookup(header_node);
-                if (const auto source_node = lookupYAMLNode(node, "source"))
-                    bindingDefinition_.enum_cpp = Lookup(source_node);
-            }
-        }
-
-        if (const auto node = lookupYAMLNode(bindingNode_, "function"))
-        {
-            if (node.IsScalar())
-            {
-                bindingDefinition_.function_cpp = Lookup(node);
-            }
-            else
-            {
-                if (const auto header_node = lookupYAMLNode(node, "header"))
-                    bindingDefinition_.function_h = Lookup(header_node);
-                if (const auto source_node = lookupYAMLNode(node, "source"))
-                    bindingDefinition_.function_cpp = Lookup(source_node);
-            }
-        }
-
-        if (const auto node = lookupYAMLNode(bindingNode_, "module"))
-        {
-            if (node.IsScalar())
-            {
-                bindingDefinition_.module_cpp = Lookup(node);
-            }
-            else
-            {
-                if (const auto header_node = lookupYAMLNode(node, "header"))
-                    bindingDefinition_.module_h = Lookup(header_node);
-                if (const auto source_node = lookupYAMLNode(node, "source"))
-                    bindingDefinition_.module_cpp = Lookup(source_node);
-            }
-        }
-
-        if (const auto node = lookupYAMLNode(bindingNode_, "variable"))
-        {
-            if (node.IsScalar())
-            {
-                bindingDefinition_.variable_cpp = Lookup(node);
-            }
-            else
-            {
-                if (const auto header_node = lookupYAMLNode(node, "header"))
-                    bindingDefinition_.variable_h = Lookup(header_node);
-                if (const auto source_node = lookupYAMLNode(node, "source"))
-                    bindingDefinition_.variable_cpp = Lookup(source_node);
-            }
-        }
-    }
+    SetBindingDefinitions("class", bindingDefinition_.class_h,
+                          bindingDefinition_.class_cpp);
+    SetBindingDefinitions("enum", bindingDefinition_.enum_h,
+                          bindingDefinition_.enum_cpp);
+    SetBindingDefinitions("function", bindingDefinition_.function_h,
+                          bindingDefinition_.function_cpp);
+    SetBindingDefinitions("module", bindingDefinition_.module_h,
+                          bindingDefinition_.module_cpp);
+    SetBindingDefinitions("variable", bindingDefinition_.variable_h,
+                          bindingDefinition_.variable_cpp);
 
     // Set custom escape function that disables HTML escaping on mstch output.
     //
@@ -829,6 +762,9 @@ bool chimera::CompiledConfiguration::Render(
     const std::shared_ptr<::mstch::object> &context,
     const ::mstch::map &full_context)
 {
+    if (view == chimera::util::FLAG_NO_RENDER)
+        return true;
+
     // Create and sanitize path and filename of top-level source file.
     // Because we may compress the filename to fit OS character limits,
     // we generate the full path, then split the filename from it.
@@ -939,4 +875,31 @@ void chimera::CompiledConfiguration::Render()
     Render(filename, bindingDefinition_.module_h, "h", nullptr, full_context);
     Render(filename, bindingDefinition_.module_cpp, "cpp", nullptr,
            full_context);
+}
+
+void chimera::CompiledConfiguration::SetBindingDefinitions(
+    const std::string &key, std::string &header_def, std::string &source_def)
+{
+    using chimera::util::lookupYAMLNode;
+
+    if (const auto node = lookupYAMLNode(bindingNode_, key))
+    {
+        if (node.IsNull())
+        {
+            header_def = chimera::util::FLAG_NO_RENDER;
+            source_def = chimera::util::FLAG_NO_RENDER;
+        }
+        else if (node.IsScalar())
+        {
+            header_def = chimera::util::FLAG_NO_RENDER;
+            source_def = Lookup(node);
+        }
+        else
+        {
+            if (const auto header_node = lookupYAMLNode(node, "header"))
+                header_def = Lookup(header_node);
+            if (const auto source_node = lookupYAMLNode(node, "source"))
+                source_def = Lookup(source_node);
+        }
+    }
 }
