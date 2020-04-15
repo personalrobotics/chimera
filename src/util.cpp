@@ -109,7 +109,7 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
 YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key)
 {
     // Return if 'node' is invalid
-    if (not node)
+    if (!node)
         return node;
 
     return node[key];
