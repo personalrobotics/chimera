@@ -169,8 +169,8 @@ const std::string &chimera::Configuration::GetOutputModuleName() const
 chimera::CompiledConfiguration::CompiledConfiguration(
     const chimera::Configuration &parent, CompilerInstance *ci)
   : parent_(parent)
-  , configNode_(parent.GetRoot())         // TODO: do we need this reference?
-  , bindingNode_(configNode_["template"]) // TODO: is this always ok?
+  , configNode_(parent.GetRoot()) // TODO: do we need this reference?
+  , bindingNode_(chimera::util::lookupYAMLNode(configNode_, "template"))
   , ci_(ci)
 {
     // This placeholder will be filled in by the options.strict specified

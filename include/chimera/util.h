@@ -61,14 +61,14 @@ template <typename... Args>
 YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
                           Args &&... args)
 {
-    // Return if 'node' is invalid
-    if (not node)
+    // Return if 'node' is invalid.
+    if (!node)
         return node;
 
     auto next = node[key];
 
-    // Return if failed to find a tag of 'key'
-    if (not next)
+    // Return if failed to find a tag of 'key'.
+    if (!next)
         return next;
 
     // Lookup for the next nested tags
