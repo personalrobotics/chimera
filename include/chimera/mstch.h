@@ -207,6 +207,7 @@ public:
               = nullptr);
 
     ::mstch::node bases();
+    std::string typeAsString();
     ::mstch::node type();
     ::mstch::node namespaceScope() override;
     ::mstch::node classScope() override;

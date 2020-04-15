@@ -294,13 +294,18 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
     return generateScope(config_, nns->getPrefix());
 }
 
-::mstch::node CXXRecord::type()
+std::string CXXRecord::typeAsString()
 {
     if (const YAML::Node node = decl_config_["type"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedTypeName(
         config_.GetContext(), QualType(decl_->getTypeForDecl(), 0));
+}
+
+::mstch::node CXXRecord::type()
+{
+    return typeAsString();
 }
 
 ::mstch::node CXXRecord::namespaceScope()
