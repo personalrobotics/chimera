@@ -3,8 +3,10 @@
 #include "chimera/util.h"
 #include "cling_utils_AST.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 #include <boost/variant/get.hpp>
 
@@ -479,8 +481,31 @@ std::string CXXRecord::typeAsString()
         method_vector.back()->setLast(true);
 
     // Copy each template into the mstch template array.
-    for (auto method_template : method_vector)
-        method_templates.push_back(method_template);
+    for (const std::shared_ptr<Method> &method : method_vector)
+        method_templates.push_back(method);
+
+    // Collect all the non-static method names
+    std::unordered_set<std::string> non_static_method_names;
+    for (const std::shared_ptr<Method> &method : method_vector)
+    {
+        if (!method->isStaticAsBool())
+            non_static_method_names.insert(method->nameAsString());
+    }
+
+    // Set each static member whether it has the same name of the instance
+    // methods in the same class, which is not allowed by Python. How to handle
+    // the name conflict is determined by the configuration (see also
+    // CompiledConfiguration::StaticMethodNamePolicy).
+    for (const std::shared_ptr<Method> &method : method_vector)
+    {
+        if (method->isStaticAsBool())
+        {
+            auto it = non_static_method_names.find(method->nameAsString());
+            if (it != non_static_method_names.end())
+                method->setNameConflict(true);
+        }
+    }
+
     return method_templates;
 }
 
@@ -969,7 +994,9 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
 Method::Method(const ::chimera::CompiledConfiguration &config,
                const CXXMethodDecl *decl, const CXXRecordDecl *class_decl)
-  : Function(config, decl, class_decl), method_decl_(decl)
+  : Function(config, decl, class_decl)
+  , method_decl_(decl)
+  , name_conflict_(false)
 {
     register_methods(this, {
                                {"is_const", &Method::isConst},
@@ -979,14 +1006,61 @@ Method::Method(const ::chimera::CompiledConfiguration &config,
                            });
 }
 
+void Method::setNameConflict(bool val)
+{
+    name_conflict_ = val;
+}
+
+bool Method::isNameConflict() const
+{
+    return name_conflict_;
+}
+
+std::string Method::nameAsString()
+{
+    std::string original_name = Function::nameAsString();
+
+    // TODO: This shouldn't happen
+    if (original_name.empty())
+        return original_name;
+
+    if (isStaticAsBool() && name_conflict_)
+    {
+        switch (config_.GetStaticMethodNamePolicy())
+        {
+            case CompiledConfiguration::StaticMethodNamePolicy::NO_CHANGE:
+                // Do nothing
+                break;
+            case CompiledConfiguration::StaticMethodNamePolicy::
+                FIRST_LETTER_CAPITAL:
+                std::transform(original_name.begin(), original_name.begin() + 1,
+                               original_name.begin(), ::toupper);
+                break;
+            case CompiledConfiguration::StaticMethodNamePolicy::CAPITAL:
+                std::transform(original_name.begin(), original_name.end(),
+                               original_name.begin(), ::toupper);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return original_name;
+}
+
 ::mstch::node Method::isConst()
 {
     return method_decl_->isConst();
 }
 
-::mstch::node Method::isStatic()
+bool Method::isStaticAsBool() const
 {
     return method_decl_->isStatic();
+}
+
+::mstch::node Method::isStatic()
+{
+    return isStaticAsBool();
 }
 
 ::mstch::node Method::isVirtual()

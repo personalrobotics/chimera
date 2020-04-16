@@ -193,6 +193,26 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         config_options_strict = strictNode.as<bool>();
     }
 
+    // Parse 'options.static_method_name_policy' to set the static method name
+    // policy for the case a static method has the same name one of the instance
+    // methods in the same class.
+    static_method_name_policy_ = StaticMethodNamePolicy::NO_CHANGE;
+    const YAML::Node staticMethodNamePolicyNode = chimera::util::lookupYAMLNode(
+        configNode_, "options", "static_method_name_policy");
+    if (staticMethodNamePolicyNode)
+    {
+        const std::string policy = staticMethodNamePolicyNode.as<std::string>();
+        if (policy == "first_letter_capital")
+        {
+            static_method_name_policy_
+                = StaticMethodNamePolicy::FIRST_LETTER_CAPITAL;
+        }
+        else if (policy == "capital")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::CAPITAL;
+        }
+    }
+
     // Set the options.strict from one of the following sources in order of
     // priority: 1) CLI '-strict' setting (True if -strict passed, False
     // otherwise) 2) YAML configuration setting (True/False) 3) false by default
@@ -476,6 +496,12 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 bool chimera::CompiledConfiguration::GetStrict() const
 {
     return strict_;
+}
+
+chimera::CompiledConfiguration::StaticMethodNamePolicy
+chimera::CompiledConfiguration::GetStaticMethodNamePolicy() const
+{
+    return static_method_name_policy_;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(

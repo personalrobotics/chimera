@@ -307,13 +307,19 @@ public:
            const clang::CXXMethodDecl *decl,
            const clang::CXXRecordDecl *class_decl = nullptr);
 
+    void setNameConflict(bool val);
+    bool isNameConflict() const;
+
+    std::string nameAsString() override;
     ::mstch::node isConst();
+    bool isStaticAsBool() const;
     ::mstch::node isStatic();
     ::mstch::node isVirtual();
     ::mstch::node isPureVirtual();
 
 private:
     const clang::CXXMethodDecl *method_decl_;
+    bool name_conflict_;
 };
 
 class Namespace : public ClangWrapper<clang::NamespaceDecl>
