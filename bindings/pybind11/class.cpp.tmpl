@@ -87,6 +87,7 @@ void {{class.mangled_name}}(::pybind11::module& m)
         }}{{/class.bases?}} >(attr, "{{class.name}}"{{!
         }}{{#class.comment?}}, {{class.mangled_name}}_docstring{{/class.comment?}}{{!
         }}{{#class.dynamic_attr}}, ::pybind11::dynamic_attr(){{/class.dynamic_attr}}{{!
+        }}, ::pybind11::module_local(){{!
         }}){{!
 
 /* default constructor to allow inheritance in Python */}}
