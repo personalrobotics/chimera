@@ -307,7 +307,8 @@ class Method : public Function
 public:
     Method(const ::chimera::CompiledConfiguration &config,
            const clang::CXXMethodDecl *decl,
-           const clang::CXXRecordDecl *class_decl = nullptr);
+           const clang::CXXRecordDecl *class_decl = nullptr,
+           const int argument_limit = -1);
 
     void setNameConflict(bool val);
     bool isNameConflict() const;

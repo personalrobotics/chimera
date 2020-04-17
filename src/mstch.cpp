@@ -993,8 +993,9 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 }
 
 Method::Method(const ::chimera::CompiledConfiguration &config,
-               const CXXMethodDecl *decl, const CXXRecordDecl *class_decl)
-  : Function(config, decl, class_decl)
+               const CXXMethodDecl *decl, const CXXRecordDecl *class_decl,
+               const int argument_limit)
+  : Function(config, decl, class_decl, argument_limit)
   , method_decl_(decl)
   , name_conflict_(false)
 {
@@ -1025,8 +1026,8 @@ bool Method::isNameConflict() const
     auto arg_range = chimera::util::getFunctionArgumentRange(decl_);
     for (unsigned n_args = arg_range.first; n_args < arg_range.second; ++n_args)
     {
-        auto method
-            = std::make_shared<Method>(config_, method_decl_, class_decl_);
+        auto method = std::make_shared<Method>(config_, method_decl_,
+                                               class_decl_, n_args);
         method->setNameConflict(name_conflict_);
         overloads.push_back(method);
     }
