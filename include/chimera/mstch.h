@@ -281,7 +281,7 @@ public:
              const int argument_limit = -1);
 
     ::mstch::node type();
-    ::mstch::node overloads();
+    virtual ::mstch::node overloads();
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
@@ -295,8 +295,10 @@ public:
     ::mstch::node call();
     ::mstch::node qualifiedCall();
 
-private:
+protected:
     const clang::CXXRecordDecl *class_decl_;
+
+private:
     const int argument_limit_;
 };
 
@@ -310,6 +312,7 @@ public:
     void setNameConflict(bool val);
     bool isNameConflict() const;
 
+    ::mstch::node overloads() override;
     std::string nameAsString() override;
     ::mstch::node isConst();
     bool isStaticAsBool() const;

@@ -112,9 +112,9 @@ public:
     {
         return a + m_val;
     }
-    static int add(int a, int b)
+    static int add(int a, int b, int c = 0)
     {
-        return a + b;
+        return a + b + c;
     }
 
 private:

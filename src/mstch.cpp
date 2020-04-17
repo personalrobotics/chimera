@@ -1016,6 +1016,28 @@ bool Method::isNameConflict() const
     return name_conflict_;
 }
 
+::mstch::node Method::overloads()
+{
+    ::mstch::array overloads;
+
+    // Create a list of wrappers that re-wrap this function with a subset of
+    // the full set of arguments (i.e. omitting some of the default arguments).
+    auto arg_range = chimera::util::getFunctionArgumentRange(decl_);
+    for (unsigned n_args = arg_range.first; n_args < arg_range.second; ++n_args)
+    {
+        auto method
+            = std::make_shared<Method>(config_, method_decl_, class_decl_);
+        method->setNameConflict(name_conflict_);
+        overloads.push_back(method);
+    }
+
+    // Add this function to its own list of overloads.
+    // It can be distinguished from other copies because `uses_defaults=false`.
+    overloads.push_back(shared_from_this());
+
+    return overloads;
+}
+
 std::string Method::nameAsString()
 {
     std::string original_name = Function::nameAsString();
