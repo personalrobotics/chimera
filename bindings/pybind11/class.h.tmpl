@@ -10,5 +10,55 @@
 #include <pybind11/pybind11.h>
 {{postinclude}}
 
+{{#class.bases}}{{!
+}}{{#allow_inheritance}}#include "{{mangled_name}}.h"{{/allow_inheritance}}
+{{/class.bases}}
+
+namespace chimera_pybind11 {
+
+{{#class.allow_inheritance}}{{!
+}}template <class {{class.name}}Base = {{class.type}}>
+class Py{{class.name}} : {{!
+}}{{^class.bases?}}public {{class.name}}Base{{/class.bases?}}{{!
+}}{{#class.bases}}public Py{{name}}<{{class.name}}Base>{{^last}}, {{/last}}{{/class.bases}}{{!
+}} {
+public:
+  /* Inherit the constructors */
+{{^class.bases?}}  using {{class.name}}Base::{{class.name}}Base;{{/class.bases?}}{{!
+}}{{#class.bases}}{{!
+}}  using Py{{name}}<{{class.name}}Base>::Py{{name}};
+{{/class.bases}}
+
+  {{!/* member [pure] virtual functions */}}
+  {{#class.methods}}{{!
+    }}{{^is_static}}{{!
+    }}{{#is_virtual}}{{!
+    }}{{#overloads}}{{!
+    }}{{#is_void}}void {{/is_void}}{{!
+    }}{{^is_void}}{{return_type}} {{/is_void}}{{!
+    }}{{name}}{{!
+    }}({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) override {
+    {{#is_pure_virtual}}PYBIND11_OVERLOAD_PURE({{/is_pure_virtual}}{{!
+      }}{{^is_pure_virtual}}PYBIND11_OVERLOAD({{/is_pure_virtual}}
+      {{!/* Return type */}}
+      {{#is_void}}void{{/is_void}}{{!
+        }}{{^is_void}}{{return_type}}{{/is_void}},
+      {{!/* Parent class */}}
+      {{class.name}}Base,
+      {{!/* Name of function in C++ (must match Python name) */}}
+      {{name}}
+      {{!/* Argument(s) */}}
+      {{#params}}, {{name}}{{/params}}
+    );
+  }
+  {{/overloads}}{{!
+  }}{{/is_virtual}}{{!
+  }}{{/is_static}}{{!
+  }}{{/class.methods}}
+};{{!
+}}{{/class.allow_inheritance}}
+
+} // namespace chimera_pybind11
+
 void {{class.mangled_name}}(::pybind11::module& m);
 {{footer}}
