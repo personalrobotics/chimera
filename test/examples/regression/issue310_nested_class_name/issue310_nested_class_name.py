@@ -13,7 +13,7 @@ class TestIssue310(unittest.TestCase):
         self.assertTrue(hasattr(binding.Derived, 'Option'))
 
     def test_issue310(self):
-        self.assertRaises(RuntimeError, self._import_py())
+        self.assertRaises(ImportError, self._import_py())
 
         self._test_issue310(boost)
 
