@@ -332,6 +332,11 @@ std::string trim(std::string s, const char *t = " \t\n\r\f\v");
 bool startsWith(const std::string &str, const std::string &prefix);
 
 /**
+ * Returns true if a string ends with a suffix, otherwise false.
+ */
+bool endsWith(const std::string &str, const std::string &suffix);
+
+/**
  * Returns the concrete type in string from a type.
  *
  * This is a helper function for debugging.

@@ -461,6 +461,8 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                           bindingDefinition_.module_cpp);
     SetBindingDefinitions("variable", bindingDefinition_.variable_h,
                           bindingDefinition_.variable_cpp);
+    SetBindingDefinitions("typedef", bindingDefinition_.typedef_h,
+                          bindingDefinition_.typedef_cpp);
 
     // Set custom escape function that disables HTML escaping on mstch output.
     //
@@ -838,6 +840,13 @@ bool chimera::CompiledConfiguration::Render(
 {
     return Render("variable", bindingDefinition_.variable_h,
                   bindingDefinition_.variable_cpp, context);
+}
+
+bool chimera::CompiledConfiguration::Render(
+    const std::shared_ptr<chimera::mstch::Typedef> context)
+{
+    return Render("typedef", bindingDefinition_.typedef_h,
+                  bindingDefinition_.typedef_cpp, context);
 }
 
 void chimera::CompiledConfiguration::Render()

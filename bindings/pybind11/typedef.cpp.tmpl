@@ -1,0 +1,27 @@
+#include "{{typedef.mangled_name}}.h"
+
+{{header}}
+{{#includes}}
+#include <{{.}}>
+{{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
+#include <pybind11/pybind11.h>
+{{postinclude}}
+
+void {{typedef.mangled_name}}(::pybind11::module& m)
+{
+    {{precontent}}
+
+    auto sm = m{{!
+        }}{{#typedef.namespace_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/typedef.namespace_scope}};
+
+    auto attr = sm{{!
+        }}{{#typedef.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.class_scope}};
+
+    attr.attr("{{typedef.name}}") = {{#typedef.underlying_class}}m{{#namespace_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/namespace_scope}}{{#class_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class_scope}}.attr("{{name}}");{{/typedef.underlying_class}}
+
+    {{postcontent}}
+}
+{{footer}}

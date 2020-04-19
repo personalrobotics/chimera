@@ -22,6 +22,7 @@ class Enum;
 class Function;
 class Variable;
 class Namespace;
+class Typedef;
 
 } // namespace mstch
 } // namespace chimera
@@ -219,6 +220,7 @@ public:
     bool Render(const std::shared_ptr<chimera::mstch::Enum> context);
     bool Render(const std::shared_ptr<chimera::mstch::Function> context);
     bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
+    bool Render(const std::shared_ptr<chimera::mstch::Typedef> context);
 
     /**
      * Renders the top-level mstch template. The rendered filename is specified

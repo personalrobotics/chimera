@@ -1,0 +1,22 @@
+#include "{{typedef.mangled_name}}.h"
+
+{{header}}
+{{#includes}}
+#include <{{.}}>
+{{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
+#include <boost/python.hpp>
+{{postinclude}}
+
+void {{typedef.mangled_name}}()
+{
+    {{precontent}}
+
+    ::boost::python::scope(::boost::python::scope(){{!
+        }}{{#typedef.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.scope}}).attr("{{typedef.name}}") = ::boost::python::scope(){{#typedef.underlying_class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.underlying_class.scope}}.attr("{{typedef.underlying_class.name}}");
+
+    {{postcontent}}
+}
+{{footer}}

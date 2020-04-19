@@ -24,6 +24,8 @@ struct Definition
     std::string module_cpp;
     std::string variable_h;
     std::string variable_cpp;
+    std::string typedef_h;
+    std::string typedef_cpp;
 };
 
 /**

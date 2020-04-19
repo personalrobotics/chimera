@@ -25,6 +25,7 @@ protected:
     bool GenerateEnum(clang::EnumDecl *decl);
     bool GenerateGlobalVar(clang::VarDecl *decl);
     bool GenerateGlobalFunction(clang::FunctionDecl *decl);
+    bool GenerateTypedefName(clang::TypedefNameDecl *decl);
 
 private:
     clang::PrintingPolicy printing_policy_;

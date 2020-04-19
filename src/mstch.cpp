@@ -1106,5 +1106,47 @@ Variable::Variable(const ::chimera::CompiledConfiguration &config,
     return chimera::util::isAssignable(config_.GetContext(), decl_->getType());
 }
 
+Typedef::Typedef(const CompiledConfiguration &config,
+                 const TypedefNameDecl *decl,
+                 const CXXRecordDecl *underlying_class_decl)
+  : ClangWrapper(config, decl), class_decl_(underlying_class_decl)
+{
+    register_methods(this, {
+                               {"underlying_class", &Typedef::underlyingClass},
+                           });
+}
+
+::mstch::node Typedef::namespaceScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateNamespaceScope(config_, nns->getPrefix());
+}
+
+::mstch::node Typedef::classScope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateClassScope(config_, nns->getPrefix());
+}
+
+::mstch::node Typedef::scope()
+{
+    const NestedNameSpecifier *nns
+        = cling::utils::TypeName::CreateNestedNameSpecifier(
+            config_.GetContext(), decl_->getCanonicalDecl(), true);
+
+    return generateScope(config_, nns->getPrefix());
+}
+
+::mstch::node Typedef::underlyingClass()
+{
+    return std::make_shared<CXXRecord>(config_, class_decl_);
+}
+
 } // namespace mstch
 } // namespace chimera

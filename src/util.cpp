@@ -961,6 +961,12 @@ bool startsWith(const std::string &str, const std::string &prefix)
             && std::equal(prefix.begin(), prefix.end(), str.begin()));
 }
 
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    return ((suffix.size() <= str.size())
+            && std::equal(suffix.rbegin(), suffix.rend(), str.rbegin()));
+}
+
 std::string toString(QualType qual_type)
 {
     return toString(qual_type.getTypePtr());
@@ -1120,6 +1126,9 @@ std::string toString(const Decl *decl)
 {
     // Reference: https://clang.llvm.org/doxygen/classclang_1_1Decl.html
 
+    if (decl == nullptr)
+        return "Error: nullptr";
+
     // TODO: There are more types that are not handled.
     if (dyn_cast<AccessSpecDecl>(decl))
         return "AccessSpecDecl";
@@ -1130,6 +1139,10 @@ std::string toString(const Decl *decl)
 #if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<BuiltinTemplateDecl>(decl))
         return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
+#endif
+#if LLVM_VERSION_AT_LEAST(10, 0, 0)
+    else if (dyn_cast<ConceptDecl>(decl))
+        return "ConceptDecl : TemplateDecl : NamedDecl";
 #endif
     else if (dyn_cast<ClassTemplateDecl>(decl))
         return "ClassTemplateDecl : RedeclarableTemplateDecl : TemplateDecl : "
@@ -1164,8 +1177,26 @@ std::string toString(const Decl *decl)
         return "RecordDecl : TagDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TagDecl>(decl))
         return "TagDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TemplateTypeParmDecl>(decl))
+        return "TemplateTypeParmDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<ObjCTypeParamDecl>(decl))
+        return "ObjCTypeParamDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypeAliasDecl>(decl))
+        return "TypeAliasDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypedefDecl>(decl))
+        return "TypedefDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypedefNameDecl>(decl))
+        return "TypedefNameDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
+    else if (dyn_cast<UsingDecl>(decl))
+        return "UsingDecl : NamedDecl";
+    else if (dyn_cast<UsingDirectiveDecl>(decl))
+        return "UsingDirectiveDecl : NamedDecl";
+    else if (dyn_cast<UsingPackDecl>(decl))
+        return "UsingPackDecl : NamedDecl";
+    else if (dyn_cast<UsingShadowDecl>(decl))
+        return "UsingShadowDecl : NamedDecl";
 #if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<DecompositionDecl>(decl))
         return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
