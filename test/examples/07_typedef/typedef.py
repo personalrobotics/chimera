@@ -24,8 +24,8 @@ class TestTypedef(unittest.TestCase):
         self.assertFalse(hasattr(binding.test2, 'Vectord'))
 
         # Same as Position and Position2 but using typedef
+        self.assertTrue(hasattr(binding.test2, 'PositionTypedef'))
         self.assertTrue(hasattr(binding.test2, 'PositionTypedef2'))
-        self.assertTrue(hasattr(binding.test2, 'PositionTypedef3'))
 
         # Same as Vectori and Vectord but using typedef
         self.assertFalse(hasattr(binding.test2, 'VectoriTypedef'))
