@@ -317,8 +317,15 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
     // Skip if the defining type is templated
     if (isa<TypeAliasDecl>(decl))
     {
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
         if (cast<TypeAliasDecl>(decl)->isTemplated())
             return false;
+#else
+        // TODO: Find a better way to check if the original type is templated
+        // declaration for LLVM < 6.0
+        if (chimera::util::endsWith(underlying_type_name, ">"))
+            return false;
+#endif
     }
 
     // Get the declaration from the underlying type

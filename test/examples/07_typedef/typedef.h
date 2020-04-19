@@ -30,7 +30,8 @@ namespace test2
 {
 
 // Not binded because the underlying type, std::string, is not binded
-// TODO: Fix to generate bind since std::string is binded by Boost.Python and pybind11
+// TODO: Fix to generate bind since std::string is binded by Boost.Python and
+// pybind11
 using String = std::string;
 using String2 = String;
 
@@ -46,7 +47,8 @@ using Vectori = test1::Vector<int>;
 using Vectord = Vector<double>;
 
 // Not binded because the underlying type, std::string, is not binded
-// TODO: Fix to generate bind since std::string is binded by Boost.Python and pybind11
+// TODO: Fix to generate bind since std::string is binded by Boost.Python and
+// pybind11
 typedef std::string StringTypedef;
 typedef StringTypedef StringTypedef2;
 

@@ -1189,8 +1189,10 @@ std::string toString(const Decl *decl)
         return "TypedefNameDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<UsingDecl>(decl))
         return "UsingDecl : NamedDecl";
+#endif
     else if (dyn_cast<UsingDirectiveDecl>(decl))
         return "UsingDirectiveDecl : NamedDecl";
     else if (dyn_cast<UsingPackDecl>(decl))
