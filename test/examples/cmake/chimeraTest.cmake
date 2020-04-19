@@ -22,6 +22,11 @@ function(chimera_add_binding_tests test_name)
   chimera_add_binding_test_pybind11(${test_name}_pybind11 ${ARGN})
 endfunction(chimera_add_binding_tests)
 
+set(bindings "boost_python")
+if(pybind11_FOUND)
+  set(bindings "boost_python pybind11")
+endif()
+
 # Add a Python test that will run against the generated code. The Python test
 # will be able to run through CTest
 #
@@ -29,7 +34,7 @@ endfunction(chimera_add_binding_tests)
 function(chimera_add_python_test test_name python_filename)
   add_test(
     NAME ${test_name}
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${python_filename}
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${python_filename} ${test_name} ${bindings}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 endfunction(chimera_add_python_test)
