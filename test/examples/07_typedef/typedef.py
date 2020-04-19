@@ -1,8 +1,7 @@
-import inspect
 import unittest
 
-import function_pybind11 as py11
-import class_boost_python as boost
+import typedef_pybind11 as py11
+import typedef_boost_python as boost
 
 
 class TestTypedef(unittest.TestCase):
@@ -24,11 +23,11 @@ class TestTypedef(unittest.TestCase):
         self.assertFalse(hasattr(binding.test2, 'Vectori'))
         self.assertFalse(hasattr(binding.test2, 'Vectord'))
 
-        # Same as Position and Position2 but using typedef 
+        # Same as Position and Position2 but using typedef
         self.assertTrue(hasattr(binding.test2, 'PositionTypedef2'))
         self.assertTrue(hasattr(binding.test2, 'PositionTypedef3'))
 
-        # Same as Vectori and Vectord but using typedef 
+        # Same as Vectori and Vectord but using typedef
         self.assertFalse(hasattr(binding.test2, 'VectoriTypedef'))
         self.assertFalse(hasattr(binding.test2, 'VectordTypedef'))
 
