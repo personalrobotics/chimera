@@ -1195,8 +1195,10 @@ std::string toString(const Decl *decl)
 #endif
     else if (dyn_cast<UsingDirectiveDecl>(decl))
         return "UsingDirectiveDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<UsingPackDecl>(decl))
         return "UsingPackDecl : NamedDecl";
+#endif
     else if (dyn_cast<UsingShadowDecl>(decl))
         return "UsingShadowDecl : NamedDecl";
 #if LLVM_VERSION_AT_LEAST(6, 0, 0)
