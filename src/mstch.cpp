@@ -651,12 +651,17 @@ Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)
     return generateScope(config_, nns->getPrefix());
 }
 
-::mstch::node Enum::type()
+std::string Enum::typeAsString()
 {
     if (const YAML::Node &node = decl_config_["type"])
         return node.as<std::string>();
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(decl_);
+}
+
+::mstch::node Enum::type()
+{
+    return typeAsString();
 }
 
 ::mstch::node Enum::values()

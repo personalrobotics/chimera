@@ -238,6 +238,7 @@ public:
     ::mstch::node namespaceScope() override;
     ::mstch::node classScope() override;
     ::mstch::node scope() override;
+    std::string typeAsString();
     ::mstch::node type();
     ::mstch::node values();
 };

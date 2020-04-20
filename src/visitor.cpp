@@ -235,6 +235,12 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::Enum>(config_, decl);
+
+    // TODO(#121): Workaround to ignore anonymous enum. The type string of an
+    // anonymous enum contains "(anonymous)". See #121 for the details.
+    if (context->typeAsString().find("(anonymous)") != std::string::npos)
+        return false;
+
     return config_.Render(context);
 }
 
