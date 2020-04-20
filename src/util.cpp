@@ -1176,9 +1176,11 @@ std::string toString(const Decl *decl)
 #endif
     else if (dyn_cast<FieldDecl>(decl))
         return "FieldDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<CXXDeductionGuideDecl>(decl))
         return "CXXDeductionGuideDecl : FunctionDecl : DeclaratorDecl : "
                "ValueDecl : NamedDecl";
+#endif
     else if (dyn_cast<CXXConstructorDecl>(decl))
         return "CXXConstructorDecl : CXXMethodDecl : FunctionDecl : "
                "DeclaratorDecl : ValueDecl : NamedDecl";
