@@ -26,6 +26,6 @@ private:
 };
 
 // Explicit instantiation declaration
-extern template class Vector<double>;
+template class Vector<double>;
 
 } // namespace chimera_test
