@@ -1189,6 +1189,40 @@ std::string toString(const Decl *decl)
         return "TypedefNameDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
+    else if (dyn_cast<ObjCAtDefsFieldDecl>(decl))
+        return "ObjCAtDefsFieldDecl : FieldDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#if LLVM_VERSION_AT_LEAST(10, 0, 0)
+    else if (dyn_cast<ObjClvarDecl>(decl))
+        return "ObjClvarDecl : FieldDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#endif
+    else if (dyn_cast<FieldDecl>(decl))
+        return "FieldDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<CXXDeductionGuideDecl>(decl))
+        return "CXXDeductionGuideDecl : FunctionDecl : DeclaratorDecl : "
+               "ValueDecl : NamedDecl";
+#endif
+    else if (dyn_cast<CXXConstructorDecl>(decl))
+        return "CXXConstructorDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXConversionDecl>(decl))
+        return "CXXConversionDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXDestructorDecl>(decl))
+        return "CXXDestructorDestructorDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXMethodDecl>(decl))
+        return "CXXMethodDecl : FunctionDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<FunctionDecl>(decl))
+        return "FunctionDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<MSPropertyDecl>(decl))
+        return "MSPropertyDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<NonTypeTemplateParmDecl>(decl))
+        return "NonTypeTemplateParmDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
 #if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<UsingDecl>(decl))
         return "UsingDecl : NamedDecl";

@@ -10,12 +10,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #
 # add_chimera_binding(TARGET target
 #                     [DESTINATION destination_dir] # Defaults to `target`
-#                     [MODULE module]  # Defaults to `target`
-#                     [BINDING binding] # Binding definition (overrides config)
+#                     [MODULE module]               # Defaults to `<BINARY_DIR>/target`
+#                     [BINDING binding]             # Binding definition (overrides config)
 #                     [CONFIGURATION config_file]
 #                     [NAMESPACES namespace1 namespace2 ...])
 #                     SOURCES source1_file [source2_file ...]
 #                     [EXTRA_SOURCES source1_file ...]
+#                     [GENERATED_BINDING_SOURCES]      # Output variable containing list of generated binding source files
 #                     [DEBUG] [EXCLUDE_FROM_ALL]
 function(add_chimera_binding)
     include(ExternalProject)
@@ -24,7 +25,7 @@ function(add_chimera_binding)
     # Unparsed arguments can be found in variable ARG_UNPARSED_ARGUMENTS.
     set(prefix binding)
     set(options DEBUG EXCLUDE_FROM_ALL)
-    set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION BINDING)
+    set(oneValueArgs TARGET MODULE CONFIGURATION DESTINATION BINDING GENERATED_BINDING_SOURCES)
     set(multiValueArgs SOURCES NAMESPACES EXTRA_SOURCES LINK_LIBRARIES)
     cmake_parse_arguments("${prefix}" "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -188,5 +189,10 @@ function(add_chimera_binding)
     )
     set_target_properties("${binding_TARGET}_REBUILD" PROPERTIES EXCLUDE_FROM_ALL TRUE)
     add_dependencies("${binding_TARGET}" "${binding_TARGET}_REBUILD")
+
+    # Set ${binding_GENERATED_BINDING_SOURCES} with the list of generated bindings
+    if(binding_GENERATED_BINDING_SOURCES)
+        set(${binding_GENERATED_BINDING_SOURCES} ${binding_GENERATED} PARENT_SCOPE)
+    endif()
 
 endfunction(add_chimera_binding)
