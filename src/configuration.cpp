@@ -193,6 +193,51 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         config_options_strict = strictNode.as<bool>();
     }
 
+    // Parse 'options.static_method_name_policy' to set the static method name
+    // policy for the case a static method has the same name one of the instance
+    // methods in the same class.
+    static_method_name_policy_ = StaticMethodNamePolicy::NO_CHANGE;
+    const YAML::Node staticMethodNamePolicyNode = chimera::util::lookupYAMLNode(
+        configNode_, "options", "static_method_name_policy");
+    if (staticMethodNamePolicyNode)
+    {
+        const std::string policy = staticMethodNamePolicyNode.as<std::string>();
+        if (policy == "to_upper")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_UPPER;
+        }
+        else if (policy == "to_lower")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_UPPER;
+        }
+        else if (policy == "to_pascal")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_PASCAL;
+        }
+        else if (policy == "to_camel")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_CAMEL;
+        }
+        else
+        {
+            if (GetStrict())
+            {
+                throw std::runtime_error(
+                  "Invalid value for 'static_method_name_policy': '" + policy
+                  + "'. Choose one of following: 'to_upper', 'to_lower', 'to_camel', 'to_pascal'");
+            }
+            else
+            {
+                std::cerr
+                    << "Invalid value for 'static_method_name_policy': '"
+                    << policy
+                    << "'. Choose one of following: 'no_change', 'to_upper', "
+                    << "'to_lower', 'to_camel', 'to_pascal'. Defaulting to "
+                    << "'no_change'." << std::endl;
+            }
+        }
+    }
+
     // Set the options.strict from one of the following sources in order of
     // priority: 1) CLI '-strict' setting (True if -strict passed, False
     // otherwise) 2) YAML configuration setting (True/False) 3) false by default
@@ -268,7 +313,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped namespace namespace '"
+                        std::cerr << "Warning: Skipped namespace namespace '"
                                   << ns_str
                                   << "' because it's unable to resolve "
                                   << "the namespace." << std::endl;
@@ -324,7 +369,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cout
+                    std::cerr
                         << "Warning: Skipped the configuration for class '"
                         << decl_str << "' becuase it's "
                         << "unable to resolve the class declaration."
@@ -363,7 +408,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout
+                        std::cerr
                             << "Warning: Skipped the configuration for "
                             << "function '" << decl_str << "' becuase it's "
                             << "unable to resolve the function declaration."
@@ -402,7 +447,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped the configuration for "
+                        std::cerr << "Warning: Skipped the configuration for "
                                   << "type '" << type_str << "' becuase it's "
                                   << "unable to resolve the type." << std::endl;
                         continue;
@@ -478,6 +523,12 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 bool chimera::CompiledConfiguration::GetStrict() const
 {
     return strict_;
+}
+
+chimera::CompiledConfiguration::StaticMethodNamePolicy
+chimera::CompiledConfiguration::GetStaticMethodNamePolicy() const
+{
+    return static_method_name_policy_;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(

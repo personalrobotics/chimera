@@ -281,7 +281,7 @@ public:
              const int argument_limit = -1);
 
     ::mstch::node type();
-    ::mstch::node overloads();
+    virtual ::mstch::node overloads();
     ::mstch::node params();
     ::mstch::node returnType();
     ::mstch::node returnValuePolicy();
@@ -295,8 +295,10 @@ public:
     ::mstch::node call();
     ::mstch::node qualifiedCall();
 
-private:
+protected:
     const clang::CXXRecordDecl *class_decl_;
+
+private:
     const int argument_limit_;
 };
 
@@ -305,15 +307,23 @@ class Method : public Function
 public:
     Method(const ::chimera::CompiledConfiguration &config,
            const clang::CXXMethodDecl *decl,
-           const clang::CXXRecordDecl *class_decl = nullptr);
+           const clang::CXXRecordDecl *class_decl = nullptr,
+           const int argument_limit = -1);
 
+    void setNameConflict(bool val);
+    bool isNameConflict() const;
+
+    ::mstch::node overloads() override;
+    std::string nameAsString() override;
     ::mstch::node isConst();
+    bool isStaticAsBool() const;
     ::mstch::node isStatic();
     ::mstch::node isVirtual();
     ::mstch::node isPureVirtual();
 
 private:
     const clang::CXXMethodDecl *method_decl_;
+    bool name_conflict_;
 };
 
 class Namespace : public ClangWrapper<clang::NamespaceDecl>

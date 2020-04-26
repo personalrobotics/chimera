@@ -121,14 +121,36 @@ protected:
 class CompiledConfiguration
 {
 public:
+    enum class StaticMethodNamePolicy
+    {
+        NO_CHANGE,
+        // Cast all the letters to upper case
+        TO_UPPER,
+        // Cast all the letters to lower case
+        TO_LOWER,
+        // Cast the first letter to upper case and cast all the letters followed
+        // by underscore to upper cases removing the underscores
+        TO_PASCAL,
+        // Cast the first letter to lower case and cast all the letters followed
+        // by underscore to upper cases removing the underscores
+        TO_CAMEL,
+        // TODO: Add more policies such as prefix and suffix
+    };
+
     virtual ~CompiledConfiguration() = default;
     CompiledConfiguration(const CompiledConfiguration &) = delete;
     CompiledConfiguration &operator=(const CompiledConfiguration &) = delete;
 
     /**
-     * Return whether to treat unresolvable configuration as errors.
+     * Returns whether to treat unresolvable configuration as errors.
      */
     bool GetStrict() const;
+
+    /**
+     * Returns policy for the case that a static method has a same name one of
+     * the instance method names in the same class.
+     */
+    StaticMethodNamePolicy GetStaticMethodNamePolicy() const;
 
     /**
      * Adds a namespace to an ordered set of traversed namespaces.
@@ -260,6 +282,7 @@ protected:
     std::set<const clang::NamespaceDecl *> binding_namespace_decls_;
 
     bool strict_;
+    StaticMethodNamePolicy static_method_name_policy_;
 
     friend class Configuration;
 };
