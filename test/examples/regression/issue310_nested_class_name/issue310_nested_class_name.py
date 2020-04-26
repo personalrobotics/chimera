@@ -10,7 +10,8 @@ class TestIssue310(unittest.TestCase):
         self.assertTrue(hasattr(binding.Derived, 'Option'))
 
     def test_issue310(self):
-        self.assertRaises(ImportError, __import__('issue310_nested_class_name_pybind11'))
+        with self.assertRaises(ImportError):
+            __import__('issue310_nested_class_name_pybind11')
         self._test_issue310(boost)
 
 
