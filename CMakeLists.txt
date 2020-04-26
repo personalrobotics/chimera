@@ -119,13 +119,13 @@ add_library(libchimera
 )
 target_compile_options(libchimera PUBLIC "-std=c++11")
 target_link_libraries(libchimera
-  PRIVATE
+  PUBLIC
     ${YAMLCPP_LIBRARIES}
     ${CLANG_LIBS}
     ${llvm_libs}
 )
-target_link_libraries(libchimera PRIVATE mstch cling_utils)
-target_link_libraries(libchimera PRIVATE chimera_bindings)
+target_link_libraries(libchimera PUBLIC mstch cling_utils)
+target_link_libraries(libchimera PUBLIC chimera_bindings)
 target_compile_definitions(libchimera
   PUBLIC
     CHIMERA_MAJOR_VERSION=${CHIMERA_MAJOR_VERSION}

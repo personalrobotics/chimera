@@ -955,6 +955,95 @@ std::string trim(std::string s, const char *t)
     return trimLeft(trimRight(s, t), t);
 }
 
+std::string toUpper(const std::string &str, int n)
+{
+    std::string casted = str;
+    if (n < 0 || static_cast<std::size_t>(n) >= casted.length())
+    {
+        std::transform(casted.begin(), casted.end(), casted.begin(), ::toupper);
+    }
+    else
+    {
+        std::transform(casted.begin(), casted.begin() + n, casted.begin(),
+                       ::toupper);
+    }
+    return casted;
+}
+
+std::string toLower(const std::string &str, int n)
+{
+    std::string casted = str;
+    if (n < 0 || static_cast<std::size_t>(n) >= casted.length())
+    {
+        std::transform(casted.begin(), casted.end(), casted.begin(), ::tolower);
+    }
+    else
+    {
+        std::transform(casted.begin(), casted.begin() + n, casted.begin(),
+                       ::tolower);
+    }
+    return casted;
+}
+
+std::string toPascal(const std::string &str)
+{
+    auto tokens = split(str, "_");
+    for (auto &token : tokens)
+        token = toUpper(token, 1);
+
+    std::string casted;
+    for (const auto &token : tokens)
+        casted += token;
+
+    return casted;
+}
+
+std::string toCamel(const std::string &str)
+{
+    auto tokens = split(str, "_");
+
+    bool first_token_found = false;
+    for (auto &token : tokens)
+    {
+        if (!first_token_found)
+        {
+            if (token.empty())
+                continue;
+
+            token = toLower(token, 1);
+            first_token_found = true;
+            continue;
+        }
+
+        token = toUpper(token, 1);
+    }
+
+    std::string casted;
+    for (const auto &token : tokens)
+        casted += token;
+
+    return casted;
+}
+
+std::vector<std::string> split(const std::string &str,
+                               const std::string &delimiter)
+{
+    std::size_t pos_start = 0;
+    std::size_t pos_end, delim_len = delimiter.length();
+    std::string token;
+    std::vector<std::string> tokens;
+
+    while ((pos_end = str.find(delimiter, pos_start)) != std::string::npos)
+    {
+        token = str.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        tokens.push_back(token);
+    }
+
+    tokens.push_back(str.substr(pos_start));
+    return tokens;
+}
+
 bool startsWith(const std::string &str, const std::string &prefix)
 {
     return ((prefix.size() <= str.size())

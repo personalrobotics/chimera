@@ -202,14 +202,39 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     if (staticMethodNamePolicyNode)
     {
         const std::string policy = staticMethodNamePolicyNode.as<std::string>();
-        if (policy == "first_letter_capital")
+        if (policy == "to_upper")
         {
-            static_method_name_policy_
-                = StaticMethodNamePolicy::FIRST_LETTER_CAPITAL;
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_UPPER;
         }
-        else if (policy == "capital")
+        else if (policy == "to_lower")
         {
-            static_method_name_policy_ = StaticMethodNamePolicy::CAPITAL;
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_UPPER;
+        }
+        else if (policy == "to_pascal")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_PASCAL;
+        }
+        else if (policy == "to_camel")
+        {
+            static_method_name_policy_ = StaticMethodNamePolicy::TO_CAMEL;
+        }
+        else
+        {
+            if (GetStrict())
+            {
+                throw std::runtime_error(
+                  "Invalid value for 'static_method_name_policy': '" + policy
+                  + "'. Choose one of following: 'to_upper', 'to_lower', 'to_camel', 'to_pascal'");
+            }
+            else
+            {
+                std::cerr
+                    << "Invalid value for 'static_method_name_policy': '"
+                    << policy
+                    << "'. Choose one of following: 'no_change', 'to_upper', "
+                    << "'to_lower', 'to_camel', 'to_pascal'. Defaulting to "
+                    << "'no_change'." << std::endl;
+            }
         }
     }
 
@@ -288,7 +313,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped namespace namespace '"
+                        std::cerr << "Warning: Skipped namespace namespace '"
                                   << ns_str
                                   << "' because it's unable to resolve "
                                   << "the namespace." << std::endl;
@@ -344,7 +369,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cout
+                    std::cerr
                         << "Warning: Skipped the configuration for class '"
                         << decl_str << "' becuase it's "
                         << "unable to resolve the class declaration."
@@ -383,7 +408,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout
+                        std::cerr
                             << "Warning: Skipped the configuration for "
                             << "function '" << decl_str << "' becuase it's "
                             << "unable to resolve the function declaration."
@@ -422,7 +447,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped the configuration for "
+                        std::cerr << "Warning: Skipped the configuration for "
                                   << "type '" << type_str << "' becuase it's "
                                   << "unable to resolve the type." << std::endl;
                         continue;

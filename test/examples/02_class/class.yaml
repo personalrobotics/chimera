@@ -3,7 +3,7 @@ arguments:
   - "-extra-arg"
   - "-I/usr/lib/clang/3.6/include"
 options:
-  static_method_name_policy: "first_letter_capital"
+  static_method_name_policy: "to_pascal"
 namespaces:
   "chimera_test":
     name: null # TODO: otherwise, import error

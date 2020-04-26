@@ -1054,14 +1054,17 @@ std::string Method::nameAsString()
             case CompiledConfiguration::StaticMethodNamePolicy::NO_CHANGE:
                 // Do nothing
                 break;
-            case CompiledConfiguration::StaticMethodNamePolicy::
-                FIRST_LETTER_CAPITAL:
-                std::transform(original_name.begin(), original_name.begin() + 1,
-                               original_name.begin(), ::toupper);
+            case CompiledConfiguration::StaticMethodNamePolicy::TO_UPPER:
+                original_name = chimera::util::toUpper(original_name);
                 break;
-            case CompiledConfiguration::StaticMethodNamePolicy::CAPITAL:
-                std::transform(original_name.begin(), original_name.end(),
-                               original_name.begin(), ::toupper);
+            case CompiledConfiguration::StaticMethodNamePolicy::TO_LOWER:
+                original_name = chimera::util::toLower(original_name);
+                break;
+            case CompiledConfiguration::StaticMethodNamePolicy::TO_PASCAL:
+                original_name = chimera::util::toPascal(original_name);
+                break;
+            case CompiledConfiguration::StaticMethodNamePolicy::TO_CAMEL:
+                original_name = chimera::util::toCamel(original_name);
                 break;
             default:
                 break;

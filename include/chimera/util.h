@@ -327,6 +327,38 @@ std::string trimLeft(std::string s, const char *t = " \t\n\r\f\v");
 std::string trim(std::string s, const char *t = " \t\n\r\f\v");
 
 /**
+ * Casts all the letters to upper case
+ */
+std::string toUpper(const std::string &str, int n = -1);
+
+/**
+ * Casts all the letters to lower case
+ */
+std::string toLower(const std::string &str, int n = -1);
+
+/**
+ * Casts the first letter to upper case and casts all the letters followed by
+ * underscore to upper cases removing the underscores
+ */
+std::string toPascal(const std::string &str);
+
+/**
+ * Casts the first letter to lower case and casts all the letters followed by
+ * underscore to upper cases removing the underscores
+ */
+std::string toCamel(const std::string &str);
+
+/**
+ * Splits string into a list of tokens.
+ *
+ * @param[in] str The original string to be split.
+ * @param[in] delimiter The string delimiter, which can be more than one
+ * character.
+ */
+std::vector<std::string> split(const std::string &str,
+                               const std::string &delimiter = " ");
+
+/**
  * Returns true if a string starts with a prefix, otherwise false.
  */
 bool startsWith(const std::string &str, const std::string &prefix);
