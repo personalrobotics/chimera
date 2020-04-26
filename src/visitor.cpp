@@ -156,6 +156,10 @@ bool chimera::Visitor::VisitDecl(Decl *decl)
         // namespace during traversal.
         config_.AddTraversedNamespace(cast<NamespaceDecl>(decl));
     }
+    else if (isa<TypedefNameDecl>(decl))
+    {
+        GenerateTypedefName(cast<TypedefNameDecl>(decl));
+    }
 
     return true;
 }
@@ -303,5 +307,51 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
 
     // Serialize using a mstch template.
     auto context = std::make_shared<chimera::mstch::Function>(config_, decl);
+    return config_.Render(context);
+}
+
+bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
+{
+    // TODO: Other derived classes of TypedefNameDecl are not tested
+    if (!isa<TypeAliasDecl>(decl) && !isa<TypedefDecl>(decl))
+        return false;
+
+    // Use underlying type to get the declaration of the original type
+    QualType underlying_type = decl->getUnderlyingType();
+    std::string underlying_type_name = chimera::util::getFullyQualifiedTypeName(
+        config_.GetContext(), underlying_type);
+
+    // Skip if the defining type is templated
+    if (isa<TypeAliasDecl>(decl))
+    {
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+        if (cast<TypeAliasDecl>(decl)->isTemplated())
+            return false;
+#else
+        // TODO: Find a better way to check if the original type is templated
+        // declaration for LLVM < 6.0
+        if (chimera::util::endsWith(underlying_type_name, ">"))
+            return false;
+#endif
+    }
+
+    // Get the declaration from the underlying type
+    auto resolved_decl = chimera::util::resolveRecord(
+        config_.GetCompilerInstance(), underlying_type_name);
+
+    // Skip if failed to get the declaration or the declaration is not of class
+    if (!resolved_decl || !isa<CXXRecordDecl>(resolved_decl))
+        return false;
+
+    // Skip if the original type is not traversed
+    auto it = traversed_class_decls_.find(cast<CXXRecordDecl>(resolved_decl));
+    if (it == traversed_class_decls_.end())
+        return false;
+
+    // Create mstch for typedef
+    const clang::CXXRecordDecl *underlying_cxx_record_dec = (*it);
+    auto context = std::make_shared<chimera::mstch::Typedef>(
+        config_, decl, underlying_cxx_record_dec);
+
     return config_.Render(context);
 }
