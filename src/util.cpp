@@ -1131,7 +1131,7 @@ std::string toString(const Decl *decl)
         std::cerr << "Warning: nullptr is not allowed to get the type name of "
                      "clang::Decl*"
                   << std::endl;
-        return "Error: [nullptr]";
+        return "std::nullptr_t";
     }
 
     // TODO: There are more types that are not handled.
