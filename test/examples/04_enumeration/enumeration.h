@@ -18,4 +18,16 @@ struct Animal
     Type type;
 };
 
+namespace test1
+{
+
+// Anonymous enum
+enum
+{
+    TRUE,
+    FALSE,
+};
+
+} // namespace test1
+
 } // namespace chimera_test
