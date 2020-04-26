@@ -1127,7 +1127,12 @@ std::string toString(const Decl *decl)
     // Reference: https://clang.llvm.org/doxygen/classclang_1_1Decl.html
 
     if (decl == nullptr)
+    {
+        std::cerr << "Warning: nullptr is not allowed to get the type name of "
+                     "clang::Decl*"
+                  << std::endl;
         return "Error: [nullptr]";
+    }
 
     // TODO: There are more types that are not handled.
     if (dyn_cast<AccessSpecDecl>(decl))
