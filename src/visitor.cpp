@@ -238,7 +238,8 @@ bool chimera::Visitor::GenerateEnum(clang::EnumDecl *decl)
 
     // TODO(#121): Workaround to ignore anonymous enum. The type string of an
     // anonymous enum contains "(anonymous)". See #121 for the details.
-    if (context->typeAsString().find("(anonymous)") != std::string::npos)
+    const std::string type = ::mstch::render("{{type}}", context);
+    if (type.find("(anonymous)") != std::string::npos)
         return false;
 
     return config_.Render(context);
