@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 #include <boost/variant/get.hpp>
 
@@ -478,55 +479,67 @@ std::string CXXRecord::typeAsString()
     if (method_vector.size() > 0)
         method_vector.back()->setLast(true);
 
-    // Copy each template into the mstch template array.
-    for (auto method_template : method_vector)
-        method_templates.push_back(method_template);
+    // Collect all the non-static method names
+    std::unordered_set<std::string> non_static_method_names;
+    for (const std::shared_ptr<Method> &method : method_vector)
+    {
+        const bool is_static
+            = (::mstch::render("{{#is_static}}true{{/is_static}}", method)
+               == "true");
+
+        if (!is_static)
+            non_static_method_names.insert(method->nameAsString());
+    }
+
+    // Copy each template into the mstch template array except static methods
+    // that have the same name with instance methods.
+    for (const std::shared_ptr<Method> &method : method_vector)
+    {
+        const bool is_static
+            = (::mstch::render("{{#is_static}}true{{/is_static}}", method)
+               == "true");
+        if (is_static)
+        {
+            const std::string name = method->nameAsString();
+            if (non_static_method_names.find(name)
+                != non_static_method_names.end())
+            {
+                std::cerr
+                    << "Warning: Skipping static method '" << name
+                    << "' because there is instance method(s) with the same "
+                    << "name. Consider renaming the conflicting static method "
+                    << "in the configuration YAML.\n";
+                continue;
+            }
+        }
+
+        method_templates.push_back(method);
+    }
+
     return method_templates;
 }
 
 ::mstch::node CXXRecord::staticMethods()
 {
-    ::mstch::array method_templates = boost::get<::mstch::array>(methods());
-    std::map<std::string, bool> is_static_method;
+    ::mstch::array static_method_list;
 
-    // Iterate through all methods searching for static ones.
+    ::mstch::array method_templates = boost::get<::mstch::array>(methods());
+
+    // Add all static method name to this list.
     for (const ::mstch::node method_node : method_templates)
     {
-        // Resolve the static-ness and name of each function from method
+        // Resolve the static-ness  and name of each function from method
         // templates.
         const auto method
             = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const std::string name = boost::get<std::string>(method->at("name"));
         const bool is_static = boost::get<bool>(method->at("is_static"));
 
-        // Throw a warning if a static and non-static method share a name.
-        if ((is_static_method.find(name) != is_static_method.end())
-            && (is_static_method[name] != is_static))
-        {
-            std::cerr
-                << "Warning: Method '" << name << "' has ambiguous static and"
-                << " non-static declarations. This may cause errors because"
-                << " this binding is using a list of named static methods."
-                << " Consider renaming one of the conflicting functions in the"
-                << " configuration YAML.\n";
-
-            // If there are any non-static methods, do not mark as static.
-            is_static_method[name] = false;
-        }
-        else
-        {
-            // Update the map with the static-ness of this method.
-            is_static_method[name] = is_static;
-        }
+        // Update the map with the static-ness of this method.
+        if (is_static)
+            static_method_list.push_back(name);
     }
 
-    // Add all static method names to this list.
-    ::mstch::array static_method_list;
-    for (auto const &entry : is_static_method)
-    {
-        if (entry.second)
-            static_method_list.push_back(entry.first);
-    }
     return static_method_list;
 }
 
