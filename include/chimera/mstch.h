@@ -224,6 +224,8 @@ public:
     ::mstch::node fields();
     ::mstch::node staticFields();
 
+    ::mstch::node staticMethodAttributeName();
+
 protected:
     const std::set<const clang::CXXRecordDecl *> *available_decls_;
 };

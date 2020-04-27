@@ -126,9 +126,14 @@ public:
     CompiledConfiguration &operator=(const CompiledConfiguration &) = delete;
 
     /**
-     * Return whether to treat unresolvable configuration as errors.
+     * Returns whether to treat unresolvable configuration as errors.
      */
     bool GetStrict() const;
+
+    /**
+     * Returns the subtable name to have all the static methods.
+     */
+    const std::string GetStaticMethodAttributeName() const;
 
     /**
      * Adds a namespace to an ordered set of traversed namespaces.
@@ -260,6 +265,7 @@ protected:
     std::set<const clang::NamespaceDecl *> binding_namespace_decls_;
 
     bool strict_;
+    std::string static_method_attribute_name_;
 
     friend class Configuration;
 };

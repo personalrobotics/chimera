@@ -209,6 +209,16 @@ chimera::CompiledConfiguration::CompiledConfiguration(
         strict_ = false;
     }
 
+    // Parse 'options.static_method_attribute_name' tag in configuration YAML
+    const YAML::Node staticMethodAttributeNameNode
+        = chimera::util::lookupYAMLNode(configNode_, "options",
+                                        "static_method_attribute_name");
+    if (staticMethodAttributeNameNode)
+    {
+        static_method_attribute_name_
+            = staticMethodAttributeNameNode.as<std::string>();
+    }
+
     // This placeholder will be filled in by the binding name specified
     // in the configuration YAML if it exists, or remain empty otherwise.
     std::string config_binding_name;
@@ -268,7 +278,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped namespace namespace '"
+                        std::cerr << "Warning: Skipped namespace namespace '"
                                   << ns_str
                                   << "' because it's unable to resolve "
                                   << "the namespace." << std::endl;
@@ -324,7 +334,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cout
+                    std::cerr
                         << "Warning: Skipped the configuration for class '"
                         << decl_str << "' becuase it's "
                         << "unable to resolve the class declaration."
@@ -363,7 +373,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout
+                        std::cerr
                             << "Warning: Skipped the configuration for "
                             << "function '" << decl_str << "' becuase it's "
                             << "unable to resolve the function declaration."
@@ -402,7 +412,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped the configuration for "
+                        std::cerr << "Warning: Skipped the configuration for "
                                   << "type '" << type_str << "' becuase it's "
                                   << "unable to resolve the type." << std::endl;
                         continue;
@@ -478,6 +488,12 @@ chimera::CompiledConfiguration::CompiledConfiguration(
 bool chimera::CompiledConfiguration::GetStrict() const
 {
     return strict_;
+}
+
+const std::string chimera::CompiledConfiguration::GetStaticMethodAttributeName()
+    const
+{
+    return static_method_attribute_name_;
 }
 
 void chimera::CompiledConfiguration::AddTraversedNamespace(

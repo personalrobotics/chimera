@@ -238,6 +238,11 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             {"static_methods", &CXXRecord::staticMethods},
             {"static_methods?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"static_method_attribute_name",
+             &CXXRecord::staticMethodAttributeName},
+            {"static_method_attribute_name?",
+             &CXXRecord::isNonFalse<CXXRecord,
+                                    &CXXRecord::staticMethodAttributeName>},
         });
 }
 
@@ -601,6 +606,11 @@ std::string CXXRecord::typeAsString()
     for (auto static_field_template : static_field_vector)
         static_field_templates.push_back(static_field_template);
     return static_field_templates;
+}
+
+::mstch::node CXXRecord::staticMethodAttributeName()
+{
+    return config_.GetStaticMethodAttributeName();
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)
