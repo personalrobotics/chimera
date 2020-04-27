@@ -224,6 +224,14 @@ bool chimera::Visitor::GenerateCXXRecord(CXXRecordDecl *decl)
     if (context->typeAsString() == "(lambda)")
         return false;
 
+    if (::mstch::render("{{#class_scope?}}true{{/class_scope?}}", context)
+        == "true")
+    {
+        std::cerr << "[DEBUG] This is a nested class: "
+                  << ::mstch::render("{{type}}", context)
+                  << std::endl;
+    }
+
     return config_.Render(context);
 }
 
