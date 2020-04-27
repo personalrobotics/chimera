@@ -929,6 +929,14 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
         {
             CXXRecordDecl *cxx_record_decl
                 = cast<CXXRecordDecl>(record_type->getDecl());
+
+            // Allow the parent class, in which the method is defined. In this
+            // case, the access specifier is As_none.
+            if (decl->getParent() == cxx_record_decl)
+            {
+                continue;
+            }
+
             if (cxx_record_decl->getAccess() != AS_public)
             {
                 return true;
@@ -936,6 +944,22 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
         }
     }
     return false;
+}
+
+bool getPythonOperatorSpelling(OverloadedOperatorKind kind, std::string &str)
+{
+    switch (kind)
+    {
+        case OverloadedOperatorKind::OO_Plus:
+            str = "__add__";
+            return true;
+        case OverloadedOperatorKind::OO_Star:
+            str = "__mul__";
+            return true;
+        // TODO: Support more operator name
+        default:
+            return false;
+    }
 }
 
 std::string trimRight(std::string s, const char *t)

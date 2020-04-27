@@ -290,7 +290,9 @@ public:
     ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node usesDefaults();
+    std::string nameAsString() override;
     ::mstch::node qualifiedName() override;
+    ::mstch::node isOperator();
     ::mstch::node isTemplate();
     ::mstch::node call();
     ::mstch::node qualifiedCall();

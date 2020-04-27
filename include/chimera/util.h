@@ -312,6 +312,14 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
 /**
+ * Converts clang operator type to the operator name in Python.
+ *
+ * Return true on success.
+ */
+bool getPythonOperatorSpelling(clang::OverloadedOperatorKind kind,
+                               std::string &str);
+
+/**
  * Trims from end of string (right)
  */
 std::string trimRight(std::string s, const char *t = " \t\n\r\f\v");
