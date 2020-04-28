@@ -42,19 +42,27 @@ std::string generateUniqueName()
 
 } // namespace
 
-::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn)
+::mstch::node wrapYAMLNodeImpl(const YAML::Node &node, ScalarConversionFn fn,
+                               bool markLast, bool isLast)
 {
     switch (node.Type())
     {
         case YAML::NodeType::Scalar:
+        {
             return fn ? fn(node) : node.as<std::string>();
+        }
         case YAML::NodeType::Sequence:
         {
             ::mstch::array context;
             for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
             {
                 const YAML::Node &value = *it;
-                context.emplace_back(wrapYAMLNode(value));
+                if (std::next(it) == node.end())
+                    context.emplace_back(
+                        wrapYAMLNodeImpl(value, nullptr, markLast, true));
+                else
+                    context.emplace_back(
+                        wrapYAMLNodeImpl(value, nullptr, markLast, false));
             }
             return context;
         }
@@ -65,8 +73,17 @@ std::string generateUniqueName()
             {
                 const std::string name = it->first.as<std::string>();
                 const YAML::Node &value = it->second;
-                context[name] = wrapYAMLNode(value);
+                context[name]
+                    = wrapYAMLNodeImpl(value, nullptr, markLast, false);
             }
+
+            if (markLast && isLast)
+            {
+                // The key "last" should be synced with the {{key}} element of
+                // chimera::mstch::ClangWrapper
+                context["last"] = true;
+            }
+
             return context;
         }
         case YAML::NodeType::Undefined:
@@ -74,6 +91,12 @@ std::string generateUniqueName()
         default:
             return nullptr;
     }
+}
+
+::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn,
+                           bool markLast)
+{
+    return wrapYAMLNodeImpl(node, fn, markLast, false);
 }
 
 void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,

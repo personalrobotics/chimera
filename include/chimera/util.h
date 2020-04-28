@@ -27,12 +27,18 @@ constexpr char FLAG_NO_RENDER[]
  * Wrapper that generates context for a YAML node.
  *
  * This function automatically converts known datatypes from YAML::Node entries
- * to mstch context entries.  It optionally takes a scalar conversion function
- * which will be applied to scalars before they are re-wrapped by mstch.
+ * to mstch context entries.
+ *
+ * @param[in] fn Optional scalar conversion function which will be applied to
+ * scalars before they are re-wrapped by mstch.
+ * @param[in] markLast Optional flag whether to add "last: true" entry to each
+ * map, which is a last entry of sequence. This is useful because all the mstch
+ * template in chimera expects to have this entry.
  */
 using ScalarConversionFn = std::function<std::string(const YAML::Node &)>;
 ::mstch::node wrapYAMLNode(const YAML::Node &node,
-                           ScalarConversionFn fn = nullptr);
+                           ScalarConversionFn fn = nullptr,
+                           bool markLast = false);
 
 /**
  * Adds entries from a YAML::Node to an existing mstch::map.

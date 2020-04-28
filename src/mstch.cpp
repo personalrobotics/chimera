@@ -244,7 +244,7 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
 ::mstch::node CXXRecord::bases()
 {
     if (const YAML::Node node = decl_config_["bases"])
-        return chimera::util::wrapYAMLNode(node);
+        return chimera::util::wrapYAMLNode(node, nullptr, true);
 
     // Get all bases of this class.
     std::set<const CXXRecordDecl *> base_decls
