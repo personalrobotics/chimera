@@ -231,6 +231,22 @@ chimera::CompiledConfiguration::CompiledConfiguration(
     // If it is not available, then skip configuration node parsing.
     if (configNode_)
     {
+        const YAML::Node moduleNode = configNode_["module"];
+        if (moduleNode)
+        {
+            const YAML::Node docNode
+                = chimera::util::lookupYAMLNode(configNode_, "module", "doc");
+
+            // Check that 'module' node in configuration YAML is a map.
+            if (!docNode.IsScalar())
+            {
+                throw std::runtime_error(
+                    "'module.doc' in configuration YAML must be a scalar.");
+            }
+
+            module_doc_ = docNode.as<std::string>();
+        }
+
         // Parse 'namespaces' section of configuration YAML if it exists.
         const YAML::Node namespacesNode = configNode_["namespaces"];
         if (namespacesNode)
@@ -864,6 +880,7 @@ void chimera::CompiledConfiguration::Render()
     ::mstch::map full_context{
         {"module",
          ::mstch::map{{"name", parent_.GetOutputModuleName()},
+                      {"doc", module_doc_},
                       {"bindings", binding_names},
                       {"sources", binding_sources},
                       // Note: binding namespaces will be lexically ordered.

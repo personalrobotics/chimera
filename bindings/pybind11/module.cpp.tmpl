@@ -17,6 +17,8 @@ PYBIND11_MODULE({{module.name}}, m)
 {
     {{precontent}}
 
+    m.doc() = "{{module.doc}}";
+
 {{#module.bindings}}
     {{.}}(m);
 {{/module.bindings}}

@@ -260,6 +260,7 @@ protected:
     std::set<const clang::NamespaceDecl *> binding_namespace_decls_;
 
     bool strict_;
+    std::string module_doc_;
 
     friend class Configuration;
 };
