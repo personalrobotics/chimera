@@ -1,7 +1,7 @@
 import unittest
 
-import moduel_pybind11 as py11
-import moduel_boost_python as boost
+import module_pybind11 as py11
+import module_boost_python as boost
 
 
 class TestModule(unittest.TestCase):
