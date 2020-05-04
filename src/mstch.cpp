@@ -528,7 +528,7 @@ std::string CXXRecord::typeAsString()
     // Add all static method name to this list.
     for (const ::mstch::node method_node : method_templates)
     {
-        // Resolve the static-ness  and name of each function from method
+        // Resolve the static-ness and name of each function from method
         // templates.
         const auto method
             = boost::get<std::shared_ptr<::mstch::object>>(method_node);
