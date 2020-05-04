@@ -525,7 +525,7 @@ std::string CXXRecord::typeAsString()
 
     ::mstch::array method_templates = boost::get<::mstch::array>(methods());
 
-    // Add all static method name to this list.
+    // Add all static method names to this list.
     for (const ::mstch::node method_node : method_templates)
     {
         // Resolve the static-ness and name of each function from method
