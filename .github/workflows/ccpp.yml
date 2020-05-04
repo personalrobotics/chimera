@@ -97,21 +97,3 @@ jobs:
       - name: Build
         run: |
           docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
-
-  mojav_clang_release:
-    name: mojav_clang_release_llvm9
-    runs-on: macOS-10.14
-    steps:
-      - uses: actions/checkout@v1
-      - name: Install Dependencies
-        env:
-          OS_NAME: osx
-          LLVM_VERSION: 9
-        run: .ci/install.sh
-      - name: Build
-        env:
-          OS_NAME: osx
-          COMPILER: clang
-          BUILD_TYPE: Release
-          LLVM_VERSION: 9
-        run: sudo -E .ci/script.sh
