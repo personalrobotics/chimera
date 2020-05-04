@@ -479,7 +479,7 @@ std::string CXXRecord::typeAsString()
     if (method_vector.size() > 0)
         method_vector.back()->setLast(true);
 
-    // Collect all the non-static method names
+    // Copy each non-static method into the mstch template.
     std::unordered_set<std::string> non_static_method_names;
     for (const std::shared_ptr<Method> &method : method_vector)
     {
