@@ -241,7 +241,8 @@ protected:
 private:
     /**
      * Returns all the methods.
-     * This may include instance methods and static methods with conflicting names.
+     * This may include instance methods and static methods with conflicting
+     * names.
      */
     ::mstch::node methodsInternal() const;
 };

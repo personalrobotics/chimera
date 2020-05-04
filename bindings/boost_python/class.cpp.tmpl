@@ -78,7 +78,8 @@ void {{class.mangled_name}}()
 }}{{/class.methods}}{{!
 
 /* static member functions */}}
-{{#class.static_methods}}{{!
+{{#class.visible_methods}}{{!
+}}{{#is_static}}{{!
 }}{{#overloads}}{{!
     }}        .def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
@@ -87,10 +88,13 @@ void {{class.mangled_name}}()
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}){{/params?}})
 {{/overloads}}{{!
-}}{{/class.static_methods}}
-{{#class.static_methods}}{{!
+}}{{/is_static}}{{!
+}}{{/class.visible_methods}}
+{{#class.visible_methods}}{{!
+}}{{#is_static}}{{!
     }}        .staticmethod("{{name}}")
-{{/class.static_methods}}{{!
+{{/is_static}}{{!
+}}{{/class.visible_methods}}{{!
 
 /* fields */}}
 {{#class.fields}}{{!

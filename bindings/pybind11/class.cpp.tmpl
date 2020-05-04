@@ -70,16 +70,27 @@ void {{class.mangled_name}}(::pybind11::module& m)
 {{/overloads}}{{!
 }}{{/class.constructors}}{{!
 
-/* member functions and static member functions */}}
-{{#class.visible_methods}}{{!
-}}{{^is_static}}{{!
+/* member functions */}}
+{{#class.methods}}{{!
 }}{{#overloads}}{{!
-    }}{{^is_static}}        .def{{/is_static}}{{!
-    }}{{#is_static}}        .def_static{{/is_static}}{{!
-    }}("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
+    }}        .def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
     }}self->{{call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
+    }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
+    }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
+    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})
+{{/overloads}}{{!
+}}{{/class.methods}}{{!
+
+/* static member functions */}}
+{{#class.visible_methods}}{{!
+}}{{#is_static}}{{!
+}}{{#overloads}}{{!
+    }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
+    }}{{#is_void}} { {{/is_void}}{{!
+    }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
+    }}{{qualified_call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
     }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})

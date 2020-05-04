@@ -483,7 +483,7 @@ std::string CXXRecord::typeAsString()
             = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const std::string name = boost::get<std::string>(method->at("name"));
 
-        if (non_static_method_names.find(name) != non_static_method_names.end())
+        if (non_static_method_names.find(name) == non_static_method_names.end())
             visible_methods.push_back(method_node);
     }
 
