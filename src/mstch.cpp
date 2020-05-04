@@ -474,7 +474,7 @@ std::string CXXRecord::typeAsString()
     }
 
     // Copy each static method into the mstch template if the static method name
-    // doesn't conflict with the non-static method names
+    // doesn't conflict with the non-static method names.
     const ::mstch::array static_method_templates
         = boost::get<::mstch::array>(staticMethods());
     for (const ::mstch::node &method_node : static_method_templates)
