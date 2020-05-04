@@ -490,8 +490,8 @@ std::string CXXRecord::typeAsString()
         non_static_method_names.insert(method->nameAsString());
     }
 
-    // Copy each template into the mstch template array except static methods
-    // that have the same name with instance methods.
+    // Copy each static method into the mstch template array, except those
+    // that have the same name as an instance method.
     for (const std::shared_ptr<Method> &method : method_vector)
     {
         const bool is_static = boost::get<bool>(method->at("is_static"));
