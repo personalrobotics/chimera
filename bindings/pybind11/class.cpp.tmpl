@@ -48,7 +48,7 @@ void {{class.mangled_name}}(::pybind11::module& m)
         }}{{#class.held_type}}, {{!
         }}{{.}}{{/class.held_type}}{{#class.bases?}}, {{!
         }}{{!
-            }}{{#class.bases}}{{qualified_name}}{{^last}}, {{/last}}{{/class.bases}}{{!
+            }}{{#class.bases}}{{qualified_name}}{{^__last__}}, {{/__last__}}{{/class.bases}}{{!
         }}{{/class.bases?}} >(attr, "{{class.name}}"{{!
         }}{{#class.comment?}}, {{class.mangled_name}}_docstring{{/class.comment?}}{{!
         }}{{#class.dynamic_attr}}, ::pybind11::dynamic_attr(){{/class.dynamic_attr}}{{!
@@ -65,8 +65,8 @@ void {{class.mangled_name}}(::pybind11::module& m)
 {{#class.constructors}}{{!
 }}{{#overloads}}{{!
     }}        .def(::pybind11::init{{!
-        }}<{{#params}}{{type}}{{^last}}, {{/last}}{{/params}}>(){{!
-        }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
+        }}<{{#params}}{{type}}{{^__last__}}, {{/__last__}}{{/params}}>(){{!
+        }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/class.constructors}}{{!
 
@@ -77,10 +77,10 @@ void {{class.mangled_name}}(::pybind11::module& m)
     }}        .def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
-    }}self->{{call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
+    }}self->{{call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
-    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
+    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
 }}{{/class.methods}}{{!
@@ -89,12 +89,12 @@ void {{class.mangled_name}}(::pybind11::module& m)
 {{#class.methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
-    }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
+    }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
-    }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
+    }}{{qualified_call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
-    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^last}}, {{/last}}{{/params}}{{/params?}})
+    }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
 }}{{/class.methods}}{{!
