@@ -33,13 +33,13 @@ void {{function.mangled_name}}()
     {{/function.scope?}}
 
 {{#function.overloads}}{{!
-    }}    ::boost::python::def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}){{!
+    }}    ::boost::python::def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
-    }}{{qualified_call}}({{#params}}{{name}}{{^last}}, {{/last}}{{/params}}); }{{!
+    }}{{qualified_call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
     }}{{#comment?}}, {{function.mangled_name}}_docstring{{/comment?}}{{!
     }}{{#return_value_policy}}, ::boost::python::return_value_policy<::boost::python::{{.}} >(){{/return_value_policy}}{{!
-    }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^last}}, {{/last}}{{/params}}){{/params?}});
+    }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}){{/params?}});
 {{/function.overloads}}
 
     {{postcontent}}
