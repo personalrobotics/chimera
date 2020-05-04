@@ -42,8 +42,9 @@ std::string generateUniqueName()
 
 } // namespace
 
-::mstch::node wrapYAMLNodeImpl(const YAML::Node &node, ScalarConversionFn fn,
-                               bool markLast, bool isLast)
+::mstch::node wrapYAMLNodeInternal(const YAML::Node &node,
+                                   ScalarConversionFn fn, bool markLast,
+                                   bool isLast)
 {
     switch (node.Type())
     {
@@ -59,10 +60,10 @@ std::string generateUniqueName()
                 const YAML::Node &value = *it;
                 if (std::next(it) == node.end())
                     context.emplace_back(
-                        wrapYAMLNodeImpl(value, nullptr, markLast, true));
+                        wrapYAMLNodeInternal(value, nullptr, markLast, true));
                 else
                     context.emplace_back(
-                        wrapYAMLNodeImpl(value, nullptr, markLast, false));
+                        wrapYAMLNodeInternal(value, nullptr, markLast, false));
             }
             return context;
         }
@@ -74,7 +75,7 @@ std::string generateUniqueName()
                 const std::string name = it->first.as<std::string>();
                 const YAML::Node &value = it->second;
                 context[name]
-                    = wrapYAMLNodeImpl(value, nullptr, markLast, false);
+                    = wrapYAMLNodeInternal(value, nullptr, markLast, false);
             }
 
             if (markLast && isLast)
@@ -96,7 +97,7 @@ std::string generateUniqueName()
 ::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn,
                            bool markLast)
 {
-    return wrapYAMLNodeImpl(node, fn, markLast, false);
+    return wrapYAMLNodeInternal(node, fn, markLast, false);
 }
 
 void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
