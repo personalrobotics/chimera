@@ -488,6 +488,7 @@ std::string CXXRecord::typeAsString()
             continue;
 
         non_static_method_names.insert(method->nameAsString());
+        method_templates.push_back(method);
     }
 
     // Copy each static method into the mstch template array, except those
