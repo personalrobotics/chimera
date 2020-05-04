@@ -445,7 +445,14 @@ std::string CXXRecord::typeAsString()
                 case OverloadedOperatorKind::OO_Star:
                     break; // Allow these kinds.
                 default:
+                {
+                    std::cerr << "Warning: Skipped operator overloading '"
+                              << method_decl->getQualifiedNameAsString()
+                              << "' because the operator type is not currently "
+                              << "supported by chimera."
+                              << std::endl;
                     continue; // Suppress any other kinds.
+                }
             }
         }
         if (method_decl->isDeleted())
