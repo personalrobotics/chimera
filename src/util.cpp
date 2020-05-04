@@ -42,62 +42,54 @@ std::string generateUniqueName()
 
 } // namespace
 
-::mstch::node wrapYAMLNodeInternal(const YAML::Node &node,
-                                   ScalarConversionFn fn, bool markLast,
-                                   bool isLast)
-{
-    switch (node.Type())
-    {
-        case YAML::NodeType::Scalar:
-        {
-            return fn ? fn(node) : node.as<std::string>();
-        }
-        case YAML::NodeType::Sequence:
-        {
-            ::mstch::array context;
-            for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-            {
-                const YAML::Node &value = *it;
-                if (std::next(it) == node.end())
-                    context.emplace_back(
-                        wrapYAMLNodeInternal(value, nullptr, markLast, true));
-                else
-                    context.emplace_back(
-                        wrapYAMLNodeInternal(value, nullptr, markLast, false));
-            }
-            return context;
-        }
-        case YAML::NodeType::Map:
-        {
-            ::mstch::map context;
-            for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
-            {
-                const std::string name = it->first.as<std::string>();
-                const YAML::Node &value = it->second;
-                context[name]
-                    = wrapYAMLNodeInternal(value, nullptr, markLast, false);
-            }
-
-            if (markLast && isLast)
-            {
-                // The key "last" should be synced with the {{key}} element of
-                // chimera::mstch::ClangWrapper
-                context["last"] = true;
-            }
-
-            return context;
-        }
-        case YAML::NodeType::Undefined:
-        case YAML::NodeType::Null:
-        default:
-            return nullptr;
-    }
-}
-
 ::mstch::node wrapYAMLNode(const YAML::Node &node, ScalarConversionFn fn,
                            bool markLast)
 {
-    return wrapYAMLNodeInternal(node, fn, markLast, false);
+  switch (node.Type())
+  {
+      case YAML::NodeType::Scalar:
+      {
+          return fn ? fn(node) : node.as<std::string>();
+      }
+      case YAML::NodeType::Sequence:
+      {
+          ::mstch::array context;
+
+          for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+          {
+              const YAML::Node &value = *it;
+              context.emplace_back(wrapYAMLNode(value, nullptr, markLast));
+          }
+
+          // Mark the last element if it is a map.
+          if (markLast && !context.empty())
+          {
+              auto &last = context.back();
+              if (last.type() == typeid(::mstch::map))
+              {
+                  auto &map = boost::get<::mstch::map>(last);
+                  map["last"] = true;
+              }
+          }
+
+          return context;
+      }
+      case YAML::NodeType::Map:
+      {
+          ::mstch::map context;
+          for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+          {
+              const std::string name = it->first.as<std::string>();
+              const YAML::Node &value = it->second;
+              context[name] = wrapYAMLNode(value, nullptr, markLast);
+          }
+          return context;
+      }
+      case YAML::NodeType::Undefined:
+      case YAML::NodeType::Null:
+      default:
+          return nullptr;
+  }
 }
 
 void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
