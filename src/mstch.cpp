@@ -457,16 +457,12 @@ std::string CXXRecord::typeAsString()
 
 ::mstch::node CXXRecord::visibleMethods()
 {
-    const ::mstch::array non_static_method_templates
-        = boost::get<::mstch::array>(methods());
-
-    const ::mstch::array static_method_templates
-        = boost::get<::mstch::array>(staticMethods());
-
     ::mstch::array visible_methods;
 
     // Copy each non-static method into the mstch template.
     std::unordered_set<std::string> non_static_method_names;
+    const ::mstch::array non_static_method_templates
+        = boost::get<::mstch::array>(methods());
     for (const ::mstch::node &method_node : non_static_method_templates)
     {
         const auto method
@@ -474,21 +470,19 @@ std::string CXXRecord::typeAsString()
         const std::string name = boost::get<std::string>(method->at("name"));
         non_static_method_names.insert(name);
 
-        // Add non-static method template to the visible method template list
         visible_methods.push_back(method_node);
     }
 
-    // Add all non-static method templates to this list.
-    ::mstch::array non_static_methods;
+    // Copy each static method into the mstch template if the static method name
+    // doesn't conflict with the non-static method names
+    const ::mstch::array static_method_templates
+        = boost::get<::mstch::array>(staticMethods());
     for (const ::mstch::node &method_node : static_method_templates)
     {
         const auto method
             = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const std::string name = boost::get<std::string>(method->at("name"));
 
-        // Add static method template to the visible method template list only
-        // if the static method name doesn't conflict with any of non-static
-        // method names
         if (non_static_method_names.find(name) != non_static_method_names.end())
             visible_methods.push_back(method_node);
     }
