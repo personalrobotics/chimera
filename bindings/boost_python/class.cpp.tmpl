@@ -66,7 +66,6 @@ void {{class.mangled_name}}()
 
 /* member functions */}}
 {{#class.methods}}{{!
-}}{{^is_static}}{{!
 }}{{#overloads}}{{!
     }}        .def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
@@ -76,11 +75,10 @@ void {{class.mangled_name}}()
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}){{/params?}})
 {{/overloads}}{{!
-}}{{/is_static}}{{!
 }}{{/class.methods}}{{!
 
 /* static member functions */}}
-{{#class.methods}}{{!
+{{#class.visible_methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
     }}        .def("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
@@ -91,10 +89,12 @@ void {{class.mangled_name}}()
     }}{{#params?}}, ({{#params}}::boost::python::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}){{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
-}}{{/class.methods}}
-{{#class.static_methods}}{{!
-    }}        .staticmethod("{{.}}")
-{{/class.static_methods}}{{!
+}}{{/class.visible_methods}}
+{{#class.visible_methods}}{{!
+}}{{#is_static}}{{!
+    }}        .staticmethod("{{name}}")
+{{/is_static}}{{!
+}}{{/class.visible_methods}}{{!
 
 /* fields */}}
 {{#class.fields}}{{!
