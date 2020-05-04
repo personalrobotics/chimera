@@ -23,6 +23,8 @@ namespace util
 constexpr char FLAG_NO_RENDER[]
     = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
 
+constexpr char END_OF_SEQUENCES[] = "__last__";
+
 /**
  * Wrapper that generates context for a YAML node.
  *
@@ -31,14 +33,10 @@ constexpr char FLAG_NO_RENDER[]
  *
  * @param[in] fn Optional scalar conversion function which will be applied to
  * scalars before they are re-wrapped by mstch.
- * @param[in] markLast Optional flag whether to add "last: true" entry to each
- * map, which is a last entry of sequence. This is useful because all the mstch
- * template in chimera expects to have this entry.
  */
 using ScalarConversionFn = std::function<std::string(const YAML::Node &)>;
 ::mstch::node wrapYAMLNode(const YAML::Node &node,
-                           ScalarConversionFn fn = nullptr,
-                           bool markLast = false);
+                           ScalarConversionFn fn = nullptr);
 
 /**
  * Adds entries from a YAML::Node to an existing mstch::map.
