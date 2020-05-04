@@ -268,7 +268,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped namespace namespace '"
+                        std::cerr << "Warning: Skipped namespace namespace '"
                                   << ns_str
                                   << "' because it's unable to resolve "
                                   << "the namespace." << std::endl;
@@ -324,7 +324,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                 }
                 else
                 {
-                    std::cout
+                    std::cerr
                         << "Warning: Skipped the configuration for class '"
                         << decl_str << "' becuase it's "
                         << "unable to resolve the class declaration."
@@ -363,7 +363,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout
+                        std::cerr
                             << "Warning: Skipped the configuration for "
                             << "function '" << decl_str << "' becuase it's "
                             << "unable to resolve the function declaration."
@@ -402,7 +402,7 @@ chimera::CompiledConfiguration::CompiledConfiguration(
                     }
                     else
                     {
-                        std::cout << "Warning: Skipped the configuration for "
+                        std::cerr << "Warning: Skipped the configuration for "
                                   << "type '" << type_str << "' becuase it's "
                                   << "unable to resolve the type." << std::endl;
                         continue;
@@ -870,11 +870,11 @@ void chimera::CompiledConfiguration::Render()
                       {"namespaces", binding_namespaces}}}};
 
     // Resolve customizable snippets that will be inserted into the file
-    // from the configuration file's "template::main" entry.
+    // from the configuration file's "template::module" entry.
     if (bindingNode_)
     {
         chimera::util::extendWithYAMLNode(
-            full_context, bindingNode_["main"], false,
+            full_context, bindingNode_["module"], false,
             std::bind(&chimera::CompiledConfiguration::Lookup, this,
                       std::placeholders::_1));
     }

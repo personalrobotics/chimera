@@ -66,6 +66,7 @@ if(NOT pybind11_FOUND)
 endif()
 
 # Add unit tests from subdirectories (roughly in order of complexity).
+add_subdirectory(00_module)
 add_subdirectory(01_function)
 add_subdirectory(02_class)
 add_subdirectory(03_smart_pointers)
