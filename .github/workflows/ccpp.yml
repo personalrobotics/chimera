@@ -100,7 +100,7 @@ jobs:
 
   mojav_clang_release:
     name: mojav_clang_release_llvm9
-    runs-on: macOS-10.15
+    runs-on: macOS-10.14
     steps:
       - uses: actions/checkout@v1
       - name: Install Dependencies
