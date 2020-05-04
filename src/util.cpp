@@ -67,7 +67,7 @@ std::string generateUniqueName()
                 if (last.type() == typeid(::mstch::map))
                 {
                     auto &map = boost::get<::mstch::map>(last);
-                    map[END_OF_SEQUENCES] = true;
+                    map[END_OF_SEQUENCE] = true;
                 }
             }
 

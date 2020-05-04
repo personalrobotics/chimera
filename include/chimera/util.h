@@ -23,7 +23,7 @@ namespace util
 constexpr char FLAG_NO_RENDER[]
     = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
 
-constexpr char END_OF_SEQUENCES[] = "__last__";
+constexpr char END_OF_SEQUENCE[] = "__last__";
 
 /**
  * Wrapper that generates context for a YAML node.

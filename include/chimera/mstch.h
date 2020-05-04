@@ -54,7 +54,7 @@ public:
         register_methods(
             this,
             {
-                {chimera::util::END_OF_SEQUENCES, &ClangWrapper::last},
+                {chimera::util::END_OF_SEQUENCE, &ClangWrapper::last},
                 {"name", &ClangWrapper::name},
                 {"mangled_name", &ClangWrapper::mangledName},
                 {"qualified_name", &ClangWrapper::qualifiedName},
