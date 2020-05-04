@@ -45,7 +45,7 @@ jobs:
           OS_NAME: linux
           COMPILER: gcc
           BUILD_TYPE: Release
-          LLVM_VERSION: 6.0
+          LLVM_VERSION: "6.0"
           PYTHON_VERSION: 3.6
           DOCKERFILE: Dockerfile.ubuntu-bionic
         run: |
