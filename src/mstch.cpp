@@ -439,9 +439,14 @@ std::string CXXRecord::typeAsString()
             const OverloadedOperatorKind kind
                 = method_decl->getOverloadedOperator();
             // TODO: Support more operators
-            if (kind != OverloadedOperatorKind::OO_Plus
-                && kind != OverloadedOperatorKind::OO_Star)
-                continue;
+            switch (kind)
+            {
+                case OverloadedOperatorKind::OO_Plus:
+                case OverloadedOperatorKind::OO_Star:
+                    break;  // Allow these kinds.
+                default:
+                    continue;  // Suppress any other kinds.
+            }
         }
         if (method_decl->isDeleted())
             continue;
