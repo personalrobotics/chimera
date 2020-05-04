@@ -483,12 +483,11 @@ std::string CXXRecord::typeAsString()
     std::unordered_set<std::string> non_static_method_names;
     for (const std::shared_ptr<Method> &method : method_vector)
     {
-        const bool is_static
-            = (::mstch::render("{{#is_static}}true{{/is_static}}", method)
-               == "true");
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+        if (is_static)
+            continue;
 
-        if (!is_static)
-            non_static_method_names.insert(method->nameAsString());
+        non_static_method_names.insert(method->nameAsString());
     }
 
     // Copy each template into the mstch template array except static methods
