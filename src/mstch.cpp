@@ -231,14 +231,17 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             {"methods", &CXXRecord::methods},
             {"methods?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"static_methods", &CXXRecord::staticMethods},
+            {"static_methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"visible_methods", &CXXRecord::visibleMethods},
+            {"visible_methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::visibleMethods>},
             {"fields", &CXXRecord::fields},
             {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
             {"static_fields", &CXXRecord::staticFields},
             {"static_fields?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
-            {"static_methods", &CXXRecord::staticMethods},
-            {"static_methods?",
-             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
         });
 }
 
@@ -416,127 +419,81 @@ std::string CXXRecord::typeAsString()
 
 ::mstch::node CXXRecord::methods()
 {
-    ::mstch::array method_templates;
+    const ::mstch::array method_templates
+        = boost::get<::mstch::array>(methodsInternal());
 
-    // Convert each method to a template object.
-    // Since template objects are lazily-evaluated, this isn't expensive.
-    std::vector<std::shared_ptr<Method>> method_vector;
-    for (CXXMethodDecl *const method_decl : decl_->methods())
+    // Add all non-static method templates to this list.
+    ::mstch::array non_static_methods;
+    for (const ::mstch::node &method_node : method_templates)
     {
-        if (config_.IsSuppressed(method_decl))
-            continue;
-        if (method_decl->getAccess() != AS_public)
-            continue; // skip protected and private members
-        if (chimera::util::hasNonPublicParam(method_decl))
-            continue;
-        if (isa<CXXConversionDecl>(method_decl))
-            continue;
-        if (isa<CXXDestructorDecl>(method_decl))
-            continue;
-        if (isa<CXXConstructorDecl>(method_decl))
-            continue;
-        if (method_decl->isOverloadedOperator())
-            continue;
-        if (method_decl->isDeleted())
-            continue;
-        if (method_decl->getDescribedFunctionTemplate())
-            continue;
-        if (chimera::util::containsRValueReference(method_decl))
-            continue;
-
-        // Skip functions that have incomplete argument types. Boost.Python
-        // requires RTTI information about all arguments, including references
-        // and pointers.
-        if (chimera::util::containsIncompleteType(
-                config_.GetCompilerInstance()->getSema(), method_decl))
-            continue;
-
-        // Skip functions that have non-copyable argument types.
-        // Using these functions requires std::move()-ing their arguments, which
-        // we generally cannot do.
-        if (chimera::util::containsNonCopyableType(method_decl))
-            continue;
-
-        // Generate the method wrapper (but don't add it just yet).
-        auto method = std::make_shared<Method>(config_, method_decl, decl_);
-
-        // Check if a return_value_policy can be generated for this function.
-        if (::mstch::render("{{return_value_policy}}", method).empty()
-            && chimera::util::needsReturnValuePolicy(
-                   method_decl, method_decl->getReturnType()))
-        {
-            // `needsReturnValuePolicy()` already prints an error message,
-            // so just continue to the next method if we got here.
-            continue;
-        }
-
-        // Now that we know it can be generated, add the method.
-        method_vector.push_back(method);
-    }
-
-    // Find and flag the last item.
-    // TODO: is there a better way to do this?
-    if (method_vector.size() > 0)
-        method_vector.back()->setLast(true);
-
-    // Copy each non-static method into the mstch template.
-    std::unordered_set<std::string> non_static_method_names;
-    for (const std::shared_ptr<Method> &method : method_vector)
-    {
-        const bool is_static = boost::get<bool>(method->at("is_static"));
-        if (is_static)
-            continue;
-
-        non_static_method_names.insert(method->nameAsString());
-        method_templates.push_back(method);
-    }
-
-    // Copy each static method into the mstch template array, except those
-    // that have the same name as an instance method.
-    for (const std::shared_ptr<Method> &method : method_vector)
-    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const bool is_static = boost::get<bool>(method->at("is_static"));
         if (!is_static)
-            continue;
-
-        const std::string name = method->nameAsString();
-        if (non_static_method_names.find(name) != non_static_method_names.end())
-        {
-            std::cerr
-                << "Warning: Skipping static method '" << name
-                << "' because there is instance method(s) with the same "
-                << "name. Consider renaming the conflicting static method "
-                << "in the configuration YAML.\n";
-            continue;
-        }
-
-        method_templates.push_back(method);
+            non_static_methods.push_back(method);
     }
 
-    return method_templates;
+    return non_static_methods;
 }
 
 ::mstch::node CXXRecord::staticMethods()
 {
-    ::mstch::array method_templates = boost::get<::mstch::array>(methods());
+    const ::mstch::array method_templates
+        = boost::get<::mstch::array>(methodsInternal());
 
-    // Add all static method names to this list.
-    ::mstch::array static_method_list;
-    for (const ::mstch::node method_node : method_templates)
+    // Add all non-static method templates to this list.
+    ::mstch::array static_methods;
+    for (const ::mstch::node &method_node : method_templates)
     {
-        // Resolve the static-ness and name of each function from method
-        // templates.
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+        if (is_static)
+            static_methods.push_back(method);
+    }
+
+    return static_methods;
+}
+
+::mstch::node CXXRecord::visibleMethods()
+{
+    const ::mstch::array non_static_method_templates
+        = boost::get<::mstch::array>(methods());
+
+    const ::mstch::array static_method_templates
+        = boost::get<::mstch::array>(staticMethods());
+
+    ::mstch::array visible_methods;
+
+    // Copy each non-static method into the mstch template.
+    std::unordered_set<std::string> non_static_method_names;
+    for (const ::mstch::node &method_node : non_static_method_templates)
+    {
         const auto method
             = boost::get<std::shared_ptr<::mstch::object>>(method_node);
         const std::string name = boost::get<std::string>(method->at("name"));
-        const bool is_static = boost::get<bool>(method->at("is_static"));
+        non_static_method_names.insert(name);
 
-        // Update the map with the static-ness of this method.
-        if (is_static)
-            static_method_list.push_back(name);
+        // Add non-static method template to the visible method template list
+        visible_methods.push_back(method_node);
     }
 
-    return static_method_list;
+    // Add all non-static method templates to this list.
+    ::mstch::array non_static_methods;
+    for (const ::mstch::node &method_node : static_method_templates)
+    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const std::string name = boost::get<std::string>(method->at("name"));
+
+        // Add static method template to the visible method template list only
+        // if the static method name doesn't conflict with any of non-static
+        // method names
+        if (non_static_method_names.find(name) != non_static_method_names.end())
+            visible_methods.push_back(method_node);
+    }
+
+    return visible_methods;
 }
 
 ::mstch::node CXXRecord::fields()
@@ -610,6 +567,77 @@ std::string CXXRecord::typeAsString()
     for (auto static_field_template : static_field_vector)
         static_field_templates.push_back(static_field_template);
     return static_field_templates;
+}
+
+::mstch::node CXXRecord::methodsInternal() const
+{
+    ::mstch::array method_templates;
+
+    // Convert each method to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Method>> method_vector;
+    for (CXXMethodDecl *const method_decl : decl_->methods())
+    {
+        if (config_.IsSuppressed(method_decl))
+            continue;
+        if (method_decl->getAccess() != AS_public)
+            continue; // skip protected and private members
+        if (chimera::util::hasNonPublicParam(method_decl))
+            continue;
+        if (isa<CXXConversionDecl>(method_decl))
+            continue;
+        if (isa<CXXDestructorDecl>(method_decl))
+            continue;
+        if (isa<CXXConstructorDecl>(method_decl))
+            continue;
+        if (method_decl->isOverloadedOperator())
+            continue;
+        if (method_decl->isDeleted())
+            continue;
+        if (method_decl->getDescribedFunctionTemplate())
+            continue;
+        if (chimera::util::containsRValueReference(method_decl))
+            continue;
+
+        // Skip functions that have incomplete argument types. Boost.Python
+        // requires RTTI information about all arguments, including references
+        // and pointers.
+        if (chimera::util::containsIncompleteType(
+                config_.GetCompilerInstance()->getSema(), method_decl))
+            continue;
+
+        // Skip functions that have non-copyable argument types.
+        // Using these functions requires std::move()-ing their arguments, which
+        // we generally cannot do.
+        if (chimera::util::containsNonCopyableType(method_decl))
+            continue;
+
+        // Generate the method wrapper (but don't add it just yet).
+        auto method = std::make_shared<Method>(config_, method_decl, decl_);
+
+        // Check if a return_value_policy can be generated for this function.
+        if (::mstch::render("{{return_value_policy}}", method).empty()
+            && chimera::util::needsReturnValuePolicy(
+                   method_decl, method_decl->getReturnType()))
+        {
+            // `needsReturnValuePolicy()` already prints an error message,
+            // so just continue to the next method if we got here.
+            continue;
+        }
+
+        // Now that we know it can be generated, add the method.
+        method_vector.push_back(method);
+    }
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (method_vector.size() > 0)
+        method_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto method_template : method_vector)
+        method_templates.push_back(method_template);
+    return method_templates;
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)
