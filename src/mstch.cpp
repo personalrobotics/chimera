@@ -494,24 +494,21 @@ std::string CXXRecord::typeAsString()
     // that have the same name with instance methods.
     for (const std::shared_ptr<Method> &method : method_vector)
     {
-        const bool is_static
-            = (::mstch::render("{{#is_static}}true{{/is_static}}", method)
-               == "true");
-        if (is_static)
-        {
-            const std::string name = method->nameAsString();
-            if (non_static_method_names.find(name)
-                != non_static_method_names.end())
-            {
-                std::cerr
-                    << "Warning: Skipping static method '" << name
-                    << "' because there is instance method(s) with the same "
-                    << "name. Consider renaming the conflicting static method "
-                    << "in the configuration YAML.\n";
-                continue;
-            }
-        }
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+        if (!is_static)
+            continue;
 
+        const std::string name = method->nameAsString();
+        if (non_static_method_names.find(name) != non_static_method_names.end())
+        {
+            std::cerr
+                << "Warning: Skipping static method '" << name
+                << "' because there is instance method(s) with the same "
+                << "name. Consider renaming the conflicting static method "
+                << "in the configuration YAML.\n";
+            continue;
+        }
+ 
         method_templates.push_back(method);
     }
 
