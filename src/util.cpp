@@ -47,15 +47,30 @@ std::string generateUniqueName()
     switch (node.Type())
     {
         case YAML::NodeType::Scalar:
+        {
             return fn ? fn(node) : node.as<std::string>();
+        }
         case YAML::NodeType::Sequence:
         {
             ::mstch::array context;
+
             for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
             {
                 const YAML::Node &value = *it;
                 context.emplace_back(wrapYAMLNode(value));
             }
+
+            // Mark the last element if it is a map.
+            if (!context.empty())
+            {
+                auto &last = context.back();
+                if (last.type() == typeid(::mstch::map))
+                {
+                    auto &map = boost::get<::mstch::map>(last);
+                    map[END_OF_SEQUENCE] = true;
+                }
+            }
+
             return context;
         }
         case YAML::NodeType::Map:

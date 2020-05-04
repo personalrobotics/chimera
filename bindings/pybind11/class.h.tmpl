@@ -20,7 +20,7 @@ namespace chimera_pybind11 {
 }}template <class {{class.name}}Base = {{class.type}}>
 class Py{{class.name}} : {{!
 }}{{^class.bases?}}public {{class.name}}Base{{/class.bases?}}{{!
-}}{{#class.bases}}public Py{{name}}<{{class.name}}Base>{{^last}}, {{/last}}{{/class.bases}}{{!
+}}{{#class.bases}}public Py{{name}}<{{class.name}}Base>{{^__last__}}, {{/__last__}}{{/class.bases}}{{!
 }} {
 public:
   /* Inherit the constructors */
@@ -37,7 +37,7 @@ public:
     }}{{#is_void}}void {{/is_void}}{{!
     }}{{^is_void}}{{return_type}} {{/is_void}}{{!
     }}{{name}}{{!
-    }}({{#params}}{{type}} {{name}}{{^last}}, {{/last}}{{/params}}) override {
+    }}({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}) override {
     {{#is_pure_virtual}}PYBIND11_OVERLOAD_PURE({{/is_pure_virtual}}{{!
       }}{{^is_pure_virtual}}PYBIND11_OVERLOAD({{/is_pure_virtual}}
       {{!/* Return type */}}
