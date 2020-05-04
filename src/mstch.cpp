@@ -508,7 +508,7 @@ std::string CXXRecord::typeAsString()
                 << "in the configuration YAML.\n";
             continue;
         }
- 
+
         method_templates.push_back(method);
     }
 
@@ -517,11 +517,10 @@ std::string CXXRecord::typeAsString()
 
 ::mstch::node CXXRecord::staticMethods()
 {
-    ::mstch::array static_method_list;
-
     ::mstch::array method_templates = boost::get<::mstch::array>(methods());
 
     // Add all static method names to this list.
+    ::mstch::array static_method_list;
     for (const ::mstch::node method_node : method_templates)
     {
         // Resolve the static-ness and name of each function from method
