@@ -870,11 +870,11 @@ void chimera::CompiledConfiguration::Render()
                       {"namespaces", binding_namespaces}}}};
 
     // Resolve customizable snippets that will be inserted into the file
-    // from the configuration file's "template::main" entry.
+    // from the configuration file's "template::module" entry.
     if (bindingNode_)
     {
         chimera::util::extendWithYAMLNode(
-            full_context, bindingNode_["main"], false,
+            full_context, bindingNode_["module"], false,
             std::bind(&chimera::CompiledConfiguration::Lookup, this,
                       std::placeholders::_1));
     }
