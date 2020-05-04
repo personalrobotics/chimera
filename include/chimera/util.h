@@ -23,12 +23,16 @@ namespace util
 constexpr char FLAG_NO_RENDER[]
     = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
 
+constexpr char END_OF_SEQUENCE[] = "__last__";
+
 /**
  * Wrapper that generates context for a YAML node.
  *
  * This function automatically converts known datatypes from YAML::Node entries
- * to mstch context entries.  It optionally takes a scalar conversion function
- * which will be applied to scalars before they are re-wrapped by mstch.
+ * to mstch context entries.
+ *
+ * @param[in] fn Optional scalar conversion function which will be applied to
+ * scalars before they are re-wrapped by mstch.
  */
 using ScalarConversionFn = std::function<std::string(const YAML::Node &)>;
 ::mstch::node wrapYAMLNode(const YAML::Node &node,
