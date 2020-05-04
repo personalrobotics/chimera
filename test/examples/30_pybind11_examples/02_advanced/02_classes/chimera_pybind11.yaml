@@ -6,5 +6,13 @@ namespaces:
   "chimera_test":
     name: null # TODO: otherwise, import error
 classes:
-  "chimera_test::Animal":
+  "chimera_test::test1::Animal":
+    allow_inheritance: True
+  "chimera_test::test1::Dog":
+    allow_inheritance: True
+  "chimera_test::test2::Animal":
+    allow_inheritance: True
+  "chimera_test::test2::Dog":
+    allow_inheritance: True
+  "chimera_test::test2::Husky":
     allow_inheritance: True

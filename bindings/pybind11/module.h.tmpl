@@ -1,0 +1,13 @@
+#pragma once
+
+{{header}}
+{{#includes}}
+#include <{{.}}>
+{{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
+#include <pybind11/pybind11.h>
+{{postinclude}}
+
+{{footer}}

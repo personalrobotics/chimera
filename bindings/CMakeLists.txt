@@ -20,10 +20,17 @@ foreach(binding_NAME IN LISTS binding_LIST)
         -P "${PROJECT_SOURCE_DIR}/cmake/generateChimeraBinding.cmake"
       DEPENDS
         "${binding_IMPL_TEMPLATE}"
+        "${binding_IMPL_PATH}/class.h.tmpl"
         "${binding_IMPL_PATH}/class.cpp.tmpl"
+        "${binding_IMPL_PATH}/enum.h.tmpl"
         "${binding_IMPL_PATH}/enum.cpp.tmpl"
+        "${binding_IMPL_PATH}/function.h.tmpl"
         "${binding_IMPL_PATH}/function.cpp.tmpl"
+        "${binding_IMPL_PATH}/variable.h.tmpl"
         "${binding_IMPL_PATH}/variable.cpp.tmpl"
+        "${binding_IMPL_PATH}/typedef.h.tmpl"
+        "${binding_IMPL_PATH}/typedef.cpp.tmpl"
+        "${binding_IMPL_PATH}/module.h.tmpl"
         "${binding_IMPL_PATH}/module.cpp.tmpl"
       COMMENT "Importing binding definition for '${binding_NAME}'."
       VERBATIM

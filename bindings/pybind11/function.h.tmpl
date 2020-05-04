@@ -1,0 +1,14 @@
+#pragma once
+
+{{header}}
+{{#includes}}
+#include <{{.}}>
+{{/includes}}
+{{#sources}}
+#include <{{.}}>
+{{/sources}}
+#include <pybind11/pybind11.h>
+{{postinclude}}
+
+void {{function.mangled_name}}(::pybind11::module& m);
+{{footer}}

@@ -1,3 +1,5 @@
+#include "{{module.name}}.h"
+
 {{header}}
 {{#includes}}
 #include <{{.}}>
@@ -14,6 +16,8 @@ void {{.}}(pybind11::module& m);
 PYBIND11_MODULE({{module.name}}, m)
 {
     {{precontent}}
+
+    m.doc() = "{{doc}}";
 
 {{#module.bindings}}
     {{.}}(m);

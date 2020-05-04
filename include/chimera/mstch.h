@@ -360,6 +360,22 @@ private:
     const clang::CXXRecordDecl *class_decl_;
 };
 
+class Typedef : public ClangWrapper<clang::TypedefNameDecl>
+{
+public:
+    Typedef(const ::chimera::CompiledConfiguration &config,
+            const clang::TypedefNameDecl *decl,
+            const clang::CXXRecordDecl *underlying_class_decl);
+
+    ::mstch::node namespaceScope() override;
+    ::mstch::node classScope() override;
+    ::mstch::node scope() override;
+    ::mstch::node underlyingClass();
+
+private:
+    const clang::CXXRecordDecl *class_decl_;
+};
+
 } // namespace mstch
 } // namespace chimera
 

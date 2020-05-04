@@ -109,7 +109,7 @@ void extendWithYAMLNode(::mstch::map &map, const YAML::Node &node,
 YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key)
 {
     // Return if 'node' is invalid
-    if (not node)
+    if (!node)
         return node;
 
     return node[key];
@@ -961,6 +961,12 @@ bool startsWith(const std::string &str, const std::string &prefix)
             && std::equal(prefix.begin(), prefix.end(), str.begin()));
 }
 
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    return ((suffix.size() <= str.size())
+            && std::equal(suffix.rbegin(), suffix.rend(), str.rbegin()));
+}
+
 std::string toString(QualType qual_type)
 {
     return toString(qual_type.getTypePtr());
@@ -971,6 +977,7 @@ std::string toString(const Type *type)
     // Reference:
     // https://clang.llvm.org/doxygen/classclang_1_1ExtQualsTypeCommonBase.html
 
+    // TODO: There are more types that are not handled.
     if (dyn_cast<DecayedType>(type))
         return "DecayedType : AdjustedType";
     else if (dyn_cast<AdjustedType>(type))
@@ -1117,18 +1124,30 @@ std::string toString(const Type *type)
 
 std::string toString(const Decl *decl)
 {
-    // TODO: Incomplete
+    // Reference: https://clang.llvm.org/doxygen/classclang_1_1Decl.html
+
+    if (decl == nullptr)
+    {
+        std::cerr << "Warning: nullptr is not allowed to get the type name of "
+                     "clang::Decl*"
+                  << std::endl;
+        return "std::nullptr_t";
+    }
+
+    // TODO: There are more types that are not handled.
     if (dyn_cast<AccessSpecDecl>(decl))
         return "AccessSpecDecl";
     else if (dyn_cast<BlockDecl>(decl))
         return "BlockDecl";
-    // ...
     else if (dyn_cast<LabelDecl>(decl))
         return "LabelDecl : NamedDecl";
-        // ...
 #if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<BuiltinTemplateDecl>(decl))
         return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
+#endif
+#if LLVM_VERSION_AT_LEAST(10, 0, 0)
+    else if (dyn_cast<ConceptDecl>(decl))
+        return "ConceptDecl : TemplateDecl : NamedDecl";
 #endif
     else if (dyn_cast<ClassTemplateDecl>(decl))
         return "ClassTemplateDecl : RedeclarableTemplateDecl : TemplateDecl : "
@@ -1148,7 +1167,6 @@ std::string toString(const Decl *decl)
         return "TemplateTemplateParmDecl : TemplateDecl : NamedDecl";
     else if (dyn_cast<TemplateDecl>(decl))
         return "TemplateDecl : NamedDecl";
-    // ...
     else if (dyn_cast<EnumDecl>(decl))
         return "EnumDecl : TagDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<ClassTemplatePartialSpecializationDecl>(decl))
@@ -1164,10 +1182,83 @@ std::string toString(const Decl *decl)
         return "RecordDecl : TagDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TagDecl>(decl))
         return "TagDecl : TypeDecl : NamedDecl";
-    // ...
+    else if (dyn_cast<TemplateTypeParmDecl>(decl))
+        return "TemplateTypeParmDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<ObjCTypeParamDecl>(decl))
+        return "ObjCTypeParamDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypeAliasDecl>(decl))
+        return "TypeAliasDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypedefDecl>(decl))
+        return "TypedefDecl : TypedefNameDecl : TypeDecl : NamedDecl";
+    else if (dyn_cast<TypedefNameDecl>(decl))
+        return "TypedefNameDecl : TypeDecl : NamedDecl";
     else if (dyn_cast<TypeDecl>(decl))
         return "TypeDecl : NamedDecl";
-    // ...
+    else if (dyn_cast<ObjCAtDefsFieldDecl>(decl))
+        return "ObjCAtDefsFieldDecl : FieldDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#if LLVM_VERSION_AT_LEAST(10, 0, 0)
+    else if (dyn_cast<ObjClvarDecl>(decl))
+        return "ObjClvarDecl : FieldDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#endif
+    else if (dyn_cast<FieldDecl>(decl))
+        return "FieldDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<CXXDeductionGuideDecl>(decl))
+        return "CXXDeductionGuideDecl : FunctionDecl : DeclaratorDecl : "
+               "ValueDecl : NamedDecl";
+#endif
+    else if (dyn_cast<CXXConstructorDecl>(decl))
+        return "CXXConstructorDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXConversionDecl>(decl))
+        return "CXXConversionDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXDestructorDecl>(decl))
+        return "CXXDestructorDestructorDecl : CXXMethodDecl : FunctionDecl : "
+               "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<CXXMethodDecl>(decl))
+        return "CXXMethodDecl : FunctionDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<FunctionDecl>(decl))
+        return "FunctionDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<MSPropertyDecl>(decl))
+        return "MSPropertyDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<NonTypeTemplateParmDecl>(decl))
+        return "NonTypeTemplateParmDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<UsingDecl>(decl))
+        return "UsingDecl : NamedDecl";
+#endif
+    else if (dyn_cast<UsingDirectiveDecl>(decl))
+        return "UsingDirectiveDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<UsingPackDecl>(decl))
+        return "UsingPackDecl : NamedDecl";
+#endif
+    else if (dyn_cast<UsingShadowDecl>(decl))
+        return "UsingShadowDecl : NamedDecl";
+#if LLVM_VERSION_AT_LEAST(6, 0, 0)
+    else if (dyn_cast<DecompositionDecl>(decl))
+        return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+#endif
+    else if (dyn_cast<ImplicitParamDecl>(decl))
+        return "ImplicitParamDecl : VarDecl : DeclaratorDecl : ValueDecl : "
+               "NamedDecl";
+    else if (dyn_cast<ParmVarDecl>(decl))
+        return "ParmVarDecl : VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<VarTemplateSpecializationDecl>(decl))
+        return "VarTemplateSpecializationDecl : VarDecl : DeclaratorDecl : "
+               "ValueDecl : NamedDecl";
+    else if (dyn_cast<VarDecl>(decl))
+        return "VarDecl : DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<DeclaratorDecl>(decl))
+        return "DeclaratorDecl : ValueDecl : NamedDecl";
+    else if (dyn_cast<ValueDecl>(decl))
+        return "ValueDecl : NamedDecl";
     else if (dyn_cast<NamedDecl>(decl))
         return "NamedDecl";
     else if (dyn_cast<Decl>(decl))

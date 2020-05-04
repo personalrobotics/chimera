@@ -20,6 +20,9 @@ namespace chimera
 namespace util
 {
 
+constexpr char FLAG_NO_RENDER[]
+    = "CHIMERA_NO_RENDER_86c10773-c4e8-4b2f-95b3-137f8e4ea0da";
+
 /**
  * Wrapper that generates context for a YAML node.
  *
@@ -62,13 +65,13 @@ YAML::Node lookupYAMLNode(const YAML::Node &node, const std::string &key,
                           Args &&... args)
 {
     // Return if 'node' is invalid
-    if (not node)
+    if (!node)
         return node;
 
     auto next = node[key];
 
     // Return if failed to find a tag of 'key'
-    if (not next)
+    if (!next)
         return next;
 
     // Lookup for the next nested tags
@@ -327,6 +330,11 @@ std::string trim(std::string s, const char *t = " \t\n\r\f\v");
  * Returns true if a string starts with a prefix, otherwise false.
  */
 bool startsWith(const std::string &str, const std::string &prefix);
+
+/**
+ * Returns true if a string ends with a suffix, otherwise false.
+ */
+bool endsWith(const std::string &str, const std::string &suffix);
 
 /**
  * Returns the concrete type in string from a type.

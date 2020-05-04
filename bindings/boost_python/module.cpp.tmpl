@@ -1,3 +1,5 @@
+#include "{{module.name}}.h"
+
 {{header}}
 {{#includes}}
 #include <{{.}}>
@@ -16,6 +18,8 @@ BOOST_PYTHON_MODULE({{module.name}})
     {{precontent}}
 
     ::boost::python::docstring_options options(true, true, false);
+
+    ::boost::python::scope().attr("__doc__") = "{{doc}}";
 
 {{#module.namespaces}}{{#name}}
     ::boost::python::scope(){{!
