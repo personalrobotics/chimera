@@ -313,11 +313,8 @@ bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
 /**
  * Converts clang operator type to the operator name in Python.
- *
- * Return true on success.
  */
-bool getPythonOperatorSpelling(clang::OverloadedOperatorKind kind,
-                               std::string &str);
+std::string getPythonOperatorSpelling(clang::OverloadedOperatorKind kind);
 
 /**
  * Trims from end of string (right)

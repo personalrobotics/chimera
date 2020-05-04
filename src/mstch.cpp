@@ -443,9 +443,9 @@ std::string CXXRecord::typeAsString()
             {
                 case OverloadedOperatorKind::OO_Plus:
                 case OverloadedOperatorKind::OO_Star:
-                    break;  // Allow these kinds.
+                    break; // Allow these kinds.
                 default:
-                    continue;  // Suppress any other kinds.
+                    continue; // Suppress any other kinds.
             }
         }
         if (method_decl->isDeleted())
@@ -941,12 +941,8 @@ std::string Function::nameAsString()
 {
     if (decl_->isOverloadedOperator())
     {
-        std::string operatorName;
-        if (chimera::util::getPythonOperatorSpelling(
-                decl_->getOverloadedOperator(), operatorName))
-        {
-            return operatorName;
-        }
+        return chimera::util::getPythonOperatorSpelling(
+            decl_->getOverloadedOperator());
     }
 
     return ClangWrapper::nameAsString();

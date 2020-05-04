@@ -946,19 +946,23 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
-bool getPythonOperatorSpelling(OverloadedOperatorKind kind, std::string &str)
+std::string getPythonOperatorSpelling(OverloadedOperatorKind kind)
 {
     switch (kind)
     {
         case OverloadedOperatorKind::OO_Plus:
-            str = "__add__";
-            return true;
+            return "__add__";
         case OverloadedOperatorKind::OO_Star:
-            str = "__mul__";
-            return true;
+            return "__mul__";
         // TODO: Support more operator name
         default:
-            return false;
+        {
+            // Unsupported operator type should be filtered out by the outside
+            // of this function. Otherwise, we regard it a bug.
+            std::stringstream ss;
+            ss << "Unsupported operator type: " << kind;
+            throw std::invalid_argument(ss.str());
+        }
     }
 }
 
