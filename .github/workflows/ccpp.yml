@@ -29,11 +29,11 @@ jobs:
           DOCKERFILE: Dockerfile.ubuntu-xenial
         run: |
           docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
-          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+          docker run -itd -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/install.sh";
       - name: Build
         run: |
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
 
   bionic_gcc_release:
     name: bionic_gcc_release_llvm6
@@ -50,11 +50,11 @@ jobs:
           DOCKERFILE: Dockerfile.ubuntu-bionic
         run: |
           docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
-          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+          docker run -itd -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/install.sh";
       - name: Build
         run: |
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
 
   eoan_gcc_release:
     name: eoan_gcc_release_llvm9
@@ -71,11 +71,11 @@ jobs:
           DOCKERFILE: Dockerfile.ubuntu-eoan
         run: |
           docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
-          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+          docker run -itd -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/install.sh";
       - name: Build
         run: |
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
 
   focal_gcc_release:
     name: focal_gcc_release_llvm9
@@ -92,11 +92,11 @@ jobs:
           DOCKERFILE: Dockerfile.ubuntu-focal
         run: |
           docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
-          docker run -itd -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/install.sh";
+          docker run -itd -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/install.sh";
       - name: Build
         run: |
-          docker exec chimera-docker /bin/sh -c "cd $TRAVIS_BUILD_DIR && . .ci/script.sh";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
 
   mojav_clang_release:
     name: mojav_clang_release_llvm9
