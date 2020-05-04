@@ -12,9 +12,12 @@ class TestIssue262(unittest.TestCase):
             with self.assertRaises(TypeError):
                 binding.Integer.add(1, 2)
         elif binding is boost:
-            # For some reason, Boost.Python allows instance and static method overloading
+            # For some reason, Boost.Python allows instance and static method overloading.
+            # However, the limitation is that the overloaded "static method" cannot be
+            # called without creating an instance of the class.
             # For the details see: https://github.com/personalrobotics/chimera/issues/262
-            self.assertEqual(binding.Integer.add(1, 2), 3)
+            i = binding.Integer(1)
+            self.assertEqual(i.add(1, 2), 3)
 
         self.assertEqual(binding.Integer.add_static(1, 2), 3)
 
