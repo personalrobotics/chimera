@@ -8,8 +8,14 @@ class TestIssue262(unittest.TestCase):
 
     def _test_issue262(self, binding):
         # Should be skipped as this static method overloads instance method
-        with self.assertRaises(TypeError):
-            binding.Integer.add(1, 2)
+        if binding is py11:
+            with self.assertRaises(TypeError):
+                binding.Integer.add(1, 2)
+        elif binding is boost:
+            # For some reason, Boost.Python allows instance and static method overloading
+            # For the details see: https://github.com/personalrobotics/chimera/issues/262
+            self.assertEqual(binding.Integer.add(1, 2), 3)
+
         self.assertEqual(binding.Integer.add_static(1, 2), 3)
 
         # Call instance method
