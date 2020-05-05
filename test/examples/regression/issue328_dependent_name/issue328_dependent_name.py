@@ -1,7 +1,7 @@
 import unittest
 
-import issue328_nested_class_name_pybind11 as py11
-import issue328_nested_class_name_boost_python as boost
+import issue328_dependent_name_pybind11 as py11
+import issue328_dependent_name_boost_python as boost
 
 
 class TestIssue328(unittest.TestCase):
