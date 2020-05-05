@@ -15,7 +15,10 @@ void {{typedef.mangled_name}}()
     {{precontent}}
 
     ::boost::python::scope(::boost::python::scope(){{!
-        }}{{#typedef.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.scope}}).attr("{{typedef.name}}") = ::boost::python::scope(){{#typedef.underlying_class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.underlying_class.scope}}.attr("{{typedef.underlying_class.name}}");
+        }}{{#typedef.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.scope}}).attr("{{typedef.name}}") = {{!
+        }}{{^typedef.is_builtin_type}}::boost::python::scope(){{#typedef.underlying_class.scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.underlying_class.scope}}.attr("{{typedef.underlying_class.name}}"){{/typedef.is_builtin_type}}{{!
+        }}{{#typedef.is_builtin_type}}::boost::python::import("__main__").attr("__builtins__").attr("{{typedef.underlying_builtin_type}}"){{/typedef.is_builtin_type}}{{!
+        }};
 
     {{postcontent}}
 }

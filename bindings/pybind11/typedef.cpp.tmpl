@@ -20,7 +20,8 @@ void {{typedef.mangled_name}}(::pybind11::module& m)
     auto attr = sm{{!
         }}{{#typedef.class_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/typedef.class_scope}};
 
-    attr.attr("{{typedef.name}}") = {{#typedef.underlying_class}}m{{#namespace_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/namespace_scope}}{{#class_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class_scope}}.attr("{{name}}");{{/typedef.underlying_class}}
+    {{^typedef.is_builtin_type}}attr.attr("{{typedef.name}}") = {{#typedef.underlying_class}}m{{#namespace_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/namespace_scope}}{{#class_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class_scope}}.attr("{{name}}");{{/typedef.underlying_class}}{{/typedef.is_builtin_type}}{{!
+    }}{{#typedef.is_builtin_type}}attr.attr("{{typedef.name}}") = ::pybind11::module::import("__main__").attr("__builtins__").attr("{{typedef.underlying_builtin_type}}");{{/typedef.is_builtin_type}}
 
     {{postcontent}}
 }

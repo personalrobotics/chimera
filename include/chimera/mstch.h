@@ -390,9 +390,24 @@ public:
     ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node underlyingClass();
+    ::mstch::node isBuiltinType();
 
 private:
     const clang::CXXRecordDecl *class_decl_;
+};
+
+class BuiltinTypedef : public ClangWrapper<clang::TypedefNameDecl>
+{
+public:
+    BuiltinTypedef(const ::chimera::CompiledConfiguration &config,
+                   const clang::TypedefNameDecl *decl,
+                   const clang::BuiltinType *builtin_type);
+
+    ::mstch::node isBuiltinType();
+    ::mstch::node underlyingBuiltinType();
+
+private:
+    const clang::BuiltinType *builtin_type_;
 };
 
 } // namespace mstch
