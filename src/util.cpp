@@ -961,7 +961,7 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
-std::string getPythonOperatorSpelling(OverloadedOperatorKind kind)
+std::string getPythonOperatorName(OverloadedOperatorKind kind)
 {
     switch (kind)
     {

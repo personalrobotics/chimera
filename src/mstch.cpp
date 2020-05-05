@@ -599,8 +599,7 @@ std::string CXXRecord::typeAsString()
                     std::cerr << "Warning: Skipped operator overloading '"
                               << method_decl->getQualifiedNameAsString()
                               << "' because the operator type is not currently "
-                              << "supported by chimera."
-                              << std::endl;
+                              << "supported by chimera." << std::endl;
                     continue; // Suppress any other kinds.
                 }
             }
@@ -979,7 +978,7 @@ std::string Function::nameAsString()
 {
     if (decl_->isOverloadedOperator())
     {
-        return chimera::util::getPythonOperatorSpelling(
+        return chimera::util::getPythonOperatorName(
             decl_->getOverloadedOperator());
     }
 
