@@ -28,16 +28,7 @@ $ ./chimera -c <yaml_config_file> -o <output_path> my_cpp_header1.h my_cpp_heade
 
 ### On Ubuntu using `apt`
 
-Chimera provides Ubuntu packages for Trusty (14.04 LTS), Xenial (16.04 LTS), Bionic (18.04 LTS), and Eoan (19.10).
-
-**Trusty**
-
-```shell
-$ sudo add-apt-repository ppa:personalrobotics/ppa
-$ sudo add-apt-repository ppa:renemilk/llvm
-$ sudo apt update
-$ sudo apt install chimera
-```
+Chimera provides Ubuntu packages for Xenial (16.04 LTS), Bionic (18.04 LTS), Eoan (19.10), and Focal (20.04).
 
 **Xenial and greater**
 
@@ -62,8 +53,8 @@ $ brew install chimera
 
 ### Requirements
 
-* libclang 3.6, 3,9 or 6.0, 7, 8, 9
-* llvm 3.6, 3,9, 6.0, 7, 8, 9 (+ tools)
+* libclang 6.0, 7, 8, 9
+* llvm 6.0, 7, 8, 9 (+ tools)
 * libedit
 * yaml-cpp
 * boost
@@ -72,19 +63,10 @@ $ brew install chimera
 
 #### Install Dependencies
 
-**Trusty**
-
-```bash
-$ sudo apt-add-repository ppa:george-edison55/cmake-3.x
-$ sudo apt-get update
-$ sudo apt-get install cmake
-$ sudo apt-get install llvm-3.7-dev llvm-3.7-tools libclang-3.7-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
-```
-
 **Xenial**
 
 ```bash
-$ sudo apt-get install llvm-3.9-dev llvm-3.9-tools libclang-3.9-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+$ sudo apt-get install llvm-6.0-dev llvm-6.0-tools libclang-6.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
 ```
 
 **Bionic and greater**

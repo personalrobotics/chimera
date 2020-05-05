@@ -20,7 +20,7 @@ matrix:
         - BUILD_NAME=XENIAL_GCC_DEBUG_LLVM3_9
         - BUILD_TYPE=Debug
         - COMPILER=GCC
-        - LLVM_VERSION=3.9
+        - LLVM_VERSION=6.0
         - PYTHON_VERSION=3.5
         - DOCKERFILE="Dockerfile.ubuntu-xenial"
       services: docker

@@ -10,7 +10,7 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.9
+    LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.5
     DOCKERFILE: Dockerfile.ubuntu-xenial
   steps:
@@ -24,7 +24,7 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.9
+    LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.5
     DOCKERFILE: Dockerfile.ubuntu-xenial
   steps:
