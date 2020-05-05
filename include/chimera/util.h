@@ -315,7 +315,10 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
-std::string getPythonBuiltinTypeSpelling(const std::string &type_name);
+/**
+ * Converts a C++ built-in type name to the Python equivalent type name.
+ */
+std::string getPythonBuiltinTypeName(const std::string &type_name);
 
 /**
  * Trims from end of string (right)

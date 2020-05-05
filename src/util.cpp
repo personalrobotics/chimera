@@ -953,10 +953,15 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
-std::string getPythonBuiltinTypeSpelling(const std::string &type_name)
+std::string getPythonBuiltinTypeName(const std::string &type_name)
 {
+    // TODO: Support more built-in type names
+    // Reference:
+    // docs.microsoft.com/en-us/cpp/cpp/fundamental-types-cpp?view=vs-2019
     if (type_name == "double" || type_name == "float")
+    {
         return "float";
+    }
     else
     {
         // Unsupported operator type should be filtered out by the outside

@@ -331,6 +331,7 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
     // Create mstch for typedef where the underlying type is a builtin type.
     if (isa<BuiltinType>(underlying_type))
     {
+        // TODO: Support more built-in types
         if (underlying_type_name != "double" && underlying_type_name != "float")
             return false;
 
