@@ -2,7 +2,7 @@
 # Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines
 
 jobs:
-- job: ubuntu_xenial_gcc_release_llvm3_9
+- job: ubuntu_xenial_gcc_release_llvm6_0
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -10,13 +10,13 @@ jobs:
     COMPILER: gcc
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.9
+    LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.5
     DOCKERFILE: Dockerfile.ubuntu-xenial
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_xenial_clang_release_llvm3_9
+- job: ubuntu_xenial_clang_release_llvm6_0
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -24,7 +24,7 @@ jobs:
     COMPILER: clang
     BUILD_TYPE: Release
     BUILD_DIR: $(Build.SourcesDirectory)
-    LLVM_VERSION: 3.9
+    LLVM_VERSION: 6.0
     PYTHON_VERSION: 3.5
     DOCKERFILE: Dockerfile.ubuntu-xenial
   steps:

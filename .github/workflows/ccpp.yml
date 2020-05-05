@@ -15,7 +15,7 @@ on:
 
 jobs:
   xenial_gcc_release:
-    name: xenial_gcc_release_llvm3_9
+    name: xenial_gcc_release_llvm6_0
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
@@ -24,7 +24,7 @@ jobs:
           OS_NAME: linux
           COMPILER: gcc
           BUILD_TYPE: Release
-          LLVM_VERSION: 3.9
+          LLVM_VERSION: "6.0"
           PYTHON_VERSION: 3.5
           DOCKERFILE: Dockerfile.ubuntu-xenial
         run: |
@@ -36,7 +36,7 @@ jobs:
           docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
 
   bionic_gcc_release:
-    name: bionic_gcc_release_llvm6
+    name: bionic_gcc_release_llvm6_0
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
