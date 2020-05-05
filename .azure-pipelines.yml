@@ -2,7 +2,7 @@
 # Ref: https://docs.microsoft.com/en-us/azure/devops/pipelines
 
 jobs:
-- job: ubuntu_xenial_gcc_release_llvm3_9
+- job: ubuntu_xenial_gcc_release_llvm6_0
   pool:
     vmImage: 'ubuntu-18.04'
   variables:
@@ -16,7 +16,7 @@ jobs:
   steps:
   - template: .ci/azure-pipelines/docker.yml
 
-- job: ubuntu_xenial_clang_release_llvm3_9
+- job: ubuntu_xenial_clang_release_llvm6_0
   pool:
     vmImage: 'ubuntu-18.04'
   variables:

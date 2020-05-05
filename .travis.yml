@@ -17,7 +17,7 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=XENIAL_GCC_DEBUG_LLVM3_9
+        - BUILD_NAME=XENIAL_GCC_DEBUG_LLVM6_0
         - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=6.0
@@ -27,7 +27,7 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        - BUILD_NAME=BIONIC_GCC_DEBUG_LLVM6
+        - BUILD_NAME=BIONIC_GCC_DEBUG_LLVM6_0
         - BUILD_TYPE=Debug
         - COMPILER=GCC
         - LLVM_VERSION=6.0
