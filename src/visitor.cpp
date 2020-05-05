@@ -350,8 +350,8 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
     auto resolved_decl = chimera::util::resolveRecord(
         config_.GetCompilerInstance(), underlying_type_name);
 
-    // Skip if failed to get the declaration or the declaration is not of
-    // class
+    // Skip if we could not get the declaration, or the declaration was not
+    // of a class.
     if (!resolved_decl || !isa<CXXRecordDecl>(resolved_decl))
         return false;
 
