@@ -328,9 +328,15 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
             return false;
     }
 
-    // Skip for dependent name types (e.g., typename T::type). See #328.
+    // TODO: Fix segfault with DependentNameType (e.g., typename T::type).
+    // Skip this for now. See #328 for the details.
     if (isa<DependentNameType>(underlying_type))
-      return false;
+    {
+        std::cerr << "Warning: Skipping dependent name type '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because it is not supported yet (#328)." << std::endl;
+        return false;
+    }
 
     // Get the declaration from the underlying type
     auto resolved_decl = chimera::util::resolveRecord(

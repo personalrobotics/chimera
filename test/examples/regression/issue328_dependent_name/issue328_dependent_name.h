@@ -14,9 +14,10 @@ public:
     Vector() = default;
 };
 
-template<typename S>
-struct ScalarTrait {
-  typedef typename S::Scalar type;
+template <typename S>
+struct ScalarTrait
+{
+    typedef typename S::Scalar type;
 };
 
 using VectorScalar = ScalarTrait<Vector<double>>::type;
