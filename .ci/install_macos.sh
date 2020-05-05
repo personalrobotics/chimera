@@ -79,11 +79,7 @@ if check_version "${LLVM_VERSION}" '=' "${LLVM_VERSION_LATEST}"; then
   LLVM_INSTALL_PREFIX='llvm'
 else
   LLVM_PACKAGE="llvm@${LLVM_VERSION}"
-  if check_version "${LLVM_VERSION}" '>=' "3.9"; then
-    LLVM_INSTALL_PREFIX="llvm"
-  else
-    LLVM_INSTALL_PREFIX="llvm-${LLVM_VERSION}"
-  fi
+  LLVM_INSTALL_PREFIX="llvm"
 
   if ! brew info "${LLVM_PACKAGE}" > /dev/null 2> /dev/null; then
     echo "error: There is no package Homebrew package named '${LLVM_PACKAGE}'"\
@@ -92,13 +88,8 @@ else
   fi
 fi
 
-# Infer the correct value of CMAKE_PREFIX_PATH for this version of LLVM. This
-# directory was changed between LLVM versions 3.8 and 3.9.
-if check_version "${LLVM_VERSION}" '>=' '3.9'; then
-  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/cmake/${LLVM_INSTALL_PREFIX}"
-else
-  LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/${LLVM_INSTALL_PREFIX}/share/llvm/cmake"
-fi
+# Infer the correct value of CMAKE_PREFIX_PATH for this version of LLVM.
+LLVM_DIR="$(brew --prefix ${LLVM_PACKAGE})/lib/cmake/${LLVM_INSTALL_PREFIX}"
 export LLVM_DIR
 
 echo $LLVM_DIR
