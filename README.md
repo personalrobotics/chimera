@@ -63,16 +63,9 @@ $ brew install chimera
 
 #### Install Dependencies
 
-**Xenial**
-
 ```bash
-$ sudo apt-get install llvm-6.0-dev llvm-6.0-tools libclang-6.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
-```
-
-**Bionic and greater**
-
-```bash
-$ sudo apt-get install llvm-6.0-dev llvm-6.0-tools libclang-6.0-dev libedit-dev libyaml-cpp-dev libboost-dev lib32z1-dev
+$ sudo apt-get install llvm-6.0-dev llvm-6.0-tools libclang-6.0-dev libedit-dev \
+$   libyaml-cpp-dev libboost-dev lib32z1-dev
 ```
 
 #### Build Chimera
