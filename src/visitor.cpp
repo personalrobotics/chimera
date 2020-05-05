@@ -335,6 +335,10 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
 #endif
     }
 
+    // Skip for dependent name types (e.g., typename T::type). See #328.
+    if (isa<DependentNameType>(underlying_type))
+      return false;
+
     // Get the declaration from the underlying type
     auto resolved_decl = chimera::util::resolveRecord(
         config_.GetCompilerInstance(), underlying_type_name);
