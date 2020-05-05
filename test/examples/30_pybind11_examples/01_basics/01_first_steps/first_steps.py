@@ -10,6 +10,10 @@ class TestFirstSteps(unittest.TestCase):
         # Test function docstring
         self.assertTrue("Returns sum of two integers" in binding.add.__doc__)
 
+        # TODO: Docstring doesn't get generated when Doxygen keyword encountered.
+        # See #332.
+        self.assertFalse("Returns sum of two integers" in binding.add_def_args.__doc__)
+
         self.assertEqual(binding.add(1, 2), 3)
         self.assertEqual(binding.add(i=3, j=4), 7)
 
