@@ -27,6 +27,7 @@ int add(int i, int j);
 // Default arguments
 //-------------------
 
+/// @brief Returns sum of two integers
 int add_def_args(int i = 1, int j = 2);
 
 } // namespace chimera_test
