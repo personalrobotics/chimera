@@ -1051,14 +1051,12 @@ std::string toString(const Type *type)
         return "DecltypeType";
     else if (dyn_cast<AutoType>(type))
         return "AutoType : DeducedType";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<DeducedTemplateSpecializationType>(type))
         return "DeducedTemplateSpecializationType : DecudedType";
     else if (dyn_cast<DeducedType>(type))
         return "DeducedType";
     else if (dyn_cast<DependentAddressSpaceType>(type))
         return "DependentAddressSpaceType";
-#endif
     else if (dyn_cast<DependentSizedExtVectorType>(type))
         return "DependentSizedExtVectorType";
 #if LLVM_VERSION_AT_LEAST(8, 0, 0)
@@ -1093,18 +1091,14 @@ std::string toString(const Type *type)
 #endif
     else if (dyn_cast<ObjCObjectType>(type))
         return "ObjCObjectType";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<ObjCTypeParamType>(type))
         return "ObjCTypeParamType";
-#endif
     else if (dyn_cast<PackExpansionType>(type))
         return "PackExpansionType";
     else if (dyn_cast<ParenType>(type))
         return "ParenType";
-#if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<PipeType>(type))
         return "PipeType";
-#endif
     else if (dyn_cast<PointerType>(type))
         return "PointerType";
 #if LLVM_VERSION_AT_LEAST(8, 0, 0)
@@ -1184,10 +1178,8 @@ std::string toString(const Decl *decl)
         return "BlockDecl";
     else if (dyn_cast<LabelDecl>(decl))
         return "LabelDecl : NamedDecl";
-#if LLVM_VERSION_AT_LEAST(3, 9, 0)
     else if (dyn_cast<BuiltinTemplateDecl>(decl))
         return "BuiltinTemplateDecl : TemplateDecl : NamedDecl";
-#endif
 #if LLVM_VERSION_AT_LEAST(10, 0, 0)
     else if (dyn_cast<ConceptDecl>(decl))
         return "ConceptDecl : TemplateDecl : NamedDecl";
@@ -1247,11 +1239,9 @@ std::string toString(const Decl *decl)
 #endif
     else if (dyn_cast<FieldDecl>(decl))
         return "FieldDecl : DeclaratorDecl : ValueDecl : NamedDecl";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<CXXDeductionGuideDecl>(decl))
         return "CXXDeductionGuideDecl : FunctionDecl : DeclaratorDecl : "
                "ValueDecl : NamedDecl";
-#endif
     else if (dyn_cast<CXXConstructorDecl>(decl))
         return "CXXConstructorDecl : CXXMethodDecl : FunctionDecl : "
                "DeclaratorDecl : ValueDecl : NamedDecl";
@@ -1271,23 +1261,17 @@ std::string toString(const Decl *decl)
     else if (dyn_cast<NonTypeTemplateParmDecl>(decl))
         return "NonTypeTemplateParmDecl : DeclaratorDecl : ValueDecl : "
                "NamedDecl";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<UsingDecl>(decl))
         return "UsingDecl : NamedDecl";
-#endif
     else if (dyn_cast<UsingDirectiveDecl>(decl))
         return "UsingDirectiveDecl : NamedDecl";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<UsingPackDecl>(decl))
         return "UsingPackDecl : NamedDecl";
-#endif
     else if (dyn_cast<UsingShadowDecl>(decl))
         return "UsingShadowDecl : NamedDecl";
-#if LLVM_VERSION_AT_LEAST(6, 0, 0)
     else if (dyn_cast<DecompositionDecl>(decl))
         return "DecompositionDecl : VarDecl : DeclaratorDecl : ValueDecl : "
                "NamedDecl";
-#endif
     else if (dyn_cast<ImplicitParamDecl>(decl))
         return "ImplicitParamDecl : VarDecl : DeclaratorDecl : ValueDecl : "
                "NamedDecl";

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 #include <boost/variant/get.hpp>
 
@@ -230,14 +231,17 @@ CXXRecord::CXXRecord(const ::chimera::CompiledConfiguration &config,
             {"methods", &CXXRecord::methods},
             {"methods?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"static_methods", &CXXRecord::staticMethods},
+            {"static_methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
+            {"visible_methods", &CXXRecord::visibleMethods},
+            {"visible_methods?",
+             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::visibleMethods>},
             {"fields", &CXXRecord::fields},
             {"fields?", &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::fields>},
             {"static_fields", &CXXRecord::staticFields},
             {"static_fields?",
              &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::staticFields>},
-            {"static_methods", &CXXRecord::staticMethods},
-            {"static_methods?",
-             &CXXRecord::isNonFalse<CXXRecord, &CXXRecord::methods>},
         });
 }
 
@@ -415,6 +419,152 @@ std::string CXXRecord::typeAsString()
 
 ::mstch::node CXXRecord::methods()
 {
+    const ::mstch::array method_templates
+        = boost::get<::mstch::array>(methodsInternal());
+
+    // Add all non-static method templates to this list.
+    ::mstch::array non_static_methods;
+    for (const ::mstch::node &method_node : method_templates)
+    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+        if (!is_static)
+            non_static_methods.push_back(method);
+    }
+
+    return non_static_methods;
+}
+
+::mstch::node CXXRecord::staticMethods()
+{
+    const ::mstch::array method_templates
+        = boost::get<::mstch::array>(methodsInternal());
+
+    // Add all non-static method templates to this list.
+    ::mstch::array static_methods;
+    for (const ::mstch::node &method_node : method_templates)
+    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const bool is_static = boost::get<bool>(method->at("is_static"));
+        if (is_static)
+            static_methods.push_back(method);
+    }
+
+    return static_methods;
+}
+
+::mstch::node CXXRecord::visibleMethods()
+{
+    ::mstch::array visible_methods;
+
+    // Copy each non-static method into the mstch template.
+    std::unordered_set<std::string> non_static_method_names;
+    const ::mstch::array non_static_method_templates
+        = boost::get<::mstch::array>(methods());
+    for (const ::mstch::node &method_node : non_static_method_templates)
+    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const std::string name = boost::get<std::string>(method->at("name"));
+        non_static_method_names.insert(name);
+
+        visible_methods.push_back(method_node);
+    }
+
+    // Copy each static method into the mstch template if the static method name
+    // doesn't conflict with the non-static method names.
+    const ::mstch::array static_method_templates
+        = boost::get<::mstch::array>(staticMethods());
+    for (const ::mstch::node &method_node : static_method_templates)
+    {
+        const auto method
+            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
+        const std::string name = boost::get<std::string>(method->at("name"));
+
+        if (non_static_method_names.find(name) == non_static_method_names.end())
+            visible_methods.push_back(method_node);
+    }
+
+    return visible_methods;
+}
+
+::mstch::node CXXRecord::fields()
+{
+    ::mstch::array field_templates;
+
+    // Convert each field to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Field>> field_vector;
+    for (FieldDecl *const field_decl : decl_->fields())
+    {
+        if (config_.IsSuppressed(field_decl))
+            continue;
+        if (field_decl->getAccess() != AS_public)
+            continue; // skip protected and private fields
+
+        if (!chimera::util::isCopyable(config_.GetContext(),
+                                       field_decl->getType()))
+            continue;
+
+        field_vector.push_back(
+            std::make_shared<Field>(config_, field_decl, decl_));
+    }
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (field_vector.size() > 0)
+        field_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto field_template : field_vector)
+        field_templates.push_back(field_template);
+    return field_templates;
+}
+
+::mstch::node CXXRecord::staticFields()
+{
+    ::mstch::array static_field_templates;
+
+    // Convert each static field to a template object.
+    // Since template objects are lazily-evaluated, this isn't expensive.
+    std::vector<std::shared_ptr<Variable>> static_field_vector;
+    for (Decl *const child_decl : decl_->decls())
+    {
+        if (config_.IsSuppressed(child_decl))
+            continue;
+        if (!isa<VarDecl>(child_decl))
+            continue;
+
+        const VarDecl *static_field_decl = cast<VarDecl>(child_decl);
+        if (static_field_decl->getAccess() != AS_public)
+            continue;
+        if (!static_field_decl->isStaticDataMember())
+            continue;
+
+        // Check if a return_value_policy can be generated for this function.
+        if (chimera::util::needsReturnValuePolicy(static_field_decl,
+                                                  static_field_decl->getType()))
+            continue;
+
+        static_field_vector.push_back(
+            std::make_shared<Variable>(config_, static_field_decl, decl_));
+    }
+
+    // Find and flag the last item.
+    // TODO: is there a better way to do this?
+    if (static_field_vector.size() > 0)
+        static_field_vector.back()->setLast(true);
+
+    // Copy each template into the mstch template array.
+    for (auto static_field_template : static_field_vector)
+        static_field_templates.push_back(static_field_template);
+    return static_field_templates;
+}
+
+::mstch::node CXXRecord::methodsInternal() const
+{
     ::mstch::array method_templates;
 
     // Convert each method to a template object.
@@ -501,125 +651,6 @@ std::string CXXRecord::typeAsString()
     for (auto method_template : method_vector)
         method_templates.push_back(method_template);
     return method_templates;
-}
-
-::mstch::node CXXRecord::staticMethods()
-{
-    ::mstch::array method_templates = boost::get<::mstch::array>(methods());
-    std::map<std::string, bool> is_static_method;
-
-    // Iterate through all methods searching for static ones.
-    for (const ::mstch::node method_node : method_templates)
-    {
-        // Resolve the static-ness and name of each function from method
-        // templates.
-        const auto method
-            = boost::get<std::shared_ptr<::mstch::object>>(method_node);
-        const std::string name = boost::get<std::string>(method->at("name"));
-        const bool is_static = boost::get<bool>(method->at("is_static"));
-
-        // Throw a warning if a static and non-static method share a name.
-        if ((is_static_method.find(name) != is_static_method.end())
-            && (is_static_method[name] != is_static))
-        {
-            std::cerr
-                << "Warning: Method '" << name << "' has ambiguous static and"
-                << " non-static declarations. This may cause errors because"
-                << " this binding is using a list of named static methods."
-                << " Consider renaming one of the conflicting functions in the"
-                << " configuration YAML.\n";
-
-            // If there are any non-static methods, do not mark as static.
-            is_static_method[name] = false;
-        }
-        else
-        {
-            // Update the map with the static-ness of this method.
-            is_static_method[name] = is_static;
-        }
-    }
-
-    // Add all static method names to this list.
-    ::mstch::array static_method_list;
-    for (auto const &entry : is_static_method)
-    {
-        if (entry.second)
-            static_method_list.push_back(entry.first);
-    }
-    return static_method_list;
-}
-
-::mstch::node CXXRecord::fields()
-{
-    ::mstch::array field_templates;
-
-    // Convert each field to a template object.
-    // Since template objects are lazily-evaluated, this isn't expensive.
-    std::vector<std::shared_ptr<Field>> field_vector;
-    for (FieldDecl *const field_decl : decl_->fields())
-    {
-        if (config_.IsSuppressed(field_decl))
-            continue;
-        if (field_decl->getAccess() != AS_public)
-            continue; // skip protected and private fields
-
-        if (!chimera::util::isCopyable(config_.GetContext(),
-                                       field_decl->getType()))
-            continue;
-
-        field_vector.push_back(
-            std::make_shared<Field>(config_, field_decl, decl_));
-    }
-
-    // Find and flag the last item.
-    // TODO: is there a better way to do this?
-    if (field_vector.size() > 0)
-        field_vector.back()->setLast(true);
-
-    // Copy each template into the mstch template array.
-    for (auto field_template : field_vector)
-        field_templates.push_back(field_template);
-    return field_templates;
-}
-
-::mstch::node CXXRecord::staticFields()
-{
-    ::mstch::array static_field_templates;
-
-    // Convert each static field to a template object.
-    // Since template objects are lazily-evaluated, this isn't expensive.
-    std::vector<std::shared_ptr<Variable>> static_field_vector;
-    for (Decl *const child_decl : decl_->decls())
-    {
-        if (config_.IsSuppressed(child_decl))
-            continue;
-        if (!isa<VarDecl>(child_decl))
-            continue;
-
-        const VarDecl *static_field_decl = cast<VarDecl>(child_decl);
-        if (static_field_decl->getAccess() != AS_public)
-            continue;
-        if (!static_field_decl->isStaticDataMember())
-            continue;
-
-        // Check if a return_value_policy can be generated for this function.
-        if (chimera::util::needsReturnValuePolicy(static_field_decl,
-                                                  static_field_decl->getType()))
-            continue;
-
-        static_field_vector.push_back(
-            std::make_shared<Variable>(config_, static_field_decl, decl_));
-    }
-
-    // Find and flag the last item.
-    // TODO: is there a better way to do this?
-    if (static_field_vector.size() > 0)
-        static_field_vector.back()->setLast(true);
-
-    // Copy each template into the mstch template array.
-    for (auto static_field_template : static_field_vector)
-        static_field_templates.push_back(static_field_template);
-    return static_field_templates;
 }
 
 Enum::Enum(const ::chimera::CompiledConfiguration &config, const EnumDecl *decl)

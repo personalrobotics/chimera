@@ -20,6 +20,7 @@ BOOST_PYTHON_MODULE({{module.name}})
     ::boost::python::docstring_options options(true, true, false);
 
     ::boost::python::scope().attr("__doc__") = "{{doc}}";
+    ::boost::python::scope().attr("__version__") = "{{version}}";
 
 {{#module.namespaces}}{{#name}}
     ::boost::python::scope(){{!

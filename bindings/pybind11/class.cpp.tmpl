@@ -72,7 +72,6 @@ void {{class.mangled_name}}(::pybind11::module& m)
 
 /* member functions */}}
 {{#class.methods}}{{!
-}}{{^is_static}}{{!
 }}{{#overloads}}{{!
     }}        .def("{{name}}", +[]({{#is_const}}const {{/is_const}}{{class.type}} *self{{#params}}, {{type}} {{name}}{{/params}}){{!
     }}{{#is_void}} { {{/is_void}}{{!
@@ -82,11 +81,10 @@ void {{class.mangled_name}}(::pybind11::module& m)
     }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
     }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}}{{#is_operator}}, ::pybind11::is_operator(){{/is_operator}})
 {{/overloads}}{{!
-}}{{/is_static}}{{!
 }}{{/class.methods}}{{!
 
 /* static member functions */}}
-{{#class.methods}}{{!
+{{#class.visible_methods}}{{!
 }}{{#is_static}}{{!
 }}{{#overloads}}{{!
     }}        .def_static("{{name}}", +[]({{#params}}{{type}} {{name}}{{^__last__}}, {{/__last__}}{{/params}}){{!
@@ -94,10 +92,11 @@ void {{class.mangled_name}}(::pybind11::module& m)
     }}{{^is_void}} -> {{return_type}} { return {{/is_void}}{{!
     }}{{qualified_call}}({{#params}}{{name}}{{^__last__}}, {{/__last__}}{{/params}}); }{{!
     }}{{#return_value_policy}}, ::pybind11::return_value_policy::{{.}}{{/return_value_policy}}{{!
+    }}{{#comment?}}, {{mangled_name}}_docstring{{/comment?}}{{!
     }}{{#params?}}, {{#params}}::pybind11::arg("{{name}}"){{^__last__}}, {{/__last__}}{{/params}}{{/params?}})
 {{/overloads}}{{!
 }}{{/is_static}}{{!
-}}{{/class.methods}}{{!
+}}{{/class.visible_methods}}{{!
 
 /* fields */}}
 {{#class.fields}}{{!

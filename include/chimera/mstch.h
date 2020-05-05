@@ -218,14 +218,33 @@ public:
     ::mstch::node qualifiedName() override;
 
     ::mstch::node constructors();
+    /**
+     * Returns all the instance methods
+     */
     ::mstch::node methods();
+    /**
+     * Returns all the static methods
+     */
     ::mstch::node staticMethods();
+    /**
+     * Returns all the instance methods and the static methods except the
+     * static methods whose name conflict with instance methods.
+     */
+    ::mstch::node visibleMethods();
 
     ::mstch::node fields();
     ::mstch::node staticFields();
 
 protected:
     const std::set<const clang::CXXRecordDecl *> *available_decls_;
+
+private:
+    /**
+     * Returns all the methods.
+     * This may include instance methods and static methods with conflicting
+     * names.
+     */
+    ::mstch::node methodsInternal() const;
 };
 
 class Enum : public ClangWrapper<clang::EnumDecl>
