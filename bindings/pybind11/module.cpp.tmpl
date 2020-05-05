@@ -18,6 +18,7 @@ PYBIND11_MODULE({{module.name}}, m)
     {{precontent}}
 
     m.doc() = "{{doc}}";
+    m.attr("__version__") = "{{version}}";
 
 {{#module.bindings}}
     {{.}}(m);
