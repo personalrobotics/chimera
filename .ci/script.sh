@@ -13,9 +13,17 @@ mkdir build
 cd build
 
 if [ $BUILD_NAME = TRUSTY_GCC_DEBUG ]; then
-  cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=ON" ..
+  cmake .. \
+    "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" \
+    "-CHIMERA_TREAT_WARNINGS_AS_ERRORS=ON" \
+    "-DLLVM_DIR=${LLVM_DIR}" \
+    "-DCODECOV=ON"
 else
-  cmake "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "-DLLVM_DIR=${LLVM_DIR}" "-DCODECOV=OFF" ..
+  cmake .. \
+    "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" \
+    "-CHIMERA_TREAT_WARNINGS_AS_ERRORS=ON" \
+    "-DLLVM_DIR=${LLVM_DIR}" \
+    "-DCODECOV=OFF"
 fi
 
 if [ "$OS_NAME" = "linux" ] && [ $(lsb_release -sc) = "bionic" ]; then

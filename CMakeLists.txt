@@ -17,6 +17,13 @@ set(CHIMERA_VERSION
   ${CHIMERA_MAJOR_VERSION}.${CHIMERA_MINOR_VERSION}.${CHIMERA_PATCH_VERSION}
 )
 
+# Compiler options
+option(CHIMERA_TREAT_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+if(CHIMERA_TREAT_WARNINGS_AS_ERRORS)
+  # Works for GCC and Clang
+  add_definitions(-Werror)
+endif()
+
 # Preset for code formatting
 include(ClangFormat)
 clang_format_setup()
