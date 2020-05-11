@@ -15,6 +15,12 @@
   LLVM_VERSION_PATCH >= z))))
 // clang-format on
 
+#define CHIMERA_UNUSED(x)                                                      \
+    do                                                                         \
+    {                                                                          \
+        (void)(x);                                                             \
+    } while (0)
+
 namespace chimera
 {
 namespace util
