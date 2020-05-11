@@ -588,20 +588,14 @@ std::string CXXRecord::typeAsString()
         {
             const OverloadedOperatorKind kind
                 = method_decl->getOverloadedOperator();
-            // TODO: Support more operators
-            switch (kind)
+            if (!chimera::util::isSupportedOperator(kind))
             {
-                case OverloadedOperatorKind::OO_Plus:
-                case OverloadedOperatorKind::OO_Star:
-                    break; // Allow these kinds.
-                default:
-                {
-                    std::cerr << "Warning: Skipped operator overloading '"
-                              << method_decl->getQualifiedNameAsString()
-                              << "' because the operator type is not currently "
-                              << "supported by chimera." << std::endl;
-                    continue; // Suppress any other kinds.
-                }
+                std::cerr << "Warning: Skipped operator overloading '"
+                          << method_decl->getQualifiedNameAsString()
+                          << "' because the operator type is not currently "
+                          << "supported by chimera." << std::endl;
+                // Suppress unsupported kinds.
+                continue;
             }
         }
         if (method_decl->isDeleted())

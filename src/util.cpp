@@ -961,6 +961,19 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
+bool isSupportedOperator(clang::OverloadedOperatorKind kind)
+{
+    try
+    {
+        getOperatorName(kind);
+        return true;
+    }
+    catch (std::invalid_argument)
+    {
+        return false;
+    }
+}
+
 std::string getOperatorName(OverloadedOperatorKind kind)
 {
     // TODO: Make this function not binding language specific.
@@ -968,10 +981,22 @@ std::string getOperatorName(OverloadedOperatorKind kind)
     // Convert clang operator type to Python operator name in string.
     switch (kind)
     {
-        case OverloadedOperatorKind::OO_Plus:
+        case OverloadedOperatorKind::OO_Plus: // o3 = o1 + o2
             return "__add__";
-        case OverloadedOperatorKind::OO_Star:
+        case OverloadedOperatorKind::OO_Minus: // o3 = o1 - o2
+            return "__sub__";
+        case OverloadedOperatorKind::OO_Star: // o3 = o1 * o2
             return "__mul__";
+        case OverloadedOperatorKind::OO_Slash: // o3 = o1 / o2
+            return "__truediv__";
+        case OverloadedOperatorKind::OO_PlusEqual: // o3 = o1 += o2
+            return "__iadd__";
+        case OverloadedOperatorKind::OO_MinusEqual: // o3 = o1 -= o2
+            return "__isub__";
+        case OverloadedOperatorKind::OO_StarEqual: // o3 = o1 *= o2
+            return "__imul__";
+        case OverloadedOperatorKind::OO_SlashEqual: // o3 = o1 /= o2
+            return "__itruediv__";
         // TODO: Support more operator name
         default:
         {

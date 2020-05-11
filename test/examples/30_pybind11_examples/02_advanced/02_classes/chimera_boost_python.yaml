@@ -3,5 +3,22 @@ arguments:
   - "-extra-arg"
   - "-I/usr/lib/clang/3.6/include"
 namespaces:
-  'chimera_test':
+  "chimera_test":
     name: null # TODO: otherwise, import error
+functions:
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator+=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator-=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator*=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator/=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator+=(float)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator-=(float)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator*=(float)":
+    return_value_policy: "copy_non_const_reference"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator/=(float)":
+    return_value_policy: "copy_non_const_reference"

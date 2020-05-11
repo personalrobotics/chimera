@@ -315,6 +315,9 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
+/** Returns true if the operator type is supported. */
+bool isSupportedOperator(clang::OverloadedOperatorKind kind);
+
 /**
  * Converts clang operator type to string.
  */

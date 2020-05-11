@@ -283,7 +283,13 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
     // Ignore overloaded operators (we can't currently wrap them).
     else if (decl->isOverloadedOperator())
+    {
+        std::cerr << "Warning: Skipped operator overloading '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because non-member operators are not currently "
+                  << "supported by chimera." << std::endl;
         return false; // TODO: Wrap overloaded operators.
+    }
     // Ignore unspecialized template functions.
     else if (decl->getDescribedFunctionTemplate())
         return false;
