@@ -1178,6 +1178,7 @@ Typedef::Typedef(const CompiledConfiguration &config,
 {
     register_methods(this, {
                                {"underlying_class", &Typedef::underlyingClass},
+                               {"is_builtin_type", &Typedef::isBuiltinType},
                            });
 }
 
@@ -1211,6 +1212,39 @@ Typedef::Typedef(const CompiledConfiguration &config,
 ::mstch::node Typedef::underlyingClass()
 {
     return std::make_shared<CXXRecord>(config_, class_decl_);
+}
+
+::mstch::node Typedef::isBuiltinType()
+{
+    return false;
+}
+
+BuiltinTypedef::BuiltinTypedef(const CompiledConfiguration &config,
+                               const TypedefNameDecl *decl,
+                               const BuiltinType *builtin_type)
+  : ClangWrapper(config, decl), builtin_type_(builtin_type)
+{
+    register_methods(this,
+                     {
+                         {"is_builtin_type", &BuiltinTypedef::isBuiltinType},
+                         {"underlying_type", &BuiltinTypedef::underlyingType},
+                     });
+}
+
+::mstch::node BuiltinTypedef::isBuiltinType()
+{
+    return true;
+}
+
+::mstch::node BuiltinTypedef::underlyingType()
+{
+    // Use underlying type to get the declaration of the original type
+    const QualType underlying_type = decl_->getUnderlyingType();
+    const std::string underlying_type_name
+        = chimera::util::getFullyQualifiedTypeName(config_.GetContext(),
+                                                   underlying_type);
+
+    return chimera::util::getBuiltinTypeName(underlying_type_name);
 }
 
 } // namespace mstch
