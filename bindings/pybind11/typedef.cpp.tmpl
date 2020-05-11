@@ -22,7 +22,7 @@ void {{typedef.mangled_name}}(::pybind11::module& m)
 
     attr.attr("{{typedef.name}}") = {{!
     }}{{^typedef.is_builtin_type}}{{#typedef.underlying_class}}m{{#namespace_scope}}{{#name}}.attr("{{name}}"){{/name}}{{/namespace_scope}}{{#class_scope}}{{#name}}.def_submodule("{{name}}"){{/name}}{{/class_scope}}.attr("{{name}}{{/typedef.underlying_class}}{{/typedef.is_builtin_type}}{{!
-    }}{{#typedef.is_builtin_type}}::pybind11::module::import("__main__").attr("__builtins__").attr("{{typedef.underlying_builtin_type}}{{/typedef.is_builtin_type}}{{!
+    }}{{#typedef.is_builtin_type}}::pybind11::module::import("__main__").attr("__builtins__").attr("{{typedef.underlying_type}}{{/typedef.is_builtin_type}}{{!
     }}");
 
     {{postcontent}}

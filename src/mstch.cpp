@@ -1224,11 +1224,11 @@ BuiltinTypedef::BuiltinTypedef(const CompiledConfiguration &config,
                                const BuiltinType *builtin_type)
   : ClangWrapper(config, decl), builtin_type_(builtin_type)
 {
-    register_methods(
-        this, {
-                  {"is_builtin_type", &BuiltinTypedef::isBuiltinType},
-                  {"underlying_builtin_type", &BuiltinTypedef::underlyingType},
-              });
+    register_methods(this,
+                     {
+                         {"is_builtin_type", &BuiltinTypedef::isBuiltinType},
+                         {"underlying_type", &BuiltinTypedef::underlyingType},
+                     });
 }
 
 ::mstch::node BuiltinTypedef::isBuiltinType()
