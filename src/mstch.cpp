@@ -1211,7 +1211,7 @@ BuiltinTypedef::BuiltinTypedef(const CompiledConfiguration &config,
         = chimera::util::getFullyQualifiedTypeName(config_.GetContext(),
                                                    underlying_type);
 
-    return chimera::util::getPythonBuiltinTypeName(underlying_type_name);
+    return chimera::util::getBuiltinTypeName(underlying_type_name);
 }
 
 } // namespace mstch

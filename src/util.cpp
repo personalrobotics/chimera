@@ -953,8 +953,10 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
-std::string getPythonBuiltinTypeName(const std::string &type_name)
+std::string getBuiltinTypeName(const std::string &type_name)
 {
+    // TODO: Support more binding languages other than Python
+
     // TODO: Support more built-in type names
     // Reference:
     // docs.microsoft.com/en-us/cpp/cpp/fundamental-types-cpp?view=vs-2019

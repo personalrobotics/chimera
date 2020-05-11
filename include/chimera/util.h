@@ -316,9 +316,10 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
 /**
- * Converts a C++ built-in type name to the Python equivalent type name.
+ * Converts a C++ built-in type name to equivalent type name in the binding
+ * language.
  */
-std::string getPythonBuiltinTypeName(const std::string &type_name);
+std::string getBuiltinTypeName(const std::string &type_name);
 
 /**
  * Trims from end of string (right)
