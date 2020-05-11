@@ -1009,6 +1009,27 @@ std::string getOperatorName(OverloadedOperatorKind kind)
     }
 }
 
+std::string getBuiltinTypeName(const std::string &type_name)
+{
+    // TODO: Support more binding languages other than Python
+
+    // TODO: Support more built-in type names
+    // Reference:
+    // docs.microsoft.com/en-us/cpp/cpp/fundamental-types-cpp?view=vs-2019
+    if (type_name == "double" || type_name == "float")
+    {
+        return "float";
+    }
+    else
+    {
+        // Unsupported operator type should be filtered out by the outside
+        // of this function. Otherwise, we regard it a bug.
+        std::stringstream ss;
+        ss << "Unsupported built-in type: " << type_name;
+        throw std::invalid_argument(ss.str());
+    }
+}
+
 std::string trimRight(std::string s, const char *t)
 {
     s.erase(s.find_last_not_of(t) + 1);

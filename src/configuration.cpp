@@ -849,6 +849,13 @@ bool chimera::CompiledConfiguration::Render(
                   bindingDefinition_.typedef_cpp, context);
 }
 
+bool chimera::CompiledConfiguration::Render(
+    const std::shared_ptr<chimera::mstch::BuiltinTypedef> context)
+{
+    return Render("typedef", bindingDefinition_.typedef_h,
+                  bindingDefinition_.typedef_cpp, context);
+}
+
 void chimera::CompiledConfiguration::Render()
 {
     // Create collections for the ordered sets of bindings, sources,

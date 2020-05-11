@@ -23,6 +23,7 @@ class Function;
 class Variable;
 class Namespace;
 class Typedef;
+class BuiltinTypedef;
 
 } // namespace mstch
 } // namespace chimera
@@ -221,6 +222,7 @@ public:
     bool Render(const std::shared_ptr<chimera::mstch::Function> context);
     bool Render(const std::shared_ptr<chimera::mstch::Variable> context);
     bool Render(const std::shared_ptr<chimera::mstch::Typedef> context);
+    bool Render(const std::shared_ptr<chimera::mstch::BuiltinTypedef> context);
 
     /**
      * Renders the top-level mstch template. The rendered filename is specified

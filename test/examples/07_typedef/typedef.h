@@ -11,6 +11,14 @@ namespace chimera_test
 namespace test1
 {
 
+using Float = float;
+using Double = double;
+
+} // namespace test1
+
+namespace test2
+{
+
 class Position
 {
 public:
@@ -24,9 +32,9 @@ public:
     Vector() = default;
 };
 
-} // namespace test1
+} // namespace test2
 
-namespace test2
+namespace test3
 {
 
 // Not binded because the underlying type, std::string, is not binded
@@ -35,15 +43,15 @@ namespace test2
 using String = std::string;
 using String2 = String;
 
-using Position = test1::Position;
+using Position = test2::Position;
 using Position2 = Position;
 
 // Not binded because it's a templated type alias
 template <typename T>
-using Vector = test1::Vector<T>;
+using Vector = test2::Vector<T>;
 
 // Not binded because of missing binding for the template class
-using Vectori = test1::Vector<int>;
+using Vectori = test2::Vector<int>;
 using Vectord = Vector<double>;
 
 // Not binded because the underlying type, std::string, is not binded
@@ -52,13 +60,13 @@ using Vectord = Vector<double>;
 typedef std::string StringTypedef;
 typedef StringTypedef StringTypedef2;
 
-typedef test1::Position PositionTypedef;
+typedef test2::Position PositionTypedef;
 typedef PositionTypedef PositionTypedef2;
 
 // Not binded because of missing binding for the template class
-typedef test1::Vector<int> VectoriTypedef;
+typedef test2::Vector<int> VectoriTypedef;
 typedef Vector<double> VectordTypedef;
 
-} // namespace test2
+} // namespace test3
 
 } // namespace chimera_test

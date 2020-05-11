@@ -324,6 +324,12 @@ bool isSupportedOperator(clang::OverloadedOperatorKind kind);
 std::string getOperatorName(clang::OverloadedOperatorKind kind);
 
 /**
+ * Converts a C++ built-in type name to equivalent type name in the binding
+ * language.
+ */
+std::string getBuiltinTypeName(const std::string &type_name);
+
+/**
  * Trims from end of string (right)
  */
 std::string trimRight(std::string s, const char *t = " \t\n\r\f\v");
