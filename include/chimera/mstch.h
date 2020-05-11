@@ -404,7 +404,7 @@ public:
                    const clang::BuiltinType *builtin_type);
 
     ::mstch::node isBuiltinType();
-    ::mstch::node underlyingBuiltinType();
+    ::mstch::node underlyingType();
 
 private:
     const clang::BuiltinType *builtin_type_;

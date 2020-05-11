@@ -1191,11 +1191,10 @@ BuiltinTypedef::BuiltinTypedef(const CompiledConfiguration &config,
   : ClangWrapper(config, decl), builtin_type_(builtin_type)
 {
     register_methods(
-        this,
-        {
-            {"is_builtin_type", &BuiltinTypedef::isBuiltinType},
-            {"underlying_builtin_type", &BuiltinTypedef::underlyingBuiltinType},
-        });
+        this, {
+                  {"is_builtin_type", &BuiltinTypedef::isBuiltinType},
+                  {"underlying_builtin_type", &BuiltinTypedef::underlyingType},
+              });
 }
 
 ::mstch::node BuiltinTypedef::isBuiltinType()
@@ -1203,7 +1202,7 @@ BuiltinTypedef::BuiltinTypedef(const CompiledConfiguration &config,
     return true;
 }
 
-::mstch::node BuiltinTypedef::underlyingBuiltinType()
+::mstch::node BuiltinTypedef::underlyingType()
 {
     // Use underlying type to get the declaration of the original type
     const QualType underlying_type = decl_->getUnderlyingType();
