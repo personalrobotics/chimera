@@ -316,9 +316,9 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
 /**
- * Converts clang operator type to the operator name in Python.
+ * Converts clang operator type to string.
  */
-std::string getPythonOperatorName(clang::OverloadedOperatorKind kind);
+std::string getOperatorName(clang::OverloadedOperatorKind kind);
 
 /**
  * Trims from end of string (right)

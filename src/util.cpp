@@ -961,8 +961,11 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
     return false;
 }
 
-std::string getPythonOperatorName(OverloadedOperatorKind kind)
+std::string getOperatorName(OverloadedOperatorKind kind)
 {
+    // TODO: Make this function not binding language specific.
+
+    // Convert clang operator type to Python operator name in string.
     switch (kind)
     {
         case OverloadedOperatorKind::OO_Plus:
