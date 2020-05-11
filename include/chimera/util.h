@@ -316,6 +316,11 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
 /**
+ * Converts clang operator type to string.
+ */
+std::string getOperatorName(clang::OverloadedOperatorKind kind);
+
+/**
  * Trims from end of string (right)
  */
 std::string trimRight(std::string s, const char *t = " \t\n\r\f\v");

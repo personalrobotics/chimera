@@ -585,7 +585,25 @@ std::string CXXRecord::typeAsString()
         if (isa<CXXConstructorDecl>(method_decl))
             continue;
         if (method_decl->isOverloadedOperator())
-            continue;
+        {
+            const OverloadedOperatorKind kind
+                = method_decl->getOverloadedOperator();
+            // TODO: Support more operators
+            switch (kind)
+            {
+                case OverloadedOperatorKind::OO_Plus:
+                case OverloadedOperatorKind::OO_Star:
+                    break; // Allow these kinds.
+                default:
+                {
+                    std::cerr << "Warning: Skipped operator overloading '"
+                              << method_decl->getQualifiedNameAsString()
+                              << "' because the operator type is not currently "
+                              << "supported by chimera." << std::endl;
+                    continue; // Suppress any other kinds.
+                }
+            }
+        }
         if (method_decl->isDeleted())
             continue;
         if (method_decl->getDescribedFunctionTemplate())
@@ -811,6 +829,7 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
             {"return_value_policy", &Function::returnValuePolicy},
             {"is_void", &Function::isVoid},
             {"uses_defaults", &Function::usesDefaults},
+            {"is_operator", &Function::isOperator},
             {"is_template", &Function::isTemplate},
             {"call", &Function::call},
             {"qualified_call", &Function::qualifiedCall},
@@ -955,6 +974,16 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
     return argument_limit_ >= 0;
 }
 
+std::string Function::nameAsString()
+{
+    if (decl_->isOverloadedOperator())
+    {
+        return chimera::util::getOperatorName(decl_->getOverloadedOperator());
+    }
+
+    return ClangWrapper::nameAsString();
+}
+
 ::mstch::node Function::qualifiedName()
 {
     if (const YAML::Node &node = decl_config_["qualified_name"])
@@ -965,6 +994,11 @@ Function::Function(const ::chimera::CompiledConfiguration &config,
 
     return chimera::util::getFullyQualifiedDeclTypeAsString(class_decl_)
            + "::" + decl_->getNameAsString();
+}
+
+::mstch::node Function::isOperator()
+{
+    return decl_->isOverloadedOperator();
 }
 
 ::mstch::node Function::qualifiedCall()

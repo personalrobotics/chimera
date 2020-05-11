@@ -944,6 +944,14 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
         {
             CXXRecordDecl *cxx_record_decl
                 = cast<CXXRecordDecl>(record_type->getDecl());
+
+            // Allow the parent class, in which the method is defined. In this
+            // case, the access specifier is As_none.
+            if (decl->getParent() == cxx_record_decl)
+            {
+                continue;
+            }
+
             if (cxx_record_decl->getAccess() != AS_public)
             {
                 return true;
@@ -951,6 +959,29 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
         }
     }
     return false;
+}
+
+std::string getOperatorName(OverloadedOperatorKind kind)
+{
+    // TODO: Make this function not binding language specific.
+
+    // Convert clang operator type to Python operator name in string.
+    switch (kind)
+    {
+        case OverloadedOperatorKind::OO_Plus:
+            return "__add__";
+        case OverloadedOperatorKind::OO_Star:
+            return "__mul__";
+        // TODO: Support more operator name
+        default:
+        {
+            // Unsupported operator type should be filtered out by the outside
+            // of this function. Otherwise, we regard it a bug.
+            std::stringstream ss;
+            ss << "Unsupported operator type: " << kind;
+            throw std::invalid_argument(ss.str());
+        }
+    }
 }
 
 std::string trimRight(std::string s, const char *t)
