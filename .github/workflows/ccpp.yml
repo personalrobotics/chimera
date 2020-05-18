@@ -97,3 +97,24 @@ jobs:
       - name: Build
         run: |
           docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
+
+  groovy_gcc_release:
+    name: groovy_gcc_release_llvm9
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        env:
+          OS_NAME: linux
+          COMPILER: gcc
+          BUILD_TYPE: Release
+          LLVM_VERSION: 9 # 10 is the default but Chimera doesn't work with it
+          PYTHON_VERSION: 3.8
+          DOCKERFILE: Dockerfile.ubuntu-groovy
+        run: |
+          docker build -t "${DOCKERFILE,,}" -f ".ci/docker/$DOCKERFILE" .;
+          docker run -itd -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE --env-file .ci/docker/env.list --name chimera-docker "${DOCKERFILE,,}";
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/install.sh";
+      - name: Build
+        run: |
+          docker exec chimera-docker /bin/sh -c "cd $GITHUB_WORKSPACE && . .ci/script.sh";
