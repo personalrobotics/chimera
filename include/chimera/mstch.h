@@ -309,7 +309,9 @@ public:
     ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node usesDefaults();
+    std::string nameAsString() override;
     ::mstch::node qualifiedName() override;
+    ::mstch::node isOperator();
     ::mstch::node isTemplate();
     ::mstch::node call();
     ::mstch::node qualifiedCall();
@@ -390,9 +392,24 @@ public:
     ::mstch::node classScope() override;
     ::mstch::node scope() override;
     ::mstch::node underlyingClass();
+    ::mstch::node isBuiltinType();
 
 private:
     const clang::CXXRecordDecl *class_decl_;
+};
+
+class BuiltinTypedef : public ClangWrapper<clang::TypedefNameDecl>
+{
+public:
+    BuiltinTypedef(const ::chimera::CompiledConfiguration &config,
+                   const clang::TypedefNameDecl *decl,
+                   const clang::BuiltinType *builtin_type);
+
+    ::mstch::node isBuiltinType();
+    ::mstch::node underlyingType();
+
+private:
+    const clang::BuiltinType *builtin_type_;
 };
 
 } // namespace mstch
