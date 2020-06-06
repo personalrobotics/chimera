@@ -963,18 +963,10 @@ bool hasNonPublicParam(const CXXMethodDecl *decl)
 
 bool isSupportedOperator(clang::OverloadedOperatorKind kind)
 {
-    try
-    {
-        getOperatorName(kind);
-        return true;
-    }
-    catch (std::invalid_argument)
-    {
-        return false;
-    }
+    return static_cast<bool>(getOperatorName(kind));
 }
 
-std::string getOperatorName(OverloadedOperatorKind kind)
+boost::optional<std::string> getOperatorName(OverloadedOperatorKind kind)
 {
     // TODO: Make this function not binding language specific.
 
@@ -982,29 +974,28 @@ std::string getOperatorName(OverloadedOperatorKind kind)
     switch (kind)
     {
         case OverloadedOperatorKind::OO_Plus: // o3 = o1 + o2
-            return "__add__";
+            return std::string("__add__");
         case OverloadedOperatorKind::OO_Minus: // o3 = o1 - o2
-            return "__sub__";
+            return std::string("__sub__");
         case OverloadedOperatorKind::OO_Star: // o3 = o1 * o2
-            return "__mul__";
+            return std::string("__mul__");
         case OverloadedOperatorKind::OO_Slash: // o3 = o1 / o2
-            return "__truediv__";
+            return std::string("__truediv__");
         case OverloadedOperatorKind::OO_PlusEqual: // o3 = o1 += o2
-            return "__iadd__";
+            return std::string("__iadd__");
         case OverloadedOperatorKind::OO_MinusEqual: // o3 = o1 -= o2
-            return "__isub__";
+            return std::string("__isub__");
         case OverloadedOperatorKind::OO_StarEqual: // o3 = o1 *= o2
-            return "__imul__";
+            return std::string("__imul__");
         case OverloadedOperatorKind::OO_SlashEqual: // o3 = o1 /= o2
-            return "__itruediv__";
+            return std::string("__itruediv__");
         // TODO: Support more operator name
         default:
         {
             // Unsupported operator type should be filtered out by the outside
             // of this function. Otherwise, we regard it a bug.
-            std::stringstream ss;
-            ss << "Unsupported operator type: " << kind;
-            throw std::invalid_argument(ss.str());
+            std::cerr << "Unsupported operator type: " << kind << std::endl;
+            return {};
         }
     }
 }

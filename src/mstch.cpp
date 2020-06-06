@@ -972,7 +972,7 @@ std::string Function::nameAsString()
 {
     if (decl_->isOverloadedOperator())
     {
-        return chimera::util::getOperatorName(decl_->getOverloadedOperator());
+        return *chimera::util::getOperatorName(decl_->getOverloadedOperator());
     }
 
     return ClangWrapper::nameAsString();
