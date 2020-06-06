@@ -1083,6 +1083,9 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
   , class_decl_(class_decl)
   , default_name_(default_name)
 {
+    // Reserved for future use.
+    CHIMERA_UNUSED(class_decl_);
+
     register_methods(this, {
                                {"name", &Parameter::name},
                                {"type", &Parameter::type},

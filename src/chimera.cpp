@@ -146,13 +146,6 @@ int run(int argc, const char **argv)
     Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
         UseCMode ? "-xc" : "-xc++", ArgumentInsertPosition::BEGIN));
 
-    // Add a workaround for the bug in clang shipped default with Ubuntu 14.04.
-    // https://bugs.launchpad.net/ubuntu/+source/llvm-defaults/+bug/1242300
-    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
-        "-I/usr/lib/llvm-" STR(LLVM_VERSION_MAJOR) "." STR(
-            LLVM_VERSION_MINOR) "/lib/clang/" LLVM_VERSION_STRING "/include",
-        ArgumentInsertPosition::END));
-
     // Run the instantiated tool on the Chimera frontend.
     return Tool.run(chimera::newFrontendActionFactory(Config).get());
 }

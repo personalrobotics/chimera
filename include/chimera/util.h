@@ -15,6 +15,14 @@
   LLVM_VERSION_PATCH >= z))))
 // clang-format on
 
+/** Macro to suppress the unused variable warnings. */
+#define CHIMERA_UNUSED(x)                                                      \
+    do                                                                         \
+    {                                                                          \
+        (void)(x);                                                             \
+    } while (0)
+// TODO: This macro should be replaced with [[maybe_unused]] once C++17 available
+
 namespace chimera
 {
 namespace util
