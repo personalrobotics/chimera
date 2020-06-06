@@ -328,6 +328,16 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
             return false;
     }
 
+    // TODO: Fix segfault with DependentNameType (e.g., typename T::type).
+    // Skip this for now. See #328 for the details.
+    if (isa<DependentNameType>(underlying_type))
+    {
+        std::cerr << "Warning: Skipping dependent name type '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because it is not supported yet (#328)." << std::endl;
+        return false;
+    }
+
     // Create mstch for typedef where the underlying type is a builtin type.
     if (isa<BuiltinType>(underlying_type))
     {
