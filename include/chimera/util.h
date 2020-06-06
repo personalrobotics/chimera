@@ -15,6 +15,14 @@
   LLVM_VERSION_PATCH >= z))))
 // clang-format on
 
+/** Macro to suppress the unused variable warnings. */
+#define CHIMERA_UNUSED(x)                                                      \
+    do                                                                         \
+    {                                                                          \
+        (void)(x);                                                             \
+    } while (0)
+// TODO: This macro should be replaced with [[maybe_unused]] once C++17 available
+
 namespace chimera
 {
 namespace util
@@ -314,6 +322,17 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  * called publicly.
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
+
+/**
+ * Converts clang operator type to string.
+ */
+std::string getOperatorName(clang::OverloadedOperatorKind kind);
+
+/**
+ * Converts a C++ built-in type name to equivalent type name in the binding
+ * language.
+ */
+std::string getBuiltinTypeName(const std::string &type_name);
 
 /**
  * Trims from end of string (right)

@@ -328,11 +328,34 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
             return false;
     }
 
+    // TODO: Fix segfault with DependentNameType (e.g., typename T::type).
+    // Skip this for now. See #328 for the details.
+    if (isa<DependentNameType>(underlying_type))
+    {
+        std::cerr << "Warning: Skipping dependent name type '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because it is not supported yet (#328)." << std::endl;
+        return false;
+    }
+
+    // Create mstch for typedef where the underlying type is a builtin type.
+    if (isa<BuiltinType>(underlying_type))
+    {
+        // TODO: Support more built-in types
+        if (underlying_type_name != "double" && underlying_type_name != "float")
+            return false;
+
+        auto context = std::make_shared<chimera::mstch::BuiltinTypedef>(
+            config_, decl, cast<BuiltinType>(underlying_type));
+        return config_.Render(context);
+    }
+
     // Get the declaration from the underlying type
     auto resolved_decl = chimera::util::resolveRecord(
         config_.GetCompilerInstance(), underlying_type_name);
 
-    // Skip if failed to get the declaration or the declaration is not of class
+    // Skip if we could not get the declaration, or the declaration was not
+    // of a class.
     if (!resolved_decl || !isa<CXXRecordDecl>(resolved_decl))
         return false;
 

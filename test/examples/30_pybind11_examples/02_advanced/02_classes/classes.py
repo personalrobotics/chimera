@@ -34,6 +34,25 @@ class TestClasses(unittest.TestCase):
         self._test_combining_virtual_functions_and_inheritance(py11)
         self._test_combining_virtual_functions_and_inheritance(boost)
 
+    def _test_operator_overloading(self, binding):
+        v1 = binding.test3.Vector2(1, 2)
+        v2 = binding.test3.Vector2(3, -1)
+
+        self.assertEqual(v1.get_x(), 1)
+        self.assertEqual(v1.get_y(), 2)
+        self.assertEqual(v2.get_x(), 3)
+        self.assertEqual(v2.get_y(), -1)
+
+        self.assertEqual((v1 + v2).get_x(), 4)
+        self.assertEqual((v1 + v2).get_y(), 1)
+
+        self.assertEqual((v1 * 8).get_x(), 8)
+        self.assertEqual((v1 * 8).get_y(), 16)
+
+    def test_operator_overloading(self):
+        self._test_operator_overloading(py11)
+        self._test_operator_overloading(boost)
+
 
 if __name__ == '__main__':
     unittest.main()
