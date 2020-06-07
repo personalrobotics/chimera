@@ -2,6 +2,7 @@
 #define __CHIMERA_UTIL_H__
 
 #include <set>
+#include <boost/optional.hpp>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Type.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -323,10 +324,14 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
+/** Returns true if the operator type is supported. */
+bool isSupportedOperator(clang::OverloadedOperatorKind kind);
+
 /**
  * Converts clang operator type to string.
  */
-std::string getOperatorName(clang::OverloadedOperatorKind kind);
+boost::optional<std::string> getOperatorName(
+    clang::OverloadedOperatorKind kind);
 
 /**
  * Converts a C++ built-in type name to equivalent type name in the binding

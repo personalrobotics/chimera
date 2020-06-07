@@ -43,11 +43,71 @@ class TestClasses(unittest.TestCase):
         self.assertEqual(v2.get_x(), 3)
         self.assertEqual(v2.get_y(), -1)
 
-        self.assertEqual((v1 + v2).get_x(), 4)
-        self.assertEqual((v1 + v2).get_y(), 1)
+        self.assertAlmostEqual((v1 + v2).get_x(), 4)
+        self.assertAlmostEqual((v1 + v2).get_y(), 1)
 
-        self.assertEqual((v1 * 8).get_x(), 8)
-        self.assertEqual((v1 * 8).get_y(), 16)
+        self.assertAlmostEqual((v1 - v2).get_x(), -2)
+        self.assertAlmostEqual((v1 - v2).get_y(), 3)
+
+        self.assertAlmostEqual((v1 * v2).get_x(), 3)
+        self.assertAlmostEqual((v1 * v2).get_y(), -2)
+
+        self.assertAlmostEqual((v1 / v2).get_x(), 1/3)
+        self.assertAlmostEqual((v1 / v2).get_y(), -2)
+
+        self.assertAlmostEqual((v1 + 8).get_x(), 9)
+        self.assertAlmostEqual((v1 + 8).get_y(), 10)
+
+        self.assertAlmostEqual((v1 - 2).get_x(), -1)
+        self.assertAlmostEqual((v1 - 2).get_y(), 0)
+
+        self.assertAlmostEqual((v1 * 8).get_x(), 8)
+        self.assertAlmostEqual((v1 * 8).get_y(), 16)
+
+        self.assertAlmostEqual((v1 / 2).get_x(), 0.5)
+        self.assertAlmostEqual((v1 / 2).get_y(), 1.0)
+
+        v1 += v2
+        self.assertEqual(v1.get_x(), 4)
+        self.assertEqual(v1.get_y(), 1)
+
+        v1 -= v2
+        self.assertEqual(v1.get_x(), 1)
+        self.assertEqual(v1.get_y(), 2)
+
+        v1 *= v2
+        self.assertEqual(v1.get_x(), 3)
+        self.assertEqual(v1.get_y(), -2)
+
+        v1 /= v2
+        self.assertEqual(v1.get_x(), 1)
+        self.assertEqual(v1.get_y(), 2)
+
+        v3 = v1.__iadd__(v2)
+        self.assertEqual(v1.get_x(), 4)
+        self.assertEqual(v1.get_y(), 1)
+        self.assertEqual(v3.get_x(), 4)
+        self.assertEqual(v3.get_y(), 1)
+
+        # TODO: Non-member operators are not supported
+        # v3 = 2 + v1
+        # self.assertEqual(v3.get_x(), 3)
+        # self.assertEqual(v3.get_y(), 4)
+
+        # TODO: Non-member operators are not supported
+        # v3 = 1 - v1
+        # self.assertEqual(v3.get_x(), 0)
+        # self.assertEqual(v3.get_y(), -1)
+
+        # TODO: Non-member operators are not supported
+        # v3 = 3 * v1
+        # self.assertEqual(v3.get_x(), 3)
+        # self.assertEqual(v3.get_y(), 6)
+
+        # TODO: Non-member operators are not supported
+        # v3 = 4 / v1
+        # self.assertEqual(v3.get_x(), 1)
+        # self.assertEqual(v3.get_y(), 2)
 
     def test_operator_overloading(self):
         self._test_operator_overloading(py11)
