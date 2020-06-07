@@ -283,7 +283,13 @@ bool chimera::Visitor::GenerateGlobalFunction(clang::FunctionDecl *decl)
         return false;
     // Ignore overloaded operators (we can't currently wrap them).
     else if (decl->isOverloadedOperator())
+    {
+        std::cerr << "Warning: Skipped operator overloading '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because non-member operators are not currently "
+                  << "supported by chimera." << std::endl;
         return false; // TODO: Wrap overloaded operators.
+    }
     // Ignore unspecialized template functions.
     else if (decl->getDescribedFunctionTemplate())
         return false;
@@ -326,6 +332,16 @@ bool chimera::Visitor::GenerateTypedefName(TypedefNameDecl *decl)
     {
         if (cast<TypeAliasDecl>(decl)->isTemplated())
             return false;
+    }
+
+    // TODO: Fix segfault with DependentNameType (e.g., typename T::type).
+    // Skip this for now. See #328 for the details.
+    if (isa<DependentNameType>(underlying_type))
+    {
+        std::cerr << "Warning: Skipping dependent name type '"
+                  << decl->getQualifiedNameAsString()
+                  << "' because it is not supported yet (#328)." << std::endl;
+        return false;
     }
 
     // Create mstch for typedef where the underlying type is a builtin type.

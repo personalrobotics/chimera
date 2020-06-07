@@ -2,6 +2,7 @@
 #define __CHIMERA_UTIL_H__
 
 #include <set>
+#include <boost/optional.hpp>
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Type.h>
 #include <clang/Frontend/CompilerInstance.h>
@@ -14,6 +15,14 @@
   (LLVM_VERSION_MINOR > y || (LLVM_VERSION_MINOR >= y && \
   LLVM_VERSION_PATCH >= z))))
 // clang-format on
+
+/** Macro to suppress the unused variable warnings. */
+#define CHIMERA_UNUSED(x)                                                      \
+    do                                                                         \
+    {                                                                          \
+        (void)(x);                                                             \
+    } while (0)
+// TODO: This macro should be replaced with [[maybe_unused]] once C++17 available
 
 namespace chimera
 {
@@ -315,10 +324,14 @@ std::pair<unsigned, unsigned> getFunctionArgumentRange(
  */
 bool hasNonPublicParam(const clang::CXXMethodDecl *decl);
 
+/** Returns true if the operator type is supported. */
+bool isSupportedOperator(clang::OverloadedOperatorKind kind);
+
 /**
  * Converts clang operator type to string.
  */
-std::string getOperatorName(clang::OverloadedOperatorKind kind);
+boost::optional<std::string> getOperatorName(
+    clang::OverloadedOperatorKind kind);
 
 /**
  * Converts a C++ built-in type name to equivalent type name in the binding
