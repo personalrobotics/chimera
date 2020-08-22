@@ -109,16 +109,84 @@ public:
     {
         return Vector2(x + v.x, y + v.y);
     }
+
+    Vector2 operator-(const Vector2 &v) const
+    {
+        return Vector2(x - v.x, y - v.y);
+    }
+
+    Vector2 operator*(const Vector2 &v) const
+    {
+        return Vector2(x * v.x, y * v.y);
+    }
+
+    Vector2 operator/(const Vector2 &v) const
+    {
+        return Vector2(x / v.x, y / v.y);
+    }
+
+    Vector2 operator+(float value) const
+    {
+        return Vector2(x + value, y + value);
+    }
+
+    Vector2 operator-(float value) const
+    {
+        return Vector2(x - value, y - value);
+    }
+
     Vector2 operator*(float value) const
     {
         return Vector2(x * value, y * value);
     }
+
+    Vector2 operator/(float value) const
+    {
+        return Vector2(x / value, y / value);
+    }
+
     Vector2 &operator+=(const Vector2 &v)
     {
         x += v.x;
         y += v.y;
         return *this;
     }
+
+    Vector2 &operator-=(const Vector2 &v)
+    {
+        x -= v.x;
+        y -= v.y;
+        return *this;
+    }
+
+    Vector2 &operator*=(const Vector2 &v)
+    {
+        x *= v.x;
+        y *= v.y;
+        return *this;
+    }
+
+    Vector2 &operator/=(const Vector2 &v)
+    {
+        x /= v.x;
+        y /= v.y;
+        return *this;
+    }
+
+    Vector2 &operator+=(float v)
+    {
+        x += v;
+        y += v;
+        return *this;
+    }
+
+    Vector2 &operator-=(float v)
+    {
+        x -= v;
+        y -= v;
+        return *this;
+    }
+
     Vector2 &operator*=(float v)
     {
         x *= v;
@@ -126,9 +194,35 @@ public:
         return *this;
     }
 
+    Vector2 &operator/=(float v)
+    {
+        x /= v;
+        y /= v;
+        return *this;
+    }
+
+    // TODO: Operator function is not supported
+    friend Vector2 operator+(float f, const Vector2 &v)
+    {
+        return Vector2(f + v.x, f + v.y);
+    }
+
+    // TODO: Operator function is not supported
+    friend Vector2 operator-(float f, const Vector2 &v)
+    {
+        return Vector2(f - v.x, f - v.y);
+    }
+
+    // TODO: Operator function is not supported
     friend Vector2 operator*(float f, const Vector2 &v)
     {
         return Vector2(f * v.x, f * v.y);
+    }
+
+    // TODO: Operator function is not supported
+    friend Vector2 operator/(float f, const Vector2 &v)
+    {
+        return Vector2(f / v.x, f / v.y);
     }
 
     float get_x() const

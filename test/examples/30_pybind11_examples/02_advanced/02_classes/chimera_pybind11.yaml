@@ -1,7 +1,3 @@
-# Arguments that will be appended in-order before command line arguments.
-arguments:
-  - "-extra-arg"
-  - "-I/usr/lib/clang/3.6/include"
 namespaces:
   "chimera_test":
     name: null # TODO: otherwise, import error
@@ -16,3 +12,20 @@ classes:
     allow_inheritance: True
   "chimera_test::test2::Husky":
     allow_inheritance: True
+functions:
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator+=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator-=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator*=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator/=(const chimera_test::test3::Vector2&)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator+=(float)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator-=(float)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator*=(float)":
+    return_value_policy: "reference_internal"
+  "chimera_test::test3::Vector2& chimera_test::test3::Vector2::operator/=(float)":
+    return_value_policy: "reference_internal"

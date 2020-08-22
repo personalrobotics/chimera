@@ -588,20 +588,14 @@ std::string CXXRecord::typeAsString()
         {
             const OverloadedOperatorKind kind
                 = method_decl->getOverloadedOperator();
-            // TODO: Support more operators
-            switch (kind)
+            if (!chimera::util::isSupportedOperator(kind))
             {
-                case OverloadedOperatorKind::OO_Plus:
-                case OverloadedOperatorKind::OO_Star:
-                    break; // Allow these kinds.
-                default:
-                {
-                    std::cerr << "Warning: Skipped operator overloading '"
-                              << method_decl->getQualifiedNameAsString()
-                              << "' because the operator type is not currently "
-                              << "supported by chimera." << std::endl;
-                    continue; // Suppress any other kinds.
-                }
+                std::cerr << "Warning: Skipped operator overloading '"
+                          << method_decl->getQualifiedNameAsString()
+                          << "' because the operator type is not currently "
+                          << "supported by chimera." << std::endl;
+                // Suppress unsupported kinds.
+                continue;
             }
         }
         if (method_decl->isDeleted())
@@ -978,7 +972,7 @@ std::string Function::nameAsString()
 {
     if (decl_->isOverloadedOperator())
     {
-        return chimera::util::getOperatorName(decl_->getOverloadedOperator());
+        return *chimera::util::getOperatorName(decl_->getOverloadedOperator());
     }
 
     return ClangWrapper::nameAsString();
@@ -1089,6 +1083,9 @@ Parameter::Parameter(const ::chimera::CompiledConfiguration &config,
   , class_decl_(class_decl)
   , default_name_(default_name)
 {
+    // Reserved for future use.
+    CHIMERA_UNUSED(class_decl_);
+
     register_methods(this, {
                                {"name", &Parameter::name},
                                {"type", &Parameter::type},
